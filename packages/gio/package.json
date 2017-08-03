@@ -1,0 +1,15 @@
+{
+  "name": "@geotiff-io/gio",
+  "version": "0.0.1",
+  "description": "Gio is a geotiff processing engine built in Javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/GeoTIFF/geotiff-io.git"
+  },
+  "author": "Daniel Dufour and Steve Peyton",
+  "license": "MIT"
+}
