@@ -1,13 +1,7 @@
 'use strict';
 
-let cache = {
-	rasters: {}
-}
-
-let gio = {
-	cache: cache,
-	load: require('../gio-load/index.js'),
-	
+module.exports = {
+	cache: require('../gio-cache/index'),
+	load: require('../gio-load/index'),
+	identify: require('../gio-identify/index')
 };
-
-module.exports = gio;

@@ -4,7 +4,7 @@
   "description": "process geotiffs",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec"
+    "test": "./node_modules/.bin/mocha --reporter spec packages/gio"
   },
   "repository": {
     "type": "git",
@@ -33,6 +33,7 @@
     "geotiff": "^0.4.1",
     "leaflet": "^1.1.0",
     "mocha": "^3.5.0",
+    "node-fetch": "^1.7.1",
     "proj4": "^2.4.3",
     "turf": "^3.0.14"
   }

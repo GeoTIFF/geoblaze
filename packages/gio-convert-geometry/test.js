@@ -17,12 +17,6 @@ let test_x_y_from_point_load = (feature) => {
 	expect(point[1]).to.equal(0.5);
 }
 
-try {
-	gio_convert_geometry('hello world');
-} catch(e) {
-	console.error(e);
-}
-
 let test = () => {
 	describe('Gio Convert Geometry Feature', () => {
 		describe('Load point geometry', () => {
