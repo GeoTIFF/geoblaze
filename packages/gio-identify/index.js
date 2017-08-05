@@ -18,8 +18,6 @@ module.exports = (image, geometry) => {
 	// TEMPORARY: make sure raster is in wgs 84
 	if (geoKeys.GeographicTypeGeoKey === 4326 && geoKeys.GeogCitationGeoKey === "WGS 84") {
 		
-		let data = image.readRasters();
-
 		let origin = image.getOrigin();
 		let lng_0 = origin[0];
 		let lat_0 = origin[1];
@@ -33,12 +31,14 @@ module.exports = (image, geometry) => {
 
 		let x = Math.floor(Math.abs(lng - lng_0) / cell_width);
 		let y = Math.floor(Math.abs(lat_0 - lat) / cell_height);
-		let cell_index = y * fd.ImageWidth + x;
 
 		// console.error(`values: x: ${x}, y: ${y}, cell_index: ${cell_index}`);
-		let value = data.length === 1 ? data[0][cell_index] : data.map(d => d[cell_index]);
-
-		return value;
+		try {
+			let values = image.readRasters({ window: [x, y, x + 1, y + 1]});
+			return values.length === 1 ? values[0][0] : values.map(value => value[0]);
+		} catch(e) {
+			throw e;
+		}
 	} else {
 		throw 'Identification currently only works with geotiffs in WGS 84. Please reproject the geotiff';
 	}
