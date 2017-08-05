@@ -1,18 +1,27 @@
 'use strict';
 
 let expect = require('chai').expect;
-let gio_load = require('./index');
+
+let load = require('./index');
+
+let url = 'http://geotiff.io/data/spam2005v2r0_physical-area_rice_total.tiff';
+let properties = [
+	'fileDirectory',
+	'geoKeys',
+	'dataView'
+];
 
 let test = () => (
-	describe('Gio Load Feature', () => {
-		describe('Load from URL', () => {
+	describe('Gio Load Feature', function() {
+		describe('Load from URL', function() {
+			this.timeout(1000000);
 			it('Loaded tiff file', () => {
-				let url = 'geotiff.io/data/spam2005v2r0_physical-area_rice_total.tiff';
-				gio_load(url).then(tiff => {
+				return load(url).then(tiff => {
 					let image = tiff.getImage();
-					expect(image).to.have.property('fileDirectory');
-					expect(image).to.have.property('geoKeys');
-					expect(image).to.have.property('dataView');
+					properties.forEach(property => {
+						expect(image).to.have.property(property);
+					});
+					// done();
 				});
 			});
 		});

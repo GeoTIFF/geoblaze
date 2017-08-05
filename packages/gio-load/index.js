@@ -1,18 +1,20 @@
 'use strict';
 
 let geotiff = require('geotiff');
-let gio = require('../gio/index');
+let fetch = require('node-fetch');
+
+let cache = require('../gio-cache/index');
 
 module.exports = (url_or_file) => (
 
 	new Promise((resolve, reject) => {
-		let url = url_or_file instanceof Blob ? URL.createObjectURL(url_or_file) : url;
+		let url = typeof url_or_file === 'object' ? URL.createObjectURL(url_or_file) : url_or_file;
 
-		if (gio.cache.rasters[url]) {
-			resolve(gio.cache.rasters[url]);
+		if (cache[url]) {
+			resolve(cache[url]);
 		} else {
 			fetch(url).then(
-				response => response.arrayBuffer(),
+				response => response.buffer(),
 				error => {
 					let domain = new URL(input_url).host;
                 	console.error(
@@ -21,10 +23,11 @@ module.exports = (url_or_file) => (
                 		Download the file and load it manually.`
                 	);
 				}
-			).then(buffer => {
-				if (buffer) {
-					let tiff = geotiff.parse(tiff);
-					gio.cache.rasters[url] = tiff;
+			).then(b => {
+				if (b) {
+					let array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+					let tiff = geotiff.parse(array_buffer);
+					cache[url] = tiff;
 					resolve(tiff);
 				}
 			});
