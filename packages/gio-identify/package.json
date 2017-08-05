@@ -1,0 +1,15 @@
+{
+  "name": "@geotiff-io/gio-identify",
+  "version": "0.0.1",
+  "description": "Identify the value of a raster cell at a given point",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/GeoTIFF/geotiff-io.git"
+  },
+  "author": "@DanielJDufour, @sdpeyton",
+  "license": "MIT"
+}
