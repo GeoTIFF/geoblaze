@@ -1,7 +1,7 @@
 {
-  "name": "@geotiff-io/gio-identify",
+  "name": "@geotiff-io/gio-convert-geometry",
   "version": "0.0.1",
-  "description": "Identify the value of a raster cell at a given point",
+  "description": "Internal tools to convert between geometry formats",
   "main": "index.js",
   "scripts": {
     "test": "test"
