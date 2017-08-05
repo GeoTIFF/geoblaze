@@ -1,10 +1,10 @@
 {
-  "name": "geotiff-io",
+  "name": "@geotiff/gio",
   "version": "0.0.1",
   "description": "process geotiffs",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter spec packages/gio"
+    "test": "./node_modules/.bin/mocha --reporter spec "
   },
   "repository": {
     "type": "git",
