@@ -1,0 +1,40 @@
+{
+  "name": "@geotiff/gio",
+  "version": "0.0.1",
+  "description": "process geotiffs",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter spec "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GeoTIFF/geotiff-io.git"
+  },
+  "keywords": [
+    "geotiff",
+    "geotiff.io",
+    "geotiff-io",
+    "gis",
+    "maps",
+    "raster",
+    "rasters",
+    "geoprocessing",
+    "pixels",
+    "tiff"
+  ],
+  "author": "Daniel Dufour and Steve Peyton",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/GeoTIFF/geotiff-io/issues"
+  },
+  "homepage": "https://github.com/GeoTIFF/geotiff-io#readme",
+  "dependencies": {
+    "chai": "^4.1.0",
+    "geotiff": "^0.4.1",
+    "leaflet": "^1.1.0",
+    "mocha": "^3.5.0",
+    "node-fetch": "^1.7.1",
+    "proj4": "^2.4.3",
+    "turf": "^3.0.14"
+  }
+}
