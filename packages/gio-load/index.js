@@ -34,8 +34,3 @@ module.exports = (url_or_file) => (
 		}
 	})
 );
-
-module.exports.meta = {
-	name: 'Load GeoTIFF',
-	desc: 'Load a GeoTIFF on to the map by adding a url or uploading a file.'
-}
