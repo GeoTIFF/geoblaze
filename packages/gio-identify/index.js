@@ -1,6 +1,5 @@
 'use strict';
 
-let gio = require('../gio/index');
 let load = require('../gio-load/index');
 let convert_geometry = require('../gio-convert-geometry/index');
 
