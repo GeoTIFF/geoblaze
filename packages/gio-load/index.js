@@ -1,7 +1,10 @@
 'use strict';
 
 let geotiff = require('geotiff');
-let fetch = require('node-fetch');
+
+let in_browser = typeof window !== 'undefined';
+
+if (!in_browser) var fetch = require('node-fetch');
 
 let cache = require('../gio-cache/index');
 
@@ -14,9 +17,9 @@ module.exports = (url_or_file) => (
 			resolve(cache[url]);
 		} else {
 			fetch(url).then(
-				response => response.buffer(),
+				response => in_browser ? response.arrayBuffer() : response.buffer(),
 				error => {
-					let domain = new URL(input_url).host;
+					let domain = new URL(url).host;
                 	console.error(
                 		`Gio could not get the file from ${domain}.  
                 		This is often because a website's security prevents cross domain requests.  
@@ -25,7 +28,7 @@ module.exports = (url_or_file) => (
 				}
 			).then(b => {
 				if (b) {
-					let array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+					let array_buffer = in_browser ? b : b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
 					let tiff = geotiff.parse(array_buffer);
 					cache[url] = tiff;
 					resolve(tiff);
