@@ -2,9 +2,7 @@
 
 let geotiff = require('geotiff');
 
-let in_browser = typeof window !== 'undefined';
-
-var fetch = in_browser ? window.fetch : require('node-fetch');
+let fetch = require('node-fetch');
 
 let cache = require('../gio-cache/index');
 
@@ -17,7 +15,7 @@ module.exports = (url_or_file) => (
 			resolve(cache[url]);
 		} else {
 			fetch(url).then(
-				response => in_browser ? response.arrayBuffer() : response.buffer(),
+				response => response.buffer(),
 				error => {
 					let domain = new URL(url).host;
                 	console.error(
@@ -28,7 +26,7 @@ module.exports = (url_or_file) => (
 				}
 			).then(b => {
 				if (b) {
-					let array_buffer = in_browser ? b : b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+					let array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
 					let tiff = geotiff.parse(array_buffer);
 					cache[url] = tiff;
 					resolve(tiff);

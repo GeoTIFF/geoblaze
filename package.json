@@ -2,8 +2,10 @@
   "name": "@geotiff/gio",
   "version": "0.0.7",
   "description": "process geotiffs",
-  "main": "index.js",
+  "main": "build/gio.bundle.js",
   "scripts": {
+    "babel": "babel --presets es2015 index.js -o build/gio.bundle.js",
+    "webpack": "webpack",
     "test": "./node_modules/.bin/mocha --reporter spec "
   },
   "repository": {
@@ -29,12 +31,18 @@
   },
   "homepage": "https://github.com/GeoTIFF/geotiff-io#readme",
   "dependencies": {
+    "babel-loader": "^7.1.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.1.0",
     "geotiff": "^0.4.1",
     "leaflet": "^1.1.0",
     "mocha": "^3.5.0",
     "node-fetch": "^1.7.1",
+    "path": "^0.12.7",
     "proj4": "^2.4.3",
-    "turf": "^3.0.14"
+    "turf": "^3.0.14",
+    "webpack": "^3.5.4"
   }
 }

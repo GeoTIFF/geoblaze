@@ -10,8 +10,6 @@ let url = 'http://geotiff.io/data/spam2005v2r0_physical-area_rice_total.tiff';
 let point = [80.63, 7.42];
 let expected_value = 350.7;
 
-// let list_of_points = [[55, 62], [66, 77], [120, -54]];
-
 let test = () => (
 	describe('Gio Identify Feature', function() {
 		describe('Identify Point in Raster', function() {
