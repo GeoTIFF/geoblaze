@@ -1,6 +1,7 @@
 'use strict';
 
 let geotiff = require('geotiff');
+
 let fetch = require('node-fetch');
 
 let cache = require('../gio-cache/index');
@@ -16,7 +17,7 @@ module.exports = (url_or_file) => (
 			fetch(url).then(
 				response => response.buffer(),
 				error => {
-					let domain = new URL(input_url).host;
+					let domain = new URL(url).host;
                 	console.error(
                 		`Gio could not get the file from ${domain}.  
                 		This is often because a website's security prevents cross domain requests.  
