@@ -9,6 +9,7 @@ let cache = require('../gio-cache/index');
 module.exports = (url_or_file) => (
 
 	new Promise((resolve, reject) => {
+		console.error(url_or_file);	
 		let url = typeof url_or_file === 'object' ? URL.createObjectURL(url_or_file) : url_or_file;
 
 		if (cache[url]) {

@@ -6,7 +6,7 @@ let load = require('../gio-load/index');
 let cache = require('../gio-cache/index');
 let identify = require('./index');
 
-let url = 'http://geotiff.io/data/spam2005v2r0_physical-area_rice_total.tiff';
+let url = 'http://geotiff.io/data/test.tiff';
 let point = [80.63, 7.42];
 let expected_value = 350.7;
 

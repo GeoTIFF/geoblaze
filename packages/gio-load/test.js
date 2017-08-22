@@ -4,7 +4,8 @@ let expect = require('chai').expect;
 
 let load = require('./index');
 
-let url = 'http://geotiff.io/data/spam2005v2r0_physical-area_rice_total.tiff';
+let path = 'http://geotiff.io/data/test.tiff';
+
 let properties = [
 	'fileDirectory',
 	'geoKeys',
@@ -16,12 +17,11 @@ let test = () => (
 		describe('Load from URL', function() {
 			this.timeout(1000000);
 			it('Loaded tiff file', () => {
-				return load(url).then(tiff => {
+				return load(path).then(tiff => {
 					let image = tiff.getImage();
 					properties.forEach(property => {
 						expect(image).to.have.property(property);
 					});
-					// done();
 				});
 			});
 		});
