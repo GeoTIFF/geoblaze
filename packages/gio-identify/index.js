@@ -15,7 +15,7 @@ module.exports = (image, geometry) => {
 	let geoKeys = image.getGeoKeys();
 
 	// TEMPORARY: make sure raster is in wgs 84
-	if (geoKeys.GeographicTypeGeoKey === 4326 && geoKeys.GeogCitationGeoKey === "WGS 84") {
+	if (geoKeys.GTModelTypeGeoKey === 2 && geoKeys.GeographicTypeGeoKey === 4326) {
 		
 		let origin = image.getOrigin();
 		let lng_0 = origin[0];
