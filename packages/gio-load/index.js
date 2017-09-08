@@ -2,14 +2,23 @@
 
 let geotiff = require('geotiff');
 
-let fetch = require('node-fetch');
+let in_browser = typeof window === 'object';
+	if (!in_browser) var fetch = require('node-fetch');
 
 let cache = require('../gio-cache/index');
+
+
 
 module.exports = (url_or_file) => (
 
 	new Promise((resolve, reject) => {
 		console.error(url_or_file);	
+		if (!in_browser && typeof url_or_file === 'object') {
+			throw `Direct TIFF loading is currently not supported outside of the browser
+				due to dependency limitations. Please use either a url or run the code 
+				in the browser.`
+		}
+
 		let url = typeof url_or_file === 'object' ? URL.createObjectURL(url_or_file) : url_or_file;
 
 		if (cache[url]) {
