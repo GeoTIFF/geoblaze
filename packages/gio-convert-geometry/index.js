@@ -2,7 +2,7 @@
 
 let _ = require('underscore');
 
-let convert_point = (geometry) => {
+let convert_point = geometry => {
 	let point;
 	if (Array.isArray(geometry) && geometry.length === 2) { // array
 		point = geometry;
@@ -25,7 +25,7 @@ let convert_point = (geometry) => {
 	return point;
 }
 
-let is_bbox = (coors) => {
+let is_bbox = coors => {
 	if (coors.length === 5 && _.isEqual(coors[0], coors[4])) {
 		let lngs = coors.map(coor => coor[0]);
 		let lats = coors.map(coor => coor[1]);
@@ -36,16 +36,14 @@ let is_bbox = (coors) => {
 	return false;
 } 
 
-let convert_bbox = (geometry) => {
+let convert_bbox = geometry => {
 	let bbox;
 	if (Array.isArray(geometry) && geometry.length === 4) { // array
 		bbox = geometry;
 	} else if (typeof geometry === 'string') { // stringified geojson
 		let geojson = JSON.parse(geometry);
-		console.error('check string');
-		let coors = geometry.coordinates[0];
+		let coors = geojson.coordinates[0];
 		if (geojson.type === 'Polygon' && is_bbox(coors)) {
-			console.error('checked')
 			let lngs = coors.map(coor => coor[0]);
 			let lats = coors.map(coor => coor[1]);
 			bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
