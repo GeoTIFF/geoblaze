@@ -3,8 +3,12 @@
 let express = require('express');
 let app = express();
 
+let path = require('path');
+
 app.use('/data', express.static('data'));
 
-app.get('/', (req, res) => res.send('Testing App for Gio'));
+app.use('/', express.static('web'));
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname + '/web/index.html')));
 
 app.listen(3000);
