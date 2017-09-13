@@ -1,6 +1,6 @@
 'use strict';
 
-let _ = require('underscore');
+let is_bbox = require('../gio-utils/index').is_bbox;
 
 let convert_point = geometry => {
 	let point;
@@ -25,37 +25,29 @@ let convert_point = geometry => {
 	return point;
 }
 
-let is_bbox = coors => {
-	if (coors.length === 5 && _.isEqual(coors[0], coors[4])) {
-		let lngs = coors.map(coor => coor[0]);
-		let lats = coors.map(coor => coor[1]);
-		if (lngs[0] === lngs[3] && lats[0] === lats[1] && lngs[1] === lngs[2]) {
-			return true;
-		}
-	}
-	return false;
-} 
-
 let convert_bbox = geometry => {
 	let bbox;
-	if (Array.isArray(geometry) && geometry.length === 4) { // array
-		bbox = geometry;
-	} else if (typeof geometry === 'string') { // stringified geojson
-		let geojson = JSON.parse(geometry);
-		let coors = geojson.coordinates[0];
-		if (geojson.type === 'Polygon' && is_bbox(coors)) {
-			let lngs = coors.map(coor => coor[0]);
-			let lats = coors.map(coor => coor[1]);
-			bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
-		}
-	} else if (typeof geometry === 'object') { // geojson
-		let coors = geometry.coordinates[0];
-		if (geometry.type === 'Polygon' && is_bbox(coors)) {
-			let lngs = coors.map(coor => coor[0]);
-			let lats = coors.map(coor => coor[1]);
-			bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
+	if (is_bbox(geometry)) {
+		if (Array.isArray(geometry) && geometry.length === 4) { // array
+			bbox = geometry;
+		} else if (typeof geometry === 'string') { // stringified geojson
+			let geojson = JSON.parse(geometry);
+			let coors = geojson.coordinates[0];
+			if (geojson.type === 'Polygon') {
+				let lngs = coors.map(coor => coor[0]);
+				let lats = coors.map(coor => coor[1]);
+				bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
+			}
+		} else if (typeof geometry === 'object') { // geojson
+			let coors = geometry.coordinates[0];
+			if (geometry.type === 'Polygon') {
+				let lngs = coors.map(coor => coor[0]);
+				let lats = coors.map(coor => coor[1]);
+				bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
+			}
 		}
 	}
+		
 
 	if (!bbox) {
 		throw `Invalid bounding box object was used. 
