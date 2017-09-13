@@ -3598,7 +3598,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var geotiff = __webpack_require__(44);
 
 var in_browser = (typeof window === 'undefined' ? 'undefined' : _typeof(window)) === 'object';
-if (!in_browser) var fetch = __webpack_require__(66);
+var fetch = in_browser ? window.fetch : __webpack_require__(66);
 
 var cache = __webpack_require__(25);
 
