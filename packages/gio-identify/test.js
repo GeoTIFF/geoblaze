@@ -3,10 +3,9 @@
 let expect = require('chai').expect;
 
 let load = require('../gio-load/index');
-let cache = require('../gio-cache/index');
 let identify = require('./index');
 
-let url = 'http://geotiff.io/data/test.tiff';
+let url = 'http://localhost:3000/data/test.tiff';
 let point = [80.63, 7.42];
 let expected_value = 350.7;
 
