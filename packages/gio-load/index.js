@@ -37,8 +37,8 @@ module.exports = (url_or_file) => (
 			).then(b => {
 				if (b) {
 					let array_buffer;
-					if (in_brower) {
-						b = array_buffer;
+					if (in_browser) {
+						array_buffer = b;
 					} else {
 						array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
 					}
