@@ -5,7 +5,7 @@
   "main": "build/gio.js",
   "scripts": {
     "babel": "babel --presets es2015 index.js -o build/gio.bundle.js",
-    "webpack": "webpack",
+    "build": "webpack",
     "test": "./node_modules/.bin/mocha --reporter spec ",
     "start": "node test-app.js"
   },
