@@ -3615,13 +3615,18 @@ module.exports = function (url_or_file) {
 			resolve(cache[url]);
 		} else {
 			fetch(url).then(function (response) {
-				return response.buffer();
+				return in_browser ? response.arrayBuffer() : response.buffer();
 			}, function (error) {
 				var domain = new URL(url).host;
 				console.error('Gio could not get the file from ' + domain + '.  \n                \t\tThis is often because a website\'s security prevents cross domain requests.  \n                \t\tDownload the file and load it manually.');
 			}).then(function (b) {
 				if (b) {
-					var array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+					var array_buffer = void 0;
+					if (in_brower) {
+						b = array_buffer;
+					} else {
+						array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+					}
 					var tiff = geotiff.parse(array_buffer);
 					cache[url] = tiff;
 					resolve(tiff);

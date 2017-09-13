@@ -25,7 +25,7 @@ module.exports = (url_or_file) => (
 			resolve(cache[url]);
 		} else {
 			fetch(url).then(
-				response => response.buffer(),
+				response => in_browser ? response.arrayBuffer() : response.buffer() ,
 				error => {
 					let domain = new URL(url).host;
                 	console.error(
@@ -36,7 +36,12 @@ module.exports = (url_or_file) => (
 				}
 			).then(b => {
 				if (b) {
-					let array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+					let array_buffer;
+					if (in_brower) {
+						b = array_buffer;
+					} else {
+						array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+					}
 					let tiff = geotiff.parse(array_buffer);
 					cache[url] = tiff;
 					resolve(tiff);
