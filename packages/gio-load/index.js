@@ -12,7 +12,6 @@ let cache = require('../gio-cache/index');
 module.exports = (url_or_file) => (
 
 	new Promise((resolve, reject) => {
-		console.error(url_or_file);	
 		if (!in_browser && typeof url_or_file === 'object') {
 			throw `Direct TIFF loading is currently not supported outside of the browser
 				due to dependency limitations. Please use either a url or run the code 
@@ -28,11 +27,9 @@ module.exports = (url_or_file) => (
 				response => in_browser ? response.arrayBuffer() : response.buffer() ,
 				error => {
 					let domain = new URL(url).host;
-                	console.error(
-                		`Gio could not get the file from ${domain}.  
+                	reject(`Gio could not get the file from ${domain}.  
                 		This is often because a website's security prevents cross domain requests.  
-                		Download the file and load it manually.`
-                	);
+                		Download the file and load it manually.`);
 				}
 			).then(b => {
 				if (b) {

@@ -68,5 +68,6 @@ module.exports = (type_of_geometry, geometry) => {
 		}
 	} catch(e) {
 		console.error(e);
+		throw e;
 	}
 }

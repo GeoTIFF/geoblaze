@@ -6,7 +6,7 @@ let median = require('./index');
 
 let url = 'http://localhost:3000/data/test.tiff';
 let bbox = [80.63, 7.42, 84.21, 10.10];
-let expected_value = 1369.20;
+let expected_value = 906.70;
 
 let test = () => {
 	describe('Gio Median Feature', function() {

@@ -11,10 +11,11 @@ let get_median = values => {
 
     // pull middle value from sorted array
     if (values_length % 2 !== 0) {
-        return values[values_length / 2];
+        let middle = Math.floor(values_length / 2);
+        return values[middle];
     } else {
         let middle = values_length / 2;
-        return (values[Math.floor(middle)] + values[Math.ceil(middle)]) / 2;
+        return (values[middle - 1] + values[middle]) / 2;
     }
 }
 
@@ -43,5 +44,6 @@ module.exports = (image, geom) => {
         }   
     } catch(e) {
         console.error(e);
+        throw e;
     }
 }
