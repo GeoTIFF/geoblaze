@@ -29065,7 +29065,7 @@ var get_median = function get_median(values) {
     var values_length = values.length;
 
     // pull middle value from sorted array
-    if (values_length % 2 === 0) {
+    if (values_length % 2 !== 0) {
         return values[values_length / 2];
     } else {
         var middle = values_length / 2;
