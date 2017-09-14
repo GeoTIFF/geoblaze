@@ -3667,7 +3667,6 @@ var cache = __webpack_require__(25);
 
 module.exports = function (url_or_file) {
 	return new Promise(function (resolve, reject) {
-		console.error(url_or_file);
 		if (!in_browser && (typeof url_or_file === 'undefined' ? 'undefined' : _typeof(url_or_file)) === 'object') {
 			throw 'Direct TIFF loading is currently not supported outside of the browser\n\t\t\t\tdue to dependency limitations. Please use either a url or run the code \n\t\t\t\tin the browser.';
 		}
@@ -3681,7 +3680,7 @@ module.exports = function (url_or_file) {
 				return in_browser ? response.arrayBuffer() : response.buffer();
 			}, function (error) {
 				var domain = new URL(url).host;
-				console.error('Gio could not get the file from ' + domain + '.  \n                \t\tThis is often because a website\'s security prevents cross domain requests.  \n                \t\tDownload the file and load it manually.');
+				reject('Gio could not get the file from ' + domain + '.  \n                \t\tThis is often because a website\'s security prevents cross domain requests.  \n                \t\tDownload the file and load it manually.');
 			}).then(function (b) {
 				if (b) {
 					var array_buffer = void 0;
@@ -9253,6 +9252,7 @@ module.exports = function (type_of_geometry, geometry) {
 		}
 	} catch (e) {
 		console.error(e);
+		throw e;
 	}
 };
 
@@ -28998,6 +28998,7 @@ module.exports = function (image, geom) {
         }
     } catch (e) {
         console.error(e);
+        throw e;
     }
 };
 
@@ -29045,6 +29046,7 @@ module.exports = function (image, geom) {
         }
     } catch (e) {
         console.error(e);
+        throw e;
     }
 };
 
@@ -29066,10 +29068,11 @@ var get_median = function get_median(values) {
 
     // pull middle value from sorted array
     if (values_length % 2 !== 0) {
-        return values[values_length / 2];
+        var middle = Math.floor(values_length / 2);
+        return values[middle];
     } else {
-        var middle = values_length / 2;
-        return (values[Math.floor(middle)] + values[Math.ceil(middle)]) / 2;
+        var _middle = values_length / 2;
+        return (values[_middle - 1] + values[_middle]) / 2;
     }
 };
 
@@ -29102,6 +29105,7 @@ module.exports = function (image, geom) {
         }
     } catch (e) {
         console.error(e);
+        throw e;
     }
 };
 
@@ -29174,6 +29178,7 @@ module.exports = function (image, geom) {
         }
     } catch (e) {
         console.error(e);
+        throw e;
     }
 };
 
