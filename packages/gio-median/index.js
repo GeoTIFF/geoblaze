@@ -14,7 +14,7 @@ let get_median = values => {
         return values[values_length / 2];
     } else {
         let middle = values_length / 2;
-        return values[Math.floor(middle)] + values[Math.ceil(middle)] / 2;
+        return (values[Math.floor(middle)] + values[Math.ceil(middle)]) / 2;
     }
 }
 

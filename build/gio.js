@@ -29069,7 +29069,7 @@ var get_median = function get_median(values) {
         return values[values_length / 2];
     } else {
         var middle = values_length / 2;
-        return values[Math.floor(middle)] + values[Math.ceil(middle)] / 2;
+        return (values[Math.floor(middle)] + values[Math.ceil(middle)]) / 2;
     }
 };
 
