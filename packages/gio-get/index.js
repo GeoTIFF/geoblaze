@@ -37,8 +37,8 @@ module.exports = (image, geom) => {
             coordinate system */
             let x_min = Math.floor(Math.abs(lng_min - lng_0) / cell_width);
             let y_min = Math.floor(Math.abs(lat_0 - lat_max) / cell_height);
-            let x_max = Math.floor(Math.abs(lng_max - lng_0) / cell_width);
-            let y_max = Math.floor(Math.abs(lat_0 - lat_min) / cell_height);
+            let x_max = Math.ceil(Math.abs(lng_max - lng_0) / cell_width);
+            let y_max = Math.ceil(Math.abs(lat_0 - lat_min) / cell_height);
 
             try {
 
