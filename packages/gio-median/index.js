@@ -10,7 +10,7 @@ let get_median = values => {
     let values_length = values.length;
 
     // pull middle value from sorted array
-    if (values_length % 2 === 0) {
+    if (values_length % 2 !== 0) {
         return values[values_length / 2];
     } else {
         let middle = values_length / 2;
