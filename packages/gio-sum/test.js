@@ -6,7 +6,7 @@ let sum = require('./index');
 
 let url = 'http://localhost:3000/data/test.tiff';
 let bbox = [80.63, 7.42, 84.21, 10.10];
-let expected_value = 248470.50;
+let expected_value = 262516.50;
 
 let test = () => {
 	describe('Gio Sum Feature', function() {

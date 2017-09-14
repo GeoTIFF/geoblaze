@@ -6,5 +6,6 @@ module.exports = {
 	identify: require('./packages/gio-identify/index'),
 	sum: require('./packages/gio-sum/index'),
 	mean: require('./packages/gio-mean/index'),
+	median: require('./packages/gio-median/index'),
 	mode: require('./packages/gio-mode/index')
 };

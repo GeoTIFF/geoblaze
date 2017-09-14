@@ -45,7 +45,7 @@ module.exports = (image, geom) => {
             } else { // multiple bands
                 return values
                     .map(band => band.filter(value => value !== no_data_value))
-                    .map(band => get_mode_from_values(band));
+                    .map(get_mode_from_values);
             }
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.'
