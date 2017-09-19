@@ -1,8 +1,8 @@
 'use strict';
 
 let expect = require('chai').expect;
-let load = require('./../gio-load/index');
-let min = require('./index');
+let load = require('./../gio-load/load');
+let min = require('./min');
 
 let url = 'http://localhost:3000/data/test.tiff';
 let bbox = [80.63, 7.42, 84.21, 10.10];

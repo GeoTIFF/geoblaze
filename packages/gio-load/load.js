@@ -5,7 +5,7 @@ let geotiff = require('geotiff');
 let in_browser = typeof window === 'object';
 var fetch = in_browser ? window.fetch : require('node-fetch');
 
-let cache = require('../gio-cache/index');
+let cache = require('../gio-cache/cache');
 
 module.exports = (url_or_file) => (
 

@@ -1,13 +1,13 @@
 'use strict';
 
 module.exports = {
-	cache: require('./packages/gio-cache/index'),
-	load: require('./packages/gio-load/index'),
-	identify: require('./packages/gio-identify/index'),
-	sum: require('./packages/gio-sum/index'),
-	mean: require('./packages/gio-mean/index'),
-	median: require('./packages/gio-median/index'),
-	min: require('./packages/gio-min/index'),
-	max: require('./packages/gio-max/index'),
-	mode: require('./packages/gio-mode/index')
+	cache: require('./packages/gio-cache/cache'),
+	load: require('./packages/gio-load/load'),
+	identify: require('./packages/gio-identify/identify'),
+	sum: require('./packages/gio-sum/sum'),
+	mean: require('./packages/gio-mean/mean'),
+	median: require('./packages/gio-median/median'),
+	min: require('./packages/gio-min/min'),
+	max: require('./packages/gio-max/max'),
+	mode: require('./packages/gio-mode/mode')
 };
