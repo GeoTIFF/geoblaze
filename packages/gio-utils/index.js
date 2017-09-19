@@ -3,7 +3,7 @@
 let _ = require('underscore');
 
 module.exports = {
-
+  
     is_bbox(geometry) {
 
         // check if we are using the gio format and return true right away if so
