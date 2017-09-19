@@ -57,3 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
+# jsdoc documentation directory
+docs/
+
