@@ -7,6 +7,7 @@
     "babel": "babel --presets es2015 index.js -o build/gio.bundle.js",
     "build": "webpack",
     "test": "./node_modules/.bin/mocha --reporter spec ",
+    "jsdoc": "jsdoc packages -r -d docs",
     "start": "node test-app.js"
   },
   "repository": {
@@ -52,6 +53,7 @@
     "webpack": "^3.5.4"
   },
   "devDependencies": {
+    "jsdoc": "^3.5.5",
     "memory-fs": "^0.4.1",
     "request": "^2.81.0"
   }
