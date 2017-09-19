@@ -4,28 +4,28 @@ let get = require('../gio-get/index');
 let utils = require('../gio-utils/index');
 
 let get_max = (values, no_data_value) => {
-	let number_of_values = values.length;
-	if (number_of_values > 0) {
-		let max = null;
-		for (let i = 0; i < number_of_values; i++) {
-			let value = values[i];
-			if (value !== no_data_value) {
+    let number_of_values = values.length;
+    if (number_of_values > 0) {
+        let max = null;
+        for (let i = 0; i < number_of_values; i++) {
+            let value = values[i];
+            if (value !== no_data_value) {
 
-				/* We first compare the current value to the stored maximum.
-				If the new value is greater than the stored minimum, replace the
-				stored minimum with the new value. When checking a greater than
-				comparison aganist a null value, like in the first comparison,
-				the statement resolves as true. */
-			
-				if (value > max) {
-					max = value;
-				}
-			}
-		}
-		return max;
-	} else {
-		throw 'No values were provided';
-	}
+                /* We first compare the current value to the stored maximum.
+                If the new value is greater than the stored minimum, replace the
+                stored minimum with the new value. When checking a greater than
+                comparison aganist a null value, like in the first comparison,
+                the statement resolves as true. */
+            
+                if (value > max) {
+                    max = value;
+                }
+            }
+        }
+        return max;
+    } else {
+        throw 'No values were provided';
+    }
 }
 
 module.exports = (image, geom) => {
