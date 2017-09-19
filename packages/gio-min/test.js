@@ -9,18 +9,18 @@ let bbox = [80.63, 7.42, 84.21, 10.10];
 let expected_value = 0;
 
 let test = () => {
-	describe('Gio Min Feature', function() {
-		describe('Get Min from Bounding Box', function() {
-			this.timeout(1000000);
-			it('Got Correct Value', () => {
-				return load(url).then(tiff => {
-					let image = tiff.getImage();
-					let value = Number(min(image, bbox).toFixed(2));
-					expect(value).to.equal(expected_value);
-				});
-			});
-		});
-	})
+    describe('Gio Min Feature', function() {
+        describe('Get Min from Bounding Box', function() {
+            this.timeout(1000000);
+            it('Got Correct Value', () => {
+                return load(url).then(tiff => {
+                    let image = tiff.getImage();
+                    let value = Number(min(image, bbox).toFixed(2));
+                    expect(value).to.equal(expected_value);
+                });
+            });
+        });
+    })
 }
 
 test();
