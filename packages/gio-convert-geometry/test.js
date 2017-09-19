@@ -1,7 +1,7 @@
 'use strict';
 
 let expect = require('chai').expect;
-let gio_convert_geometry = require('./index');
+let gio_convert_geometry = require('./convert-geometry');
 
 let array_point = [102, 0.5];
 

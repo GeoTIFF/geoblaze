@@ -2,8 +2,8 @@
 
 let _ = require('underscore');
 
-let get = require('../gio-get/index');
-let utils = require('../gio-utils/index');
+let get = require('../gio-get/get');
+let utils = require('../gio-utils/utils');
 
 let get_mode_from_values = (values) => {
 

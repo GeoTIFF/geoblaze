@@ -1,6 +1,6 @@
 'use strict';
 
-let utils = require('../gio-utils/index');
+let utils = require('../gio-utils/utils');
 
 let convert_point = geometry => {
     let point;

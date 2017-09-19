@@ -2,8 +2,8 @@
 
 let expect = require('chai').expect;
 
-let load = require('../gio-load/index');
-let identify = require('./index');
+let load = require('../gio-load/load');
+let identify = require('./identify');
 
 let url = 'http://localhost:3000/data/test.tiff';
 let point = [80.63, 7.42];

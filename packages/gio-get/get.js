@@ -1,8 +1,8 @@
 'use strict';
 
-let load = require('../gio-load/index');
-let utils = require('../gio-utils/index');
-let convert_geometry = require('../gio-convert-geometry/index');
+let load = require('../gio-load/load');
+let utils = require('../gio-utils/utils');
+let convert_geometry = require('../gio-convert-geometry/convert-geometry');
 
 module.exports = (image, geom) => {
     

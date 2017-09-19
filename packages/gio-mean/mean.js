@@ -1,7 +1,7 @@
 'use strict';
 
-let get = require('../gio-get/index');
-let utils = require('../gio-utils/index');
+let get = require('../gio-get/get');
+let utils = require('../gio-utils/utils');
 
 module.exports = (image, geom) => {
     
@@ -13,21 +13,23 @@ module.exports = (image, geom) => {
             let values = get(image, geom);
             let no_data_value = utils.get_no_data_value(image);
 
-            // sum values
+            // run simple reduce to get average
             if (values.length === 1) { // one band
-                return values[0]
+                let sum = values[0]
                     .filter(value => value !== no_data_value)
                     .reduce((sum, value) => sum += value, 0);
+                return sum / values[0].length;
             } else {
                 return values.map(band => { // multiple bands
                     return band
                         .filter(value => value !== no_data_value)
                         .reduce((sum, value) => sum += value, 0)
+                        / band.length;
                 });
             }
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.'
-        }            
+        }   
     } catch(e) {
         console.error(e);
         throw e;
