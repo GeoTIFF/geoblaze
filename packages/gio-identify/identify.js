@@ -1,7 +1,7 @@
 'use strict';
 
-let load = require('../gio-load/index');
-let convert_geometry = require('../gio-convert-geometry/index');
+let load = require('../gio-load/load');
+let convert_geometry = require('../gio-convert-geometry/convert-geometry');
 
 /**
     Given an image and a point geometry,
