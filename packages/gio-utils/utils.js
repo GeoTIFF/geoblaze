@@ -67,5 +67,33 @@ module.exports = {
 
         // so far haven't found a reason not to return as an integer
         return parseInt(image.fileDirectory.GDAL_NODATA);
+    },
+
+    get_bounding_box(geometry) {
+
+        // initialize the min and max values to the first
+        // point so that we don't have to run a null check
+        // when iterating over each point
+        let first_point = geometry[0][0];
+        let xmin = first_point[0],
+            ymin = first_point[1],
+            xmax = first_point[0],
+            ymax = first_point[1];
+
+        geometry.forEach(part => {
+
+            // iterate through each point in the polygon
+            // and reset min/max values accordingly
+            for (var i = 0; i < part.length; i++) {
+                let point = part[i];
+                if (point[0] < xmin) xmin = point[0];
+                if (point[1] < ymin) ymin = point[1];
+                if (point[0] > xmax) xmax = point[0];
+                if (point[1] > ymax) ymax = point[1];
+            }
+
+        });
+
+        return { xmin, ymin, xmax, ymax };
     }
 }
