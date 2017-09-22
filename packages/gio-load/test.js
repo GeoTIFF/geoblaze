@@ -4,7 +4,7 @@ let expect = require('chai').expect;
 
 let fetch = require('node-fetch');
 
-let load = require('./index');
+let load = require('./load');
 
 let path = 'http://localhost:3000/data/test.tiff';
 
