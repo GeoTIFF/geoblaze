@@ -33,16 +33,35 @@ module.exports = {
         return false;
     },
 
-    // is_polygon(geometry) {
+    is_polygon(geometry) {
 
-    //     // check if input is a coordinate array
-    //     if (Array.isArray(geometry)) {
+        // convert to a geometryp
+        let coors;
+        if (Array.isArray(geometry)) {
+            coors = geometry;
+        } else if (typeof geometry === 'string') {
+            let geojson = JSON.parse(geometry);
+            coors = geojson.coordinates;
+        } else if (typeof geometry === 'object') {
+            coors = geometry.coordinates;
+        }
 
-    //     }
+        if (coors) {
+            // iterate through each geometry and make sure first and
+            // last point are the same
+            let is_polygon_array = true;
+            coors.forEach(part => {
+                let first_vertex = part[0];
+                let last_vertex = part[part.length - 1]
+                if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
+                    is_polygon_array = false;
+                }
+            });
+            return is_polygon_array;
+        }
 
-
-    //     return false;
-    // }
+        return false;
+    },
 
     get_no_data_value(image) {
 
