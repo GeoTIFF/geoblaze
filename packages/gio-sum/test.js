@@ -28,7 +28,7 @@ let test = () => {
                 });
             });
         });
-        describe('Get Sum from Bounding Box', function() {
+        describe('Get Sum from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
                 return load(url).then(tiff => {
