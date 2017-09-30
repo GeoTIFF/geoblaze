@@ -19,7 +19,7 @@ module.exports = (image, geom, run_on_values) => {
 
     // get values in a bounding box around the geometry
     let latlng_bbox = utils.get_bounding_box(geom);
-    let image_pixel_values = get(image, latlng_bbox)[0];
+    let image_bands = get(image, latlng_bbox)
 
     // set origin points of image, ie returned bbox
     let lat_0 = latlng_bbox[3];
@@ -38,7 +38,7 @@ module.exports = (image, geom, run_on_values) => {
     // iterate through image rows and convert each one to a line
     // running through the middle of the row
     let image_lines = [];
-    let image_size = image_pixel_values.length;
+    let image_size = image_bands[0].length;
     for (let y = 0; y < image_size; y += row_length) {
 
         // get latitude of current row 
@@ -126,13 +126,15 @@ module.exports = (image, geom, run_on_values) => {
                     // use the start and end indexes to pull pixels out of
                     // the corresponding image row
                     for (let r = start_index; r < end_index; r++) {
-                        let value = image_pixel_values[r];
-                        if (value !== no_data_value) {
-                            
-                            // run the function provided as a parameter input
-                            // on the value
-                            run_on_values(value);
-                        }
+                        image_bands.forEach((band, band_index) => {
+                            let value = band[r];
+                            if (value !== no_data_value) {
+                                
+                                // run the function provided as a parameter input
+                                // on the value
+                                run_on_values(value, band_index);
+                            }
+                        });
                     }
                 }
             }

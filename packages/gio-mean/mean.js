@@ -4,6 +4,7 @@ let _ = require('underscore');
 
 let get = require('../gio-get/get');
 let utils = require('../gio-utils/utils');
+let convert_geometry = require('../gio-convert-geometry/convert-geometry');
 let intersect_polygon = require('../gio-intersect-polygon/intersect-polygon');
 
 module.exports = (image, geom) => {
@@ -11,6 +12,7 @@ module.exports = (image, geom) => {
     try {
 
         if (utils.is_bbox(geom)) { // if geometry is a bounding box
+            geom = convert_geometry('bbox', geom);
             let no_data_value = utils.get_no_data_value(image);
 
             // grab array of values
@@ -31,19 +33,40 @@ module.exports = (image, geom) => {
                 });
             }
         } else if (utils.is_polygon(geom)) { // if geometry is a polygon
-            let sum = 0;
-            let num_values = 0;
+            geom = convert_geometry('polygon', geom);
+            let sums = [];
+            let num_values = [];
             
             // the third argument of intersect_polygon is a function which
             // is run on every value, we use it to increment the sum so we
             // can later divide it by the total value count to get the mean
-            intersect_polygon(image, geom, value => {
-                sum += value;
-                num_values += 1;
+            intersect_polygon(image, geom, (value, band_index) => {
+                if (!num_values[band_index]) {
+                    sums[band_index] = value;
+                    num_values[band_index] = 1;
+                } else {
+                    sums[band_index] += value; 
+                    num_values[band_index] += 1;
+                }
             });
 
-            if (num_values > 0) return sum / num_values;
-            else throw 'No Values were found in the given geometry';
+            // here we check to see how many bands were in the image
+            // based on the sums and use that to select how we display
+            // the result
+            let results = [];
+            num_values.forEach((num, index) => {
+                if (num > 0) results.push(sums[index] / num);
+            });
+            if (results.length === 1) {
+                return results[0];
+            } else if (results.length > 1) {
+                return results;
+            } else {
+                throw 'No Values were found in the given geometry';
+            }
+
+            // if (num_values > 0) return sum / num_values;
+            // else throw 'No Values were found in the given geometry';
         } else {
             throw 'Only Bounding Box and Polygon geometries are currently supported.'
         }   
