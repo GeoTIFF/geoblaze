@@ -41,12 +41,12 @@ module.exports = (image, geom) => {
             // is run on every value, we use it to increment the sum so we
             // can later divide it by the total value count to get the mean
             intersect_polygon(image, geom, (value, band_index) => {
-                if (!num_values[band_index]) {
-                    sums[band_index] = value;
-                    num_values[band_index] = 1;
-                } else {
+                if (num_values[band_index]) {
                     sums[band_index] += value; 
                     num_values[band_index] += 1;
+                } else {
+                    sums[band_index] = value;
+                    num_values[band_index] = 1;
                 }
             });
 
