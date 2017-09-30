@@ -64,9 +64,6 @@ module.exports = (image, geom) => {
             } else {
                 throw 'No Values were found in the given geometry';
             }
-
-            // if (num_values > 0) return sum / num_values;
-            // else throw 'No Values were found in the given geometry';
         } else {
             throw 'Only Bounding Box and Polygon geometries are currently supported.'
         }   
