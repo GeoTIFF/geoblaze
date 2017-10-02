@@ -52,7 +52,7 @@ module.exports = (image, geom) => {
             let values = [];
 
             intersect_polygon(image, geom, (value, band_index) => {
-                if (!values[band_index]) {
+                if (typeof values[band_index] === 'undefined') {
                     values[band_index] = value; 
                 } else if (value < values[band_index]) {
                     values[band_index] = value; 
