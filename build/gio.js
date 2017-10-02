@@ -2617,9 +2617,9 @@ module.exports = function (image, geom, run_on_values) {
     var latlng_bbox = utils.get_bounding_box(geom);
     var image_bands = get(image, latlng_bbox);
 
-    // set origin points of image, ie returned bbox
-    var lat_0 = latlng_bbox[3];
-    var lng_0 = latlng_bbox[0];
+    // set origin points of image, based on the returned bbox
+    var lat_0 = latlng_bbox[3] + (info.lat_0 - latlng_bbox[3]) % cell_height;
+    var lng_0 = latlng_bbox[0] - (latlng_bbox[0] - info.lng_0) % cell_width;
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
@@ -2638,7 +2638,7 @@ module.exports = function (image, geom, run_on_values) {
     for (var y = 0; y < image_size; y += row_length) {
 
         // get latitude of current row 
-        var lat = lat_0 + cell_height * y / row_length + cell_height / 2;
+        var lat = lat_0 - (cell_height * y / row_length + cell_height / 2);
 
         // use that point, plus another point along the same latitude to
         // create a line
@@ -2662,12 +2662,22 @@ module.exports = function (image, geom, run_on_values) {
             var end_point = part[i];
             var edge_line = get_line_from_points(start_point, end_point);
 
+            var start_lng = void 0,
+                end_lng = void 0;
+            if (start_point[0] < end_point[0]) {
+                start_lng = start_point[0];
+                end_lng = end_point[0];
+            } else {
+                start_lng = end_point[0];
+                end_lng = start_point[0];
+            }
+
             // find the y values in the image coordinate space
-            var y_1 = Math.floor(lat_0 - start_point[1]) / cell_height;
-            var y_2 = Math.floor(lat_0 - end_point[1]) / cell_height;
+            var y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
+            var y_2 = Math.floor((lat_0 - end_point[1]) / cell_height);
 
             // make sure to set the start and end points so that we are
-            // incrementing upwards
+            // incrementing upwards through rows
             var row_start = void 0,
                 row_end = void 0;
             if (y_1 < y_2) {
@@ -2684,12 +2694,12 @@ module.exports = function (image, geom, run_on_values) {
                 var image_line = image_lines[j];
                 var intersection = get_intersection_of_two_lines(edge_line, image_line);
 
-                // check to see if the intersection point is inside the image row
-                // and if it is, add the intersection to the list of intersections
-                // at the corresponding index for that row in intersections_by_row
-                var image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
-
-                if (image_pixel_index >= 0 && image_pixel_index <= row_length) {
+                // check to see if the intersection point is within the range of 
+                // the edge line segment. If it is, add the intersection to the 
+                // list of intersections at the corresponding index for that row 
+                // in intersections_by_row
+                if (intersection.x >= start_lng && intersection.x <= end_lng) {
+                    var image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
                     intersections_by_row[j].push(image_pixel_index);
                 }
             }
@@ -2705,7 +2715,9 @@ module.exports = function (image, geom, run_on_values) {
         // we make sure to sort intersections here because we don't know the order
         // in which they were recorded, as it was based on the order of polygon
         // edges
-        var row_intersections = intersections_by_row[i].sort();
+        var row_intersections = intersections_by_row[i].sort(function (a, b) {
+            return a - b;
+        });
         var num_intersections = row_intersections.length;
         if (num_intersections > 0) {
             // make sure the row is in the polygon
@@ -29765,7 +29777,7 @@ module.exports = function (image, geom) {
                     return band.filter(function (value) {
                         return value !== no_data_value;
                     });
-                }).map(get_mode_from_values);
+                }).map(get_mode);
             }
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
