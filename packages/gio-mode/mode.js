@@ -49,7 +49,7 @@ module.exports = (image, geom) => {
             } else { // multiple bands
                 return values
                     .map(band => band.filter(value => value !== no_data_value))
-                    .map(get_mode_from_values);
+                    .map(get_mode);
             }
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);

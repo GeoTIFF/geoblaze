@@ -21,9 +21,9 @@ module.exports = (image, geom, run_on_values) => {
     let latlng_bbox = utils.get_bounding_box(geom);
     let image_bands = get(image, latlng_bbox)
 
-    // set origin points of image, ie returned bbox
-    let lat_0 = latlng_bbox[3];
-    let lng_0 = latlng_bbox[0];
+    // set origin points of image, based on the returned bbox
+    let lat_0 = latlng_bbox[3] + ((info.lat_0 - latlng_bbox[3]) % cell_height);
+    let lng_0 = latlng_bbox[0] - ((latlng_bbox[0] - info.lng_0) % cell_width);
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
@@ -42,8 +42,8 @@ module.exports = (image, geom, run_on_values) => {
     for (let y = 0; y < image_size; y += row_length) {
 
         // get latitude of current row 
-        let lat = lat_0 + (cell_height * y / row_length) + (cell_height / 2);
-        
+        let lat = lat_0 - (cell_height * y / row_length + cell_height / 2);
+
         // use that point, plus another point along the same latitude to
         // create a line
         let point_0 = [lng_0, lat];
@@ -64,12 +64,21 @@ module.exports = (image, geom, run_on_values) => {
             let end_point = part[i];
             let edge_line = get_line_from_points(start_point, end_point);
 
+            let start_lng, end_lng;
+            if (start_point[0] < end_point[0]) {
+                start_lng = start_point[0];
+                end_lng = end_point[0];
+            } else {
+                start_lng = end_point[0];
+                end_lng = start_point[0];
+            }
+
             // find the y values in the image coordinate space
-            let y_1 = Math.floor(lat_0 - start_point[1]) / cell_height;
-            let y_2 = Math.floor(lat_0 - end_point[1]) / cell_height;
+            let y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
+            let y_2 = Math.floor((lat_0 - end_point[1]) / cell_height);
 
             // make sure to set the start and end points so that we are
-            // incrementing upwards
+            // incrementing upwards through rows
             let row_start, row_end;
             if (y_1 < y_2) {
                 row_start = y_1;
@@ -85,12 +94,12 @@ module.exports = (image, geom, run_on_values) => {
                 let image_line = image_lines[j];
                 let intersection = get_intersection_of_two_lines(edge_line, image_line);
 
-                // check to see if the intersection point is inside the image row
-                // and if it is, add the intersection to the list of intersections
-                // at the corresponding index for that row in intersections_by_row
-                let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
-                
-                if (image_pixel_index >= 0 && image_pixel_index <= row_length) {
+                // check to see if the intersection point is within the range of 
+                // the edge line segment. If it is, add the intersection to the 
+                // list of intersections at the corresponding index for that row 
+                // in intersections_by_row
+                if (intersection.x >= start_lng && intersection.x <= end_lng) {
+                    let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
                     intersections_by_row[j].push(image_pixel_index);
                 }
             }
@@ -106,7 +115,8 @@ module.exports = (image, geom, run_on_values) => {
         // we make sure to sort intersections here because we don't know the order
         // in which they were recorded, as it was based on the order of polygon
         // edges
-        let row_intersections = intersections_by_row[i].sort();
+        let row_intersections = intersections_by_row[i]
+            .sort((a, b) => a - b);
         let num_intersections = row_intersections.length;
         if (num_intersections > 0) { // make sure the row is in the polygon
 
