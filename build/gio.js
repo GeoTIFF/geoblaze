@@ -29602,7 +29602,7 @@ module.exports = function (image, geom) {
             var _values = [];
 
             intersect_polygon(image, geom, function (value, band_index) {
-                if (!_values[band_index]) {
+                if (typeof _values[band_index] === 'undefined') {
                     _values[band_index] = value;
                 } else if (value < _values[band_index]) {
                     _values[band_index] = value;
