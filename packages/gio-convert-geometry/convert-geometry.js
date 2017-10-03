@@ -1,5 +1,7 @@
 'use strict';
 
+let _ = require('underscore');
+
 let utils = require('../gio-utils/utils');
 
 let convert_point = geometry => {
@@ -32,14 +34,14 @@ let convert_bbox = geometry => {
             bbox = geometry;
         } else if (typeof geometry === 'string') { // stringified geojson
             let geojson = JSON.parse(geometry);
-            let coors = geojson.coordinates[0];
+            let coors = utils.get_geojson_coors(geojson)[0];
             if (geojson.type === 'Polygon') {
                 let lngs = coors.map(coor => coor[0]);
                 let lats = coors.map(coor => coor[1]);
                 bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
             }
         } else if (typeof geometry === 'object') { // geojson
-            let coors = geometry.coordinates[0];
+            let coors = utils.get_geojson_coors(geometry)[0];
             if (geometry.type === 'Polygon') {
                 let lngs = coors.map(coor => coor[0]);
                 let lats = coors.map(coor => coor[1]);
@@ -63,9 +65,9 @@ let convert_polygon = geometry => {
             polygon = geometry;
         } else if (typeof geometry === 'string') { // stringified geojson
             let geojson = JSON.parse(geometry);
-            polygon = geojson.coordinates;
+            polygon = utils.get_geojson_coors(geojson);
         } else if (typeof geometry === 'object') { // geojson
-            polygon = geometry.coordinates;
+            polygon = utils.get_geojson_coors(geometry);
         }
     }
 

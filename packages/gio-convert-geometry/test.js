@@ -21,14 +21,34 @@ let array_polygon = [
     [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.4], [100.2, 0.2] ]
 ];
 
-let geojson_polygon_str = `{ 
+let geojson_polygon_str_1 = `{ 
     "type": "Polygon",
     "coordinates": [
         [ [100.0, 0.0], [101.0, 0.0], [101.5, 1.0], [100.0, 0.5], [100.0, 0.0] ],
         [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.4], [100.2, 0.2] ]
     ]
 }`;
-let geojson_polygon = JSON.parse(geojson_polygon_str);
+
+let geojson_polygon_str_2 = `{ 
+    "type": "FeatureCollection",
+    "features": [
+        { "type": "Feature",
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [ [100.0, 0.0], [101.0, 0.1], [101.5, 1.0], [100.0, 0.5], [100.0, 0.0] ]
+                ]
+            },
+            "properties": {
+                "prop0": "value0",
+                "prop1": {"this": "that"}
+            }
+         }
+    ]
+}`
+
+let geojson_polygon_1 = JSON.parse(geojson_polygon_str_1);
+let geojson_polygon_2 = JSON.parse(geojson_polygon_str_2);
 
 let test_point_load = feature => {
     let point = gio_convert_geometry('point', feature);
@@ -79,11 +99,17 @@ let test = () => {
             it('Loaded from array', () => {
                 test_polygon_load(array_polygon);
             });
-            it('Loaded from geojson string', () => {
-                test_polygon_load(geojson_polygon_str);
+            it('Loaded from geojson string (simple)', () => {
+                test_polygon_load(geojson_polygon_str_1);
             });
-            it('Loaded from geojson obj', () => {
-                test_polygon_load(geojson_polygon);
+            it('Loaded from geojson string (complex)', () => {
+                test_polygon_load(geojson_polygon_str_2);
+            });
+            it('Loaded from geojson obj (simple)', () => {
+                test_polygon_load(geojson_polygon_1);
+            });
+            it('Loaded from geojson obj (complex)', () => {
+                test_polygon_load(geojson_polygon_2);
             });
         })
     })
