@@ -19,19 +19,12 @@ module.exports = (image, geom) => {
             let values = get(image, geom);
 
             // run simple reduce to get average
-            if (values.length === 1) { // one band
-                let sum = values[0]
+            return values.map(band => {
+                return band
                     .filter(value => value !== no_data_value)
-                    .reduce((sum, value) => sum += value, 0);
-                return sum / values[0].length;
-            } else {
-                return values.map(band => { // multiple bands
-                    return band
-                        .filter(value => value !== no_data_value)
-                        .reduce((sum, value) => sum += value, 0)
-                        / band.length;
-                });
-            }
+                    .reduce((sum, value) => sum += value, 0)
+                    / band.length;
+            });
         } else if (utils.is_polygon(geom)) { // if geometry is a polygon
             geom = convert_geometry('polygon', geom);
             let sums = [];
@@ -57,13 +50,10 @@ module.exports = (image, geom) => {
             num_values.forEach((num, index) => {
                 if (num > 0) results.push(sums[index] / num);
             });
-            if (results.length === 1) {
-                return results[0];
-            } else if (results.length > 1) {
-                return results;
-            } else {
-                throw 'No Values were found in the given geometry';
-            }
+
+            if (results) return results;
+            else throw 'No Values were found in the given geometry';
+
         } else {
             throw 'Only Bounding Box and Polygon geometries are currently supported.'
         }   

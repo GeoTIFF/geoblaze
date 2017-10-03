@@ -24,7 +24,7 @@ let test = () => {
             it('Got Correct Value', () => {
                 return load(url).then(tiff => {
                     let image = tiff.getImage();
-                    let value = mode(image, bbox);
+                    let value = mode(image, bbox)[0];
                     expect(value).to.equal(expected_bbox_value);
                 });
             });
@@ -34,7 +34,7 @@ let test = () => {
             it('Got Correct Value', () => {
                 return load(url).then(tiff => {
                     let image = tiff.getImage();
-                    let value = mode(image, polygon);
+                    let value = mode(image, polygon)[0];
                     expect(value).to.equal(expected_polygon_value);
                 });
             });
