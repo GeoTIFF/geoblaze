@@ -29284,7 +29284,7 @@ var identify = function identify(image, geometry) {
             // This ternary expression makes sure that if there is only one image band,
             // the value is returned as a single number. Otherwise, the values for all
             // bands are returned as an array.
-            return values.length === 1 ? values[0][0] : values.map(function (value) {
+            return values.map(function (value) {
                 return value[0];
             });
         } catch (e) {
@@ -29321,23 +29321,14 @@ module.exports = function (image, geom) {
             var no_data_value = utils.get_no_data_value(image);
 
             // sum values
-            if (values.length === 1) {
-                // one band
-                return values[0].filter(function (value) {
+            return values.map(function (band) {
+                // multiple bands
+                return band.filter(function (value) {
                     return value !== no_data_value;
                 }).reduce(function (sum, value) {
                     return sum += value;
                 }, 0);
-            } else {
-                return values.map(function (band) {
-                    // multiple bands
-                    return band.filter(function (value) {
-                        return value !== no_data_value;
-                    }).reduce(function (sum, value) {
-                        return sum += value;
-                    }, 0);
-                });
-            }
+            });
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
             var sums = [];
@@ -29352,13 +29343,7 @@ module.exports = function (image, geom) {
                 }
             });
 
-            if (sums.length === 1) {
-                return sums[0];
-            } else if (sums.length > 1) {
-                return sums;
-            } else {
-                throw 'No Values were found in the given geometry';
-            }
+            if (sums.length > 0) return sums;else throw 'No Values were found in the given geometry';
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.';
         }
@@ -29395,24 +29380,13 @@ module.exports = function (image, geom) {
             var values = get(image, geom);
 
             // run simple reduce to get average
-            if (values.length === 1) {
-                // one band
-                var sum = values[0].filter(function (value) {
+            return values.map(function (band) {
+                return band.filter(function (value) {
                     return value !== no_data_value;
                 }).reduce(function (sum, value) {
                     return sum += value;
-                }, 0);
-                return sum / values[0].length;
-            } else {
-                return values.map(function (band) {
-                    // multiple bands
-                    return band.filter(function (value) {
-                        return value !== no_data_value;
-                    }).reduce(function (sum, value) {
-                        return sum += value;
-                    }, 0) / band.length;
-                });
-            }
+                }, 0) / band.length;
+            });
         } else if (utils.is_polygon(geom)) {
             // if geometry is a polygon
             geom = convert_geometry('polygon', geom);
@@ -29439,13 +29413,8 @@ module.exports = function (image, geom) {
             num_values.forEach(function (num, index) {
                 if (num > 0) results.push(sums[index] / num);
             });
-            if (results.length === 1) {
-                return results[0];
-            } else if (results.length > 1) {
-                return results;
-            } else {
-                throw 'No Values were found in the given geometry';
-            }
+
+            if (results) return results;else throw 'No Values were found in the given geometry';
         } else {
             throw 'Only Bounding Box and Polygon geometries are currently supported.';
         }
@@ -29495,19 +29464,11 @@ module.exports = function (image, geom) {
             var no_data_value = utils.get_no_data_value(image);
 
             // get median
-            if (values.length === 1) {
-                // one band
-                var filtered_values = values[0].filter(function (value) {
+            return values.map(function (band) {
+                return band.filter(function (value) {
                     return value !== no_data_value;
                 });
-                return get_median(filtered_values);
-            } else {
-                return values.map(function (band) {
-                    return band.filter(function (value) {
-                        return value !== no_data_value;
-                    });
-                }).map(get_median);
-            }
+            }).map(get_median);
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
             var _values = [];
@@ -29523,13 +29484,7 @@ module.exports = function (image, geom) {
                 }
             });
 
-            if (_values.length === 1) {
-                return get_median(_values[0]);
-            } else if (_values.length > 1) {
-                return _values.map(get_median);
-            } else {
-                throw 'No Values were found in the given geometry';
-            }
+            if (_values.length > 0) return _values.map(get_median);else throw 'No Values were found in the given geometry';
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.';
         }
@@ -29588,15 +29543,9 @@ module.exports = function (image, geom) {
             var no_data_value = utils.get_no_data_value(image);
 
             // get min value
-            if (values.length === 1) {
-                // one band
-                return get_min(values[0], no_data_value);
-            } else {
-                // multiple bands
-                return values.map(function (band) {
-                    return get_min(band, no_data_value);
-                });
-            }
+            return values.map(function (band) {
+                return get_min(band, no_data_value);
+            });
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
             var _values = [];
@@ -29609,13 +29558,7 @@ module.exports = function (image, geom) {
                 }
             });
 
-            if (_values.length === 1) {
-                return _values[0];
-            } else if (_values.length > 1) {
-                return _values;
-            } else {
-                throw 'No Values were found in the given geometry';
-            }
+            if (_values.length > 0) return _values;else throw 'No Values were found in the given geometry';
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.';
         }
@@ -29674,15 +29617,9 @@ module.exports = function (image, geom) {
             var no_data_value = utils.get_no_data_value(image);
 
             // get max value
-            if (values.length === 1) {
-                // one band
-                return get_max(values[0], no_data_value);
-            } else {
-                // multiple bands
-                return values.map(function (band) {
-                    return get_max(band, no_data_value);
-                });
-            }
+            return values.map(function (band) {
+                return get_max(band, no_data_value);
+            });
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
             var _values = [];
@@ -29695,13 +29632,7 @@ module.exports = function (image, geom) {
                 }
             });
 
-            if (_values.length === 1) {
-                return _values[0];
-            } else if (_values.length > 1) {
-                return _values;
-            } else {
-                throw 'No Values were found in the given geometry';
-            }
+            if (_values) return _values;else throw 'No Values were found in the given geometry';
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.';
         }
@@ -29765,20 +29696,11 @@ module.exports = function (image, geom) {
             var values = get(image, geom);
             var no_data_value = utils.get_no_data_value(image);
 
-            if (values.length === 1) {
-                // one band
-                var filtered_values = values[0].filter(function (value) {
+            return values.map(function (band) {
+                return band.filter(function (value) {
                     return value !== no_data_value;
                 });
-                return get_mode(filtered_values);
-            } else {
-                // multiple bands
-                return values.map(function (band) {
-                    return band.filter(function (value) {
-                        return value !== no_data_value;
-                    });
-                }).map(get_mode);
-            }
+            }).map(get_mode);
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
             var _values = [];
@@ -29794,13 +29716,7 @@ module.exports = function (image, geom) {
                 }
             });
 
-            if (_values.length === 1) {
-                return get_mode(_values[0]);
-            } else if (_values.length > 1) {
-                return _values.map(get_mode);
-            } else {
-                throw 'No Values were found in the given geometry';
-            }
+            if (_values.length > 0) return _values.map(get_mode);else throw 'No Values were found in the given geometry';
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.';
         }
