@@ -42,11 +42,8 @@ module.exports = (image, geom) => {
             let no_data_value = utils.get_no_data_value(image);
 
             // get min value
-            if (values.length === 1) { // one band
-                return get_min(values[0], no_data_value);
-            } else { // multiple bands
-                return values.map(band => get_min(band, no_data_value));
-            }
+            return values.map(band => get_min(band, no_data_value));
+        
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
             let values = [];
@@ -59,13 +56,8 @@ module.exports = (image, geom) => {
                 }
             });
 
-            if (values.length === 1) {
-                return values[0];
-            } else if (values.length > 1) {
-                return values;
-            } else {
-                throw 'No Values were found in the given geometry';
-            }
+            if (values.length > 0) return values;
+            else throw 'No Values were found in the given geometry';
 
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.'

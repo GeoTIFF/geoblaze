@@ -68,7 +68,7 @@ let identify = (image, geometry) => {
             // This ternary expression makes sure that if there is only one image band,
             // the value is returned as a single number. Otherwise, the values for all
             // bands are returned as an array.
-            return values.length === 1 ? values[0][0] : values.map(value => value[0]);
+            return values.map(value => value[0]);
         } catch(e) {
             throw e;
         }
