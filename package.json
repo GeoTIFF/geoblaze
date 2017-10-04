@@ -1,6 +1,6 @@
 {
   "name": "@geotiff/gio",
-  "version": "0.0.31",
+  "version": "0.0.32",
   "description": "process geotiffs",
   "main": "build/gio.js",
   "scripts": {
