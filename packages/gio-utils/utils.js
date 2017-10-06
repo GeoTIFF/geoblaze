@@ -173,12 +173,9 @@ module.exports = {
         // calculate the determinant, ad - cb in a square matrix |a b|
         let det = line_1.a * line_2.b - line_2.a * line_1.b; /*  |c d| */
 
-        if (det === 0) { // this means the lines are parellel, we need a way to account for this
-
-        } else { // otherwise, get x and y coordinates of intersection
+        if (det) { // this makes sure the lines aren't parallel, if they are, det will equal 0
             let x = (line_2.b * line_1.c - line_1.b * line_2.c) / det;
             let y = (line_1.a * line_2.c - line_2.a * line_1.c) / det;
             return { x, y };
-        }
     }
 }
