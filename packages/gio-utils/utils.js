@@ -177,5 +177,6 @@ module.exports = {
             let x = (line_2.b * line_1.c - line_1.b * line_2.c) / det;
             let y = (line_1.a * line_2.c - line_2.a * line_1.c) / det;
             return { x, y };
+        }
     }
 }

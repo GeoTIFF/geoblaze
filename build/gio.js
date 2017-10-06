@@ -2277,10 +2277,8 @@ module.exports = {
         // calculate the determinant, ad - cb in a square matrix |a b|
         var det = line_1.a * line_2.b - line_2.a * line_1.b; /*  |c d| */
 
-        if (det === 0) {// this means the lines are parellel, we need a way to account for this
-
-        } else {
-            // otherwise, get x and y coordinates of intersection
+        if (det) {
+            // this makes sure the lines aren't parallel, if they are, det will equal 0
             var x = (line_2.b * line_1.c - line_1.b * line_2.c) / det;
             var y = (line_1.a * line_2.c - line_2.a * line_1.c) / det;
             return { x: x, y: y };
@@ -2720,7 +2718,7 @@ module.exports = function (image, geom, run_on_values) {
                 // the edge line segment. If it is, add the intersection to the 
                 // list of intersections at the corresponding index for that row 
                 // in intersections_by_row
-                if (intersection.x >= start_lng && intersection.x <= end_lng) {
+                if (intersection && intersection.x >= start_lng && intersection.x <= end_lng) {
                     var image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
                     intersections_by_row[j].push(image_pixel_index);
                 }
