@@ -98,7 +98,7 @@ module.exports = (image, geom, run_on_values) => {
                 // the edge line segment. If it is, add the intersection to the 
                 // list of intersections at the corresponding index for that row 
                 // in intersections_by_row
-                if (intersection.x >= start_lng && intersection.x <= end_lng) {
+                if (intersection && intersection.x >= start_lng && intersection.x <= end_lng) {
                     let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
                     intersections_by_row[j].push(image_pixel_index);
                 }

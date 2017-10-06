@@ -36,6 +36,19 @@ module.exports = {
         return [x_min, y_min, x_max, y_max];
     },
 
+    get_geojson_coors(geojson) {
+        if (geojson.features) { // for feature collections
+            let coordinates = geojson.features.map(feature => feature.geometry.coordinates[0]);
+            let geometry = [];
+            coordinates.forEach(part => geometry.push(part));
+            return geometry;
+        } else if (geojson.geometry) { // for individual feature
+            return geojson.geometry.coordinates;
+        } else if (geojson.coordinates) { // for just the geometry
+            return geojson.coordinates;
+        }
+    },
+
     is_bbox(geometry) {
 
         // check if we are using the gio format and return true right away if so
@@ -47,13 +60,13 @@ module.exports = {
         let coors;
         if (typeof geometry === 'string') { // stringified geojson
             let geojson = JSON.parse(geometry);
-            if (geojson.coordinates) {
-                coors = geojson.coordinates[0];
-            }
+            let geojson_coors = this.get_geojson_coors(geojson);
+            if (geojson_coors) coors = geojson_coors[0];
+            // console.error(coors);
         } else if (typeof geometry === 'object') { // geojson
-            if (geometry.coordinates) {
-                coors = geometry.coordinates[0];
-            }
+            let geojson_coors = this.get_geojson_coors(geometry);
+            if (geojson_coors) coors = geojson_coors[0];
+            // console.error(coors);
         } else {
             return false;
         }
@@ -71,18 +84,19 @@ module.exports = {
 
     is_polygon(geometry) {
 
-        // convert to a geometryp
+        // convert to a geometry
         let coors;
         if (Array.isArray(geometry)) {
             coors = geometry;
         } else if (typeof geometry === 'string') {
             let geojson = JSON.parse(geometry);
-            coors = geojson.coordinates;
+            coors = this.get_geojson_coors(geojson);
         } else if (typeof geometry === 'object') {
-            coors = geometry.coordinates;
+            coors = this.get_geojson_coors(geometry);
         }
 
         if (coors) {
+
             // iterate through each geometry and make sure first and
             // last point are the same
             let is_polygon_array = true;
@@ -159,9 +173,7 @@ module.exports = {
         // calculate the determinant, ad - cb in a square matrix |a b|
         let det = line_1.a * line_2.b - line_2.a * line_1.b; /*  |c d| */
 
-        if (det === 0) { // this means the lines are parellel, we need a way to account for this
-
-        } else { // otherwise, get x and y coordinates of intersection
+        if (det) { // this makes sure the lines aren't parallel, if they are, det will equal 0
             let x = (line_2.b * line_1.c - line_1.b * line_2.c) / det;
             let y = (line_1.a * line_2.c - line_2.a * line_1.c) / det;
             return { x, y };
