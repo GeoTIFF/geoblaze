@@ -61,7 +61,9 @@ module.exports = {
         if (typeof geometry === 'string') { // stringified geojson
             let geojson = JSON.parse(geometry);
             let geojson_coors = this.get_geojson_coors(geojson);
-            if (geojson_coors) coors = geojson_coors[0];
+            if (geojson_coors.length === 1 && geojson_coors[0].length === 5) {
+                coors = geojson_coors[0];
+            }
             // console.error(coors);
         } else if (typeof geometry === 'object') { // geojson
             let geojson_coors = this.get_geojson_coors(geometry);
