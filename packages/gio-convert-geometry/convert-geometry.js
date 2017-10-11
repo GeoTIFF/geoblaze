@@ -35,18 +35,14 @@ let convert_bbox = geometry => {
         } else if (typeof geometry === 'string') { // stringified geojson
             let geojson = JSON.parse(geometry);
             let coors = utils.get_geojson_coors(geojson)[0];
-            if (geojson.type === 'Polygon') {
-                let lngs = coors.map(coor => coor[0]);
-                let lats = coors.map(coor => coor[1]);
-                bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
-            }
+            let lngs = coors.map(coor => coor[0]);
+            let lats = coors.map(coor => coor[1]);
+            bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
         } else if (typeof geometry === 'object') { // geojson
             let coors = utils.get_geojson_coors(geometry)[0];
-            if (geometry.type === 'Polygon') {
-                let lngs = coors.map(coor => coor[0]);
-                let lats = coors.map(coor => coor[1]);
-                bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
-            }
+            let lngs = coors.map(coor => coor[0]);
+            let lats = coors.map(coor => coor[1]);
+            bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
         }
     }
         
