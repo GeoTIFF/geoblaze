@@ -9,3 +9,4 @@ require('./packages/gio-median/test');
 require('./packages/gio-min/test');
 require('./packages/gio-max/test');
 require('./packages/gio-mode/test');
+require('./packages/gio-histogram/test');
