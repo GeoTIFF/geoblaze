@@ -2,6 +2,8 @@
 
 let _ = require('underscore');
 
+let combine = require('@turf/combine');
+
 module.exports = {
 
     get_image_info(image) {
@@ -38,10 +40,14 @@ module.exports = {
 
     get_geojson_coors(geojson) {
         if (geojson.features) { // for feature collections
-            let coordinates = geojson.features.map(feature => feature.geometry.coordinates[0]);
-            let geometry = [];
-            coordinates.forEach(part => geometry.push(part));
-            return geometry;
+
+            // make sure that if any polygons are overlapping, we get the union of them
+            geojson = combine(geojson);
+            
+            // turf adds extra arrays when running combine, so we need to remove them
+            // as we return the coordinates
+            return geojson.features[0].geometry.coordinates
+                .map(coors => coors[0]);
         } else if (geojson.geometry) { // for individual feature
             return geojson.geometry.coordinates;
         } else if (geojson.coordinates) { // for just the geometry

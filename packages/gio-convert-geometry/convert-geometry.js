@@ -69,19 +69,6 @@ let convert_polygon = geometry => {
         }
     }
 
-    // make sure that if any polygons are overlapping, we get the union of them
-    // it may seem circuitous to convert back to geojson, get the union, then convert
-    // back to coordinates, but it ensures that multiple geometries in any format
-    // are covered
-    // if (polygon && polygon.length > 1) {
-    //     console.error('polygon check: ', polygon.length, polygon);
-    //     let geojsons = polygon.map(coors => turf.polygon([coors]));
-    //     let union_geometry = turf.union.apply(this, geojsons);
-    //     polygon = utils.get_geojson_coors(union_geometry);
-
-    //     console.error('final: ', polygon);
-    // }
-
     if (!polygon) {
         throw `Invalild polygon object was used.
             Please use either a [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] array or GeoJSON polygon.`
