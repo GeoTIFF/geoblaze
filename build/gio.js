@@ -2662,7 +2662,6 @@ module.exports = function (image, geom, run_on_values) {
             edges.push([start_point, end_point]);
         }
     });
-    console.error('number of edges: ', edges.length);
 
     // iterate through image rows and convert each one to a line
     // running through the middle of the row
