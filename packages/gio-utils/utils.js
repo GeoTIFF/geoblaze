@@ -2,6 +2,8 @@
 
 let _ = require('underscore');
 
+let combine = require('@turf/combine');
+
 module.exports = {
 
     get_image_info(image) {
@@ -38,10 +40,14 @@ module.exports = {
 
     get_geojson_coors(geojson) {
         if (geojson.features) { // for feature collections
-            let coordinates = geojson.features.map(feature => feature.geometry.coordinates[0]);
-            let geometry = [];
-            coordinates.forEach(part => geometry.push(part));
-            return geometry;
+
+            // make sure that if any polygons are overlapping, we get the union of them
+            geojson = combine(geojson);
+            
+            // turf adds extra arrays when running combine, so we need to remove them
+            // as we return the coordinates
+            return geojson.features[0].geometry.coordinates
+                .map(coors => coors[0]);
         } else if (geojson.geometry) { // for individual feature
             return geojson.geometry.coordinates;
         } else if (geojson.coordinates) { // for just the geometry
@@ -61,12 +67,12 @@ module.exports = {
         if (typeof geometry === 'string') { // stringified geojson
             let geojson = JSON.parse(geometry);
             let geojson_coors = this.get_geojson_coors(geojson);
-            if (geojson_coors) coors = geojson_coors[0];
-            // console.error(coors);
+            if (geojson_coors.length === 1 && geojson_coors[0].length === 5) {
+                coors = geojson_coors[0];
+            }
         } else if (typeof geometry === 'object') { // geojson
             let geojson_coors = this.get_geojson_coors(geometry);
             if (geojson_coors) coors = geojson_coors[0];
-            // console.error(coors);
         } else {
             return false;
         }
