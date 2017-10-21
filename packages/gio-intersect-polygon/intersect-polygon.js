@@ -35,6 +35,18 @@ module.exports = (image, geom, run_on_values) => {
 
     let row_length = x_max - x_min;
 
+    // collapse geometry down to a list of edges
+    // necessary for multi-part geometries
+    let edges = [];
+    geom.forEach(part => {
+        for (let i = 1; i < part.length; i++) {
+            let start_point = part[i - 1];
+            let end_point = part[i];
+            edges.push([start_point, end_point]);
+        }
+    });
+    console.error('number of edges: ', edges.length);
+
     // iterate through image rows and convert each one to a line
     // running through the middle of the row
     let image_lines = [];
@@ -56,55 +68,54 @@ module.exports = (image, geom, run_on_values) => {
     // lines, and compute the intersections with each image row
     let num_rows = Math.floor(image_size / row_length);
     let intersections_by_row = _.range(num_rows).map(row => []);
-    geom.forEach(part => {
-        for (let i = 1; i < part.length; i++) {
-            
-            // get vertices that make up an edge and convert that to a line
-            let start_point = part[i - 1];
-            let end_point = part[i];
-            let edge_line = get_line_from_points(start_point, end_point);
+    for (let i = 0; i < edges.length; i++) {
+        
+        // get vertices that make up an edge and convert that to a line
+        let edge = edges[i];
+        let start_point = edge[0];
+        let end_point = edge[1];
+        let edge_line = get_line_from_points(start_point, end_point);
 
-            let start_lng, end_lng;
-            if (start_point[0] < end_point[0]) {
-                start_lng = start_point[0];
-                end_lng = end_point[0];
-            } else {
-                start_lng = end_point[0];
-                end_lng = start_point[0];
-            }
+        let start_lng, end_lng;
+        if (start_point[0] < end_point[0]) {
+            start_lng = start_point[0];
+            end_lng = end_point[0];
+        } else {
+            start_lng = end_point[0];
+            end_lng = start_point[0];
+        }
 
-            // find the y values in the image coordinate space
-            let y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
-            let y_2 = Math.floor((lat_0 - end_point[1]) / cell_height);
+        // find the y values in the image coordinate space
+        let y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
+        let y_2 = Math.floor((lat_0 - end_point[1]) / cell_height);
 
-            // make sure to set the start and end points so that we are
-            // incrementing upwards through rows
-            let row_start, row_end;
-            if (y_1 < y_2) {
-                row_start = y_1;
-                row_end = y_2;
-            } else {
-                row_start = y_2;
-                row_end = y_1;
-            }
+        // make sure to set the start and end points so that we are
+        // incrementing upwards through rows
+        let row_start, row_end;
+        if (y_1 < y_2) {
+            row_start = y_1;
+            row_end = y_2;
+        } else {
+            row_start = y_2;
+            row_end = y_1;
+        }
 
-            // iterate through image lines within the change in y of
-            // the edge line and find all intersections
-            for (let j = row_start; j < row_end + 1; j++) {
-                let image_line = image_lines[j];
-                let intersection = get_intersection_of_two_lines(edge_line, image_line);
+        // iterate through image lines within the change in y of
+        // the edge line and find all intersections
+        for (let j = row_start; j < row_end + 1; j++) {
+            let image_line = image_lines[j];
+            let intersection = get_intersection_of_two_lines(edge_line, image_line);
 
-                // check to see if the intersection point is within the range of 
-                // the edge line segment. If it is, add the intersection to the 
-                // list of intersections at the corresponding index for that row 
-                // in intersections_by_row
-                if (intersection && intersection.x >= start_lng && intersection.x <= end_lng) {
-                    let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
-                    intersections_by_row[j].push(image_pixel_index);
-                }
+            // check to see if the intersection point is within the range of 
+            // the edge line segment. If it is, add the intersection to the 
+            // list of intersections at the corresponding index for that row 
+            // in intersections_by_row
+            if (intersection && intersection.x >= start_lng && intersection.x <= end_lng) {
+                let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
+                intersections_by_row[j].push(image_pixel_index);
             }
         }
-    });
+    }
 
     // iterate through the list of computed intersections for each row.
     // use these intersections to split up each row into pixels that fall

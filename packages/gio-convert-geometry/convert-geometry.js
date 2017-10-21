@@ -4,6 +4,8 @@ let _ = require('underscore');
 
 let utils = require('../gio-utils/utils');
 
+// let turf = require('@turf/turf');
+
 let convert_point = geometry => {
     let point;
     if (Array.isArray(geometry) && geometry.length === 2) { // array
@@ -66,6 +68,19 @@ let convert_polygon = geometry => {
             polygon = utils.get_geojson_coors(geometry);
         }
     }
+
+    // make sure that if any polygons are overlapping, we get the union of them
+    // it may seem circuitous to convert back to geojson, get the union, then convert
+    // back to coordinates, but it ensures that multiple geometries in any format
+    // are covered
+    // if (polygon && polygon.length > 1) {
+    //     console.error('polygon check: ', polygon.length, polygon);
+    //     let geojsons = polygon.map(coors => turf.polygon([coors]));
+    //     let union_geometry = turf.union.apply(this, geojsons);
+    //     polygon = utils.get_geojson_coors(union_geometry);
+
+    //     console.error('final: ', polygon);
+    // }
 
     if (!polygon) {
         throw `Invalild polygon object was used.
