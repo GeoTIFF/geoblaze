@@ -13,25 +13,73 @@ let get_equal_interval_bins = (values, num_classes) => {
     let min_value = _.min(values);
     let max_value = _.max(values);
 
-    // divide up based on number of classes
+    // specify bins, bins represented as a list of [min, max] values
+    // and are divided up based on number of classes
     let interval = (max_value - min_value) / num_classes;
-    return _.range(num_classes)
+    let bins = _.range(num_classes)
         .map((num, index) => [num * interval, (num + 1) * interval]);
+
+    let results = {};
+
+    // set first bin in results to eliminate the need to check
+    // for the existence of the key in every iteration
+    let bin_index = 0;
+    let bin = bins[bin_index];
+    let bin_key = `${bin[0]} - ${bin[1]}`;
+    let first_value = values[0];
+
+    while (first_value > bin[1]) { // this is in case the first value isn't in the first bin
+        bin_index += 1;
+        bin = bins[bin_key];
+        bin_key = `>${bin[0]} - ${bin[1]}`;
+    }
+    results[bin_key] = 1;
+
+    // add to results based on bins
+    for (var i = 1; i < values.length; i++) {
+        let value = values[i];
+        if (value <= bin[1]) { // add to existing bin if its in the correct range
+            results[bin_key] += 1;
+        } else { // otherwise keep searching for an appropriate bin until one is found
+            while (value > bin[1]) {
+                bin_index += 1;
+                bin = bins[bin_index];
+                bin_key = `>${bin[0]} - ${bin[1]}`;
+            }
+            results[bin_key] = 1; // initialize that bin with the first occupant
+        }
+    }
+
+    return results;
 }
 
 let get_quantile_bins = (values, num_classes) => {
 
-    // get the interval to divide values by
-    let interval = values.length / num_classes;
-    let result = _.range(num_classes)
-        .map((num, index) => {
-            if (index === 0) {
-                return [num * interval, (num + 1) * interval + 1];
-            } else {
-                return [num * interval + 1, (num + 1) * interval + 1];
-            }
-        });
-        return result;
+    // get the number of values in each bin
+    let values_per_bin = values.length / num_classes;
+
+    // iterate through values and use a counter to
+    // decide when to set up the next bin. Bins are
+    // represented as a list of [min, max] values
+    let results = {}
+    let bin_index = 0;
+    let bin_min = values[0];
+    let num_values_in_current_bin = 1;
+    for (var i = 1; i < values.length; i++) {
+        let value = values[i];
+        if (num_values_in_current_bin < values_per_bin) {
+            num_values_in_current_bin += 1;
+        } else { // if it is the last value, add it to the bin and start setting up for the next one
+            let bin_max = value;
+            num_values_in_current_bin += 1;
+            if (_.keys(results).length > 0) bin_min = `>${bin_min}`;
+            results[`${bin_min} - ${bin_max}`] = num_values_in_current_bin;
+            num_values_in_current_bin = 0;
+            bin_min = value;
+        }
+    }
+
+    return results;
 }
 
 let get_histogram = (values, options) => {
@@ -71,53 +119,17 @@ let get_histogram = (values, options) => {
             throw 'Insufficient options were provided, need a value for "class_type". Possible values include "equal-interval" and "quantile"';
         }
 
-        // specify bins, bins represented as a list of [min, max] values
-        let bins;
-        if (class_type === 'equal-interval') {
-            bins = get_equal_interval_bins(values, num_classes);
-        } else if (class_type === 'quantile') {
-            bins = get_quantile_bins(values, num_classes);
-        } else {
-            throw 'The class_type provided is either not supported or incorrectly specified.';
-        }
-
-        console.error('bins: ', bins)
-
         // sort values to make binning more efficient
         values = values.sort((a, b) => a - b);
 
-        let bin_index = 0;
-        let bin = bins[bin_index];
-        let bin_key = `${bin[0]} - ${bin[1]}`;
-
-        // set first bin in results to eliminate the need to check
-        // for the existence of the key in every iteration
-        let first_value = values[0];
-        while (first_value > bin[1]) { // this is in case the first value isn't in the first bin
-            bin_index += 1;
-            bin = bins[bin_key];
-            bin_key = `>${bin[0]} - ${bin[1]}`;
-        }
-        results[bin_key] = 1;
-
-        // add to results based on bins
-        for (var i = 1; i < values.length; i++) {
-            let value = values[i];
-            if (value <= bin[1]) { // add to existing bin if its in the correct range
-                results[bin_key] += 1;
-            } else { // otherwise keep searching for an appropriate bin until one is found
-                while (value > bin[1]) {
-                    bin_index += 1;
-                    bin = bins[bin_index];
-                    bin_key = `>${bin[0]} - ${bin[1]}`;
-                }
-                // console.error('next bin: ', bin_key)
-                results[bin_key] = 1; // initialize that bin with the first occupant
-            }
+        if (class_type === 'equal-interval') {
+            results = get_equal_interval_bins(values, num_classes);
+        } else if (class_type === 'quantile') {
+            results = get_quantile_bins(values, num_classes);
+        } else {
+            throw 'The class_type provided is either not supported or incorrectly specified.';
         }
     }
-
-    console.error('got results! ', results);
 
     if (results) return results;
     else throw 'An unexpected error occurred while running the get_histogram function.';
@@ -129,13 +141,15 @@ module.exports = (image, geom, options) => {
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
-            let no_data_value = utils.get_no_data_value(image);
+            var no_data_value = utils.get_no_data_value(image);
 
             // grab array of values by band
             let values = get(image, geom);
 
             // run through histogram function
-            return values.map(band => get_histogram(band, options));
+            return values
+                .map(band => band.filter(value => value !== no_data_value))
+                .map(band => get_histogram(band, options));
 
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
@@ -150,6 +164,8 @@ module.exports = (image, geom, options) => {
                     values[band_index] = [value];
                 }
             });
+
+            values = values.map(band => band.filter(value => value !== no_data_value));
 
             // run through histogram function
             return values.map(band => get_histogram(band, options));
