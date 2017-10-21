@@ -237,7 +237,7 @@ let test = () => {
                 });
             });
         });
-        describe('Get Sum from Polygon (Multi-Polygon GeoJSON)', function() {
+        describe('Get Sum from Polygon (Multi-Polygon GeoJSON, 1 + 2)', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
                 return load(url).then(tiff => {
