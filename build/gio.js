@@ -2096,7 +2096,7 @@ process.umask = function() { return 0; };
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _ = __webpack_require__(12);
+var _ = __webpack_require__(9);
 
 var combine = __webpack_require__(129);
 
@@ -2291,35 +2291,6 @@ module.exports = {
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports) {
-
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
-
-/***/ }),
-/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2329,7 +2300,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var _ = __webpack_require__(12);
+var _ = __webpack_require__(9);
 
 var utils = __webpack_require__(3);
 
@@ -2438,7 +2409,79 @@ module.exports = function (type_of_geometry, geometry) {
 };
 
 /***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
+  }
+}
+
+
+/***/ }),
 /* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var load = __webpack_require__(18);
+var utils = __webpack_require__(3);
+var convert_geometry = __webpack_require__(4);
+
+module.exports = function (image, geom) {
+
+    if (utils.is_bbox(geom)) {
+        // bounding box
+
+        // convert geometry
+        var geometry = convert_geometry('bbox', geom);
+
+        var geoKeys = image.getGeoKeys();
+
+        // TEMPORARY: make sure raster is in wgs 84
+        if (geoKeys.GTModelTypeGeoKey === 2 && geoKeys.GeographicTypeGeoKey === 4326) {
+
+            // use a utility function that converts from the lat/long coordinate
+            // space to the image coordinate space
+            var bbox = utils.convert_latlng_bbox_to_image_bbox(image, geometry);
+
+            try {
+
+                // get values
+                return image.readRasters({ window: bbox });
+            } catch (e) {
+                throw e;
+            }
+        } else {
+            throw 'This feature currently only works with geotiffs in WGS 84. Please reproject the geotiff';
+        }
+    } else {
+        throw 'Geometry is not a bounding box - please make sure to send a bounding box when using gio-get';
+    }
+};
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2487,8 +2530,8 @@ var objectKeys = Object.keys || function (obj) {
 module.exports = Duplex;
 
 /*<replacement>*/
-var util = __webpack_require__(10);
-util.inherits = __webpack_require__(4);
+var util = __webpack_require__(11);
+util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
 var Readable = __webpack_require__(33);
@@ -2568,58 +2611,15 @@ function forEach(xs, f) {
 }
 
 /***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var load = __webpack_require__(18);
-var utils = __webpack_require__(3);
-var convert_geometry = __webpack_require__(5);
-
-module.exports = function (image, geom) {
-
-    if (utils.is_bbox(geom)) {
-        // bounding box
-
-        // convert geometry
-        var geometry = convert_geometry('bbox', geom);
-
-        var geoKeys = image.getGeoKeys();
-
-        // TEMPORARY: make sure raster is in wgs 84
-        if (geoKeys.GTModelTypeGeoKey === 2 && geoKeys.GeographicTypeGeoKey === 4326) {
-
-            // use a utility function that converts from the lat/long coordinate
-            // space to the image coordinate space
-            var bbox = utils.convert_latlng_bbox_to_image_bbox(image, geometry);
-
-            try {
-
-                // get values
-                return image.readRasters({ window: bbox });
-            } catch (e) {
-                throw e;
-            }
-        } else {
-            throw 'This feature currently only works with geotiffs in WGS 84. Please reproject the geotiff';
-        }
-    } else {
-        throw 'Geometry is not a bounding box - please make sure to send a bounding box when using gio-get';
-    }
-};
-
-/***/ }),
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _ = __webpack_require__(12);
+var _ = __webpack_require__(9);
 
-var get = __webpack_require__(7);
+var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
 
 var get_line_from_points = utils.get_line_from_points;
@@ -2792,266 +2792,6 @@ module.exports = function (image, geom, run_on_values) {
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(33);
-exports.Stream = exports;
-exports.Readable = exports;
-exports.Writable = __webpack_require__(22);
-exports.Duplex = __webpack_require__(6);
-exports.Transform = __webpack_require__(36);
-exports.PassThrough = __webpack_require__(84);
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// NOTE: These type checking functions intentionally don't use `instanceof`
-// because it is fragile and can be easily faked with `Object.create()`.
-
-function isArray(arg) {
-  if (Array.isArray) {
-    return Array.isArray(arg);
-  }
-  return objectToString(arg) === '[object Array]';
-}
-exports.isArray = isArray;
-
-function isBoolean(arg) {
-  return typeof arg === 'boolean';
-}
-exports.isBoolean = isBoolean;
-
-function isNull(arg) {
-  return arg === null;
-}
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-exports.isNumber = isNumber;
-
-function isString(arg) {
-  return typeof arg === 'string';
-}
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-exports.isUndefined = isUndefined;
-
-function isRegExp(re) {
-  return objectToString(re) === '[object RegExp]';
-}
-exports.isRegExp = isRegExp;
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-exports.isObject = isObject;
-
-function isDate(d) {
-  return objectToString(d) === '[object Date]';
-}
-exports.isDate = isDate;
-
-function isError(e) {
-  return (objectToString(e) === '[object Error]' || e instanceof Error);
-}
-exports.isError = isError;
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-exports.isBuffer = Buffer.isBuffer;
-
-function objectToString(o) {
-  return Object.prototype.toString.call(o);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).Buffer))
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-module.exports = Stream;
-
-var EE = __webpack_require__(20).EventEmitter;
-var inherits = __webpack_require__(4);
-
-inherits(Stream, EE);
-Stream.Readable = __webpack_require__(9);
-Stream.Writable = __webpack_require__(101);
-Stream.Duplex = __webpack_require__(102);
-Stream.Transform = __webpack_require__(37);
-Stream.PassThrough = __webpack_require__(103);
-
-// Backwards-compat with node 0.4.x
-Stream.Stream = Stream;
-
-
-
-// old-style streams.  Note that the pipe method (the only relevant
-// part of this class) is overridden in the Readable class.
-
-function Stream() {
-  EE.call(this);
-}
-
-Stream.prototype.pipe = function(dest, options) {
-  var source = this;
-
-  function ondata(chunk) {
-    if (dest.writable) {
-      if (false === dest.write(chunk) && source.pause) {
-        source.pause();
-      }
-    }
-  }
-
-  source.on('data', ondata);
-
-  function ondrain() {
-    if (source.readable && source.resume) {
-      source.resume();
-    }
-  }
-
-  dest.on('drain', ondrain);
-
-  // If the 'end' option is not supplied, dest.end() will be called when
-  // source gets the 'end' or 'close' events.  Only dest.end() once.
-  if (!dest._isStdio && (!options || options.end !== false)) {
-    source.on('end', onend);
-    source.on('close', onclose);
-  }
-
-  var didOnEnd = false;
-  function onend() {
-    if (didOnEnd) return;
-    didOnEnd = true;
-
-    dest.end();
-  }
-
-
-  function onclose() {
-    if (didOnEnd) return;
-    didOnEnd = true;
-
-    if (typeof dest.destroy === 'function') dest.destroy();
-  }
-
-  // don't leave dangling pipes when there are errors.
-  function onerror(er) {
-    cleanup();
-    if (EE.listenerCount(this, 'error') === 0) {
-      throw er; // Unhandled stream error in pipe.
-    }
-  }
-
-  source.on('error', onerror);
-  dest.on('error', onerror);
-
-  // remove all the event listeners that were added.
-  function cleanup() {
-    source.removeListener('data', ondata);
-    dest.removeListener('drain', ondrain);
-
-    source.removeListener('end', onend);
-    source.removeListener('close', onclose);
-
-    source.removeListener('error', onerror);
-    dest.removeListener('error', onerror);
-
-    source.removeListener('end', cleanup);
-    source.removeListener('close', cleanup);
-
-    dest.removeListener('close', cleanup);
-  }
-
-  source.on('end', cleanup);
-  source.on('close', cleanup);
-
-  dest.on('close', cleanup);
-
-  dest.emit('pipe', source);
-
-  // Allow for unix-like usage: A.pipe(B).pipe(C)
-  return dest;
-};
-
-
-/***/ }),
-/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -4603,6 +4343,266 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscor
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
   }
 }.call(this));
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(33);
+exports.Stream = exports;
+exports.Readable = exports;
+exports.Writable = __webpack_require__(22);
+exports.Duplex = __webpack_require__(7);
+exports.Transform = __webpack_require__(36);
+exports.PassThrough = __webpack_require__(84);
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+
+function isArray(arg) {
+  if (Array.isArray) {
+    return Array.isArray(arg);
+  }
+  return objectToString(arg) === '[object Array]';
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = Buffer.isBuffer;
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).Buffer))
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+module.exports = Stream;
+
+var EE = __webpack_require__(20).EventEmitter;
+var inherits = __webpack_require__(5);
+
+inherits(Stream, EE);
+Stream.Readable = __webpack_require__(10);
+Stream.Writable = __webpack_require__(101);
+Stream.Duplex = __webpack_require__(102);
+Stream.Transform = __webpack_require__(37);
+Stream.PassThrough = __webpack_require__(103);
+
+// Backwards-compat with node 0.4.x
+Stream.Stream = Stream;
+
+
+
+// old-style streams.  Note that the pipe method (the only relevant
+// part of this class) is overridden in the Readable class.
+
+function Stream() {
+  EE.call(this);
+}
+
+Stream.prototype.pipe = function(dest, options) {
+  var source = this;
+
+  function ondata(chunk) {
+    if (dest.writable) {
+      if (false === dest.write(chunk) && source.pause) {
+        source.pause();
+      }
+    }
+  }
+
+  source.on('data', ondata);
+
+  function ondrain() {
+    if (source.readable && source.resume) {
+      source.resume();
+    }
+  }
+
+  dest.on('drain', ondrain);
+
+  // If the 'end' option is not supplied, dest.end() will be called when
+  // source gets the 'end' or 'close' events.  Only dest.end() once.
+  if (!dest._isStdio && (!options || options.end !== false)) {
+    source.on('end', onend);
+    source.on('close', onclose);
+  }
+
+  var didOnEnd = false;
+  function onend() {
+    if (didOnEnd) return;
+    didOnEnd = true;
+
+    dest.end();
+  }
+
+
+  function onclose() {
+    if (didOnEnd) return;
+    didOnEnd = true;
+
+    if (typeof dest.destroy === 'function') dest.destroy();
+  }
+
+  // don't leave dangling pipes when there are errors.
+  function onerror(er) {
+    cleanup();
+    if (EE.listenerCount(this, 'error') === 0) {
+      throw er; // Unhandled stream error in pipe.
+    }
+  }
+
+  source.on('error', onerror);
+  dest.on('error', onerror);
+
+  // remove all the event listeners that were added.
+  function cleanup() {
+    source.removeListener('data', ondata);
+    dest.removeListener('drain', ondrain);
+
+    source.removeListener('end', onend);
+    source.removeListener('close', onclose);
+
+    source.removeListener('error', onerror);
+    dest.removeListener('error', onerror);
+
+    source.removeListener('end', cleanup);
+    source.removeListener('close', cleanup);
+
+    dest.removeListener('close', cleanup);
+  }
+
+  source.on('end', cleanup);
+  source.on('close', cleanup);
+
+  dest.on('close', cleanup);
+
+  dest.emit('pipe', source);
+
+  // Allow for unix-like usage: A.pipe(B).pipe(C)
+  return dest;
+};
 
 
 /***/ }),
@@ -6212,8 +6212,8 @@ var Duplex;
 Writable.WritableState = WritableState;
 
 /*<replacement>*/
-var util = __webpack_require__(10);
-util.inherits = __webpack_require__(4);
+var util = __webpack_require__(11);
+util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
 /*<replacement>*/
@@ -6244,7 +6244,7 @@ util.inherits(Writable, Stream);
 function nop() {}
 
 function WritableState(options, stream) {
-  Duplex = Duplex || __webpack_require__(6);
+  Duplex = Duplex || __webpack_require__(7);
 
   options = options || {};
 
@@ -6384,7 +6384,7 @@ if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.protot
 }
 
 function Writable(options) {
-  Duplex = Duplex || __webpack_require__(6);
+  Duplex = Duplex || __webpack_require__(7);
 
   // Writable ctor is applied to Duplexes, too.
   // `realHasInstance` is necessary because using plain `instanceof`
@@ -7645,7 +7645,7 @@ function hasOwnProperty(obj, prop) {
 
 var convert = __webpack_require__(104).convert;
 var bodyStream = __webpack_require__(125);
-var PassThrough = __webpack_require__(11).PassThrough;
+var PassThrough = __webpack_require__(12).PassThrough;
 var FetchError = __webpack_require__(43);
 
 module.exports = Body;
@@ -9730,8 +9730,8 @@ function _isUint8Array(obj) {
 /*</replacement>*/
 
 /*<replacement>*/
-var util = __webpack_require__(10);
-util.inherits = __webpack_require__(4);
+var util = __webpack_require__(11);
+util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
 /*<replacement>*/
@@ -9767,7 +9767,7 @@ function prependListener(emitter, event, fn) {
 }
 
 function ReadableState(options, stream) {
-  Duplex = Duplex || __webpack_require__(6);
+  Duplex = Duplex || __webpack_require__(7);
 
   options = options || {};
 
@@ -9835,7 +9835,7 @@ function ReadableState(options, stream) {
 }
 
 function Readable(options) {
-  Duplex = Duplex || __webpack_require__(6);
+  Duplex = Duplex || __webpack_require__(7);
 
   if (!(this instanceof Readable)) return new Readable(options);
 
@@ -10830,11 +10830,11 @@ module.exports = {
 
 module.exports = Transform;
 
-var Duplex = __webpack_require__(6);
+var Duplex = __webpack_require__(7);
 
 /*<replacement>*/
-var util = __webpack_require__(10);
-util.inherits = __webpack_require__(4);
+var util = __webpack_require__(11);
+util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
 util.inherits(Transform, Duplex);
@@ -10982,7 +10982,7 @@ function done(stream, er, data) {
 /* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(9).Transform
+module.exports = __webpack_require__(10).Transform
 
 
 /***/ }),
@@ -11160,7 +11160,8 @@ module.exports = {
 	median: __webpack_require__(133),
 	min: __webpack_require__(134),
 	max: __webpack_require__(135),
-	mode: __webpack_require__(136)
+	mode: __webpack_require__(136),
+	histogram: __webpack_require__(137)
 };
 
 /***/ }),
@@ -16977,7 +16978,7 @@ var resolve_url = __webpack_require__(15).resolve;
 var http = __webpack_require__(19);
 var https = __webpack_require__(88);
 var zlib = __webpack_require__(89);
-var stream = __webpack_require__(11);
+var stream = __webpack_require__(12);
 
 var Body = __webpack_require__(25);
 var Response = __webpack_require__(126);
@@ -18239,9 +18240,9 @@ var objectKeys = Object.keys || function (obj) {
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer, global, process) {var capability = __webpack_require__(32)
-var inherits = __webpack_require__(4)
+var inherits = __webpack_require__(5)
 var response = __webpack_require__(77)
-var stream = __webpack_require__(9)
+var stream = __webpack_require__(10)
 var toArrayBuffer = __webpack_require__(85)
 
 var IncomingMessage = response.IncomingMessage
@@ -18552,8 +18553,8 @@ var unsafeHeaders = [
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process, Buffer, global) {var capability = __webpack_require__(32)
-var inherits = __webpack_require__(4)
-var stream = __webpack_require__(9)
+var inherits = __webpack_require__(5)
+var stream = __webpack_require__(10)
 
 var rStates = exports.readyStates = {
 	UNSENT: 0,
@@ -19206,8 +19207,8 @@ module.exports = PassThrough;
 var Transform = __webpack_require__(36);
 
 /*<replacement>*/
-var util = __webpack_require__(10);
-util.inherits = __webpack_require__(4);
+var util = __webpack_require__(11);
+util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
 util.inherits(PassThrough, Transform);
@@ -26155,14 +26156,14 @@ module.exports = __webpack_require__(22);
 /* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(6);
+module.exports = __webpack_require__(7);
 
 
 /***/ }),
 /* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(9).PassThrough
+module.exports = __webpack_require__(10).PassThrough
 
 
 /***/ }),
@@ -28700,7 +28701,7 @@ module.exports = [["8740","䏰䰲䘃䖦䕸𧉧䵷䖳𧲱䳢𧳅㮕䜶䝄䱇䱀�
 
 
 var Buffer = __webpack_require__(0).Buffer,
-    Transform = __webpack_require__(11).Transform;
+    Transform = __webpack_require__(12).Transform;
 
 
 // == Exports ==================================================================
@@ -28997,7 +28998,7 @@ module.exports = function (iconv) {
 
         // -- Readable -------------------------------------------------------------
         if (iconv.supportsStreams) {
-            var Readable = __webpack_require__(11).Readable;
+            var Readable = __webpack_require__(12).Readable;
 
             original.ReadableSetEncoding = Readable.prototype.setEncoding;
             Readable.prototype.setEncoding = function setEncoding(enc, options) {
@@ -29031,7 +29032,7 @@ module.exports = function (iconv) {
         Buffer.prototype.write = original.BufferWrite;
 
         if (iconv.supportsStreams) {
-            var Readable = __webpack_require__(11).Readable;
+            var Readable = __webpack_require__(12).Readable;
 
             Readable.prototype.setEncoding = original.ReadableSetEncoding;
             delete Readable.prototype.collect;
@@ -29248,7 +29249,7 @@ Request.prototype.clone = function() {
 
 
 var load = __webpack_require__(18);
-var convert_geometry = __webpack_require__(5);
+var convert_geometry = __webpack_require__(4);
 
 /**
     Given an image and a point geometry,
@@ -30413,9 +30414,9 @@ function lineReduce(geojson, callback, initialValue) {
 "use strict";
 
 
-var get = __webpack_require__(7);
+var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
-var convert_geometry = __webpack_require__(5);
+var convert_geometry = __webpack_require__(4);
 var intersect_polygon = __webpack_require__(8);
 
 module.exports = function (image, geom) {
@@ -30469,11 +30470,11 @@ module.exports = function (image, geom) {
 "use strict";
 
 
-var _ = __webpack_require__(12);
+var _ = __webpack_require__(9);
 
-var get = __webpack_require__(7);
+var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
-var convert_geometry = __webpack_require__(5);
+var convert_geometry = __webpack_require__(4);
 var intersect_polygon = __webpack_require__(8);
 
 module.exports = function (image, geom) {
@@ -30540,9 +30541,9 @@ module.exports = function (image, geom) {
 "use strict";
 
 
-var get = __webpack_require__(7);
+var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
-var convert_geometry = __webpack_require__(5);
+var convert_geometry = __webpack_require__(4);
 var intersect_polygon = __webpack_require__(8);
 
 var get_median = function get_median(values) {
@@ -30610,9 +30611,9 @@ module.exports = function (image, geom) {
 "use strict";
 
 
-var get = __webpack_require__(7);
+var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
-var convert_geometry = __webpack_require__(5);
+var convert_geometry = __webpack_require__(4);
 var intersect_polygon = __webpack_require__(8);
 
 var get_min = function get_min(values, no_data_value) {
@@ -30684,9 +30685,9 @@ module.exports = function (image, geom) {
 "use strict";
 
 
-var get = __webpack_require__(7);
+var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
-var convert_geometry = __webpack_require__(5);
+var convert_geometry = __webpack_require__(4);
 var intersect_polygon = __webpack_require__(8);
 
 var get_max = function get_max(values, no_data_value) {
@@ -30758,11 +30759,11 @@ module.exports = function (image, geom) {
 "use strict";
 
 
-var _ = __webpack_require__(12);
+var _ = __webpack_require__(9);
 
-var get = __webpack_require__(7);
+var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
-var convert_geometry = __webpack_require__(5);
+var convert_geometry = __webpack_require__(4);
 var intersect_polygon = __webpack_require__(8);
 
 var get_mode = function get_mode(values) {
@@ -30828,6 +30829,205 @@ module.exports = function (image, geom) {
             if (_values.length > 0) return _values.map(get_mode);else throw 'No Values were found in the given geometry';
         } else {
             throw 'Non-Bounding Box geometries are currently not supported.';
+        }
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+/***/ }),
+/* 137 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _ = __webpack_require__(9);
+
+var get = __webpack_require__(6);
+var utils = __webpack_require__(3);
+var convert_geometry = __webpack_require__(4);
+var intersect_polygon = __webpack_require__(8);
+
+var get_equal_interval_bins = function get_equal_interval_bins(values, num_classes) {
+
+    // get min and max values
+    var min_value = _.min(values);
+    var max_value = _.max(values);
+
+    // specify bins, bins represented as a list of [min, max] values
+    // and are divided up based on number of classes
+    var interval = (max_value - min_value) / num_classes;
+    var bins = _.range(num_classes).map(function (num, index) {
+        return [num * interval, (num + 1) * interval];
+    });
+
+    var results = {};
+
+    // set first bin in results to eliminate the need to check
+    // for the existence of the key in every iteration
+    var bin_index = 0;
+    var bin = bins[bin_index];
+    var bin_key = bin[0] + ' - ' + bin[1];
+    var first_value = values[0];
+
+    while (first_value > bin[1]) {
+        // this is in case the first value isn't in the first bin
+        bin_index += 1;
+        bin = bins[bin_key];
+        bin_key = '>' + bin[0] + ' - ' + bin[1];
+    }
+    results[bin_key] = 1;
+
+    // add to results based on bins
+    for (var i = 1; i < values.length; i++) {
+        var value = values[i];
+        if (value <= bin[1]) {
+            // add to existing bin if its in the correct range
+            results[bin_key] += 1;
+        } else {
+            // otherwise keep searching for an appropriate bin until one is found
+            while (value > bin[1]) {
+                bin_index += 1;
+                bin = bins[bin_index];
+                bin_key = '>' + bin[0] + ' - ' + bin[1];
+            }
+            results[bin_key] = 1; // initialize that bin with the first occupant
+        }
+    }
+
+    return results;
+};
+
+var get_quantile_bins = function get_quantile_bins(values, num_classes) {
+
+    // get the number of values in each bin
+    var values_per_bin = values.length / num_classes;
+
+    // iterate through values and use a counter to
+    // decide when to set up the next bin. Bins are
+    // represented as a list of [min, max] values
+    var results = {};
+    var bin_index = 0;
+    var bin_min = values[0];
+    var num_values_in_current_bin = 1;
+    for (var i = 1; i < values.length; i++) {
+        var value = values[i];
+        if (num_values_in_current_bin < values_per_bin) {
+            num_values_in_current_bin += 1;
+        } else {
+            // if it is the last value, add it to the bin and start setting up for the next one
+            var bin_max = value;
+            num_values_in_current_bin += 1;
+            if (_.keys(results).length > 0) bin_min = '>' + bin_min;
+            results[bin_min + ' - ' + bin_max] = num_values_in_current_bin;
+            num_values_in_current_bin = 0;
+            bin_min = value;
+        }
+    }
+
+    return results;
+};
+
+var get_histogram = function get_histogram(values, options) {
+
+    // pull out options, possible options are:
+    // scale_type: measurement scale, options are: nominal, ratio
+    // num_classes: number of classes/bins, only available for ratio data
+    // class_type: method of breaking data into classes, only available
+    //             for ratio data, options are: equal-interval, quantile
+    //             
+    var options = options || {};
+    var scale_type = options.scale_type;
+    var num_classes = options.num_classes;
+    var class_type = options.class_type;
+
+    if (!scale_type) {
+        throw 'Insufficient options were provided, need a value for "scale_type." Possible values include "nominal" and "ratio".';
+    }
+
+    var results = void 0;
+
+    // when working with nominal data, we simply create a new object attribute
+    // for every new value, and increment for each additional value.
+    if (scale_type === 'nominal') {
+        results = {};
+        for (var i = 0; i < values.length; i++) {
+            var value = values[i];
+            if (results[value]) results[value] += 1;else results[value] = 1;
+        }
+    } else if (scale_type === 'ratio') {
+        results = {};
+
+        if (!num_classes) {
+            throw 'Insufficient options were provided, need a value for "num_classes".';
+        } else if (!class_type) {
+            throw 'Insufficient options were provided, need a value for "class_type". Possible values include "equal-interval" and "quantile"';
+        }
+
+        // sort values to make binning more efficient
+        values = values.sort(function (a, b) {
+            return a - b;
+        });
+
+        if (class_type === 'equal-interval') {
+            results = get_equal_interval_bins(values, num_classes);
+        } else if (class_type === 'quantile') {
+            results = get_quantile_bins(values, num_classes);
+        } else {
+            throw 'The class_type provided is either not supported or incorrectly specified.';
+        }
+    }
+
+    if (results) return results;else throw 'An unexpected error occurred while running the get_histogram function.';
+};
+
+module.exports = function (image, geom, options) {
+
+    try {
+
+        if (utils.is_bbox(geom)) {
+            geom = convert_geometry('bbox', geom);
+            var no_data_value = utils.get_no_data_value(image);
+
+            // grab array of values by band
+            var values = get(image, geom);
+
+            // run through histogram function
+            return values.map(function (band) {
+                return band.filter(function (value) {
+                    return value !== no_data_value;
+                });
+            }).map(function (band) {
+                return get_histogram(band, options);
+            });
+        } else if (utils.is_polygon(geom)) {
+            geom = convert_geometry('polygon', geom);
+            var _no_data_value = utils.get_no_data_value(image);
+
+            // grab array of values by band
+            var _values = [];
+            intersect_polygon(image, geom, function (value, band_index) {
+                if (_values[band_index]) {
+                    _values[band_index].push(value);
+                } else {
+                    _values[band_index] = [value];
+                }
+            });
+
+            _values = _values.map(function (band) {
+                return band.filter(function (value) {
+                    return value !== _no_data_value;
+                });
+            });
+
+            // run through histogram function
+            return _values.map(function (band) {
+                return get_histogram(band, options);
+            });
+        } else {
+            throw 'Only Bounding Box and Polygon geometries are currently supported.';
         }
     } catch (e) {
         console.error(e);
