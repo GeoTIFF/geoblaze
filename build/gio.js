@@ -30843,7 +30843,9 @@ var get_equal_interval_bins = function get_equal_interval_bins(values, num_class
     // and are divided up based on number of classes
     var interval = (max_value - min_value) / num_classes;
     var bins = _.range(num_classes).map(function (num, index) {
-        return [min_value + num * interval, min_value + (num + 1) * interval];
+        var start = Number((min_value + num * interval).toFixed(2));
+        var end = Number((min_value + (num + 1) * interval).toFixed(2));
+        return [start, end];
     });
 
     var results = {};
@@ -30896,19 +30898,25 @@ var get_quantile_bins = function get_quantile_bins(values, num_classes) {
     var bin_min = values[0];
     var num_values_in_current_bin = 1;
     for (var i = 1; i < values.length; i++) {
-        var value = values[i];
-        if (num_values_in_current_bin < values_per_bin) {
+        if (num_values_in_current_bin + 1 < values_per_bin) {
             num_values_in_current_bin += 1;
         } else {
             // if it is the last value, add it to the bin and start setting up for the next one
-            var bin_max = value;
+            var value = values[i];
+            var _bin_max = value;
             num_values_in_current_bin += 1;
             if (_.keys(results).length > 0) bin_min = '>' + bin_min;
-            results[bin_min + ' - ' + bin_max] = num_values_in_current_bin;
+            results[bin_min + ' - ' + _bin_max] = num_values_in_current_bin;
             num_values_in_current_bin = 0;
             bin_min = value;
         }
     }
+
+    // add the last bin
+    var bin_max = values[values.length - 1];
+    num_values_in_current_bin += 1;
+    bin_min = '>' + bin_min;
+    results[bin_min + ' - ' + bin_max] = num_values_in_current_bin;
 
     return results;
 };
