@@ -14,7 +14,7 @@ let polygon = [[
     [85.078125, 21.166483858206583], [86.044921875, 20.838277806058933], [86.98974609375, 22.49225722008518],
     [85.58349609375, 24.54712317973075], [84.6826171875, 23.36242859340884], [83.12255859375, 22.49225722008518]
 ]];
-let expected_polygon_value = 2959534.3;
+let expected_polygon_value = 3165731.9;
 
 
 let polygon_geojson_1 = `{
@@ -61,7 +61,7 @@ let polygon_geojson_1 = `{
     }]
 }`;
 
-let expected_polygon_geojson_value_1 = 259802.5;
+let expected_polygon_geojson_value_1 = 320113.1;
 
 let polygon_geojson_2 = `{
   "type": "FeatureCollection",
@@ -107,7 +107,7 @@ let polygon_geojson_2 = `{
     }]
 }`;
 
-let expected_polygon_geojson_value_2 = 122663.3;
+let expected_polygon_geojson_value_2 = 141335.5;
 
 let polygon_geojson_collection = `{
   "type": "FeatureCollection",
