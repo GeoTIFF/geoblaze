@@ -2781,7 +2781,7 @@ module.exports = function (image, geom, run_on_values) {
                         });
                     };
 
-                    for (var r = start_index; r < end_index; r++) {
+                    for (var r = start_index; r <= end_index; r++) {
                         _loop(r);
                     }
                 }
