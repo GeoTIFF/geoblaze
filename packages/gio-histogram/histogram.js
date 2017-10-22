@@ -17,7 +17,7 @@ let get_equal_interval_bins = (values, num_classes) => {
     // and are divided up based on number of classes
     let interval = (max_value - min_value) / num_classes;
     let bins = _.range(num_classes)
-        .map((num, index) => [num * interval, (num + 1) * interval]);
+        .map((num, index) => [min_value + num * interval, min_value + (num + 1) * interval]);
 
     let results = {};
 
