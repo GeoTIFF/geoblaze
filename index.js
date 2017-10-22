@@ -9,5 +9,6 @@ module.exports = {
 	median: require('./packages/gio-median/median'),
 	min: require('./packages/gio-min/min'),
 	max: require('./packages/gio-max/max'),
-	mode: require('./packages/gio-mode/mode')
+	mode: require('./packages/gio-mode/mode'),
+    histogram: require('./packages/gio-histogram/histogram')
 };
