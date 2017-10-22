@@ -145,7 +145,7 @@ module.exports = (image, geom, run_on_values) => {
 
                     // use the start and end indexes to pull pixels out of
                     // the corresponding image row
-                    for (let r = start_index; r < end_index; r++) {
+                    for (let r = start_index; r <= end_index; r++) {
                         image_bands.forEach((band, band_index) => {
                             let value = band[r];
                             if (value !== no_data_value) {
