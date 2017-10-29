@@ -16,7 +16,7 @@ let test = () => (
             it('Identified Point Correctly', () => {
                 return load(url).then(tiff => {
                     let image = tiff.getImage();
-                    let value = identify(image, point);
+                    let value = identify(image, point)[0];
                     expect(value).to.equal(expected_value);
                 });
             });

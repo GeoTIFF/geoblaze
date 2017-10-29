@@ -1,6 +1,6 @@
 {
   "name": "@geotiff/gio",
-  "version": "0.0.25",
+  "version": "0.0.39",
   "description": "process geotiffs",
   "main": "build/gio.js",
   "scripts": {
@@ -33,6 +33,8 @@
   },
   "homepage": "https://github.com/GeoTIFF/geotiff-io#readme",
   "dependencies": {
+    "@turf/turf": "^4.7.3",
+    "@turf/union": "^4.7.3",
     "babel-loader": "^7.1.1",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.6.0",

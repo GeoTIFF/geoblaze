@@ -1,6 +1,10 @@
 'use strict';
 
+let _ = require('underscore');
+
 let utils = require('../gio-utils/utils');
+
+// let turf = require('@turf/turf');
 
 let convert_point = geometry => {
     let point;
@@ -32,19 +36,15 @@ let convert_bbox = geometry => {
             bbox = geometry;
         } else if (typeof geometry === 'string') { // stringified geojson
             let geojson = JSON.parse(geometry);
-            let coors = geojson.coordinates[0];
-            if (geojson.type === 'Polygon') {
-                let lngs = coors.map(coor => coor[0]);
-                let lats = coors.map(coor => coor[1]);
-                bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
-            }
+            let coors = utils.get_geojson_coors(geojson)[0];
+            let lngs = coors.map(coor => coor[0]);
+            let lats = coors.map(coor => coor[1]);
+            bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
         } else if (typeof geometry === 'object') { // geojson
-            let coors = geometry.coordinates[0];
-            if (geometry.type === 'Polygon') {
-                let lngs = coors.map(coor => coor[0]);
-                let lats = coors.map(coor => coor[1]);
-                bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
-            }
+            let coors = utils.get_geojson_coors(geometry)[0];
+            let lngs = coors.map(coor => coor[0]);
+            let lats = coors.map(coor => coor[1]);
+            bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
         }
     }
         
@@ -56,26 +56,26 @@ let convert_bbox = geometry => {
     return bbox;
 }
 
-// let convert_polygon = geometry => {
-//     let polygon;
-//     if (utils.is_polygon(geometry)) {
-//         if (Array.isArray(geometry)) { // array
-//             polygon = geometry;
-//         } else if (typeof geometry === 'string') { // stringified geojson
-//             let geojson = JSON.parse(geometry);
-//             polygon = geojson.coordinates;
-//         } else if (typeof geometry === 'object') { // geojson
-//             polygon = geometry.coordinates;
-//         }
-//     }
+let convert_polygon = geometry => {
+    let polygon;
+    if (utils.is_polygon(geometry)) {
+        if (Array.isArray(geometry)) { // array
+            polygon = geometry;
+        } else if (typeof geometry === 'string') { // stringified geojson
+            let geojson = JSON.parse(geometry);
+            polygon = utils.get_geojson_coors(geojson);
+        } else if (typeof geometry === 'object') { // geojson
+            polygon = utils.get_geojson_coors(geometry);
+        }
+    }
 
-//     if (!polygon) {
-//         throw `Invalild polygon object was used.
-//             Please use either a [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] array or GeoJSON polygon.`
-//     }
+    if (!polygon) {
+        throw `Invalild polygon object was used.
+            Please use either a [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] array or GeoJSON polygon.`
+    }
 
-//     return polygon;
-// }
+    return polygon;
+}
 
 module.exports = (type_of_geometry, geometry) => {
     try {
@@ -83,9 +83,9 @@ module.exports = (type_of_geometry, geometry) => {
             return convert_point(geometry);
         } else if (type_of_geometry === 'bbox') {
             return convert_bbox(geometry);
-        } /*else if (type_of_geometry === 'polygon') {
+        } else if (type_of_geometry === 'polygon') {
             return convert_polygon(geometry);
-        }*/ else {
+        } else {
             throw 'Invalid geometry type was specified. Please use either "point" or "polygon"';
         }
     } catch(e) {
