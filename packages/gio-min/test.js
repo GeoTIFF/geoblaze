@@ -21,9 +21,8 @@ let test = () => {
         describe('Get Min from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(min(image, bbox)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(min(georaster, bbox)[0].toFixed(2));
                     expect(value).to.equal(expected_bbox_value);
                 });
             });
@@ -31,9 +30,8 @@ let test = () => {
         describe('Get Min from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(min(image, polygon)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(min(georaster, polygon)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_value);
                 });
             });

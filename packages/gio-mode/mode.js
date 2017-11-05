@@ -31,7 +31,7 @@ let get_mode = values => {
     return modes.length === 1 ? modes[0] : modes; 
 }
 
-module.exports = (image, geom) => {
+module.exports = (georaster, geom) => {
     
     try {
         
@@ -40,8 +40,9 @@ module.exports = (image, geom) => {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
-            let values = get(image, geom);
-            let no_data_value = utils.get_no_data_value(image);
+            let flat = true;
+            let values = get(georaster, geom, flat);
+            let no_data_value = georaster.no_data_value;
 
             return values
                 .map(band => band.filter(value => value !== no_data_value))
@@ -54,7 +55,7 @@ module.exports = (image, geom) => {
             // the third argument of this function is a function which
             // runs for every pixel in the polygon. Here we add them to
             // an array to run through the get_mode function
-            intersect_polygon(image, geom, (value, band_index) => {
+            intersect_polygon(georaster, geom, (value, band_index) => {
                 if (values[band_index]) {
                     values[band_index].push(value);
                 } else {

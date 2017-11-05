@@ -16,8 +16,11 @@ let get_equal_interval_bins = (values, num_classes) => {
     // specify bins, bins represented as a list of [min, max] values
     // and are divided up based on number of classes
     let interval = (max_value - min_value) / num_classes;
-    let bins = _.range(num_classes)
-        .map((num, index) => [num * interval, (num + 1) * interval]);
+    let bins = _.range(num_classes).map((num, index) => {
+        let start = Number((min_value + num * interval).toFixed(2));
+        let end = Number((min_value + (num + 1) * interval).toFixed(2));
+        return [start, end];
+    });
 
     let results = {};
 
@@ -66,10 +69,10 @@ let get_quantile_bins = (values, num_classes) => {
     let bin_min = values[0];
     let num_values_in_current_bin = 1;
     for (var i = 1; i < values.length; i++) {
-        let value = values[i];
-        if (num_values_in_current_bin < values_per_bin) {
+        if (num_values_in_current_bin + 1 < values_per_bin) {
             num_values_in_current_bin += 1;
         } else { // if it is the last value, add it to the bin and start setting up for the next one
+            let value = values[i];
             let bin_max = value;
             num_values_in_current_bin += 1;
             if (_.keys(results).length > 0) bin_min = `>${bin_min}`;
@@ -78,6 +81,12 @@ let get_quantile_bins = (values, num_classes) => {
             bin_min = value;
         }
     }
+
+    // add the last bin
+    let bin_max = values[values.length - 1];
+    num_values_in_current_bin += 1;
+    bin_min = `>${bin_min}`;
+    results[`${bin_min} - ${bin_max}`] = num_values_in_current_bin;
 
     return results;
 }
@@ -135,16 +144,17 @@ let get_histogram = (values, options) => {
     else throw 'An unexpected error occurred while running the get_histogram function.';
 }
 
-module.exports = (image, geom, options) => {
+module.exports = (georaster, geom, options) => {
 
     try {
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var no_data_value = georaster.no_data_value;
 
             // grab array of values by band
-            let values = get(image, geom);
+            let flat = true;
+            let values = get(georaster, geom, true);
 
             // run through histogram function
             return values
@@ -153,11 +163,11 @@ module.exports = (image, geom, options) => {
 
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
-            let no_data_value = utils.get_no_data_value(image);
+            let no_data_value = georaster.no_data_value;
 
             // grab array of values by band
             let values = [];
-            intersect_polygon(image, geom, (value, band_index) => {
+            intersect_polygon(georaster, geom, (value, band_index) => {
                 if (values[band_index]) {
                     values[band_index].push(value); 
                 } else {

@@ -32,16 +32,15 @@ let polygon = [[
     [85.078125, 21.166483858206583], [86.044921875, 20.838277806058933], [86.98974609375, 22.49225722008518],
     [85.58349609375, 24.54712317973075], [84.6826171875, 23.36242859340884], [83.12255859375, 22.49225722008518]
 ]];
-let expected_polygon_value = 2744.55;
+let expected_polygon_value = 2750.5;
 
 let test = () => {
     describe('Gio Median Feature', function() {
         describe('Get Median from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(median(image, bbox)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(median(georaster, bbox)[0].toFixed(2));
                     expect(value).to.equal(expected_bbox_value);
                 });
             });
@@ -49,9 +48,8 @@ let test = () => {
         describe('Get Median from Bounding Box (GeoJSON)', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(median(image, bbox_geojson)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(median(georaster, bbox_geojson)[0].toFixed(2));
                     expect(value).to.equal(expected_bbox_geojson_value);
                 });
             });
@@ -59,9 +57,8 @@ let test = () => {
         describe('Get Median from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(median(image, polygon)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(median(georaster, polygon)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_value);
                 });
             });

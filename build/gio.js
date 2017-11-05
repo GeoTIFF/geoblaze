@@ -88,9 +88,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 
-var base64 = __webpack_require__(68)
-var ieee754 = __webpack_require__(69)
-var isArray = __webpack_require__(31)
+var base64 = __webpack_require__(46)
+var ieee754 = __webpack_require__(47)
+var isArray = __webpack_require__(29)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -2096,40 +2096,40 @@ process.umask = function() { return 0; };
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _ = __webpack_require__(9);
+var _ = __webpack_require__(8);
 
 var combine = __webpack_require__(129);
 
 module.exports = {
-    get_image_info: function get_image_info(image) {
-        var fd = image.fileDirectory;
-        var origin = image.getOrigin();
-        var cell_width = fd.ModelPixelScale[0];
-        var cell_height = fd.ModelPixelScale[1];
-        var lng_0 = origin[0];
-        var lat_0 = origin[1];
-        return { lng_0: lng_0, lat_0: lat_0, cell_width: cell_width, cell_height: cell_height };
-    },
-    convert_latlng_bbox_to_image_bbox: function convert_latlng_bbox_to_image_bbox(image, latlng_bbox) {
+    convert_latlng_bbox_to_image_bbox: function convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox) {
 
-        var info = this.get_image_info(image);
-
-        // pull out bounding box values
-        var lng_min = latlng_bbox[0];
-        var lat_min = latlng_bbox[1];
-        var lng_max = latlng_bbox[2];
-        var lat_max = latlng_bbox[3];
+        var lng_min = void 0,
+            lat_min = void 0,
+            lng_max = void 0,
+            lat_max = void 0;
+        if (typeof latlng_bbox.xmin !== "undefined") {
+            lng_min = latlng_bbox.xmin;
+            lat_min = latlng_bbox.ymin;
+            lng_max = latlng_bbox.xmax;
+            lat_max = latlng_bbox.ymax;
+        } else if (Array.isArray(latlng_bbox) && latlng_bbox.length === 4) {
+            // pull out bounding box values
+            lng_min = latlng_bbox[0];
+            lat_min = latlng_bbox[1];
+            lng_max = latlng_bbox[2];
+            lat_max = latlng_bbox[3];
+        }
 
         // map bounding box values to image coordinate space
         /* y_min uses lat_max while y_max uses lat_min because the image coordinate
         system is inverted along the y axis relative to the lat/long (geographic)
         coordinate system */
-        var x_min = Math.floor(Math.abs(lng_min - info.lng_0) / info.cell_width);
-        var y_min = Math.floor(Math.abs(info.lat_0 - lat_max) / info.cell_height);
-        var x_max = Math.ceil(Math.abs(lng_max - info.lng_0) / info.cell_width);
-        var y_max = Math.ceil(Math.abs(info.lat_0 - lat_min) / info.cell_height);
-
-        return [x_min, y_min, x_max, y_max];
+        return {
+            xmin: Math.floor(Math.abs(lng_min - georaster.xmin) / georaster.pixelWidth),
+            ymin: Math.floor(Math.abs(georaster.ymax - lat_max) / georaster.pixelHeight),
+            xmax: Math.ceil(Math.abs(lng_max - georaster.xmin) / georaster.pixelWidth),
+            ymax: Math.ceil(Math.abs(georaster.ymax - lat_min) / georaster.pixelHeight)
+        };
     },
     get_geojson_coors: function get_geojson_coors(geojson) {
         if (geojson.features) {
@@ -2154,6 +2154,10 @@ module.exports = {
     is_bbox: function is_bbox(geometry) {
 
         // check if we are using the gio format and return true right away if so
+        if (geometry.xmin !== undefined && geometry.xmax !== undefined && geometry.ymax !== undefined && geometry.ymin !== undefined) {
+            return true;
+        }
+
         if (Array.isArray(geometry) && geometry.length === 4) {
             // array 
             return true;
@@ -2220,11 +2224,6 @@ module.exports = {
 
         return false;
     },
-    get_no_data_value: function get_no_data_value(image) {
-
-        // so far haven't found a reason not to return as an integer
-        return parseInt(image.fileDirectory.GDAL_NODATA);
-    },
     get_bounding_box: function get_bounding_box(geometry) {
 
         // initialize the min and max values to the first
@@ -2249,7 +2248,7 @@ module.exports = {
             }
         });
 
-        return [xmin, ymin, xmax, ymax];
+        return { xmin: xmin, ymin: ymin, xmax: xmax, ymax: ymax };
     },
 
 
@@ -2300,7 +2299,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var _ = __webpack_require__(9);
+var _ = __webpack_require__(8);
 
 var utils = __webpack_require__(3);
 
@@ -2334,9 +2333,11 @@ var convert_point = function convert_point(geometry) {
 var convert_bbox = function convert_bbox(geometry) {
     var bbox = void 0;
     if (utils.is_bbox(geometry)) {
-        if (Array.isArray(geometry) && geometry.length === 4) {
-            // array
+        if (typeof geometry.xmin !== "undefined" && typeof geometry.ymax !== "undefined") {
             bbox = geometry;
+        } else if (Array.isArray(geometry) && geometry.length === 4) {
+            // array
+            bbox = { xmin: geometry[0], ymin: geometry[1], xmax: geometry[2], ymax: geometry[3] };
         } else if (typeof geometry === 'string') {
             // stringified geojson
             var geojson = JSON.parse(geometry);
@@ -2347,7 +2348,7 @@ var convert_bbox = function convert_bbox(geometry) {
             var lats = coors.map(function (coor) {
                 return coor[1];
             });
-            bbox = [Math.min.apply(Math, _toConsumableArray(lngs)), Math.min.apply(Math, _toConsumableArray(lats)), Math.max.apply(Math, _toConsumableArray(lngs)), Math.max.apply(Math, _toConsumableArray(lats))];
+            bbox = { xmin: Math.min.apply(Math, _toConsumableArray(lngs)), ymin: Math.min.apply(Math, _toConsumableArray(lats)), xmax: Math.max.apply(Math, _toConsumableArray(lngs)), ymax: Math.max.apply(Math, _toConsumableArray(lats)) };
         } else if ((typeof geometry === 'undefined' ? 'undefined' : _typeof(geometry)) === 'object') {
             // geojson
             var _coors = utils.get_geojson_coors(geometry)[0];
@@ -2357,7 +2358,7 @@ var convert_bbox = function convert_bbox(geometry) {
             var _lats = _coors.map(function (coor) {
                 return coor[1];
             });
-            bbox = [Math.min.apply(Math, _toConsumableArray(_lngs)), Math.min.apply(Math, _toConsumableArray(_lats)), Math.max.apply(Math, _toConsumableArray(_lngs)), Math.max.apply(Math, _toConsumableArray(_lats))];
+            bbox = { xmin: Math.min.apply(Math, _toConsumableArray(_lngs)), ymin: Math.min.apply(Math, _toConsumableArray(_lats)), xmax: Math.max.apply(Math, _toConsumableArray(_lngs)), ymax: Math.max.apply(Math, _toConsumableArray(_lats)) };
         }
     }
 
@@ -2448,7 +2449,7 @@ var load = __webpack_require__(18);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
 
-module.exports = function (image, geom) {
+module.exports = function (georaster, geom, flat) {
 
     if (utils.is_bbox(geom)) {
         // bounding box
@@ -2456,19 +2457,37 @@ module.exports = function (image, geom) {
         // convert geometry
         var geometry = convert_geometry('bbox', geom);
 
-        var geoKeys = image.getGeoKeys();
-
-        // TEMPORARY: make sure raster is in wgs 84
-        if (geoKeys.GTModelTypeGeoKey === 2 && geoKeys.GeographicTypeGeoKey === 4326) {
+        if (georaster.projection === 4326) {
 
             // use a utility function that converts from the lat/long coordinate
             // space to the image coordinate space
-            var bbox = utils.convert_latlng_bbox_to_image_bbox(image, geometry);
+            // // left, top, right, bottom
+            var bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, geometry);
+            //console.log("bbox:", bbox);
+            var bbox_left = bbox.xmin;
+            var bbox_top = bbox.ymin;
+            var bbox_right = bbox.xmax;
+            var bbox_bottom = bbox.ymax;
 
             try {
-
-                // get values
-                return image.readRasters({ window: bbox });
+                if (flat) {
+                    //console.log("flat is true");
+                    return georaster.values.map(function (band) {
+                        var values = [];
+                        for (var row_index = bbox_top; row_index < bbox_bottom; row_index++) {
+                            values = values.concat(Array.prototype.slice.call(band[row_index].slice(bbox_left, bbox_right)));
+                        }
+                        return values;
+                    });
+                } else {
+                    return georaster.values.map(function (band) {
+                        var table = [];
+                        for (var row_index = bbox_top; row_index < bbox_bottom; row_index++) {
+                            table.push(band[row_index].slice(bbox_left, bbox_right));
+                        }
+                        return table;
+                    });
+                }
             } catch (e) {
                 throw e;
             }
@@ -2530,7 +2549,7 @@ var objectKeys = Object.keys || function (obj) {
 module.exports = Duplex;
 
 /*<replacement>*/
-var util = __webpack_require__(11);
+var util = __webpack_require__(12);
 util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
@@ -2612,186 +2631,6 @@ function forEach(xs, f) {
 
 /***/ }),
 /* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _ = __webpack_require__(9);
-
-var get = __webpack_require__(6);
-var utils = __webpack_require__(3);
-
-var get_line_from_points = utils.get_line_from_points;
-var get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
-
-module.exports = function (image, geom, run_on_values) {
-
-    // get the cell width and height, will use later
-    var info = utils.get_image_info(image);
-    var cell_width = info.cell_width;
-    var cell_height = info.cell_height;
-
-    var no_data_value = utils.get_no_data_value(image);
-
-    // get values in a bounding box around the geometry
-    var latlng_bbox = utils.get_bounding_box(geom);
-    var image_bands = get(image, latlng_bbox);
-
-    // set origin points of image, based on the returned bbox
-    var lat_0 = latlng_bbox[3] + (info.lat_0 - latlng_bbox[3]) % cell_height;
-    var lng_0 = latlng_bbox[0] - (latlng_bbox[0] - info.lng_0) % cell_width;
-
-    // calculate size of bbox in image coordinates
-    // to derive out the row length
-    var image_bbox = utils.convert_latlng_bbox_to_image_bbox(image, latlng_bbox);
-    var x_min = image_bbox[0],
-        y_min = image_bbox[1],
-        x_max = image_bbox[2],
-        y_max = image_bbox[3];
-
-    var row_length = x_max - x_min;
-
-    // collapse geometry down to a list of edges
-    // necessary for multi-part geometries
-    var edges = [];
-    geom.forEach(function (part) {
-        for (var i = 1; i < part.length; i++) {
-            var start_point = part[i - 1];
-            var end_point = part[i];
-            edges.push([start_point, end_point]);
-        }
-    });
-
-    // iterate through image rows and convert each one to a line
-    // running through the middle of the row
-    var image_lines = [];
-    var image_size = image_bands[0].length;
-    for (var y = 0; y < image_size; y += row_length) {
-
-        // get latitude of current row 
-        var lat = lat_0 - (cell_height * y / row_length + cell_height / 2);
-
-        // use that point, plus another point along the same latitude to
-        // create a line
-        var point_0 = [lng_0, lat];
-        var point_1 = [lng_0 + 1, lat];
-        var line = get_line_from_points(point_0, point_1);
-        image_lines.push(line);
-    }
-
-    // iterate through the list of polygon vertices, convert them to
-    // lines, and compute the intersections with each image row
-    var num_rows = Math.floor(image_size / row_length);
-    var intersections_by_row = _.range(num_rows).map(function (row) {
-        return [];
-    });
-    for (var i = 0; i < edges.length; i++) {
-
-        // get vertices that make up an edge and convert that to a line
-        var edge = edges[i];
-        var start_point = edge[0];
-        var end_point = edge[1];
-        var edge_line = get_line_from_points(start_point, end_point);
-
-        var start_lng = void 0,
-            end_lng = void 0;
-        if (start_point[0] < end_point[0]) {
-            start_lng = start_point[0];
-            end_lng = end_point[0];
-        } else {
-            start_lng = end_point[0];
-            end_lng = start_point[0];
-        }
-
-        // find the y values in the image coordinate space
-        var y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
-        var y_2 = Math.floor((lat_0 - end_point[1]) / cell_height);
-
-        // make sure to set the start and end points so that we are
-        // incrementing upwards through rows
-        var row_start = void 0,
-            row_end = void 0;
-        if (y_1 < y_2) {
-            row_start = y_1;
-            row_end = y_2;
-        } else {
-            row_start = y_2;
-            row_end = y_1;
-        }
-
-        // iterate through image lines within the change in y of
-        // the edge line and find all intersections
-        for (var j = row_start; j < row_end + 1; j++) {
-            var image_line = image_lines[j];
-            var intersection = get_intersection_of_two_lines(edge_line, image_line);
-
-            // check to see if the intersection point is within the range of 
-            // the edge line segment. If it is, add the intersection to the 
-            // list of intersections at the corresponding index for that row 
-            // in intersections_by_row
-            if (intersection && intersection.x >= start_lng && intersection.x <= end_lng) {
-                var image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
-                intersections_by_row[j].push(image_pixel_index);
-            }
-        }
-    }
-
-    // iterate through the list of computed intersections for each row.
-    // use these intersections to split up each row into pixels that fall
-    // within the polygon and pixels that fall outside the polygon
-    // for more information on this, review the ray casting algorithm
-    for (var _i = 0; _i < num_rows; _i++) {
-
-        // we make sure to sort intersections here because we don't know the order
-        // in which they were recorded, as it was based on the order of polygon
-        // edges
-        var row_intersections = intersections_by_row[_i].sort(function (a, b) {
-            return a - b;
-        });
-        var num_intersections = row_intersections.length;
-        if (num_intersections > 0) {
-            // make sure the row is in the polygon
-
-            // iterate through intersections and get the start and end
-            // indexes at odd intervals, ie where pixels are inside the
-            // polygon
-            for (var _j = 0; _j < num_intersections; _j++) {
-                if (_j % 2 === 1) {
-                    var start_row_index = row_intersections[_j - 1];
-                    var end_row_index = row_intersections[_j];
-
-                    // convert the start and end row indexes to indexes
-                    // in the image
-                    var start_index = _i * row_length + start_row_index;
-                    var end_index = _i * row_length + end_row_index;
-
-                    // use the start and end indexes to pull pixels out of
-                    // the corresponding image row
-
-                    var _loop = function _loop(r) {
-                        image_bands.forEach(function (band, band_index) {
-                            var value = band[r];
-                            if (value !== no_data_value) {
-
-                                // run the function provided as a parameter input
-                                // on the value
-                                run_on_values(value, band_index);
-                            }
-                        });
-                    };
-
-                    for (var r = start_index; r < end_index; r++) {
-                        _loop(r);
-                    }
-                }
-            }
-        }
-    }
-};
-
-/***/ }),
-/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.8.3
@@ -4346,396 +4185,228 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscor
 
 
 /***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _ = __webpack_require__(8);
+
+var get = __webpack_require__(6);
+var utils = __webpack_require__(3);
+
+var get_line_from_points = utils.get_line_from_points;
+var get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
+
+module.exports = function (georaster, geom, run_on_values) {
+
+    var cell_width = georaster.pixelWidth;
+    var cell_height = georaster.pixelHeight;
+    var no_data_value = georaster.no_data_value;
+    var image_height = georaster.height;
+
+    // get values in a bounding box around the geometry
+    var latlng_bbox = utils.get_bounding_box(geom);
+    //console.log("latlng_bbox:", latlng_bbox); //good
+    var image_bands = get(georaster, latlng_bbox);
+    //console.log("image_bands:", image_bands);
+
+    // set origin points of bbox of geometry in image space
+    var lat_0 = latlng_bbox.ymax + (georaster.ymax - latlng_bbox.ymax) % cell_height;
+    //console.log("lat_0:", lat_0); //good
+    var lng_0 = latlng_bbox.xmin - (latlng_bbox.xmin - georaster.xmin) % cell_width;
+    //console.log("lng_0:", lng_0); //good
+
+    // calculate size of bbox in image coordinates
+    // to derive out the row length
+    var image_bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox);
+    //console.log("image_bbox:", image_bbox); //good
+    var x_min = image_bbox.xmin,
+        y_min = image_bbox.ymin,
+        x_max = image_bbox.xmax,
+        y_max = image_bbox.ymax;
+
+    var row_length = x_max - x_min;
+    //console.log("row_length:", row_length); //good
+
+    // collapse geometry down to a list of edges
+    // necessary for multi-part geometries
+    var edges = [];
+    geom.forEach(function (part) {
+        for (var i = 1; i < part.length; i++) {
+            var start_point = part[i - 1];
+            var end_point = part[i];
+            edges.push([start_point, end_point]);
+        }
+    });
+
+    // iterate through image rows and convert each one to a line
+    // running through the middle of the row
+    var image_lines = [];
+    var num_rows = image_bands[0].length;
+    //console.log("num_rows:", num_rows);//good
+    for (var y = 0; y < num_rows; y++) {
+
+        // I don't understand this
+        var lat = lat_0 - (cell_height * y + cell_height / 2);
+        //console.log("lat:", lat); //good
+
+        // use that point, plus another point along the same latitude to
+        // create a line
+        var point_0 = [lng_0, lat];
+        var point_1 = [lng_0 + 1, lat];
+        var line = get_line_from_points(point_0, point_1);
+        image_lines.push(line);
+    }
+    //console.log("image_lines:", image_lines);
+
+    // iterate through the list of polygon vertices, convert them to
+    // lines, and compute the intersections with each image row
+    var intersections_by_row = _.range(num_rows).map(function (row) {
+        return [];
+    });
+    for (var i = 0; i < edges.length; i++) {
+
+        // get vertices that make up an edge and convert that to a line
+        var edge = edges[i];
+        var start_point = edge[0];
+        var end_point = edge[1];
+        var edge_line = get_line_from_points(start_point, end_point);
+
+        var start_lng = void 0,
+            end_lng = void 0;
+        if (start_point[0] < end_point[0]) {
+            start_lng = start_point[0];
+            end_lng = end_point[0];
+        } else {
+            start_lng = end_point[0];
+            end_lng = start_point[0];
+        }
+        //console.log("\n\n\n");
+        //console.log("start_lng:", start_lng);
+        //console.log("end_lng:", end_lng);
+
+        // find the y values in the image coordinate space
+        var y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
+        var y_2 = Math.floor((lat_0 - end_point[1]) / cell_height);
+
+        // make sure to set the start and end points so that we are
+        // incrementing upwards through rows
+        var row_start = void 0,
+            row_end = void 0;
+        if (y_1 < y_2) {
+            row_start = y_1;
+            row_end = y_2;
+        } else {
+            row_start = y_2;
+            row_end = y_1;
+        }
+        //console.log("row_start, row_end", [row_start, row_end]);
+
+        // iterate through image lines within the change in y of
+        // the edge line and find all intersections
+        for (var j = row_start; j < row_end + 1; j++) {
+            var image_line = image_lines[j];
+            //console.log("image_line:", image_line);
+            try {
+                var intersection = get_intersection_of_two_lines(edge_line, image_line);
+            } catch (error) {
+                console.log("j:", j);
+                console.log("edge_line:", edge_line);
+                console.log("image_line:", image_line);
+                console.log("image_lines:", image_lines);
+                console.error(error);
+                throw error;
+            }
+            //console.log("intersection:", intersection);
+
+            // check to see if the intersection point is within the range of 
+            // the edge line segment. If it is, add the intersection to the 
+            // list of intersections at the corresponding index for that row 
+            // in intersections_by_row
+            if (intersection && intersection.x >= start_lng && intersection.x <= end_lng) {
+                var image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
+                intersections_by_row[j].push(image_pixel_index);
+            }
+        }
+    }
+
+    //console.log("intersections by row", intersections_by_row);
+
+    // iterate through the list of computed intersections for each row.
+    // use these intersections to split up each row into pixels that fall
+    // within the polygon and pixels that fall outside the polygon
+    // for more information on this, review the ray casting algorithm
+
+    var _loop = function _loop(_i) {
+
+        // we make sure to sort intersections here because we don't know the order
+        // in which they were recorded, as it was based on the order of polygon
+        // edges
+        var row_intersections = intersections_by_row[_i].sort(function (a, b) {
+            return a - b;
+        });
+        var num_intersections = row_intersections.length;
+        if (num_intersections > 0) {
+            // make sure the row is in the polygon
+
+            // iterate through intersections and get the start and end
+            // indexes at odd intervals, ie where pixels are inside the
+            // polygon
+            for (var _j = 0; _j < num_intersections; _j++) {
+                if (_j % 2 === 1) {
+
+                    var start_column_index = row_intersections[_j - 1];
+                    var end_column_index = row_intersections[_j];
+                    //console.log("start_row_index:end_row_index", start_row_index,":",end_row_index);
+
+                    // convert to start and end in the clipped image    
+                    //let start_index = start_row_index - x_min;
+                    //let end_index = end_row_index - x_min;
+
+                    //console.log("start_index:end_index", start_index,":",end_index);
+
+                    // use the start and end indexes to pull pixels out of
+                    // the corresponding image row
+
+                    var _loop2 = function _loop2(column_index) {
+                        image_bands.forEach(function (band, band_index) {
+                            //console.log("band:", band);
+                            try {
+                                var value = band[_i][column_index];
+                            } catch (error) {
+                                //console.log("band:", band);
+                                //console.log("row_index:", row_index);
+                                //console.log("column_index:", column_index);
+                                //console.error(error);
+                                throw error;
+                            }
+                            if (value !== no_data_value) {
+                                // run the function provided as a parameter input
+                                // on the value
+                                run_on_values(value, band_index);
+                            }
+                        });
+                    };
+
+                    for (var column_index = start_column_index; column_index <= end_column_index; column_index++) {
+                        _loop2(column_index);
+                    }
+                }
+            }
+        }
+    };
+
+    for (var _i = 0; _i < num_rows; _i++) {
+        _loop(_i);
+    }
+};
+
+/***/ }),
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(33);
-exports.Stream = exports;
-exports.Readable = exports;
-exports.Writable = __webpack_require__(22);
-exports.Duplex = __webpack_require__(7);
-exports.Transform = __webpack_require__(36);
-exports.PassThrough = __webpack_require__(84);
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// NOTE: These type checking functions intentionally don't use `instanceof`
-// because it is fragile and can be easily faked with `Object.create()`.
-
-function isArray(arg) {
-  if (Array.isArray) {
-    return Array.isArray(arg);
-  }
-  return objectToString(arg) === '[object Array]';
-}
-exports.isArray = isArray;
-
-function isBoolean(arg) {
-  return typeof arg === 'boolean';
-}
-exports.isBoolean = isBoolean;
-
-function isNull(arg) {
-  return arg === null;
-}
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-exports.isNumber = isNumber;
-
-function isString(arg) {
-  return typeof arg === 'string';
-}
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-exports.isUndefined = isUndefined;
-
-function isRegExp(re) {
-  return objectToString(re) === '[object RegExp]';
-}
-exports.isRegExp = isRegExp;
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-exports.isObject = isObject;
-
-function isDate(d) {
-  return objectToString(d) === '[object Date]';
-}
-exports.isDate = isDate;
-
-function isError(e) {
-  return (objectToString(e) === '[object Error]' || e instanceof Error);
-}
-exports.isError = isError;
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-exports.isBuffer = Buffer.isBuffer;
-
-function objectToString(o) {
-  return Object.prototype.toString.call(o);
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).Buffer))
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-module.exports = Stream;
-
-var EE = __webpack_require__(20).EventEmitter;
-var inherits = __webpack_require__(5);
-
-inherits(Stream, EE);
-Stream.Readable = __webpack_require__(10);
-Stream.Writable = __webpack_require__(101);
-Stream.Duplex = __webpack_require__(102);
-Stream.Transform = __webpack_require__(37);
-Stream.PassThrough = __webpack_require__(103);
-
-// Backwards-compat with node 0.4.x
-Stream.Stream = Stream;
-
-
-
-// old-style streams.  Note that the pipe method (the only relevant
-// part of this class) is overridden in the Readable class.
-
-function Stream() {
-  EE.call(this);
-}
-
-Stream.prototype.pipe = function(dest, options) {
-  var source = this;
-
-  function ondata(chunk) {
-    if (dest.writable) {
-      if (false === dest.write(chunk) && source.pause) {
-        source.pause();
-      }
-    }
-  }
-
-  source.on('data', ondata);
-
-  function ondrain() {
-    if (source.readable && source.resume) {
-      source.resume();
-    }
-  }
-
-  dest.on('drain', ondrain);
-
-  // If the 'end' option is not supplied, dest.end() will be called when
-  // source gets the 'end' or 'close' events.  Only dest.end() once.
-  if (!dest._isStdio && (!options || options.end !== false)) {
-    source.on('end', onend);
-    source.on('close', onclose);
-  }
-
-  var didOnEnd = false;
-  function onend() {
-    if (didOnEnd) return;
-    didOnEnd = true;
-
-    dest.end();
-  }
-
-
-  function onclose() {
-    if (didOnEnd) return;
-    didOnEnd = true;
-
-    if (typeof dest.destroy === 'function') dest.destroy();
-  }
-
-  // don't leave dangling pipes when there are errors.
-  function onerror(er) {
-    cleanup();
-    if (EE.listenerCount(this, 'error') === 0) {
-      throw er; // Unhandled stream error in pipe.
-    }
-  }
-
-  source.on('error', onerror);
-  dest.on('error', onerror);
-
-  // remove all the event listeners that were added.
-  function cleanup() {
-    source.removeListener('data', ondata);
-    dest.removeListener('drain', ondrain);
-
-    source.removeListener('end', onend);
-    source.removeListener('close', onclose);
-
-    source.removeListener('error', onerror);
-    dest.removeListener('error', onerror);
-
-    source.removeListener('end', cleanup);
-    source.removeListener('close', cleanup);
-
-    dest.removeListener('close', cleanup);
-  }
-
-  source.on('end', cleanup);
-  source.on('close', cleanup);
-
-  dest.on('close', cleanup);
-
-  dest.emit('pipe', source);
-
-  // Allow for unix-like usage: A.pipe(B).pipe(C)
-  return dest;
-};
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function AbstractDecoder() {}
-
-AbstractDecoder.prototype = {
-  isAsync: function isAsync() {
-    // TODO: check if async reading func is enabled or not.
-    return typeof this.decodeBlock === "undefined";
-  }
-};
-
-module.exports = AbstractDecoder;
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-
-var TYPED_OK =  (typeof Uint8Array !== 'undefined') &&
-                (typeof Uint16Array !== 'undefined') &&
-                (typeof Int32Array !== 'undefined');
-
-
-exports.assign = function (obj /*from1, from2, from3, ...*/) {
-  var sources = Array.prototype.slice.call(arguments, 1);
-  while (sources.length) {
-    var source = sources.shift();
-    if (!source) { continue; }
-
-    if (typeof source !== 'object') {
-      throw new TypeError(source + 'must be non-object');
-    }
-
-    for (var p in source) {
-      if (source.hasOwnProperty(p)) {
-        obj[p] = source[p];
-      }
-    }
-  }
-
-  return obj;
-};
-
-
-// reduce buffer size, avoiding mem copy
-exports.shrinkBuf = function (buf, size) {
-  if (buf.length === size) { return buf; }
-  if (buf.subarray) { return buf.subarray(0, size); }
-  buf.length = size;
-  return buf;
-};
-
-
-var fnTyped = {
-  arraySet: function (dest, src, src_offs, len, dest_offs) {
-    if (src.subarray && dest.subarray) {
-      dest.set(src.subarray(src_offs, src_offs + len), dest_offs);
-      return;
-    }
-    // Fallback to ordinary array
-    for (var i = 0; i < len; i++) {
-      dest[dest_offs + i] = src[src_offs + i];
-    }
-  },
-  // Join array of chunks to single array.
-  flattenChunks: function (chunks) {
-    var i, l, len, pos, chunk, result;
-
-    // calculate data length
-    len = 0;
-    for (i = 0, l = chunks.length; i < l; i++) {
-      len += chunks[i].length;
-    }
-
-    // join chunks
-    result = new Uint8Array(len);
-    pos = 0;
-    for (i = 0, l = chunks.length; i < l; i++) {
-      chunk = chunks[i];
-      result.set(chunk, pos);
-      pos += chunk.length;
-    }
-
-    return result;
-  }
-};
-
-var fnUntyped = {
-  arraySet: function (dest, src, src_offs, len, dest_offs) {
-    for (var i = 0; i < len; i++) {
-      dest[dest_offs + i] = src[src_offs + i];
-    }
-  },
-  // Join array of chunks to single array.
-  flattenChunks: function (chunks) {
-    return [].concat.apply([], chunks);
-  }
-};
-
-
-// Enable/Disable typed arrays use, for testing
-//
-exports.setTyped = function (on) {
-  if (on) {
-    exports.Buf8  = Uint8Array;
-    exports.Buf16 = Uint16Array;
-    exports.Buf32 = Int32Array;
-    exports.assign(exports, fnTyped);
-  } else {
-    exports.Buf8  = Array;
-    exports.Buf16 = Array;
-    exports.Buf32 = Array;
-    exports.assign(exports, fnUntyped);
-  }
-};
-
-exports.setTyped(TYPED_OK);
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
 "use strict";
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4760,8 +4431,8 @@ exports.setTyped(TYPED_OK);
 
 
 
-var punycode = __webpack_require__(70);
-var util = __webpack_require__(72);
+var punycode = __webpack_require__(71);
+var util = __webpack_require__(73);
 
 exports.parse = urlParse;
 exports.resolve = urlResolve;
@@ -4836,7 +4507,7 @@ var protocolPattern = /^([a-z0-9.+-]+:)/i,
       'gopher:': true,
       'file:': true
     },
-    querystring = __webpack_require__(73);
+    querystring = __webpack_require__(74);
 
 function urlParse(url, parseQueryString, slashesDenoteHost) {
   if (url && util.isObject(url) && url instanceof Url) return url;
@@ -5472,6 +5143,396 @@ Url.prototype.parseHost = function() {
 
 
 /***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(33);
+exports.Stream = exports;
+exports.Readable = exports;
+exports.Writable = __webpack_require__(22);
+exports.Duplex = __webpack_require__(7);
+exports.Transform = __webpack_require__(36);
+exports.PassThrough = __webpack_require__(84);
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(Buffer) {// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+
+function isArray(arg) {
+  if (Array.isArray) {
+    return Array.isArray(arg);
+  }
+  return objectToString(arg) === '[object Array]';
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = Buffer.isBuffer;
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).Buffer))
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+module.exports = Stream;
+
+var EE = __webpack_require__(20).EventEmitter;
+var inherits = __webpack_require__(5);
+
+inherits(Stream, EE);
+Stream.Readable = __webpack_require__(11);
+Stream.Writable = __webpack_require__(101);
+Stream.Duplex = __webpack_require__(102);
+Stream.Transform = __webpack_require__(37);
+Stream.PassThrough = __webpack_require__(103);
+
+// Backwards-compat with node 0.4.x
+Stream.Stream = Stream;
+
+
+
+// old-style streams.  Note that the pipe method (the only relevant
+// part of this class) is overridden in the Readable class.
+
+function Stream() {
+  EE.call(this);
+}
+
+Stream.prototype.pipe = function(dest, options) {
+  var source = this;
+
+  function ondata(chunk) {
+    if (dest.writable) {
+      if (false === dest.write(chunk) && source.pause) {
+        source.pause();
+      }
+    }
+  }
+
+  source.on('data', ondata);
+
+  function ondrain() {
+    if (source.readable && source.resume) {
+      source.resume();
+    }
+  }
+
+  dest.on('drain', ondrain);
+
+  // If the 'end' option is not supplied, dest.end() will be called when
+  // source gets the 'end' or 'close' events.  Only dest.end() once.
+  if (!dest._isStdio && (!options || options.end !== false)) {
+    source.on('end', onend);
+    source.on('close', onclose);
+  }
+
+  var didOnEnd = false;
+  function onend() {
+    if (didOnEnd) return;
+    didOnEnd = true;
+
+    dest.end();
+  }
+
+
+  function onclose() {
+    if (didOnEnd) return;
+    didOnEnd = true;
+
+    if (typeof dest.destroy === 'function') dest.destroy();
+  }
+
+  // don't leave dangling pipes when there are errors.
+  function onerror(er) {
+    cleanup();
+    if (EE.listenerCount(this, 'error') === 0) {
+      throw er; // Unhandled stream error in pipe.
+    }
+  }
+
+  source.on('error', onerror);
+  dest.on('error', onerror);
+
+  // remove all the event listeners that were added.
+  function cleanup() {
+    source.removeListener('data', ondata);
+    dest.removeListener('drain', ondrain);
+
+    source.removeListener('end', onend);
+    source.removeListener('close', onclose);
+
+    source.removeListener('error', onerror);
+    dest.removeListener('error', onerror);
+
+    source.removeListener('end', cleanup);
+    source.removeListener('close', cleanup);
+
+    dest.removeListener('close', cleanup);
+  }
+
+  source.on('end', cleanup);
+  source.on('close', cleanup);
+
+  dest.on('close', cleanup);
+
+  dest.emit('pipe', source);
+
+  // Allow for unix-like usage: A.pipe(B).pipe(C)
+  return dest;
+};
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function AbstractDecoder() {}
+
+AbstractDecoder.prototype = {
+  isAsync: function isAsync() {
+    // TODO: check if async reading func is enabled or not.
+    return typeof this.decodeBlock === "undefined";
+  }
+};
+
+module.exports = AbstractDecoder;
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+
+var TYPED_OK =  (typeof Uint8Array !== 'undefined') &&
+                (typeof Uint16Array !== 'undefined') &&
+                (typeof Int32Array !== 'undefined');
+
+function _has(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+exports.assign = function (obj /*from1, from2, from3, ...*/) {
+  var sources = Array.prototype.slice.call(arguments, 1);
+  while (sources.length) {
+    var source = sources.shift();
+    if (!source) { continue; }
+
+    if (typeof source !== 'object') {
+      throw new TypeError(source + 'must be non-object');
+    }
+
+    for (var p in source) {
+      if (_has(source, p)) {
+        obj[p] = source[p];
+      }
+    }
+  }
+
+  return obj;
+};
+
+
+// reduce buffer size, avoiding mem copy
+exports.shrinkBuf = function (buf, size) {
+  if (buf.length === size) { return buf; }
+  if (buf.subarray) { return buf.subarray(0, size); }
+  buf.length = size;
+  return buf;
+};
+
+
+var fnTyped = {
+  arraySet: function (dest, src, src_offs, len, dest_offs) {
+    if (src.subarray && dest.subarray) {
+      dest.set(src.subarray(src_offs, src_offs + len), dest_offs);
+      return;
+    }
+    // Fallback to ordinary array
+    for (var i = 0; i < len; i++) {
+      dest[dest_offs + i] = src[src_offs + i];
+    }
+  },
+  // Join array of chunks to single array.
+  flattenChunks: function (chunks) {
+    var i, l, len, pos, chunk, result;
+
+    // calculate data length
+    len = 0;
+    for (i = 0, l = chunks.length; i < l; i++) {
+      len += chunks[i].length;
+    }
+
+    // join chunks
+    result = new Uint8Array(len);
+    pos = 0;
+    for (i = 0, l = chunks.length; i < l; i++) {
+      chunk = chunks[i];
+      result.set(chunk, pos);
+      pos += chunk.length;
+    }
+
+    return result;
+  }
+};
+
+var fnUntyped = {
+  arraySet: function (dest, src, src_offs, len, dest_offs) {
+    for (var i = 0; i < len; i++) {
+      dest[dest_offs + i] = src[src_offs + i];
+    }
+  },
+  // Join array of chunks to single array.
+  flattenChunks: function (chunks) {
+    return [].concat.apply([], chunks);
+  }
+};
+
+
+// Enable/Disable typed arrays use, for testing
+//
+exports.setTyped = function (on) {
+  if (on) {
+    exports.Buf8  = Uint8Array;
+    exports.Buf16 = Uint16Array;
+    exports.Buf32 = Int32Array;
+    exports.assign(exports, fnTyped);
+  } else {
+    exports.Buf8  = Array;
+    exports.Buf16 = Array;
+    exports.Buf32 = Array;
+    exports.assign(exports, fnUntyped);
+  }
+};
+
+exports.setTyped(TYPED_OK);
+
+
+/***/ }),
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5640,20 +5701,22 @@ exports.setTyped(TYPED_OK);
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var geotiff = __webpack_require__(45);
+var parse_georaster = __webpack_require__(45);
 
 var in_browser = (typeof window === 'undefined' ? 'undefined' : _typeof(window)) === 'object';
-var fetch = in_browser ? window.fetch : __webpack_require__(67);
+var fetch = in_browser ? window.fetch : __webpack_require__(70);
+var URL = in_browser ? window.URL : __webpack_require__(10).parse;
 
 var cache = __webpack_require__(28);
 
 module.exports = function (url_or_file) {
     return new Promise(function (resolve, reject) {
         if (!in_browser && (typeof url_or_file === 'undefined' ? 'undefined' : _typeof(url_or_file)) === 'object') {
-            throw 'Direct TIFF loading is currently not supported outside of the browser\n                due to dependency limitations. Please use either a url or run the code \n                in the browser.';
+            throw 'Direct raster loading is currently not supported outside of the browser\n                due to dependency limitations. Please use either a url or run the code \n                in the browser.';
         }
 
         var url = (typeof url_or_file === 'undefined' ? 'undefined' : _typeof(url_or_file)) === 'object' ? URL.createObjectURL(url_or_file) : url_or_file;
+        //console.log("url:", url);
 
         if (cache[url]) {
             resolve(cache[url]);
@@ -5662,8 +5725,11 @@ module.exports = function (url_or_file) {
                 return in_browser ? response.arrayBuffer() : response.buffer();
             }, function (error) {
                 var domain = new URL(url).host;
-                reject('Gio could not get the file from ' + domain + '.  \n                        This is often because a website\'s security prevents cross domain requests.  \n                        Download the file and load it manually.');
+                var error_message = 'Gio could not get the file from ' + domain + '.  \n                        This is often because a website\'s security prevents cross domain requests.  \n                        Download the file and load it manually.';
+                console.error(error_message);
+                reject(error_message);
             }).then(function (b) {
+                //console.log("b:", b);
                 if (b) {
                     var array_buffer = void 0;
                     if (in_browser) {
@@ -5671,9 +5737,11 @@ module.exports = function (url_or_file) {
                     } else {
                         array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
                     }
-                    var tiff = geotiff.parse(array_buffer);
-                    cache[url] = tiff;
-                    resolve(tiff);
+                    parse_georaster(array_buffer).then(function (georaster) {
+                        cache[url] = georaster;
+                        //console.log("resolving:", georaster);
+                        resolve(georaster);
+                    });
                 }
             });
         }
@@ -5684,10 +5752,10 @@ module.exports = function (url_or_file) {
 /* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {var ClientRequest = __webpack_require__(76)
+/* WEBPACK VAR INJECTION */(function(global) {var ClientRequest = __webpack_require__(77)
 var extend = __webpack_require__(86)
 var statusCodes = __webpack_require__(87)
-var url = __webpack_require__(15)
+var url = __webpack_require__(10)
 
 var http = exports
 
@@ -6212,7 +6280,7 @@ var Duplex;
 Writable.WritableState = WritableState;
 
 /*<replacement>*/
-var util = __webpack_require__(11);
+var util = __webpack_require__(12);
 util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
@@ -6810,7 +6878,7 @@ Writable.prototype._destroy = function (err, cb) {
   this.end();
   cb(err);
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(80).setImmediate, __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(81).setImmediate, __webpack_require__(1)))
 
 /***/ }),
 /* 23 */
@@ -7645,7 +7713,7 @@ function hasOwnProperty(obj, prop) {
 
 var convert = __webpack_require__(104).convert;
 var bodyStream = __webpack_require__(125);
-var PassThrough = __webpack_require__(12).PassThrough;
+var PassThrough = __webpack_require__(13).PassThrough;
 var FetchError = __webpack_require__(43);
 
 module.exports = Body;
@@ -8064,6 +8132,17 @@ module.exports = {};
 
 /***/ }),
 /* 29 */
+/***/ (function(module, exports) {
+
+var toString = {}.toString;
+
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
+};
+
+
+/***/ }),
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8294,7 +8373,7 @@ var parseXml;
 if (typeof window === "undefined") {
   parseXml = function parseXml(xmlStr) {
     // requires xmldom module
-    var DOMParser = __webpack_require__(47).DOMParser;
+    var DOMParser = __webpack_require__(50).DOMParser;
     return new DOMParser().parseFromString(xmlStr, "text/xml");
   };
 } else if (typeof window.DOMParser !== "undefined") {
@@ -8323,7 +8402,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports) {
 
 /*
@@ -9573,17 +9652,6 @@ try{
 
 
 /***/ }),
-/* 31 */
-/***/ (function(module, exports) {
-
-var toString = {}.toString;
-
-module.exports = Array.isArray || function (arr) {
-  return toString.call(arr) == '[object Array]';
-};
-
-
-/***/ }),
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9695,7 +9763,7 @@ var processNextTick = __webpack_require__(16);
 module.exports = Readable;
 
 /*<replacement>*/
-var isArray = __webpack_require__(31);
+var isArray = __webpack_require__(29);
 /*</replacement>*/
 
 /*<replacement>*/
@@ -9730,12 +9798,12 @@ function _isUint8Array(obj) {
 /*</replacement>*/
 
 /*<replacement>*/
-var util = __webpack_require__(11);
+var util = __webpack_require__(12);
 util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
 /*<replacement>*/
-var debugUtil = __webpack_require__(78);
+var debugUtil = __webpack_require__(79);
 var debug = void 0;
 if (debugUtil && debugUtil.debuglog) {
   debug = debugUtil.debuglog('stream');
@@ -9744,7 +9812,7 @@ if (debugUtil && debugUtil.debuglog) {
 }
 /*</replacement>*/
 
-var BufferList = __webpack_require__(79);
+var BufferList = __webpack_require__(80);
 var destroyImpl = __webpack_require__(35);
 var StringDecoder;
 
@@ -10833,7 +10901,7 @@ module.exports = Transform;
 var Duplex = __webpack_require__(7);
 
 /*<replacement>*/
-var util = __webpack_require__(11);
+var util = __webpack_require__(12);
 util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
@@ -10982,7 +11050,7 @@ function done(stream, er, data) {
 /* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(10).Transform
+module.exports = __webpack_require__(11).Transform
 
 
 /***/ }),
@@ -11127,9 +11195,6 @@ module.exports = FetchError;
  */
 function FetchError(message, type, systemError) {
 
-	// hide custom error implementation details from end-users
-	Error.captureStackTrace(this, this.constructor);
-
 	this.name = this.constructor.name;
 	this.message = message;
 	this.type = type;
@@ -11139,6 +11204,8 @@ function FetchError(message, type, systemError) {
 		this.code = this.errno = systemError.code;
 	}
 
+	// hide custom error implementation details from end-users
+	Error.captureStackTrace(this, this.constructor);
 }
 
 __webpack_require__(24).inherits(FetchError, Error);
@@ -11169,9 +11236,411 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+/* WEBPACK VAR INJECTION */(function(Buffer) {
+
+// import this library in case you don't use the web worker
+
+var _createClass = function () {
+    function defineProperties(target, props) {
+        for (var i = 0; i < props.length; i++) {
+            var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+        }
+    }return function (Constructor, protoProps, staticProps) {
+        if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+    };
+}();
+
+function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
+
+var GeoTIFF = __webpack_require__(48);
+
+var parse_data = function parse_data(data) {
+
+    try {
+
+        var result = {
+            _arrayBuffer: data.arrayBuffer
+        };
+
+        var height = void 0,
+            no_data_value = void 0,
+            width = void 0;
+
+        if (data.raster_type === "geotiff") {
+
+            //console.log("data.raster_type is geotiff");
+            var geotiff = GeoTIFF.parse(data.arrayBuffer);
+            //console.log("geotiff:", geotiff);
+
+            var image = geotiff.getImage();
+
+            var fileDirectory = image.fileDirectory;
+
+            result.projection = image.getGeoKeys().GeographicTypeGeoKey;
+
+            result.height = height = image.getHeight();
+            result.width = width = image.getWidth();
+
+            // https://www.awaresystems.be/imaging/tiff/tifftags/modeltiepointtag.html
+            result.xmin = fileDirectory.ModelTiepoint[3];
+            result.ymax = fileDirectory.ModelTiepoint[4];
+
+            // https://www.awaresystems.be/imaging/tiff/tifftags/modelpixelscaletag.html
+            result.pixelHeight = fileDirectory.ModelPixelScale[1];
+            result.pixelWidth = fileDirectory.ModelPixelScale[0];
+
+            result.xmax = result.xmin + width * result.pixelWidth;
+            result.ymin = result.ymax - height * result.pixelHeight;
+
+            result.no_data_value = no_data_value = fileDirectory.GDAL_NODATA ? parseFloat(fileDirectory.GDAL_NODATA) : null;
+            //console.log("no_data_value:", no_data_value);
+
+            result.number_of_rasters = fileDirectory.SamplesPerPixel;
+
+            result.values = image.readRasters().map(function (values_in_one_dimension) {
+                var values_in_two_dimensions = [];
+                for (var y = 0; y < height; y++) {
+                    var start = y * width;
+                    var end = start + width;
+                    values_in_two_dimensions.push(values_in_one_dimension.slice(start, end));
+                }
+                //console.log("values_in_two_dimensions:", values_in_two_dimensions);
+                return values_in_two_dimensions;
+            });
+        }
+
+        result.maxs = [];
+        result.mins = [];
+        result.ranges = [];
+
+        var max = void 0;var min = void 0;
+
+        //console.log("starting to get min, max and ranges");
+        for (var raster_index = 0; raster_index < result.number_of_rasters; raster_index++) {
+
+            var rows = result.values[raster_index];
+
+            for (var row_index = 0; row_index < height; row_index++) {
+
+                var row = rows[row_index];
+
+                for (var column_index = 0; column_index < width; column_index++) {
+
+                    var value = row[column_index];
+                    if (value != no_data_value) {
+                        if (typeof min === "undefined" || value < min) min = value;else if (typeof max === "undefined" || value > max) max = value;
+                    }
+                }
+            }
+
+            result.maxs.push(max);
+            result.mins.push(min);
+            result.ranges.push(max - min);
+        }
+
+        return result;
+    } catch (error) {
+
+        console.error("error:", error);
+    }
+};
+
+var web_worker_script = "\n\n    // this is a bit of a hack to trick geotiff to work with web worker\n    let window = self;\n\n    let parse_data = " + parse_data.toString() + ";\n    //console.log(\"inside web worker, parse_data is\", parse_data);\n\n    try {\n        /* Need to find a way to do this with webpack */\n        importScripts(\"https://unpkg.com/geotiff@0.4.1/dist/geotiff.browserify.min.js\");\n    } catch (error) {\n        console.error(error);\n    }\n\n    onmessage = e => {\n        //console.error(\"inside worker on message started with\", e); \n        let data = e.data;\n        let result = parse_data(data);\n        console.log(\"posting from web wroker:\", result);\n        postMessage(result, [result._arrayBuffer]);\n        close();\n    }\n";
+
+var GeoRaster = function () {
+    function GeoRaster(arrayBuffer) {
+        _classCallCheck(this, GeoRaster);
+
+        //console.log("starting GeoRaster.constructor with", arrayBuffer.toString());
 
 
-var GeoTIFF = __webpack_require__(46);
+        if (typeof Buffer !== "undefined" && Buffer.isBuffer(arrayBuffer)) {
+            arrayBuffer = arrayBuffer.buffer.slice(arrayBuffer.byteOffset, arrayBuffer.byteOffset + arrayBuffer.byteLength);
+        }
+
+        this.raster_type = "geotiff";
+        this._arrayBuffer = arrayBuffer;
+        this._web_worker_is_available = typeof window !== "undefined" && window.Worker !== "undefined";
+        this._blob_is_available = typeof Blob !== "undefined";
+        this._url_is_available = typeof URL !== "undefined";
+
+        //console.log("this after construction:", this);
+    }
+
+    _createClass(GeoRaster, [{
+        key: "initialize",
+        value: function initialize() {
+            var _this = this;
+
+            return new Promise(function (resolve, reject) {
+                //console.log("starting GeoRaster.values getter");
+                if (_this.raster_type === "geotiff") {
+                    if (_this._web_worker_is_available) {
+                        var url = void 0;
+                        if (_this._blob_is_available) {
+                            var blob = new Blob([web_worker_script], { type: 'application/javascript' });
+                            //console.log("blob:", blob);
+                            if (_this._url_is_available) {
+                                url = URL.createObjectURL(blob);
+                                //console.log("url:", url);
+                            }
+                        }
+                        var worker = new Worker(url);
+                        //console.log("worker:", worker);
+                        worker.onmessage = function (e) {
+                            console.log("main thread received message:", e);
+                            var data = e.data;
+                            for (var key in data) {
+                                _this[key] = data[key];
+                            }
+                            resolve(_this);
+                        };
+                        //console.log("about to postMessage");
+                        worker.postMessage({ arrayBuffer: _this._arrayBuffer, raster_type: _this.raster_type }, [_this._arrayBuffer]);
+                    } else {
+                        //console.log("web worker is not available");
+                        var result = parse_data({ arrayBuffer: _this._arrayBuffer, raster_type: _this.raster_type });
+                        //console.log("result:", result);
+                        resolve(result);
+                    }
+                } else {
+                    reject("couldn't find a way to parse");
+                }
+            });
+        }
+    }]);
+
+    return GeoRaster;
+}();
+
+module.exports = function (input) {
+    return new GeoRaster(input).initialize();
+};
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).Buffer))
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+exports.byteLength = byteLength
+exports.toByteArray = toByteArray
+exports.fromByteArray = fromByteArray
+
+var lookup = []
+var revLookup = []
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
+
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+for (var i = 0, len = code.length; i < len; ++i) {
+  lookup[i] = code[i]
+  revLookup[code.charCodeAt(i)] = i
+}
+
+revLookup['-'.charCodeAt(0)] = 62
+revLookup['_'.charCodeAt(0)] = 63
+
+function placeHoldersCount (b64) {
+  var len = b64.length
+  if (len % 4 > 0) {
+    throw new Error('Invalid string. Length must be a multiple of 4')
+  }
+
+  // the number of equal signs (place holders)
+  // if there are two placeholders, than the two characters before it
+  // represent one byte
+  // if there is only one, then the three characters before it represent 2 bytes
+  // this is just a cheap hack to not do indexOf twice
+  return b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
+}
+
+function byteLength (b64) {
+  // base64 is 4/3 + up to two characters of the original data
+  return (b64.length * 3 / 4) - placeHoldersCount(b64)
+}
+
+function toByteArray (b64) {
+  var i, l, tmp, placeHolders, arr
+  var len = b64.length
+  placeHolders = placeHoldersCount(b64)
+
+  arr = new Arr((len * 3 / 4) - placeHolders)
+
+  // if there are placeholders, only get up to the last complete 4 chars
+  l = placeHolders > 0 ? len - 4 : len
+
+  var L = 0
+
+  for (i = 0; i < l; i += 4) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
+    arr[L++] = (tmp >> 16) & 0xFF
+    arr[L++] = (tmp >> 8) & 0xFF
+    arr[L++] = tmp & 0xFF
+  }
+
+  if (placeHolders === 2) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
+    arr[L++] = tmp & 0xFF
+  } else if (placeHolders === 1) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2)
+    arr[L++] = (tmp >> 8) & 0xFF
+    arr[L++] = tmp & 0xFF
+  }
+
+  return arr
+}
+
+function tripletToBase64 (num) {
+  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
+}
+
+function encodeChunk (uint8, start, end) {
+  var tmp
+  var output = []
+  for (var i = start; i < end; i += 3) {
+    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+    output.push(tripletToBase64(tmp))
+  }
+  return output.join('')
+}
+
+function fromByteArray (uint8) {
+  var tmp
+  var len = uint8.length
+  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
+  var output = ''
+  var parts = []
+  var maxChunkLength = 16383 // must be multiple of 3
+
+  // go through the array every three bytes, we'll deal with trailing stuff later
+  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
+  }
+
+  // pad the end with zeros, but make sure to not forget the extra bytes
+  if (extraBytes === 1) {
+    tmp = uint8[len - 1]
+    output += lookup[tmp >> 2]
+    output += lookup[(tmp << 4) & 0x3F]
+    output += '=='
+  } else if (extraBytes === 2) {
+    tmp = (uint8[len - 2] << 8) + (uint8[len - 1])
+    output += lookup[tmp >> 10]
+    output += lookup[(tmp >> 4) & 0x3F]
+    output += lookup[(tmp << 2) & 0x3F]
+    output += '='
+  }
+
+  parts.push(output)
+
+  return parts.join('')
+}
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports) {
+
+exports.read = function (buffer, offset, isLE, mLen, nBytes) {
+  var e, m
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var nBits = -7
+  var i = isLE ? (nBytes - 1) : 0
+  var d = isLE ? -1 : 1
+  var s = buffer[offset + i]
+
+  i += d
+
+  e = s & ((1 << (-nBits)) - 1)
+  s >>= (-nBits)
+  nBits += eLen
+  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+  m = e & ((1 << (-nBits)) - 1)
+  e >>= (-nBits)
+  nBits += mLen
+  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
+
+  if (e === 0) {
+    e = 1 - eBias
+  } else if (e === eMax) {
+    return m ? NaN : ((s ? -1 : 1) * Infinity)
+  } else {
+    m = m + Math.pow(2, mLen)
+    e = e - eBias
+  }
+  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
+}
+
+exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
+  var e, m, c
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+  var i = isLE ? 0 : (nBytes - 1)
+  var d = isLE ? 1 : -1
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
+
+  value = Math.abs(value)
+
+  if (isNaN(value) || value === Infinity) {
+    m = isNaN(value) ? 1 : 0
+    e = eMax
+  } else {
+    e = Math.floor(Math.log(value) / Math.LN2)
+    if (value * (c = Math.pow(2, -e)) < 1) {
+      e--
+      c *= 2
+    }
+    if (e + eBias >= 1) {
+      value += rt / c
+    } else {
+      value += rt * Math.pow(2, 1 - eBias)
+    }
+    if (value * c >= 2) {
+      e++
+      c /= 2
+    }
+
+    if (e + eBias >= eMax) {
+      m = 0
+      e = eMax
+    } else if (e + eBias >= 1) {
+      m = (value * c - 1) * Math.pow(2, mLen)
+      e = e + eBias
+    } else {
+      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
+      e = 0
+    }
+  }
+
+  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
+
+  e = (e << mLen) | m
+  eLen += mLen
+  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
+
+  buffer[offset + i - d] |= s * 128
+}
+
+
+/***/ }),
+/* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var GeoTIFF = __webpack_require__(49);
 
 /**
  * Main parsing function for GeoTIFF files.
@@ -11204,15 +11673,15 @@ if (typeof window !== "undefined") {
 }
 
 /***/ }),
-/* 46 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var globals = __webpack_require__(29);
-var GeoTIFFImage = __webpack_require__(49);
-var DataView64 = __webpack_require__(66);
+var globals = __webpack_require__(30);
+var GeoTIFFImage = __webpack_require__(52);
+var DataView64 = __webpack_require__(69);
 
 var fieldTypes = globals.fieldTypes,
     fieldTagNames = globals.fieldTagNames,
@@ -11447,7 +11916,7 @@ GeoTIFF.prototype = {
 module.exports = GeoTIFF;
 
 /***/ }),
-/* 47 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function DOMParser(options){
@@ -11696,15 +12165,15 @@ function appendElement (hander,node) {
 }//appendChild and setAttributeNS are preformance key
 
 //if(typeof require == 'function'){
-	var XMLReader = __webpack_require__(48).XMLReader;
-	var DOMImplementation = exports.DOMImplementation = __webpack_require__(30).DOMImplementation;
-	exports.XMLSerializer = __webpack_require__(30).XMLSerializer ;
+	var XMLReader = __webpack_require__(51).XMLReader;
+	var DOMImplementation = exports.DOMImplementation = __webpack_require__(31).DOMImplementation;
+	exports.XMLSerializer = __webpack_require__(31).XMLSerializer ;
 	exports.DOMParser = DOMParser;
 //}
 
 
 /***/ }),
-/* 48 */
+/* 51 */
 /***/ (function(module, exports) {
 
 //[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
@@ -12343,18 +12812,18 @@ exports.XMLReader = XMLReader;
 
 
 /***/ }),
-/* 49 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var globals = __webpack_require__(29);
-var RGB = __webpack_require__(50);
-var RawDecoder = __webpack_require__(51);
-var LZWDecoder = __webpack_require__(52);
-var DeflateDecoder = __webpack_require__(53);
-var PackbitsDecoder = __webpack_require__(65);
+var globals = __webpack_require__(30);
+var RGB = __webpack_require__(53);
+var RawDecoder = __webpack_require__(54);
+var LZWDecoder = __webpack_require__(55);
+var DeflateDecoder = __webpack_require__(56);
+var PackbitsDecoder = __webpack_require__(68);
 
 var sum = function sum(array, start, end) {
   var s = 0;
@@ -13171,7 +13640,7 @@ GeoTIFFImage.prototype = {
 module.exports = GeoTIFFImage;
 
 /***/ }),
-/* 50 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13299,13 +13768,13 @@ module.exports = {
 };
 
 /***/ }),
-/* 51 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var AbstractDecoder = __webpack_require__(13);
+var AbstractDecoder = __webpack_require__(14);
 
 function RawDecoder() {}
 
@@ -13318,7 +13787,7 @@ RawDecoder.prototype.decodeBlock = function (buffer) {
 module.exports = RawDecoder;
 
 /***/ }),
-/* 52 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13326,7 +13795,7 @@ module.exports = RawDecoder;
 
 //var lzwCompress = require("lzwcompress");
 
-var AbstractDecoder = __webpack_require__(13);
+var AbstractDecoder = __webpack_require__(14);
 
 var MIN_BITS = 9;
 var MAX_BITS = 12;
@@ -13571,14 +14040,14 @@ LZWDecoder.prototype.decodeBlock = function (buffer) {
 module.exports = LZWDecoder;
 
 /***/ }),
-/* 53 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var AbstractDecoder = __webpack_require__(13);
-var pakoInflate = __webpack_require__(54).inflate;
+var AbstractDecoder = __webpack_require__(14);
+var pakoInflate = __webpack_require__(57).inflate;
 
 function DeflateDecoder() {}
 
@@ -13591,20 +14060,20 @@ DeflateDecoder.prototype.decodeBlock = function (buffer) {
 module.exports = DeflateDecoder;
 
 /***/ }),
-/* 54 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 
-var zlib_inflate = __webpack_require__(55);
-var utils        = __webpack_require__(14);
-var strings      = __webpack_require__(60);
-var c            = __webpack_require__(61);
-var msg          = __webpack_require__(62);
-var ZStream      = __webpack_require__(63);
-var GZheader     = __webpack_require__(64);
+var zlib_inflate = __webpack_require__(58);
+var utils        = __webpack_require__(15);
+var strings      = __webpack_require__(63);
+var c            = __webpack_require__(64);
+var msg          = __webpack_require__(65);
+var ZStream      = __webpack_require__(66);
+var GZheader     = __webpack_require__(67);
 
 var toString = Object.prototype.toString;
 
@@ -13619,7 +14088,7 @@ var toString = Object.prototype.toString;
 /* internal
  * inflate.chunks -> Array
  *
- * Chunks of output data, if [[Inflate#onData]] not overriden.
+ * Chunks of output data, if [[Inflate#onData]] not overridden.
  **/
 
 /**
@@ -13747,7 +14216,7 @@ function Inflate(options) {
  * Inflate#push(data[, mode]) -> Boolean
  * - data (Uint8Array|Array|ArrayBuffer|String): input data
  * - mode (Number|Boolean): 0..6 for corresponding Z_NO_FLUSH..Z_TREE modes.
- *   See constants. Skipped or `false` means Z_NO_FLUSH, `true` meansh Z_FINISH.
+ *   See constants. Skipped or `false` means Z_NO_FLUSH, `true` means Z_FINISH.
  *
  * Sends input data to inflate pipe, generating [[Inflate#onData]] calls with
  * new output chunks. Returns `true` on success. The last data block must have
@@ -13894,7 +14363,7 @@ Inflate.prototype.push = function (data, mode) {
 
 /**
  * Inflate#onData(chunk) -> Void
- * - chunk (Uint8Array|Array|String): ouput data. Type of array depends
+ * - chunk (Uint8Array|Array|String): output data. Type of array depends
  *   on js engine support. When string output requested, each chunk
  *   will be string.
  *
@@ -13921,7 +14390,7 @@ Inflate.prototype.onEnd = function (status) {
   if (status === c.Z_OK) {
     if (this.options.to === 'string') {
       // Glue & convert here, until we teach pako to send
-      // utf8 alligned strings to onData
+      // utf8 aligned strings to onData
       this.result = this.chunks.join('');
     } else {
       this.result = utils.flattenChunks(this.chunks);
@@ -14016,7 +14485,7 @@ exports.ungzip  = inflate;
 
 
 /***/ }),
-/* 55 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14041,11 +14510,11 @@ exports.ungzip  = inflate;
 //   misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 
-var utils         = __webpack_require__(14);
-var adler32       = __webpack_require__(56);
-var crc32         = __webpack_require__(57);
-var inflate_fast  = __webpack_require__(58);
-var inflate_table = __webpack_require__(59);
+var utils         = __webpack_require__(15);
+var adler32       = __webpack_require__(59);
+var crc32         = __webpack_require__(60);
+var inflate_fast  = __webpack_require__(61);
+var inflate_table = __webpack_require__(62);
 
 var CODES = 0;
 var LENS = 1;
@@ -14454,162 +14923,72 @@ function inflate(strm, flush) {
   inf_leave: // goto emulation
   for (;;) {
     switch (state.mode) {
-    case HEAD:
-      if (state.wrap === 0) {
-        state.mode = TYPEDO;
-        break;
-      }
-      //=== NEEDBITS(16);
-      while (bits < 16) {
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-      }
-      //===//
-      if ((state.wrap & 2) && hold === 0x8b1f) {  /* gzip header */
-        state.check = 0/*crc32(0L, Z_NULL, 0)*/;
-        //=== CRC2(state.check, hold);
-        hbuf[0] = hold & 0xff;
-        hbuf[1] = (hold >>> 8) & 0xff;
-        state.check = crc32(state.check, hbuf, 2, 0);
+      case HEAD:
+        if (state.wrap === 0) {
+          state.mode = TYPEDO;
+          break;
+        }
+        //=== NEEDBITS(16);
+        while (bits < 16) {
+          if (have === 0) { break inf_leave; }
+          have--;
+          hold += input[next++] << bits;
+          bits += 8;
+        }
         //===//
+        if ((state.wrap & 2) && hold === 0x8b1f) {  /* gzip header */
+          state.check = 0/*crc32(0L, Z_NULL, 0)*/;
+          //=== CRC2(state.check, hold);
+          hbuf[0] = hold & 0xff;
+          hbuf[1] = (hold >>> 8) & 0xff;
+          state.check = crc32(state.check, hbuf, 2, 0);
+          //===//
 
+          //=== INITBITS();
+          hold = 0;
+          bits = 0;
+          //===//
+          state.mode = FLAGS;
+          break;
+        }
+        state.flags = 0;           /* expect zlib header */
+        if (state.head) {
+          state.head.done = false;
+        }
+        if (!(state.wrap & 1) ||   /* check if zlib header allowed */
+          (((hold & 0xff)/*BITS(8)*/ << 8) + (hold >> 8)) % 31) {
+          strm.msg = 'incorrect header check';
+          state.mode = BAD;
+          break;
+        }
+        if ((hold & 0x0f)/*BITS(4)*/ !== Z_DEFLATED) {
+          strm.msg = 'unknown compression method';
+          state.mode = BAD;
+          break;
+        }
+        //--- DROPBITS(4) ---//
+        hold >>>= 4;
+        bits -= 4;
+        //---//
+        len = (hold & 0x0f)/*BITS(4)*/ + 8;
+        if (state.wbits === 0) {
+          state.wbits = len;
+        }
+        else if (len > state.wbits) {
+          strm.msg = 'invalid window size';
+          state.mode = BAD;
+          break;
+        }
+        state.dmax = 1 << len;
+        //Tracev((stderr, "inflate:   zlib header ok\n"));
+        strm.adler = state.check = 1/*adler32(0L, Z_NULL, 0)*/;
+        state.mode = hold & 0x200 ? DICTID : TYPE;
         //=== INITBITS();
         hold = 0;
         bits = 0;
         //===//
-        state.mode = FLAGS;
         break;
-      }
-      state.flags = 0;           /* expect zlib header */
-      if (state.head) {
-        state.head.done = false;
-      }
-      if (!(state.wrap & 1) ||   /* check if zlib header allowed */
-        (((hold & 0xff)/*BITS(8)*/ << 8) + (hold >> 8)) % 31) {
-        strm.msg = 'incorrect header check';
-        state.mode = BAD;
-        break;
-      }
-      if ((hold & 0x0f)/*BITS(4)*/ !== Z_DEFLATED) {
-        strm.msg = 'unknown compression method';
-        state.mode = BAD;
-        break;
-      }
-      //--- DROPBITS(4) ---//
-      hold >>>= 4;
-      bits -= 4;
-      //---//
-      len = (hold & 0x0f)/*BITS(4)*/ + 8;
-      if (state.wbits === 0) {
-        state.wbits = len;
-      }
-      else if (len > state.wbits) {
-        strm.msg = 'invalid window size';
-        state.mode = BAD;
-        break;
-      }
-      state.dmax = 1 << len;
-      //Tracev((stderr, "inflate:   zlib header ok\n"));
-      strm.adler = state.check = 1/*adler32(0L, Z_NULL, 0)*/;
-      state.mode = hold & 0x200 ? DICTID : TYPE;
-      //=== INITBITS();
-      hold = 0;
-      bits = 0;
-      //===//
-      break;
-    case FLAGS:
-      //=== NEEDBITS(16); */
-      while (bits < 16) {
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-      }
-      //===//
-      state.flags = hold;
-      if ((state.flags & 0xff) !== Z_DEFLATED) {
-        strm.msg = 'unknown compression method';
-        state.mode = BAD;
-        break;
-      }
-      if (state.flags & 0xe000) {
-        strm.msg = 'unknown header flags set';
-        state.mode = BAD;
-        break;
-      }
-      if (state.head) {
-        state.head.text = ((hold >> 8) & 1);
-      }
-      if (state.flags & 0x0200) {
-        //=== CRC2(state.check, hold);
-        hbuf[0] = hold & 0xff;
-        hbuf[1] = (hold >>> 8) & 0xff;
-        state.check = crc32(state.check, hbuf, 2, 0);
-        //===//
-      }
-      //=== INITBITS();
-      hold = 0;
-      bits = 0;
-      //===//
-      state.mode = TIME;
-      /* falls through */
-    case TIME:
-      //=== NEEDBITS(32); */
-      while (bits < 32) {
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-      }
-      //===//
-      if (state.head) {
-        state.head.time = hold;
-      }
-      if (state.flags & 0x0200) {
-        //=== CRC4(state.check, hold)
-        hbuf[0] = hold & 0xff;
-        hbuf[1] = (hold >>> 8) & 0xff;
-        hbuf[2] = (hold >>> 16) & 0xff;
-        hbuf[3] = (hold >>> 24) & 0xff;
-        state.check = crc32(state.check, hbuf, 4, 0);
-        //===
-      }
-      //=== INITBITS();
-      hold = 0;
-      bits = 0;
-      //===//
-      state.mode = OS;
-      /* falls through */
-    case OS:
-      //=== NEEDBITS(16); */
-      while (bits < 16) {
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-      }
-      //===//
-      if (state.head) {
-        state.head.xflags = (hold & 0xff);
-        state.head.os = (hold >> 8);
-      }
-      if (state.flags & 0x0200) {
-        //=== CRC2(state.check, hold);
-        hbuf[0] = hold & 0xff;
-        hbuf[1] = (hold >>> 8) & 0xff;
-        state.check = crc32(state.check, hbuf, 2, 0);
-        //===//
-      }
-      //=== INITBITS();
-      hold = 0;
-      bits = 0;
-      //===//
-      state.mode = EXLEN;
-      /* falls through */
-    case EXLEN:
-      if (state.flags & 0x0400) {
+      case FLAGS:
         //=== NEEDBITS(16); */
         while (bits < 16) {
           if (have === 0) { break inf_leave; }
@@ -14618,9 +14997,19 @@ function inflate(strm, flush) {
           bits += 8;
         }
         //===//
-        state.length = hold;
+        state.flags = hold;
+        if ((state.flags & 0xff) !== Z_DEFLATED) {
+          strm.msg = 'unknown compression method';
+          state.mode = BAD;
+          break;
+        }
+        if (state.flags & 0xe000) {
+          strm.msg = 'unknown header flags set';
+          state.mode = BAD;
+          break;
+        }
         if (state.head) {
-          state.head.extra_len = hold;
+          state.head.text = ((hold >> 8) & 1);
         }
         if (state.flags & 0x0200) {
           //=== CRC2(state.check, hold);
@@ -14633,102 +15022,36 @@ function inflate(strm, flush) {
         hold = 0;
         bits = 0;
         //===//
-      }
-      else if (state.head) {
-        state.head.extra = null/*Z_NULL*/;
-      }
-      state.mode = EXTRA;
-      /* falls through */
-    case EXTRA:
-      if (state.flags & 0x0400) {
-        copy = state.length;
-        if (copy > have) { copy = have; }
-        if (copy) {
-          if (state.head) {
-            len = state.head.extra_len - state.length;
-            if (!state.head.extra) {
-              // Use untyped array for more conveniend processing later
-              state.head.extra = new Array(state.head.extra_len);
-            }
-            utils.arraySet(
-              state.head.extra,
-              input,
-              next,
-              // extra field is limited to 65536 bytes
-              // - no need for additional size check
-              copy,
-              /*len + copy > state.head.extra_max - len ? state.head.extra_max : copy,*/
-              len
-            );
-            //zmemcpy(state.head.extra + len, next,
-            //        len + copy > state.head.extra_max ?
-            //        state.head.extra_max - len : copy);
-          }
-          if (state.flags & 0x0200) {
-            state.check = crc32(state.check, input, copy, next);
-          }
-          have -= copy;
-          next += copy;
-          state.length -= copy;
+        state.mode = TIME;
+        /* falls through */
+      case TIME:
+        //=== NEEDBITS(32); */
+        while (bits < 32) {
+          if (have === 0) { break inf_leave; }
+          have--;
+          hold += input[next++] << bits;
+          bits += 8;
         }
-        if (state.length) { break inf_leave; }
-      }
-      state.length = 0;
-      state.mode = NAME;
-      /* falls through */
-    case NAME:
-      if (state.flags & 0x0800) {
-        if (have === 0) { break inf_leave; }
-        copy = 0;
-        do {
-          // TODO: 2 or 1 bytes?
-          len = input[next + copy++];
-          /* use constant limit because in js we should not preallocate memory */
-          if (state.head && len &&
-              (state.length < 65536 /*state.head.name_max*/)) {
-            state.head.name += String.fromCharCode(len);
-          }
-        } while (len && copy < have);
-
+        //===//
+        if (state.head) {
+          state.head.time = hold;
+        }
         if (state.flags & 0x0200) {
-          state.check = crc32(state.check, input, copy, next);
+          //=== CRC4(state.check, hold)
+          hbuf[0] = hold & 0xff;
+          hbuf[1] = (hold >>> 8) & 0xff;
+          hbuf[2] = (hold >>> 16) & 0xff;
+          hbuf[3] = (hold >>> 24) & 0xff;
+          state.check = crc32(state.check, hbuf, 4, 0);
+          //===
         }
-        have -= copy;
-        next += copy;
-        if (len) { break inf_leave; }
-      }
-      else if (state.head) {
-        state.head.name = null;
-      }
-      state.length = 0;
-      state.mode = COMMENT;
-      /* falls through */
-    case COMMENT:
-      if (state.flags & 0x1000) {
-        if (have === 0) { break inf_leave; }
-        copy = 0;
-        do {
-          len = input[next + copy++];
-          /* use constant limit because in js we should not preallocate memory */
-          if (state.head && len &&
-              (state.length < 65536 /*state.head.comm_max*/)) {
-            state.head.comment += String.fromCharCode(len);
-          }
-        } while (len && copy < have);
-        if (state.flags & 0x0200) {
-          state.check = crc32(state.check, input, copy, next);
-        }
-        have -= copy;
-        next += copy;
-        if (len) { break inf_leave; }
-      }
-      else if (state.head) {
-        state.head.comment = null;
-      }
-      state.mode = HCRC;
-      /* falls through */
-    case HCRC:
-      if (state.flags & 0x0200) {
+        //=== INITBITS();
+        hold = 0;
+        bits = 0;
+        //===//
+        state.mode = OS;
+        /* falls through */
+      case OS:
         //=== NEEDBITS(16); */
         while (bits < 16) {
           if (have === 0) { break inf_leave; }
@@ -14737,201 +15060,213 @@ function inflate(strm, flush) {
           bits += 8;
         }
         //===//
-        if (hold !== (state.check & 0xffff)) {
-          strm.msg = 'header crc mismatch';
-          state.mode = BAD;
-          break;
+        if (state.head) {
+          state.head.xflags = (hold & 0xff);
+          state.head.os = (hold >> 8);
+        }
+        if (state.flags & 0x0200) {
+          //=== CRC2(state.check, hold);
+          hbuf[0] = hold & 0xff;
+          hbuf[1] = (hold >>> 8) & 0xff;
+          state.check = crc32(state.check, hbuf, 2, 0);
+          //===//
         }
         //=== INITBITS();
         hold = 0;
         bits = 0;
         //===//
-      }
-      if (state.head) {
-        state.head.hcrc = ((state.flags >> 9) & 1);
-        state.head.done = true;
-      }
-      strm.adler = state.check = 0;
-      state.mode = TYPE;
-      break;
-    case DICTID:
-      //=== NEEDBITS(32); */
-      while (bits < 32) {
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-      }
-      //===//
-      strm.adler = state.check = zswap32(hold);
-      //=== INITBITS();
-      hold = 0;
-      bits = 0;
-      //===//
-      state.mode = DICT;
-      /* falls through */
-    case DICT:
-      if (state.havedict === 0) {
-        //--- RESTORE() ---
-        strm.next_out = put;
-        strm.avail_out = left;
-        strm.next_in = next;
-        strm.avail_in = have;
-        state.hold = hold;
-        state.bits = bits;
-        //---
-        return Z_NEED_DICT;
-      }
-      strm.adler = state.check = 1/*adler32(0L, Z_NULL, 0)*/;
-      state.mode = TYPE;
-      /* falls through */
-    case TYPE:
-      if (flush === Z_BLOCK || flush === Z_TREES) { break inf_leave; }
-      /* falls through */
-    case TYPEDO:
-      if (state.last) {
-        //--- BYTEBITS() ---//
-        hold >>>= bits & 7;
-        bits -= bits & 7;
-        //---//
-        state.mode = CHECK;
-        break;
-      }
-      //=== NEEDBITS(3); */
-      while (bits < 3) {
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-      }
-      //===//
-      state.last = (hold & 0x01)/*BITS(1)*/;
-      //--- DROPBITS(1) ---//
-      hold >>>= 1;
-      bits -= 1;
-      //---//
-
-      switch ((hold & 0x03)/*BITS(2)*/) {
-      case 0:                             /* stored block */
-        //Tracev((stderr, "inflate:     stored block%s\n",
-        //        state.last ? " (last)" : ""));
-        state.mode = STORED;
-        break;
-      case 1:                             /* fixed block */
-        fixedtables(state);
-        //Tracev((stderr, "inflate:     fixed codes block%s\n",
-        //        state.last ? " (last)" : ""));
-        state.mode = LEN_;             /* decode codes */
-        if (flush === Z_TREES) {
-          //--- DROPBITS(2) ---//
-          hold >>>= 2;
-          bits -= 2;
-          //---//
-          break inf_leave;
+        state.mode = EXLEN;
+        /* falls through */
+      case EXLEN:
+        if (state.flags & 0x0400) {
+          //=== NEEDBITS(16); */
+          while (bits < 16) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          state.length = hold;
+          if (state.head) {
+            state.head.extra_len = hold;
+          }
+          if (state.flags & 0x0200) {
+            //=== CRC2(state.check, hold);
+            hbuf[0] = hold & 0xff;
+            hbuf[1] = (hold >>> 8) & 0xff;
+            state.check = crc32(state.check, hbuf, 2, 0);
+            //===//
+          }
+          //=== INITBITS();
+          hold = 0;
+          bits = 0;
+          //===//
         }
+        else if (state.head) {
+          state.head.extra = null/*Z_NULL*/;
+        }
+        state.mode = EXTRA;
+        /* falls through */
+      case EXTRA:
+        if (state.flags & 0x0400) {
+          copy = state.length;
+          if (copy > have) { copy = have; }
+          if (copy) {
+            if (state.head) {
+              len = state.head.extra_len - state.length;
+              if (!state.head.extra) {
+                // Use untyped array for more convenient processing later
+                state.head.extra = new Array(state.head.extra_len);
+              }
+              utils.arraySet(
+                state.head.extra,
+                input,
+                next,
+                // extra field is limited to 65536 bytes
+                // - no need for additional size check
+                copy,
+                /*len + copy > state.head.extra_max - len ? state.head.extra_max : copy,*/
+                len
+              );
+              //zmemcpy(state.head.extra + len, next,
+              //        len + copy > state.head.extra_max ?
+              //        state.head.extra_max - len : copy);
+            }
+            if (state.flags & 0x0200) {
+              state.check = crc32(state.check, input, copy, next);
+            }
+            have -= copy;
+            next += copy;
+            state.length -= copy;
+          }
+          if (state.length) { break inf_leave; }
+        }
+        state.length = 0;
+        state.mode = NAME;
+        /* falls through */
+      case NAME:
+        if (state.flags & 0x0800) {
+          if (have === 0) { break inf_leave; }
+          copy = 0;
+          do {
+            // TODO: 2 or 1 bytes?
+            len = input[next + copy++];
+            /* use constant limit because in js we should not preallocate memory */
+            if (state.head && len &&
+                (state.length < 65536 /*state.head.name_max*/)) {
+              state.head.name += String.fromCharCode(len);
+            }
+          } while (len && copy < have);
+
+          if (state.flags & 0x0200) {
+            state.check = crc32(state.check, input, copy, next);
+          }
+          have -= copy;
+          next += copy;
+          if (len) { break inf_leave; }
+        }
+        else if (state.head) {
+          state.head.name = null;
+        }
+        state.length = 0;
+        state.mode = COMMENT;
+        /* falls through */
+      case COMMENT:
+        if (state.flags & 0x1000) {
+          if (have === 0) { break inf_leave; }
+          copy = 0;
+          do {
+            len = input[next + copy++];
+            /* use constant limit because in js we should not preallocate memory */
+            if (state.head && len &&
+                (state.length < 65536 /*state.head.comm_max*/)) {
+              state.head.comment += String.fromCharCode(len);
+            }
+          } while (len && copy < have);
+          if (state.flags & 0x0200) {
+            state.check = crc32(state.check, input, copy, next);
+          }
+          have -= copy;
+          next += copy;
+          if (len) { break inf_leave; }
+        }
+        else if (state.head) {
+          state.head.comment = null;
+        }
+        state.mode = HCRC;
+        /* falls through */
+      case HCRC:
+        if (state.flags & 0x0200) {
+          //=== NEEDBITS(16); */
+          while (bits < 16) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          if (hold !== (state.check & 0xffff)) {
+            strm.msg = 'header crc mismatch';
+            state.mode = BAD;
+            break;
+          }
+          //=== INITBITS();
+          hold = 0;
+          bits = 0;
+          //===//
+        }
+        if (state.head) {
+          state.head.hcrc = ((state.flags >> 9) & 1);
+          state.head.done = true;
+        }
+        strm.adler = state.check = 0;
+        state.mode = TYPE;
         break;
-      case 2:                             /* dynamic block */
-        //Tracev((stderr, "inflate:     dynamic codes block%s\n",
-        //        state.last ? " (last)" : ""));
-        state.mode = TABLE;
-        break;
-      case 3:
-        strm.msg = 'invalid block type';
-        state.mode = BAD;
-      }
-      //--- DROPBITS(2) ---//
-      hold >>>= 2;
-      bits -= 2;
-      //---//
-      break;
-    case STORED:
-      //--- BYTEBITS() ---// /* go to byte boundary */
-      hold >>>= bits & 7;
-      bits -= bits & 7;
-      //---//
-      //=== NEEDBITS(32); */
-      while (bits < 32) {
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-      }
-      //===//
-      if ((hold & 0xffff) !== ((hold >>> 16) ^ 0xffff)) {
-        strm.msg = 'invalid stored block lengths';
-        state.mode = BAD;
-        break;
-      }
-      state.length = hold & 0xffff;
-      //Tracev((stderr, "inflate:       stored length %u\n",
-      //        state.length));
-      //=== INITBITS();
-      hold = 0;
-      bits = 0;
-      //===//
-      state.mode = COPY_;
-      if (flush === Z_TREES) { break inf_leave; }
-      /* falls through */
-    case COPY_:
-      state.mode = COPY;
-      /* falls through */
-    case COPY:
-      copy = state.length;
-      if (copy) {
-        if (copy > have) { copy = have; }
-        if (copy > left) { copy = left; }
-        if (copy === 0) { break inf_leave; }
-        //--- zmemcpy(put, next, copy); ---
-        utils.arraySet(output, input, next, copy, put);
-        //---//
-        have -= copy;
-        next += copy;
-        left -= copy;
-        put += copy;
-        state.length -= copy;
-        break;
-      }
-      //Tracev((stderr, "inflate:       stored end\n"));
-      state.mode = TYPE;
-      break;
-    case TABLE:
-      //=== NEEDBITS(14); */
-      while (bits < 14) {
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-      }
-      //===//
-      state.nlen = (hold & 0x1f)/*BITS(5)*/ + 257;
-      //--- DROPBITS(5) ---//
-      hold >>>= 5;
-      bits -= 5;
-      //---//
-      state.ndist = (hold & 0x1f)/*BITS(5)*/ + 1;
-      //--- DROPBITS(5) ---//
-      hold >>>= 5;
-      bits -= 5;
-      //---//
-      state.ncode = (hold & 0x0f)/*BITS(4)*/ + 4;
-      //--- DROPBITS(4) ---//
-      hold >>>= 4;
-      bits -= 4;
-      //---//
-//#ifndef PKZIP_BUG_WORKAROUND
-      if (state.nlen > 286 || state.ndist > 30) {
-        strm.msg = 'too many length or distance symbols';
-        state.mode = BAD;
-        break;
-      }
-//#endif
-      //Tracev((stderr, "inflate:       table sizes ok\n"));
-      state.have = 0;
-      state.mode = LENLENS;
-      /* falls through */
-    case LENLENS:
-      while (state.have < state.ncode) {
-        //=== NEEDBITS(3);
+      case DICTID:
+        //=== NEEDBITS(32); */
+        while (bits < 32) {
+          if (have === 0) { break inf_leave; }
+          have--;
+          hold += input[next++] << bits;
+          bits += 8;
+        }
+        //===//
+        strm.adler = state.check = zswap32(hold);
+        //=== INITBITS();
+        hold = 0;
+        bits = 0;
+        //===//
+        state.mode = DICT;
+        /* falls through */
+      case DICT:
+        if (state.havedict === 0) {
+          //--- RESTORE() ---
+          strm.next_out = put;
+          strm.avail_out = left;
+          strm.next_in = next;
+          strm.avail_in = have;
+          state.hold = hold;
+          state.bits = bits;
+          //---
+          return Z_NEED_DICT;
+        }
+        strm.adler = state.check = 1/*adler32(0L, Z_NULL, 0)*/;
+        state.mode = TYPE;
+        /* falls through */
+      case TYPE:
+        if (flush === Z_BLOCK || flush === Z_TREES) { break inf_leave; }
+        /* falls through */
+      case TYPEDO:
+        if (state.last) {
+          //--- BYTEBITS() ---//
+          hold >>>= bits & 7;
+          bits -= bits & 7;
+          //---//
+          state.mode = CHECK;
+          break;
+        }
+        //=== NEEDBITS(3); */
         while (bits < 3) {
           if (have === 0) { break inf_leave; }
           have--;
@@ -14939,39 +15274,442 @@ function inflate(strm, flush) {
           bits += 8;
         }
         //===//
-        state.lens[order[state.have++]] = (hold & 0x07);//BITS(3);
-        //--- DROPBITS(3) ---//
-        hold >>>= 3;
-        bits -= 3;
+        state.last = (hold & 0x01)/*BITS(1)*/;
+        //--- DROPBITS(1) ---//
+        hold >>>= 1;
+        bits -= 1;
         //---//
-      }
-      while (state.have < 19) {
-        state.lens[order[state.have++]] = 0;
-      }
-      // We have separate tables & no pointers. 2 commented lines below not needed.
-      //state.next = state.codes;
-      //state.lencode = state.next;
-      // Switch to use dynamic table
-      state.lencode = state.lendyn;
-      state.lenbits = 7;
 
-      opts = { bits: state.lenbits };
-      ret = inflate_table(CODES, state.lens, 0, 19, state.lencode, 0, state.work, opts);
-      state.lenbits = opts.bits;
-
-      if (ret) {
-        strm.msg = 'invalid code lengths set';
-        state.mode = BAD;
+        switch ((hold & 0x03)/*BITS(2)*/) {
+          case 0:                             /* stored block */
+            //Tracev((stderr, "inflate:     stored block%s\n",
+            //        state.last ? " (last)" : ""));
+            state.mode = STORED;
+            break;
+          case 1:                             /* fixed block */
+            fixedtables(state);
+            //Tracev((stderr, "inflate:     fixed codes block%s\n",
+            //        state.last ? " (last)" : ""));
+            state.mode = LEN_;             /* decode codes */
+            if (flush === Z_TREES) {
+              //--- DROPBITS(2) ---//
+              hold >>>= 2;
+              bits -= 2;
+              //---//
+              break inf_leave;
+            }
+            break;
+          case 2:                             /* dynamic block */
+            //Tracev((stderr, "inflate:     dynamic codes block%s\n",
+            //        state.last ? " (last)" : ""));
+            state.mode = TABLE;
+            break;
+          case 3:
+            strm.msg = 'invalid block type';
+            state.mode = BAD;
+        }
+        //--- DROPBITS(2) ---//
+        hold >>>= 2;
+        bits -= 2;
+        //---//
         break;
-      }
-      //Tracev((stderr, "inflate:       code lengths ok\n"));
-      state.have = 0;
-      state.mode = CODELENS;
-      /* falls through */
-    case CODELENS:
-      while (state.have < state.nlen + state.ndist) {
+      case STORED:
+        //--- BYTEBITS() ---// /* go to byte boundary */
+        hold >>>= bits & 7;
+        bits -= bits & 7;
+        //---//
+        //=== NEEDBITS(32); */
+        while (bits < 32) {
+          if (have === 0) { break inf_leave; }
+          have--;
+          hold += input[next++] << bits;
+          bits += 8;
+        }
+        //===//
+        if ((hold & 0xffff) !== ((hold >>> 16) ^ 0xffff)) {
+          strm.msg = 'invalid stored block lengths';
+          state.mode = BAD;
+          break;
+        }
+        state.length = hold & 0xffff;
+        //Tracev((stderr, "inflate:       stored length %u\n",
+        //        state.length));
+        //=== INITBITS();
+        hold = 0;
+        bits = 0;
+        //===//
+        state.mode = COPY_;
+        if (flush === Z_TREES) { break inf_leave; }
+        /* falls through */
+      case COPY_:
+        state.mode = COPY;
+        /* falls through */
+      case COPY:
+        copy = state.length;
+        if (copy) {
+          if (copy > have) { copy = have; }
+          if (copy > left) { copy = left; }
+          if (copy === 0) { break inf_leave; }
+          //--- zmemcpy(put, next, copy); ---
+          utils.arraySet(output, input, next, copy, put);
+          //---//
+          have -= copy;
+          next += copy;
+          left -= copy;
+          put += copy;
+          state.length -= copy;
+          break;
+        }
+        //Tracev((stderr, "inflate:       stored end\n"));
+        state.mode = TYPE;
+        break;
+      case TABLE:
+        //=== NEEDBITS(14); */
+        while (bits < 14) {
+          if (have === 0) { break inf_leave; }
+          have--;
+          hold += input[next++] << bits;
+          bits += 8;
+        }
+        //===//
+        state.nlen = (hold & 0x1f)/*BITS(5)*/ + 257;
+        //--- DROPBITS(5) ---//
+        hold >>>= 5;
+        bits -= 5;
+        //---//
+        state.ndist = (hold & 0x1f)/*BITS(5)*/ + 1;
+        //--- DROPBITS(5) ---//
+        hold >>>= 5;
+        bits -= 5;
+        //---//
+        state.ncode = (hold & 0x0f)/*BITS(4)*/ + 4;
+        //--- DROPBITS(4) ---//
+        hold >>>= 4;
+        bits -= 4;
+        //---//
+//#ifndef PKZIP_BUG_WORKAROUND
+        if (state.nlen > 286 || state.ndist > 30) {
+          strm.msg = 'too many length or distance symbols';
+          state.mode = BAD;
+          break;
+        }
+//#endif
+        //Tracev((stderr, "inflate:       table sizes ok\n"));
+        state.have = 0;
+        state.mode = LENLENS;
+        /* falls through */
+      case LENLENS:
+        while (state.have < state.ncode) {
+          //=== NEEDBITS(3);
+          while (bits < 3) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          state.lens[order[state.have++]] = (hold & 0x07);//BITS(3);
+          //--- DROPBITS(3) ---//
+          hold >>>= 3;
+          bits -= 3;
+          //---//
+        }
+        while (state.have < 19) {
+          state.lens[order[state.have++]] = 0;
+        }
+        // We have separate tables & no pointers. 2 commented lines below not needed.
+        //state.next = state.codes;
+        //state.lencode = state.next;
+        // Switch to use dynamic table
+        state.lencode = state.lendyn;
+        state.lenbits = 7;
+
+        opts = { bits: state.lenbits };
+        ret = inflate_table(CODES, state.lens, 0, 19, state.lencode, 0, state.work, opts);
+        state.lenbits = opts.bits;
+
+        if (ret) {
+          strm.msg = 'invalid code lengths set';
+          state.mode = BAD;
+          break;
+        }
+        //Tracev((stderr, "inflate:       code lengths ok\n"));
+        state.have = 0;
+        state.mode = CODELENS;
+        /* falls through */
+      case CODELENS:
+        while (state.have < state.nlen + state.ndist) {
+          for (;;) {
+            here = state.lencode[hold & ((1 << state.lenbits) - 1)];/*BITS(state.lenbits)*/
+            here_bits = here >>> 24;
+            here_op = (here >>> 16) & 0xff;
+            here_val = here & 0xffff;
+
+            if ((here_bits) <= bits) { break; }
+            //--- PULLBYTE() ---//
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+            //---//
+          }
+          if (here_val < 16) {
+            //--- DROPBITS(here.bits) ---//
+            hold >>>= here_bits;
+            bits -= here_bits;
+            //---//
+            state.lens[state.have++] = here_val;
+          }
+          else {
+            if (here_val === 16) {
+              //=== NEEDBITS(here.bits + 2);
+              n = here_bits + 2;
+              while (bits < n) {
+                if (have === 0) { break inf_leave; }
+                have--;
+                hold += input[next++] << bits;
+                bits += 8;
+              }
+              //===//
+              //--- DROPBITS(here.bits) ---//
+              hold >>>= here_bits;
+              bits -= here_bits;
+              //---//
+              if (state.have === 0) {
+                strm.msg = 'invalid bit length repeat';
+                state.mode = BAD;
+                break;
+              }
+              len = state.lens[state.have - 1];
+              copy = 3 + (hold & 0x03);//BITS(2);
+              //--- DROPBITS(2) ---//
+              hold >>>= 2;
+              bits -= 2;
+              //---//
+            }
+            else if (here_val === 17) {
+              //=== NEEDBITS(here.bits + 3);
+              n = here_bits + 3;
+              while (bits < n) {
+                if (have === 0) { break inf_leave; }
+                have--;
+                hold += input[next++] << bits;
+                bits += 8;
+              }
+              //===//
+              //--- DROPBITS(here.bits) ---//
+              hold >>>= here_bits;
+              bits -= here_bits;
+              //---//
+              len = 0;
+              copy = 3 + (hold & 0x07);//BITS(3);
+              //--- DROPBITS(3) ---//
+              hold >>>= 3;
+              bits -= 3;
+              //---//
+            }
+            else {
+              //=== NEEDBITS(here.bits + 7);
+              n = here_bits + 7;
+              while (bits < n) {
+                if (have === 0) { break inf_leave; }
+                have--;
+                hold += input[next++] << bits;
+                bits += 8;
+              }
+              //===//
+              //--- DROPBITS(here.bits) ---//
+              hold >>>= here_bits;
+              bits -= here_bits;
+              //---//
+              len = 0;
+              copy = 11 + (hold & 0x7f);//BITS(7);
+              //--- DROPBITS(7) ---//
+              hold >>>= 7;
+              bits -= 7;
+              //---//
+            }
+            if (state.have + copy > state.nlen + state.ndist) {
+              strm.msg = 'invalid bit length repeat';
+              state.mode = BAD;
+              break;
+            }
+            while (copy--) {
+              state.lens[state.have++] = len;
+            }
+          }
+        }
+
+        /* handle error breaks in while */
+        if (state.mode === BAD) { break; }
+
+        /* check for end-of-block code (better have one) */
+        if (state.lens[256] === 0) {
+          strm.msg = 'invalid code -- missing end-of-block';
+          state.mode = BAD;
+          break;
+        }
+
+        /* build code tables -- note: do not change the lenbits or distbits
+           values here (9 and 6) without reading the comments in inftrees.h
+           concerning the ENOUGH constants, which depend on those values */
+        state.lenbits = 9;
+
+        opts = { bits: state.lenbits };
+        ret = inflate_table(LENS, state.lens, 0, state.nlen, state.lencode, 0, state.work, opts);
+        // We have separate tables & no pointers. 2 commented lines below not needed.
+        // state.next_index = opts.table_index;
+        state.lenbits = opts.bits;
+        // state.lencode = state.next;
+
+        if (ret) {
+          strm.msg = 'invalid literal/lengths set';
+          state.mode = BAD;
+          break;
+        }
+
+        state.distbits = 6;
+        //state.distcode.copy(state.codes);
+        // Switch to use dynamic table
+        state.distcode = state.distdyn;
+        opts = { bits: state.distbits };
+        ret = inflate_table(DISTS, state.lens, state.nlen, state.ndist, state.distcode, 0, state.work, opts);
+        // We have separate tables & no pointers. 2 commented lines below not needed.
+        // state.next_index = opts.table_index;
+        state.distbits = opts.bits;
+        // state.distcode = state.next;
+
+        if (ret) {
+          strm.msg = 'invalid distances set';
+          state.mode = BAD;
+          break;
+        }
+        //Tracev((stderr, 'inflate:       codes ok\n'));
+        state.mode = LEN_;
+        if (flush === Z_TREES) { break inf_leave; }
+        /* falls through */
+      case LEN_:
+        state.mode = LEN;
+        /* falls through */
+      case LEN:
+        if (have >= 6 && left >= 258) {
+          //--- RESTORE() ---
+          strm.next_out = put;
+          strm.avail_out = left;
+          strm.next_in = next;
+          strm.avail_in = have;
+          state.hold = hold;
+          state.bits = bits;
+          //---
+          inflate_fast(strm, _out);
+          //--- LOAD() ---
+          put = strm.next_out;
+          output = strm.output;
+          left = strm.avail_out;
+          next = strm.next_in;
+          input = strm.input;
+          have = strm.avail_in;
+          hold = state.hold;
+          bits = state.bits;
+          //---
+
+          if (state.mode === TYPE) {
+            state.back = -1;
+          }
+          break;
+        }
+        state.back = 0;
         for (;;) {
-          here = state.lencode[hold & ((1 << state.lenbits) - 1)];/*BITS(state.lenbits)*/
+          here = state.lencode[hold & ((1 << state.lenbits) - 1)];  /*BITS(state.lenbits)*/
+          here_bits = here >>> 24;
+          here_op = (here >>> 16) & 0xff;
+          here_val = here & 0xffff;
+
+          if (here_bits <= bits) { break; }
+          //--- PULLBYTE() ---//
+          if (have === 0) { break inf_leave; }
+          have--;
+          hold += input[next++] << bits;
+          bits += 8;
+          //---//
+        }
+        if (here_op && (here_op & 0xf0) === 0) {
+          last_bits = here_bits;
+          last_op = here_op;
+          last_val = here_val;
+          for (;;) {
+            here = state.lencode[last_val +
+                    ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
+            here_bits = here >>> 24;
+            here_op = (here >>> 16) & 0xff;
+            here_val = here & 0xffff;
+
+            if ((last_bits + here_bits) <= bits) { break; }
+            //--- PULLBYTE() ---//
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+            //---//
+          }
+          //--- DROPBITS(last.bits) ---//
+          hold >>>= last_bits;
+          bits -= last_bits;
+          //---//
+          state.back += last_bits;
+        }
+        //--- DROPBITS(here.bits) ---//
+        hold >>>= here_bits;
+        bits -= here_bits;
+        //---//
+        state.back += here_bits;
+        state.length = here_val;
+        if (here_op === 0) {
+          //Tracevv((stderr, here.val >= 0x20 && here.val < 0x7f ?
+          //        "inflate:         literal '%c'\n" :
+          //        "inflate:         literal 0x%02x\n", here.val));
+          state.mode = LIT;
+          break;
+        }
+        if (here_op & 32) {
+          //Tracevv((stderr, "inflate:         end of block\n"));
+          state.back = -1;
+          state.mode = TYPE;
+          break;
+        }
+        if (here_op & 64) {
+          strm.msg = 'invalid literal/length code';
+          state.mode = BAD;
+          break;
+        }
+        state.extra = here_op & 15;
+        state.mode = LENEXT;
+        /* falls through */
+      case LENEXT:
+        if (state.extra) {
+          //=== NEEDBITS(state.extra);
+          n = state.extra;
+          while (bits < n) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          state.length += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
+          //--- DROPBITS(state.extra) ---//
+          hold >>>= state.extra;
+          bits -= state.extra;
+          //---//
+          state.back += state.extra;
+        }
+        //Tracevv((stderr, "inflate:         length %u\n", state.length));
+        state.was = state.length;
+        state.mode = DIST;
+        /* falls through */
+      case DIST:
+        for (;;) {
+          here = state.distcode[hold & ((1 << state.distbits) - 1)];/*BITS(state.distbits)*/
           here_bits = here >>> 24;
           here_op = (here >>> 16) & 0xff;
           here_val = here & 0xffff;
@@ -14984,354 +15722,85 @@ function inflate(strm, flush) {
           bits += 8;
           //---//
         }
-        if (here_val < 16) {
-          //--- DROPBITS(here.bits) ---//
-          hold >>>= here_bits;
-          bits -= here_bits;
-          //---//
-          state.lens[state.have++] = here_val;
-        }
-        else {
-          if (here_val === 16) {
-            //=== NEEDBITS(here.bits + 2);
-            n = here_bits + 2;
-            while (bits < n) {
-              if (have === 0) { break inf_leave; }
-              have--;
-              hold += input[next++] << bits;
-              bits += 8;
-            }
-            //===//
-            //--- DROPBITS(here.bits) ---//
-            hold >>>= here_bits;
-            bits -= here_bits;
+        if ((here_op & 0xf0) === 0) {
+          last_bits = here_bits;
+          last_op = here_op;
+          last_val = here_val;
+          for (;;) {
+            here = state.distcode[last_val +
+                    ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
+            here_bits = here >>> 24;
+            here_op = (here >>> 16) & 0xff;
+            here_val = here & 0xffff;
+
+            if ((last_bits + here_bits) <= bits) { break; }
+            //--- PULLBYTE() ---//
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
             //---//
-            if (state.have === 0) {
-              strm.msg = 'invalid bit length repeat';
+          }
+          //--- DROPBITS(last.bits) ---//
+          hold >>>= last_bits;
+          bits -= last_bits;
+          //---//
+          state.back += last_bits;
+        }
+        //--- DROPBITS(here.bits) ---//
+        hold >>>= here_bits;
+        bits -= here_bits;
+        //---//
+        state.back += here_bits;
+        if (here_op & 64) {
+          strm.msg = 'invalid distance code';
+          state.mode = BAD;
+          break;
+        }
+        state.offset = here_val;
+        state.extra = (here_op) & 15;
+        state.mode = DISTEXT;
+        /* falls through */
+      case DISTEXT:
+        if (state.extra) {
+          //=== NEEDBITS(state.extra);
+          n = state.extra;
+          while (bits < n) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          state.offset += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
+          //--- DROPBITS(state.extra) ---//
+          hold >>>= state.extra;
+          bits -= state.extra;
+          //---//
+          state.back += state.extra;
+        }
+//#ifdef INFLATE_STRICT
+        if (state.offset > state.dmax) {
+          strm.msg = 'invalid distance too far back';
+          state.mode = BAD;
+          break;
+        }
+//#endif
+        //Tracevv((stderr, "inflate:         distance %u\n", state.offset));
+        state.mode = MATCH;
+        /* falls through */
+      case MATCH:
+        if (left === 0) { break inf_leave; }
+        copy = _out - left;
+        if (state.offset > copy) {         /* copy from window */
+          copy = state.offset - copy;
+          if (copy > state.whave) {
+            if (state.sane) {
+              strm.msg = 'invalid distance too far back';
               state.mode = BAD;
               break;
             }
-            len = state.lens[state.have - 1];
-            copy = 3 + (hold & 0x03);//BITS(2);
-            //--- DROPBITS(2) ---//
-            hold >>>= 2;
-            bits -= 2;
-            //---//
-          }
-          else if (here_val === 17) {
-            //=== NEEDBITS(here.bits + 3);
-            n = here_bits + 3;
-            while (bits < n) {
-              if (have === 0) { break inf_leave; }
-              have--;
-              hold += input[next++] << bits;
-              bits += 8;
-            }
-            //===//
-            //--- DROPBITS(here.bits) ---//
-            hold >>>= here_bits;
-            bits -= here_bits;
-            //---//
-            len = 0;
-            copy = 3 + (hold & 0x07);//BITS(3);
-            //--- DROPBITS(3) ---//
-            hold >>>= 3;
-            bits -= 3;
-            //---//
-          }
-          else {
-            //=== NEEDBITS(here.bits + 7);
-            n = here_bits + 7;
-            while (bits < n) {
-              if (have === 0) { break inf_leave; }
-              have--;
-              hold += input[next++] << bits;
-              bits += 8;
-            }
-            //===//
-            //--- DROPBITS(here.bits) ---//
-            hold >>>= here_bits;
-            bits -= here_bits;
-            //---//
-            len = 0;
-            copy = 11 + (hold & 0x7f);//BITS(7);
-            //--- DROPBITS(7) ---//
-            hold >>>= 7;
-            bits -= 7;
-            //---//
-          }
-          if (state.have + copy > state.nlen + state.ndist) {
-            strm.msg = 'invalid bit length repeat';
-            state.mode = BAD;
-            break;
-          }
-          while (copy--) {
-            state.lens[state.have++] = len;
-          }
-        }
-      }
-
-      /* handle error breaks in while */
-      if (state.mode === BAD) { break; }
-
-      /* check for end-of-block code (better have one) */
-      if (state.lens[256] === 0) {
-        strm.msg = 'invalid code -- missing end-of-block';
-        state.mode = BAD;
-        break;
-      }
-
-      /* build code tables -- note: do not change the lenbits or distbits
-         values here (9 and 6) without reading the comments in inftrees.h
-         concerning the ENOUGH constants, which depend on those values */
-      state.lenbits = 9;
-
-      opts = { bits: state.lenbits };
-      ret = inflate_table(LENS, state.lens, 0, state.nlen, state.lencode, 0, state.work, opts);
-      // We have separate tables & no pointers. 2 commented lines below not needed.
-      // state.next_index = opts.table_index;
-      state.lenbits = opts.bits;
-      // state.lencode = state.next;
-
-      if (ret) {
-        strm.msg = 'invalid literal/lengths set';
-        state.mode = BAD;
-        break;
-      }
-
-      state.distbits = 6;
-      //state.distcode.copy(state.codes);
-      // Switch to use dynamic table
-      state.distcode = state.distdyn;
-      opts = { bits: state.distbits };
-      ret = inflate_table(DISTS, state.lens, state.nlen, state.ndist, state.distcode, 0, state.work, opts);
-      // We have separate tables & no pointers. 2 commented lines below not needed.
-      // state.next_index = opts.table_index;
-      state.distbits = opts.bits;
-      // state.distcode = state.next;
-
-      if (ret) {
-        strm.msg = 'invalid distances set';
-        state.mode = BAD;
-        break;
-      }
-      //Tracev((stderr, 'inflate:       codes ok\n'));
-      state.mode = LEN_;
-      if (flush === Z_TREES) { break inf_leave; }
-      /* falls through */
-    case LEN_:
-      state.mode = LEN;
-      /* falls through */
-    case LEN:
-      if (have >= 6 && left >= 258) {
-        //--- RESTORE() ---
-        strm.next_out = put;
-        strm.avail_out = left;
-        strm.next_in = next;
-        strm.avail_in = have;
-        state.hold = hold;
-        state.bits = bits;
-        //---
-        inflate_fast(strm, _out);
-        //--- LOAD() ---
-        put = strm.next_out;
-        output = strm.output;
-        left = strm.avail_out;
-        next = strm.next_in;
-        input = strm.input;
-        have = strm.avail_in;
-        hold = state.hold;
-        bits = state.bits;
-        //---
-
-        if (state.mode === TYPE) {
-          state.back = -1;
-        }
-        break;
-      }
-      state.back = 0;
-      for (;;) {
-        here = state.lencode[hold & ((1 << state.lenbits) - 1)];  /*BITS(state.lenbits)*/
-        here_bits = here >>> 24;
-        here_op = (here >>> 16) & 0xff;
-        here_val = here & 0xffff;
-
-        if (here_bits <= bits) { break; }
-        //--- PULLBYTE() ---//
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-        //---//
-      }
-      if (here_op && (here_op & 0xf0) === 0) {
-        last_bits = here_bits;
-        last_op = here_op;
-        last_val = here_val;
-        for (;;) {
-          here = state.lencode[last_val +
-                  ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
-          here_bits = here >>> 24;
-          here_op = (here >>> 16) & 0xff;
-          here_val = here & 0xffff;
-
-          if ((last_bits + here_bits) <= bits) { break; }
-          //--- PULLBYTE() ---//
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-          //---//
-        }
-        //--- DROPBITS(last.bits) ---//
-        hold >>>= last_bits;
-        bits -= last_bits;
-        //---//
-        state.back += last_bits;
-      }
-      //--- DROPBITS(here.bits) ---//
-      hold >>>= here_bits;
-      bits -= here_bits;
-      //---//
-      state.back += here_bits;
-      state.length = here_val;
-      if (here_op === 0) {
-        //Tracevv((stderr, here.val >= 0x20 && here.val < 0x7f ?
-        //        "inflate:         literal '%c'\n" :
-        //        "inflate:         literal 0x%02x\n", here.val));
-        state.mode = LIT;
-        break;
-      }
-      if (here_op & 32) {
-        //Tracevv((stderr, "inflate:         end of block\n"));
-        state.back = -1;
-        state.mode = TYPE;
-        break;
-      }
-      if (here_op & 64) {
-        strm.msg = 'invalid literal/length code';
-        state.mode = BAD;
-        break;
-      }
-      state.extra = here_op & 15;
-      state.mode = LENEXT;
-      /* falls through */
-    case LENEXT:
-      if (state.extra) {
-        //=== NEEDBITS(state.extra);
-        n = state.extra;
-        while (bits < n) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        state.length += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
-        //--- DROPBITS(state.extra) ---//
-        hold >>>= state.extra;
-        bits -= state.extra;
-        //---//
-        state.back += state.extra;
-      }
-      //Tracevv((stderr, "inflate:         length %u\n", state.length));
-      state.was = state.length;
-      state.mode = DIST;
-      /* falls through */
-    case DIST:
-      for (;;) {
-        here = state.distcode[hold & ((1 << state.distbits) - 1)];/*BITS(state.distbits)*/
-        here_bits = here >>> 24;
-        here_op = (here >>> 16) & 0xff;
-        here_val = here & 0xffff;
-
-        if ((here_bits) <= bits) { break; }
-        //--- PULLBYTE() ---//
-        if (have === 0) { break inf_leave; }
-        have--;
-        hold += input[next++] << bits;
-        bits += 8;
-        //---//
-      }
-      if ((here_op & 0xf0) === 0) {
-        last_bits = here_bits;
-        last_op = here_op;
-        last_val = here_val;
-        for (;;) {
-          here = state.distcode[last_val +
-                  ((hold & ((1 << (last_bits + last_op)) - 1))/*BITS(last.bits + last.op)*/ >> last_bits)];
-          here_bits = here >>> 24;
-          here_op = (here >>> 16) & 0xff;
-          here_val = here & 0xffff;
-
-          if ((last_bits + here_bits) <= bits) { break; }
-          //--- PULLBYTE() ---//
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-          //---//
-        }
-        //--- DROPBITS(last.bits) ---//
-        hold >>>= last_bits;
-        bits -= last_bits;
-        //---//
-        state.back += last_bits;
-      }
-      //--- DROPBITS(here.bits) ---//
-      hold >>>= here_bits;
-      bits -= here_bits;
-      //---//
-      state.back += here_bits;
-      if (here_op & 64) {
-        strm.msg = 'invalid distance code';
-        state.mode = BAD;
-        break;
-      }
-      state.offset = here_val;
-      state.extra = (here_op) & 15;
-      state.mode = DISTEXT;
-      /* falls through */
-    case DISTEXT:
-      if (state.extra) {
-        //=== NEEDBITS(state.extra);
-        n = state.extra;
-        while (bits < n) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        state.offset += hold & ((1 << state.extra) - 1)/*BITS(state.extra)*/;
-        //--- DROPBITS(state.extra) ---//
-        hold >>>= state.extra;
-        bits -= state.extra;
-        //---//
-        state.back += state.extra;
-      }
-//#ifdef INFLATE_STRICT
-      if (state.offset > state.dmax) {
-        strm.msg = 'invalid distance too far back';
-        state.mode = BAD;
-        break;
-      }
-//#endif
-      //Tracevv((stderr, "inflate:         distance %u\n", state.offset));
-      state.mode = MATCH;
-      /* falls through */
-    case MATCH:
-      if (left === 0) { break inf_leave; }
-      copy = _out - left;
-      if (state.offset > copy) {         /* copy from window */
-        copy = state.offset - copy;
-        if (copy > state.whave) {
-          if (state.sane) {
-            strm.msg = 'invalid distance too far back';
-            state.mode = BAD;
-            break;
-          }
-// (!) This block is disabled in zlib defailts,
+// (!) This block is disabled in zlib defaults,
 // don't enable it for binary compatibility
 //#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
 //          Trace((stderr, "inflate.c too far\n"));
@@ -15346,106 +15815,106 @@ function inflate(strm, flush) {
 //          if (state.length === 0) { state.mode = LEN; }
 //          break;
 //#endif
+          }
+          if (copy > state.wnext) {
+            copy -= state.wnext;
+            from = state.wsize - copy;
+          }
+          else {
+            from = state.wnext - copy;
+          }
+          if (copy > state.length) { copy = state.length; }
+          from_source = state.window;
         }
-        if (copy > state.wnext) {
-          copy -= state.wnext;
-          from = state.wsize - copy;
+        else {                              /* copy from output */
+          from_source = output;
+          from = put - state.offset;
+          copy = state.length;
         }
-        else {
-          from = state.wnext - copy;
-        }
-        if (copy > state.length) { copy = state.length; }
-        from_source = state.window;
-      }
-      else {                              /* copy from output */
-        from_source = output;
-        from = put - state.offset;
-        copy = state.length;
-      }
-      if (copy > left) { copy = left; }
-      left -= copy;
-      state.length -= copy;
-      do {
-        output[put++] = from_source[from++];
-      } while (--copy);
-      if (state.length === 0) { state.mode = LEN; }
-      break;
-    case LIT:
-      if (left === 0) { break inf_leave; }
-      output[put++] = state.length;
-      left--;
-      state.mode = LEN;
-      break;
-    case CHECK:
-      if (state.wrap) {
-        //=== NEEDBITS(32);
-        while (bits < 32) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          // Use '|' insdead of '+' to make sure that result is signed
-          hold |= input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        _out -= left;
-        strm.total_out += _out;
-        state.total += _out;
-        if (_out) {
-          strm.adler = state.check =
-              /*UPDATE(state.check, put - _out, _out);*/
-              (state.flags ? crc32(state.check, output, _out, put - _out) : adler32(state.check, output, _out, put - _out));
+        if (copy > left) { copy = left; }
+        left -= copy;
+        state.length -= copy;
+        do {
+          output[put++] = from_source[from++];
+        } while (--copy);
+        if (state.length === 0) { state.mode = LEN; }
+        break;
+      case LIT:
+        if (left === 0) { break inf_leave; }
+        output[put++] = state.length;
+        left--;
+        state.mode = LEN;
+        break;
+      case CHECK:
+        if (state.wrap) {
+          //=== NEEDBITS(32);
+          while (bits < 32) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            // Use '|' instead of '+' to make sure that result is signed
+            hold |= input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          _out -= left;
+          strm.total_out += _out;
+          state.total += _out;
+          if (_out) {
+            strm.adler = state.check =
+                /*UPDATE(state.check, put - _out, _out);*/
+                (state.flags ? crc32(state.check, output, _out, put - _out) : adler32(state.check, output, _out, put - _out));
 
+          }
+          _out = left;
+          // NB: crc32 stored as signed 32-bit int, zswap32 returns signed too
+          if ((state.flags ? hold : zswap32(hold)) !== state.check) {
+            strm.msg = 'incorrect data check';
+            state.mode = BAD;
+            break;
+          }
+          //=== INITBITS();
+          hold = 0;
+          bits = 0;
+          //===//
+          //Tracev((stderr, "inflate:   check matches trailer\n"));
         }
-        _out = left;
-        // NB: crc32 stored as signed 32-bit int, zswap32 returns signed too
-        if ((state.flags ? hold : zswap32(hold)) !== state.check) {
-          strm.msg = 'incorrect data check';
-          state.mode = BAD;
-          break;
+        state.mode = LENGTH;
+        /* falls through */
+      case LENGTH:
+        if (state.wrap && state.flags) {
+          //=== NEEDBITS(32);
+          while (bits < 32) {
+            if (have === 0) { break inf_leave; }
+            have--;
+            hold += input[next++] << bits;
+            bits += 8;
+          }
+          //===//
+          if (hold !== (state.total & 0xffffffff)) {
+            strm.msg = 'incorrect length check';
+            state.mode = BAD;
+            break;
+          }
+          //=== INITBITS();
+          hold = 0;
+          bits = 0;
+          //===//
+          //Tracev((stderr, "inflate:   length matches trailer\n"));
         }
-        //=== INITBITS();
-        hold = 0;
-        bits = 0;
-        //===//
-        //Tracev((stderr, "inflate:   check matches trailer\n"));
-      }
-      state.mode = LENGTH;
-      /* falls through */
-    case LENGTH:
-      if (state.wrap && state.flags) {
-        //=== NEEDBITS(32);
-        while (bits < 32) {
-          if (have === 0) { break inf_leave; }
-          have--;
-          hold += input[next++] << bits;
-          bits += 8;
-        }
-        //===//
-        if (hold !== (state.total & 0xffffffff)) {
-          strm.msg = 'incorrect length check';
-          state.mode = BAD;
-          break;
-        }
-        //=== INITBITS();
-        hold = 0;
-        bits = 0;
-        //===//
-        //Tracev((stderr, "inflate:   length matches trailer\n"));
-      }
-      state.mode = DONE;
-      /* falls through */
-    case DONE:
-      ret = Z_STREAM_END;
-      break inf_leave;
-    case BAD:
-      ret = Z_DATA_ERROR;
-      break inf_leave;
-    case MEM:
-      return Z_MEM_ERROR;
-    case SYNC:
-      /* falls through */
-    default:
-      return Z_STREAM_ERROR;
+        state.mode = DONE;
+        /* falls through */
+      case DONE:
+        ret = Z_STREAM_END;
+        break inf_leave;
+      case BAD:
+        ret = Z_DATA_ERROR;
+        break inf_leave;
+      case MEM:
+        return Z_MEM_ERROR;
+      case SYNC:
+        /* falls through */
+      default:
+        return Z_STREAM_ERROR;
     }
   }
 
@@ -15579,14 +16048,14 @@ exports.inflateUndermine = inflateUndermine;
 
 
 /***/ }),
-/* 56 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
-// It doesn't worth to make additional optimizationa as in original.
+// It isn't worth it to make additional optimizations as in original.
 // Small size is preferable.
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -15637,7 +16106,7 @@ module.exports = adler32;
 
 
 /***/ }),
-/* 57 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15703,7 +16172,7 @@ module.exports = crc32;
 
 
 /***/ }),
-/* 58 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15910,7 +16379,7 @@ module.exports = function inflate_fast(strm, start) {
                   break top;
                 }
 
-// (!) This block is disabled in zlib defailts,
+// (!) This block is disabled in zlib defaults,
 // don't enable it for binary compatibility
 //#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
 //                if (len <= op - whave) {
@@ -16055,7 +16524,7 @@ module.exports = function inflate_fast(strm, start) {
 
 
 /***/ }),
-/* 59 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16080,7 +16549,7 @@ module.exports = function inflate_fast(strm, start) {
 //   misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 
-var utils = __webpack_require__(14);
+var utils = __webpack_require__(15);
 
 var MAXBITS = 15;
 var ENOUGH_LENS = 852;
@@ -16405,7 +16874,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
 
 
 /***/ }),
-/* 60 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16413,13 +16882,13 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
 
 
 
-var utils = __webpack_require__(14);
+var utils = __webpack_require__(15);
 
 
 // Quick check if we can use fast array to bin string conversion
 //
 // - apply(Array) can fail on Android 2.2
-// - apply(Uint8Array) can fail on iOS 5.1 Safary
+// - apply(Uint8Array) can fail on iOS 5.1 Safari
 //
 var STR_APPLY_OK = true;
 var STR_APPLY_UIA_OK = true;
@@ -16584,11 +17053,11 @@ exports.utf8border = function (buf, max) {
   pos = max - 1;
   while (pos >= 0 && (buf[pos] & 0xC0) === 0x80) { pos--; }
 
-  // Fuckup - very small and broken sequence,
+  // Very small and broken sequence,
   // return max, because we should return something anyway.
   if (pos < 0) { return max; }
 
-  // If we came to start of buffer - that means vuffer is too small,
+  // If we came to start of buffer - that means buffer is too small,
   // return max too.
   if (pos === 0) { return max; }
 
@@ -16597,7 +17066,7 @@ exports.utf8border = function (buf, max) {
 
 
 /***/ }),
-/* 61 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16672,7 +17141,7 @@ module.exports = {
 
 
 /***/ }),
-/* 62 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16711,7 +17180,7 @@ module.exports = {
 
 
 /***/ }),
-/* 63 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16765,7 +17234,7 @@ module.exports = ZStream;
 
 
 /***/ }),
-/* 64 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16830,13 +17299,13 @@ module.exports = GZheader;
 
 
 /***/ }),
-/* 65 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var AbstractDecoder = __webpack_require__(13);
+var AbstractDecoder = __webpack_require__(14);
 
 function PackbitsDecoder() {}
 
@@ -16869,7 +17338,7 @@ PackbitsDecoder.prototype.decodeBlock = function (buffer) {
 module.exports = PackbitsDecoder;
 
 /***/ }),
-/* 66 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16963,7 +17432,7 @@ var DataView64 = function () {
 module.exports = DataView64;
 
 /***/ }),
-/* 67 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer, global) {
@@ -16973,12 +17442,12 @@ module.exports = DataView64;
  * a request API compatible with window.fetch
  */
 
-var parse_url = __webpack_require__(15).parse;
-var resolve_url = __webpack_require__(15).resolve;
+var parse_url = __webpack_require__(10).parse;
+var resolve_url = __webpack_require__(10).resolve;
 var http = __webpack_require__(19);
 var https = __webpack_require__(88);
 var zlib = __webpack_require__(89);
-var stream = __webpack_require__(12);
+var stream = __webpack_require__(13);
 
 var Body = __webpack_require__(25);
 var Response = __webpack_require__(126);
@@ -17241,218 +17710,7 @@ Fetch.Request = Request;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).Buffer, __webpack_require__(1)))
 
 /***/ }),
-/* 68 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-exports.byteLength = byteLength
-exports.toByteArray = toByteArray
-exports.fromByteArray = fromByteArray
-
-var lookup = []
-var revLookup = []
-var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
-
-var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-for (var i = 0, len = code.length; i < len; ++i) {
-  lookup[i] = code[i]
-  revLookup[code.charCodeAt(i)] = i
-}
-
-revLookup['-'.charCodeAt(0)] = 62
-revLookup['_'.charCodeAt(0)] = 63
-
-function placeHoldersCount (b64) {
-  var len = b64.length
-  if (len % 4 > 0) {
-    throw new Error('Invalid string. Length must be a multiple of 4')
-  }
-
-  // the number of equal signs (place holders)
-  // if there are two placeholders, than the two characters before it
-  // represent one byte
-  // if there is only one, then the three characters before it represent 2 bytes
-  // this is just a cheap hack to not do indexOf twice
-  return b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
-}
-
-function byteLength (b64) {
-  // base64 is 4/3 + up to two characters of the original data
-  return (b64.length * 3 / 4) - placeHoldersCount(b64)
-}
-
-function toByteArray (b64) {
-  var i, l, tmp, placeHolders, arr
-  var len = b64.length
-  placeHolders = placeHoldersCount(b64)
-
-  arr = new Arr((len * 3 / 4) - placeHolders)
-
-  // if there are placeholders, only get up to the last complete 4 chars
-  l = placeHolders > 0 ? len - 4 : len
-
-  var L = 0
-
-  for (i = 0; i < l; i += 4) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
-    arr[L++] = (tmp >> 16) & 0xFF
-    arr[L++] = (tmp >> 8) & 0xFF
-    arr[L++] = tmp & 0xFF
-  }
-
-  if (placeHolders === 2) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
-    arr[L++] = tmp & 0xFF
-  } else if (placeHolders === 1) {
-    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2)
-    arr[L++] = (tmp >> 8) & 0xFF
-    arr[L++] = tmp & 0xFF
-  }
-
-  return arr
-}
-
-function tripletToBase64 (num) {
-  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
-}
-
-function encodeChunk (uint8, start, end) {
-  var tmp
-  var output = []
-  for (var i = start; i < end; i += 3) {
-    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
-    output.push(tripletToBase64(tmp))
-  }
-  return output.join('')
-}
-
-function fromByteArray (uint8) {
-  var tmp
-  var len = uint8.length
-  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
-  var output = ''
-  var parts = []
-  var maxChunkLength = 16383 // must be multiple of 3
-
-  // go through the array every three bytes, we'll deal with trailing stuff later
-  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
-    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
-  }
-
-  // pad the end with zeros, but make sure to not forget the extra bytes
-  if (extraBytes === 1) {
-    tmp = uint8[len - 1]
-    output += lookup[tmp >> 2]
-    output += lookup[(tmp << 4) & 0x3F]
-    output += '=='
-  } else if (extraBytes === 2) {
-    tmp = (uint8[len - 2] << 8) + (uint8[len - 1])
-    output += lookup[tmp >> 10]
-    output += lookup[(tmp >> 4) & 0x3F]
-    output += lookup[(tmp << 2) & 0x3F]
-    output += '='
-  }
-
-  parts.push(output)
-
-  return parts.join('')
-}
-
-
-/***/ }),
-/* 69 */
-/***/ (function(module, exports) {
-
-exports.read = function (buffer, offset, isLE, mLen, nBytes) {
-  var e, m
-  var eLen = nBytes * 8 - mLen - 1
-  var eMax = (1 << eLen) - 1
-  var eBias = eMax >> 1
-  var nBits = -7
-  var i = isLE ? (nBytes - 1) : 0
-  var d = isLE ? -1 : 1
-  var s = buffer[offset + i]
-
-  i += d
-
-  e = s & ((1 << (-nBits)) - 1)
-  s >>= (-nBits)
-  nBits += eLen
-  for (; nBits > 0; e = e * 256 + buffer[offset + i], i += d, nBits -= 8) {}
-
-  m = e & ((1 << (-nBits)) - 1)
-  e >>= (-nBits)
-  nBits += mLen
-  for (; nBits > 0; m = m * 256 + buffer[offset + i], i += d, nBits -= 8) {}
-
-  if (e === 0) {
-    e = 1 - eBias
-  } else if (e === eMax) {
-    return m ? NaN : ((s ? -1 : 1) * Infinity)
-  } else {
-    m = m + Math.pow(2, mLen)
-    e = e - eBias
-  }
-  return (s ? -1 : 1) * m * Math.pow(2, e - mLen)
-}
-
-exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c
-  var eLen = nBytes * 8 - mLen - 1
-  var eMax = (1 << eLen) - 1
-  var eBias = eMax >> 1
-  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
-  var i = isLE ? 0 : (nBytes - 1)
-  var d = isLE ? 1 : -1
-  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
-
-  value = Math.abs(value)
-
-  if (isNaN(value) || value === Infinity) {
-    m = isNaN(value) ? 1 : 0
-    e = eMax
-  } else {
-    e = Math.floor(Math.log(value) / Math.LN2)
-    if (value * (c = Math.pow(2, -e)) < 1) {
-      e--
-      c *= 2
-    }
-    if (e + eBias >= 1) {
-      value += rt / c
-    } else {
-      value += rt * Math.pow(2, 1 - eBias)
-    }
-    if (value * c >= 2) {
-      e++
-      c /= 2
-    }
-
-    if (e + eBias >= eMax) {
-      m = 0
-      e = eMax
-    } else if (e + eBias >= 1) {
-      m = (value * c - 1) * Math.pow(2, mLen)
-      e = e + eBias
-    } else {
-      m = value * Math.pow(2, eBias - 1) * Math.pow(2, mLen)
-      e = 0
-    }
-  }
-
-  for (; mLen >= 8; buffer[offset + i] = m & 0xff, i += d, m /= 256, mLen -= 8) {}
-
-  e = (e << mLen) | m
-  eLen += mLen
-  for (; eLen > 0; buffer[offset + i] = e & 0xff, i += d, e /= 256, eLen -= 8) {}
-
-  buffer[offset + i - d] |= s * 128
-}
-
-
-/***/ }),
-/* 70 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module, global) {var __WEBPACK_AMD_DEFINE_RESULT__;/*! https://mths.be/punycode v1.4.1 by @mathias */
@@ -17988,10 +18246,10 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 }(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(71)(module), __webpack_require__(1)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(72)(module), __webpack_require__(1)))
 
 /***/ }),
-/* 71 */
+/* 72 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -18019,7 +18277,7 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 72 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18042,18 +18300,18 @@ module.exports = {
 
 
 /***/ }),
-/* 73 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-exports.decode = exports.parse = __webpack_require__(74);
-exports.encode = exports.stringify = __webpack_require__(75);
+exports.decode = exports.parse = __webpack_require__(75);
+exports.encode = exports.stringify = __webpack_require__(76);
 
 
 /***/ }),
-/* 74 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18144,7 +18402,7 @@ var isArray = Array.isArray || function (xs) {
 
 
 /***/ }),
-/* 75 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18236,13 +18494,13 @@ var objectKeys = Object.keys || function (obj) {
 
 
 /***/ }),
-/* 76 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(Buffer, global, process) {var capability = __webpack_require__(32)
 var inherits = __webpack_require__(5)
-var response = __webpack_require__(77)
-var stream = __webpack_require__(10)
+var response = __webpack_require__(78)
+var stream = __webpack_require__(11)
 var toArrayBuffer = __webpack_require__(85)
 
 var IncomingMessage = response.IncomingMessage
@@ -18549,12 +18807,12 @@ var unsafeHeaders = [
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0).Buffer, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 77 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process, Buffer, global) {var capability = __webpack_require__(32)
 var inherits = __webpack_require__(5)
-var stream = __webpack_require__(10)
+var stream = __webpack_require__(11)
 
 var rStates = exports.readyStates = {
 	UNSENT: 0,
@@ -18738,13 +18996,13 @@ IncomingMessage.prototype._onXHRProgress = function () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(0).Buffer, __webpack_require__(1)))
 
 /***/ }),
-/* 78 */
+/* 79 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 79 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18824,7 +19082,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 80 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = Function.prototype.apply;
@@ -18877,14 +19135,13 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(81);
-var global = __webpack_require__(82);
-exports.setImmediate = global.setImmediate;
-exports.clearImmediate = global.clearImmediate;
+__webpack_require__(82);
+exports.setImmediate = setImmediate;
+exports.clearImmediate = clearImmediate;
 
 
 /***/ }),
-/* 81 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -19077,26 +19334,6 @@ exports.clearImmediate = global.clearImmediate;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(2)))
 
 /***/ }),
-/* 82 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global) {var win;
-
-if (typeof window !== "undefined") {
-    win = window;
-} else if (typeof global !== "undefined") {
-    win = global;
-} else if (typeof self !== "undefined"){
-    win = self;
-} else {
-    win = {};
-}
-
-module.exports = win;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
-
-/***/ }),
 /* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19207,7 +19444,7 @@ module.exports = PassThrough;
 var Transform = __webpack_require__(36);
 
 /*<replacement>*/
-var util = __webpack_require__(11);
+var util = __webpack_require__(12);
 util.inherits = __webpack_require__(5);
 /*</replacement>*/
 
@@ -26163,7 +26400,7 @@ module.exports = __webpack_require__(7);
 /* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(10).PassThrough
+module.exports = __webpack_require__(11).PassThrough
 
 
 /***/ }),
@@ -26438,7 +26675,7 @@ if (nodeVer) {
 }
 
 if (false) {
-    console.error("iconv-lite warning: javascript files are loaded not with utf-8 encoding. See https://github.com/ashtuchkin/iconv-lite/wiki/Javascript-source-file-encodings for more info.");
+    console.error("iconv-lite warning: javascript files use encoding different from utf-8. See https://github.com/ashtuchkin/iconv-lite/wiki/Javascript-source-file-encodings for more info.");
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
@@ -26551,8 +26788,6 @@ module.exports = {
     utf16le: "ucs2",
 
     binary: { type: "_internal" },
-    iso88591: "binary",
-
     base64: { type: "_internal" },
     hex:    { type: "_internal" },
 
@@ -27380,8 +27615,6 @@ module.exports = {
 
     "cp819": "iso88591",
     "ibm819": "iso88591",
-    "cp28591": "iso88591",
-    "28591": "iso88591",
 
     "cyrillic": "iso88595",
 
@@ -27512,6 +27745,7 @@ module.exports = {
   "1256": "windows1256",
   "1257": "windows1257",
   "1258": "windows1258",
+  "28591": "iso88591",
   "28592": "iso88592",
   "28593": "iso88593",
   "28594": "iso88594",
@@ -27564,7 +27798,7 @@ module.exports = {
   "cp1254": "windows1254",
   "windows1255": {
     "type": "_sbcs",
-    "chars": "€�‚ƒ„…†‡ˆ‰�‹�����‘’“”•–—˜™�›���� ¡¢£₪¥¦§¨©×«¬­®¯°±²³´µ¶·¸¹÷»¼½¾¿ְֱֲֳִֵֶַָֹ�ֻּֽ־ֿ׀ׁׂ׃װױײ׳״�������אבגדהוזחטיךכלםמןנסעףפץצקרשת��‎‏�"
+    "chars": "€�‚ƒ„…†‡ˆ‰�‹�����‘’“”•–—˜™�›���� ¡¢£₪¥¦§¨©×«¬­®¯°±²³´µ¶·¸¹÷»¼½¾¿ְֱֲֳִֵֶַָֹֺֻּֽ־ֿ׀ׁׂ׃װױײ׳״�������אבגדהוזחטיךכלםמןנסעףפץצקרשת��‎‏�"
   },
   "win1255": "windows1255",
   "cp1255": "windows1255",
@@ -27586,6 +27820,11 @@ module.exports = {
   },
   "win1258": "windows1258",
   "cp1258": "windows1258",
+  "iso88591": {
+    "type": "_sbcs",
+    "chars": " ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
+  },
+  "cp28591": "iso88591",
   "iso88592": {
     "type": "_sbcs",
     "chars": " Ą˘Ł¤ĽŚ§¨ŠŞŤŹ­ŽŻ°ą˛ł´ľśˇ¸šşťź˝žżŔÁÂĂÄĹĆÇČÉĘËĚÍÎĎĐŃŇÓÔŐÖ×ŘŮÚŰÜÝŢßŕáâăäĺćçčéęëěíîďđńňóôőö÷řůúűüýţ˙"
@@ -28701,7 +28940,7 @@ module.exports = [["8740","䏰䰲䘃䖦䕸𧉧䵷䖳𧲱䳢𧳅㮕䜶䝄䱇䱀�
 
 
 var Buffer = __webpack_require__(0).Buffer,
-    Transform = __webpack_require__(12).Transform;
+    Transform = __webpack_require__(13).Transform;
 
 
 // == Exports ==================================================================
@@ -28998,7 +29237,7 @@ module.exports = function (iconv) {
 
         // -- Readable -------------------------------------------------------------
         if (iconv.supportsStreams) {
-            var Readable = __webpack_require__(12).Readable;
+            var Readable = __webpack_require__(13).Readable;
 
             original.ReadableSetEncoding = Readable.prototype.setEncoding;
             Readable.prototype.setEncoding = function setEncoding(enc, options) {
@@ -29032,7 +29271,7 @@ module.exports = function (iconv) {
         Buffer.prototype.write = original.BufferWrite;
 
         if (iconv.supportsStreams) {
-            var Readable = __webpack_require__(12).Readable;
+            var Readable = __webpack_require__(13).Readable;
 
             Readable.prototype.setEncoding = original.ReadableSetEncoding;
             delete Readable.prototype.collect;
@@ -29171,7 +29410,7 @@ Response.prototype.clone = function() {
  * Request class contains server only options
  */
 
-var parse_url = __webpack_require__(15).parse;
+var parse_url = __webpack_require__(10).parse;
 var Headers = __webpack_require__(27);
 var Body = __webpack_require__(25);
 
@@ -29252,14 +29491,14 @@ var load = __webpack_require__(18);
 var convert_geometry = __webpack_require__(4);
 
 /**
-    Given an image and a point geometry,
+    Given a raster and a point geometry,
     the identify function returns the pixel
-    value of the image at the given point.
+    value of the raster at the given point.
 
-    @param {object} image - the image is a raster representation derived from the getTiff() method of a GeoTIFF loaded using the geotiff npm package.
+    @param {object} raster - a raster from the georaster library
     @param {string|object} geometry - geometry can be an [x,y] array, a GeoJSON point object, or a string representation of a GeoJSON point object.
 */
-var identify = function identify(image, geometry) {
+var identify = function identify(georaster, geometry) {
 
     // The convert_geometry function takes the input
     // geometry and converts it to a standard format.
@@ -29267,36 +29506,9 @@ var identify = function identify(image, geometry) {
     var lng = point[0];
     var lat = point[1];
 
-    // The file directory holds a set of GeoTIFF
-    // tags. 
-    var fd = image.fileDirectory;
-
-    // Geo Keys are a set of metadata parameters
-    // which provide information about the GeoTIFF.
-    var geoKeys = image.getGeoKeys();
-
-    // More information on tags and keys can be found
-    // here: http://geotiff.maptools.org/spec/geotiff6.html
-
-    // Here we use Geo Keys to determine if we are using
-    // a geographic coordinate system with the WGS 84 datum
-    // a GTModelTypeGeoKey of 2 specifies a geographic
-    // coordinate system, while the GeographicTypeGeoKey
-    // references the wkid of the spatial reference.
-    if (geoKeys.GTModelTypeGeoKey === 2 && geoKeys.GeographicTypeGeoKey === 4326) {
-
-        // Here we get necessary information to do a transformation from the image
-        // coordinate space to the geographic coordinate space. The origin is the
-        // [long,lat] value of the top left corner, which is point [0,0] in the image
-        // coordinate space. 
-        var origin = image.getOrigin();
-        var lng_0 = origin[0];
-        var lat_0 = origin[1];
-
-        // The cell width and cell height, measured in the image coordinate space, 
-        // are found in the ModelPixelScale tag in the file directory. 
-        var cell_width = fd.ModelPixelScale[0];
-        var cell_height = fd.ModelPixelScale[1];
+    //console.log("georaster.projection:", georaster.projection);
+    if (georaster.projection === 4326) {
+        //console.log("assed proj");
 
         // By normalizing the difference in latitude and longitude between the image
         // origin and the point geometry by the cell height and width respectively,
@@ -29304,20 +29516,15 @@ var identify = function identify(image, geometry) {
         // coordinate space to their associated pixel location in the image space.
         // Note that the y value is inverted to account for the inversion between the
         // coordinate and image spaces.
-        var x = Math.floor(Math.abs(lng - lng_0) / cell_width);
-        var y = Math.floor(Math.abs(lat_0 - lat) / cell_height);
+        var x = Math.floor(Math.abs(lng - georaster.xmin) / georaster.pixelWidth);
+        var y = Math.floor(Math.abs(georaster.ymax - lat) / georaster.pixelHeight);
 
         try {
 
-            // The image pixel values are extracted from the geotiff using the built-in
-            // readRasters function
-            var values = image.readRasters({ window: [x, y, x + 1, y + 1] });
-
-            // This ternary expression makes sure that if there is only one image band,
-            // the value is returned as a single number. Otherwise, the values for all
-            // bands are returned as an array.
-            return values.map(function (value) {
-                return value[0];
+            // iterate through the bands
+            // get the row and then the column of the pixel that you want
+            return georaster.values.map(function (rows) {
+                return rows[y][x];
             });
         } catch (e) {
             throw e;
@@ -30417,26 +30624,29 @@ function lineReduce(geojson, callback, initialValue) {
 var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
-var intersect_polygon = __webpack_require__(8);
+var intersect_polygon = __webpack_require__(9);
 
-module.exports = function (image, geom) {
+module.exports = function (georaster, geom) {
 
     try {
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
 
-            // grab array of values;
-            var values = get(image, geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var values = get(georaster, geom);
+            var height = georaster.height;
+            var width = georaster.width;
+            var no_data_value = georaster.no_data_value;
 
             // sum values
             return values.map(function (band) {
-                // multiple bands
-                return band.filter(function (value) {
-                    return value !== no_data_value;
-                }).reduce(function (sum, value) {
-                    return sum += value;
+                // iterate over each band which include rows of pixels
+                return band.reduce(function (sum_of_band, row) {
+                    // reduce all the rows into one sum
+                    return sum_of_band + row.reduce(function (sum_of_row, cell_value) {
+                        // reduce each row to a sum of its pixel values
+                        return cell_value !== no_data_value ? sum_of_row + cell_value : sum_of_row;
+                    }, 0);
                 }, 0);
             });
         } else if (utils.is_polygon(geom)) {
@@ -30445,7 +30655,7 @@ module.exports = function (image, geom) {
 
             // the third argument of intersect_polygon is a function which
             // is run on every value, we use it to increment the sum 
-            intersect_polygon(image, geom, function (value, band_index) {
+            intersect_polygon(georaster, geom, function (value, band_index) {
                 if (sums[band_index]) {
                     sums[band_index] += value;
                 } else {
@@ -30470,48 +30680,61 @@ module.exports = function (image, geom) {
 "use strict";
 
 
-var _ = __webpack_require__(9);
+var _ = __webpack_require__(8);
 
 var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
-var intersect_polygon = __webpack_require__(8);
+var intersect_polygon = __webpack_require__(9);
 
-module.exports = function (image, geom) {
+module.exports = function (georaster, geom) {
 
     try {
 
         if (utils.is_bbox(geom)) {
             // if geometry is a bounding box
             geom = convert_geometry('bbox', geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var no_data_value = georaster.no_data_value;
 
             // grab array of values
-            var values = get(image, geom);
+            var values = get(georaster, geom);
 
-            // run simple reduce to get average
-            return values.map(function (band) {
-                return band.filter(function (value) {
-                    return value !== no_data_value;
-                }).reduce(function (sum, value) {
-                    return sum += value;
-                }, 0) / band.length;
-            });
+            // sum values
+            var sums = [];
+            for (var band_index = 0; band_index < values.length; band_index++) {
+                var running_sum_for_band = 0;
+                var number_of_cells_with_values_in_band = 0;
+                var band = values[band_index];
+                var number_of_rows = band.length;
+                for (var row_index = 0; row_index < number_of_rows; row_index++) {
+                    var row = band[row_index];
+                    var number_of_cells = row.length;
+                    for (var column_index = 0; column_index < number_of_cells; column_index++) {
+                        var value = row[column_index];
+                        if (value !== no_data_value) {
+                            number_of_cells_with_values_in_band++;
+                            running_sum_for_band += value;
+                        }
+                    }
+                }
+                sums.push(running_sum_for_band / number_of_cells_with_values_in_band);
+            }
+            return sums;
         } else if (utils.is_polygon(geom)) {
             // if geometry is a polygon
             geom = convert_geometry('polygon', geom);
-            var sums = [];
+            var _sums = [];
             var num_values = [];
 
             // the third argument of intersect_polygon is a function which
             // is run on every value, we use it to increment the sum so we
             // can later divide it by the total value count to get the mean
-            intersect_polygon(image, geom, function (value, band_index) {
+            intersect_polygon(georaster, geom, function (value, band_index) {
                 if (num_values[band_index]) {
-                    sums[band_index] += value;
+                    _sums[band_index] += value;
                     num_values[band_index] += 1;
                 } else {
-                    sums[band_index] = value;
+                    _sums[band_index] = value;
                     num_values[band_index] = 1;
                 }
             });
@@ -30521,7 +30744,7 @@ module.exports = function (image, geom) {
             // the result
             var results = [];
             num_values.forEach(function (num, index) {
-                if (num > 0) results.push(sums[index] / num);
+                if (num > 0) results.push(_sums[index] / num);
             });
 
             if (results) return results;else throw 'No Values were found in the given geometry';
@@ -30544,7 +30767,8 @@ module.exports = function (image, geom) {
 var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
-var intersect_polygon = __webpack_require__(8);
+var intersect_polygon = __webpack_require__(9);
+var _ = __webpack_require__(8);
 
 var get_median = function get_median(values) {
 
@@ -30562,7 +30786,7 @@ var get_median = function get_median(values) {
     }
 };
 
-module.exports = function (image, geom) {
+module.exports = function (georaster, geom) {
 
     try {
 
@@ -30570,15 +30794,56 @@ module.exports = function (image, geom) {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
-            var values = get(image, geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var flat = false; // get values as a one dimensional flat array rather than as a table
+            var values = get(georaster, geom, flat);
+            //console.log("values:", values.length, values[0].length, values[0][0].length);
+            var no_data_value = georaster.no_data_value;
 
             // get median
-            return values.map(function (band) {
-                return band.filter(function (value) {
-                    return value !== no_data_value;
+            //return values
+            //    .map(band => band.filter(value => value !== no_data_value))
+            //    .map(get_median);
+
+            // median values
+            var medians = [];
+            for (var band_index = 0; band_index < values.length; band_index++) {
+                var band = values[band_index];
+                var number_of_cells_with_values_in_band = 0;
+                var number_of_rows = band.length;
+                var counts = {};
+                for (var row_index = 0; row_index < number_of_rows; row_index++) {
+                    var row = band[row_index];
+                    var number_of_cells = row.length;
+                    for (var column_index = 0; column_index < number_of_cells; column_index++) {
+                        var value = row[column_index];
+                        if (value !== no_data_value) {
+                            number_of_cells_with_values_in_band++;
+                            if (value in counts) counts[value]++;else counts[value] = 1;
+                        }
+                    }
+                }
+                var sorted_counts = _.pairs(counts).sort(function (pair1, pair2) {
+                    return Number(pair1[0]) - Number(pair2[0]);
                 });
-            }).map(get_median);
+                //console.log("sorted_counts:", sorted_counts);
+                var middle = number_of_cells_with_values_in_band / 2;
+                var running_count = 0;
+                for (var i = 0; i < sorted_counts.length; i++) {
+                    var sorted_count = sorted_counts[i];
+                    var _value = Number(sorted_count[0]);
+                    var count = sorted_count[1];
+                    running_count += count;
+                    if (running_count > middle) {
+                        medians.push(_value);
+                        break;
+                    } else if (running_count === middle) {
+                        medians.push((_value + Number(sorted_counts[i + 1])) / 2);
+                        break;
+                    }
+                }
+                //console.log("medians:", medians);
+            }
+            return medians;
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
             var _values = [];
@@ -30586,7 +30851,7 @@ module.exports = function (image, geom) {
             // the third argument of this function is a function which
             // runs for every pixel in the polygon. Here we add them to
             // an array to run through the get_median function
-            intersect_polygon(image, geom, function (value, band_index) {
+            intersect_polygon(georaster, geom, function (value, band_index) {
                 if (_values[band_index]) {
                     _values[band_index].push(value);
                 } else {
@@ -30614,7 +30879,7 @@ module.exports = function (image, geom) {
 var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
-var intersect_polygon = __webpack_require__(8);
+var intersect_polygon = __webpack_require__(9);
 
 var get_min = function get_min(values, no_data_value) {
     var number_of_values = values.length;
@@ -30641,7 +30906,7 @@ var get_min = function get_min(values, no_data_value) {
     }
 };
 
-module.exports = function (image, geom) {
+module.exports = function (georaster, geom) {
 
     try {
 
@@ -30649,8 +30914,8 @@ module.exports = function (image, geom) {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
-            var values = get(image, geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var values = get(georaster, geom, true);
+            var no_data_value = georaster.no_data_value;
 
             // get min value
             return values.map(function (band) {
@@ -30660,7 +30925,7 @@ module.exports = function (image, geom) {
             geom = convert_geometry('polygon', geom);
             var _values = [];
 
-            intersect_polygon(image, geom, function (value, band_index) {
+            intersect_polygon(georaster, geom, function (value, band_index) {
                 if (typeof _values[band_index] === 'undefined') {
                     _values[band_index] = value;
                 } else if (value < _values[band_index]) {
@@ -30688,7 +30953,7 @@ module.exports = function (image, geom) {
 var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
-var intersect_polygon = __webpack_require__(8);
+var intersect_polygon = __webpack_require__(9);
 
 var get_max = function get_max(values, no_data_value) {
     var number_of_values = values.length;
@@ -30715,7 +30980,7 @@ var get_max = function get_max(values, no_data_value) {
     }
 };
 
-module.exports = function (image, geom) {
+module.exports = function (georaster, geom) {
 
     try {
 
@@ -30723,8 +30988,9 @@ module.exports = function (image, geom) {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
-            var values = get(image, geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var flat = true;
+            var values = get(georaster, geom, flat);
+            var no_data_value = georaster.no_data_value;
 
             // get max value
             return values.map(function (band) {
@@ -30734,7 +31000,7 @@ module.exports = function (image, geom) {
             geom = convert_geometry('polygon', geom);
             var _values = [];
 
-            intersect_polygon(image, geom, function (value, band_index) {
+            intersect_polygon(georaster, geom, function (value, band_index) {
                 if (!_values[band_index]) {
                     _values[band_index] = value;
                 } else if (value > _values[band_index]) {
@@ -30759,12 +31025,12 @@ module.exports = function (image, geom) {
 "use strict";
 
 
-var _ = __webpack_require__(9);
+var _ = __webpack_require__(8);
 
 var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
-var intersect_polygon = __webpack_require__(8);
+var intersect_polygon = __webpack_require__(9);
 
 var get_mode = function get_mode(values) {
 
@@ -30794,7 +31060,7 @@ var get_mode = function get_mode(values) {
     return modes.length === 1 ? modes[0] : modes;
 };
 
-module.exports = function (image, geom) {
+module.exports = function (georaster, geom) {
 
     try {
 
@@ -30803,8 +31069,9 @@ module.exports = function (image, geom) {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
-            var values = get(image, geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var flat = true;
+            var values = get(georaster, geom, flat);
+            var no_data_value = georaster.no_data_value;
 
             return values.map(function (band) {
                 return band.filter(function (value) {
@@ -30818,7 +31085,7 @@ module.exports = function (image, geom) {
             // the third argument of this function is a function which
             // runs for every pixel in the polygon. Here we add them to
             // an array to run through the get_mode function
-            intersect_polygon(image, geom, function (value, band_index) {
+            intersect_polygon(georaster, geom, function (value, band_index) {
                 if (_values[band_index]) {
                     _values[band_index].push(value);
                 } else {
@@ -30843,12 +31110,12 @@ module.exports = function (image, geom) {
 "use strict";
 
 
-var _ = __webpack_require__(9);
+var _ = __webpack_require__(8);
 
 var get = __webpack_require__(6);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
-var intersect_polygon = __webpack_require__(8);
+var intersect_polygon = __webpack_require__(9);
 
 var get_equal_interval_bins = function get_equal_interval_bins(values, num_classes) {
 
@@ -30860,7 +31127,9 @@ var get_equal_interval_bins = function get_equal_interval_bins(values, num_class
     // and are divided up based on number of classes
     var interval = (max_value - min_value) / num_classes;
     var bins = _.range(num_classes).map(function (num, index) {
-        return [num * interval, (num + 1) * interval];
+        var start = Number((min_value + num * interval).toFixed(2));
+        var end = Number((min_value + (num + 1) * interval).toFixed(2));
+        return [start, end];
     });
 
     var results = {};
@@ -30913,19 +31182,25 @@ var get_quantile_bins = function get_quantile_bins(values, num_classes) {
     var bin_min = values[0];
     var num_values_in_current_bin = 1;
     for (var i = 1; i < values.length; i++) {
-        var value = values[i];
-        if (num_values_in_current_bin < values_per_bin) {
+        if (num_values_in_current_bin + 1 < values_per_bin) {
             num_values_in_current_bin += 1;
         } else {
             // if it is the last value, add it to the bin and start setting up for the next one
-            var bin_max = value;
+            var value = values[i];
+            var _bin_max = value;
             num_values_in_current_bin += 1;
             if (_.keys(results).length > 0) bin_min = '>' + bin_min;
-            results[bin_min + ' - ' + bin_max] = num_values_in_current_bin;
+            results[bin_min + ' - ' + _bin_max] = num_values_in_current_bin;
             num_values_in_current_bin = 0;
             bin_min = value;
         }
     }
+
+    // add the last bin
+    var bin_max = values[values.length - 1];
+    num_values_in_current_bin += 1;
+    bin_min = '>' + bin_min;
+    results[bin_min + ' - ' + bin_max] = num_values_in_current_bin;
 
     return results;
 };
@@ -30983,16 +31258,17 @@ var get_histogram = function get_histogram(values, options) {
     if (results) return results;else throw 'An unexpected error occurred while running the get_histogram function.';
 };
 
-module.exports = function (image, geom, options) {
+module.exports = function (georaster, geom, options) {
 
     try {
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var no_data_value = georaster.no_data_value;
 
             // grab array of values by band
-            var values = get(image, geom);
+            var flat = true;
+            var values = get(georaster, geom, true);
 
             // run through histogram function
             return values.map(function (band) {
@@ -31004,11 +31280,11 @@ module.exports = function (image, geom, options) {
             });
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
-            var _no_data_value = utils.get_no_data_value(image);
+            var _no_data_value = georaster.no_data_value;
 
             // grab array of values by band
             var _values = [];
-            intersect_polygon(image, geom, function (value, band_index) {
+            intersect_polygon(georaster, geom, function (value, band_index) {
                 if (_values[band_index]) {
                     _values[band_index].push(value);
                 } else {

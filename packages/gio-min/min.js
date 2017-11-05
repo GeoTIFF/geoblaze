@@ -30,7 +30,7 @@ let get_min = (values, no_data_value) => {
     }
 }
 
-module.exports = (image, geom) => {
+module.exports = (georaster, geom) => {
     
     try {
         
@@ -38,17 +38,18 @@ module.exports = (image, geom) => {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
-            let values = get(image, geom);
-            let no_data_value = utils.get_no_data_value(image);
+            let values = get(georaster, geom, true);
+            let no_data_value = georaster.no_data_value;
 
             // get min value
             return values.map(band => get_min(band, no_data_value));
+            
         
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
             let values = [];
 
-            intersect_polygon(image, geom, (value, band_index) => {
+            intersect_polygon(georaster, geom, (value, band_index) => {
                 if (typeof values[band_index] === 'undefined') {
                     values[band_index] = value; 
                 } else if (value < values[band_index]) {

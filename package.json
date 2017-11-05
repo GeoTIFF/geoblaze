@@ -1,12 +1,12 @@
 {
   "name": "@geotiff/gio",
-  "version": "0.0.36",
+  "version": "0.0.39",
   "description": "process geotiffs",
   "main": "build/gio.js",
   "scripts": {
     "babel": "babel --presets es2015 index.js -o build/gio.bundle.js",
     "build": "webpack",
-    "test": "./node_modules/.bin/mocha --reporter spec ",
+    "test": "./node_modules/.bin/mocha --reporter spec",
     "jsdoc": "jsdoc packages -r -d docs",
     "start": "node test-app.js"
   },
@@ -35,6 +35,7 @@
   "dependencies": {
     "@turf/turf": "^4.7.3",
     "@turf/union": "^4.7.3",
+    "@turf/combine": "^4.7.3",
     "babel-loader": "^7.1.1",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.6.0",

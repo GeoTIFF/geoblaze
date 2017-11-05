@@ -17,32 +17,33 @@ let ratio_ei_options = {
     class_type: 'equal-interval'
 }
 
-let ratio_quantile_bbox_results = {
-    "0 - 95.8": 32,
-    ">95.8 - 313.1": 32,
-    ">313.1 - 743.5": 32,
-    ">743.5 - 1255.5": 32,
-    ">1255.5 - 1856.1": 32,
-    ">1856.1 - 3058.6": 32
+let ratio_quantile_bbox_results = { 
+    '0 - 93.2': 31,
+    '>93.2 - 272': 31,
+    '>272 - 724': 31,
+    '>724 - 1141.9': 31,
+    '>1141.9 - 1700.6': 31,
+    '>1700.6 - 2732.4': 31,
+    '>2732.4 - 5166.7': 28 }
+
+let ratio_quantile_polygon_results = { 
+    '0 - 129.3': 248,
+    '>129.3 - 683.8': 248,
+    '>683.8 - 1191': 248,
+    '>1191 - 1948.7': 248,
+    '>1948.7 - 2567.7': 248,
+    '>2567.7 - 3483.9': 248,
+    '>3483.9 - 7807.4': 246 
 }
 
-let ratio_quantile_polygon_results = {
-    "0 - 141.8": 235,
-    ">141.8 - 686.6": 235,
-    ">686.6 - 1214.3": 235,
-    ">1214.3 - 1951.8": 235,
-    ">1951.8 - 2563.1": 235,
-    ">2531.1 - 3474.5": 235
-}
-
-let ratio_ei_polygon_results = {
-    "0 - 1115.3428571428572": 674,
-    ">1115.3428571428572 - 2230.6857142857143": 362,
-    ">2230.6857142857143 - 3346.0285714285715": 344,
-    ">3346.0285714285715 - 4461.371428571429": 154,
-    ">4461.371428571429 - 5576.714285714286": 69,
-    ">5576.714285714286 - 6692.057142857143": 22,
-    ">6692.057142857143 - 7807.4": 9
+let ratio_ei_polygon_results = { 
+    '0 - 1115.34': 719,
+    '>1115.34 - 2230.69': 373,
+    '>2230.69 - 3346.03': 359,
+    '>3346.03 - 4461.37': 170,
+    '>4461.37 - 5576.71': 78,
+    '>5576.71 - 6692.06': 25,
+    '>6692.06 - 7807.4': 9 
 }
 
 let url = 'http://localhost:3000/data/test.tiff';
@@ -82,9 +83,8 @@ let test = () => {
         describe('Get Histogram (Ratio, Quantile) from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let results = histogram(image, bbox, ratio_quantile_options)[0];
+                return load(url).then(georaster => {
+                    let results = histogram(georaster, bbox, ratio_quantile_options)[0];
                     _.keys(ratio_quantile_bbox_results).forEach(key => {
                         let value = results[key];
                         let expected_value = ratio_quantile_bbox_results[key];
@@ -96,10 +96,9 @@ let test = () => {
         describe('Get Histogram (Ratio, Quantile) from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let results = histogram(image, polygon, ratio_quantile_options)[0];
-                    _.keys(ratio_quantile_bbox_results).forEach(key => {
+                return load(url).then(georaster => {
+                    let results = histogram(georaster, polygon, ratio_quantile_options)[0];
+                    _.keys(ratio_quantile_polygon_results).forEach(key => {
                         let value = results[key];
                         let expected_value = ratio_quantile_polygon_results[key];
                         expect(value).to.equal(expected_value);
@@ -110,10 +109,9 @@ let test = () => {
         describe('Get Histogram (Ratio, Equal Interval) from Polygon (GeoJSON)', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let results = histogram(image, polygon_geojson, ratio_ei_options)[0];
-                   _.keys(ratio_quantile_bbox_results).forEach(key => {
+                return load(url).then(georaster => {
+                    let results = histogram(georaster, polygon_geojson, ratio_ei_options)[0];
+                    _.keys(ratio_quantile_bbox_results).forEach(key => {
                         let value = results[key];
                         let expected_value = ratio_ei_polygon_results[key];
                         expect(value).to.equal(expected_value);
