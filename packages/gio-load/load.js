@@ -4,7 +4,7 @@ let parse_georaster = require("georaster");
 
 let in_browser = typeof window === 'object';
 var fetch = in_browser ? window.fetch : require('node-fetch');
-var URL = in_browser ? URL : require("url").parse;
+var URL = in_browser ? window.URL : require("url").parse;
 
 let cache = require('../gio-cache/cache');
 

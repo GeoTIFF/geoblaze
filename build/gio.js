@@ -5708,7 +5708,7 @@ var parse_georaster = __webpack_require__(45);
 
 var in_browser = (typeof window === 'undefined' ? 'undefined' : _typeof(window)) === 'object';
 var fetch = in_browser ? window.fetch : __webpack_require__(70);
-var URL = in_browser ? URL : __webpack_require__(10).parse;
+var URL = in_browser ? window.URL : __webpack_require__(10).parse;
 
 var cache = __webpack_require__(28);
 
