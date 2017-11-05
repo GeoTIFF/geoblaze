@@ -60,3 +60,11 @@ typings/
 # jsdoc documentation directory
 docs/
 
+# swap files
+*.swm
+*.swn
+*.swo
+*.swp
+
+# lock files
+package-lock.json

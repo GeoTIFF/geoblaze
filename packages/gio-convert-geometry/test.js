@@ -58,10 +58,10 @@ let test_point_load = feature => {
 
 let test_bbox_load = feature => {
     let bbox = gio_convert_geometry('bbox', feature);
-    expect(bbox[0]).to.equal(100);
-    expect(bbox[1]).to.equal(0);
-    expect(bbox[2]).to.equal(101);
-    expect(bbox[3]).to.equal(1);
+    expect(bbox.xmin).to.equal(100);
+    expect(bbox.ymin).to.equal(0);
+    expect(bbox.xmax).to.equal(101);
+    expect(bbox.ymax).to.equal(1);
 }
 
 let test_polygon_load = feature => {

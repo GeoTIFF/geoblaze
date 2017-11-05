@@ -22,9 +22,8 @@ let test = () => {
         describe('Get Max from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(max(image, bbox)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(max(georaster, bbox)[0].toFixed(2));
                     expect(value).to.equal(expected_bbox_value);
                 });
             });
@@ -32,9 +31,8 @@ let test = () => {
         describe('Get Max from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(max(image, polygon)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(max(georaster, polygon)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_value);
                 });
             });

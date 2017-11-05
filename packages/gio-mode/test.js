@@ -22,9 +22,8 @@ let test = () => {
         describe('Get Mode from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = mode(image, bbox)[0];
+                return load(url).then(georaster => {
+                    let value = mode(georaster, bbox)[0];
                     expect(value).to.equal(expected_bbox_value);
                 });
             });
@@ -32,9 +31,8 @@ let test = () => {
         describe('Get Mode from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = mode(image, polygon)[0];
+                return load(url).then(georaster => {
+                    let value = mode(georaster, polygon)[0];
                     expect(value).to.equal(expected_polygon_value);
                 });
             });

@@ -30,7 +30,7 @@ let get_max = (values, no_data_value) => {
     }
 }
 
-module.exports = (image, geom) => {
+module.exports = (georaster, geom) => {
     
     try {
         
@@ -38,8 +38,9 @@ module.exports = (image, geom) => {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
-            let values = get(image, geom);
-            let no_data_value = utils.get_no_data_value(image);
+            let flat = true;
+            let values = get(georaster, geom, flat);
+            let no_data_value = georaster.no_data_value;
 
             // get max value
             return values.map(band => get_max(band, no_data_value));
@@ -48,7 +49,7 @@ module.exports = (image, geom) => {
             geom = convert_geometry('polygon', geom);
             let values = [];
 
-            intersect_polygon(image, geom, (value, band_index) => {
+            intersect_polygon(georaster, geom, (value, band_index) => {
                 if (!values[band_index]) {
                     values[band_index] = value; 
                 } else if (value > values[band_index]) {

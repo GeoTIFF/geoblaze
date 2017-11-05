@@ -7,7 +7,7 @@ let mean = require('./mean');
 let url = 'http://localhost:3000/data/test.tiff';
 
 let bbox = [80.63, 7.42, 84.21, 10.10];
-let expected_bbox_value = 180.80;
+let expected_bbox_value = 1232.47;
 
 let polygon = [[
     [83.12255859375, 22.49225722008518], [82.96875, 21.57571893245848], [81.58447265624999,  1.207458730482642],
@@ -44,9 +44,8 @@ let test = () => {
         describe('Get Mean from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(mean(image, bbox)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(mean(georaster, bbox)[0].toFixed(2));
                     expect(value).to.equal(expected_bbox_value);
                 });
             });
@@ -54,9 +53,8 @@ let test = () => {
         describe('Get Mean from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(mean(image, polygon)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(mean(georaster, polygon)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_value);
                 })
             })
@@ -64,9 +62,8 @@ let test = () => {
         describe('Get Mean from Polygon (GeoJSON)', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(mean(image, polygon_geojson)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(mean(georaster, polygon_geojson)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_geojson_value);
                 })
             })

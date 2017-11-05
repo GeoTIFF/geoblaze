@@ -200,9 +200,8 @@ let test = () => {
         describe('Get Sum from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(sum(image, bbox)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(sum(georaster, bbox)[0].toFixed(2));
                     expect(value).to.equal(expected_bbox_value);
                 });
             });
@@ -210,9 +209,8 @@ let test = () => {
         describe('Get Sum from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(sum(image, polygon)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(sum(georaster, polygon)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_value);
                 });
             });
@@ -220,9 +218,8 @@ let test = () => {
         describe('Get Sum from Polygon (GeoJSON) 1', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(sum(image, polygon_geojson_1)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(sum(georaster, polygon_geojson_1)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_geojson_value_1);
                 });
             });
@@ -230,9 +227,8 @@ let test = () => {
         describe('Get Sum from Polygon (GeoJSON) 2', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(sum(image, polygon_geojson_2)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(sum(georaster, polygon_geojson_2)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_geojson_value_2);
                 });
             });
@@ -240,9 +236,8 @@ let test = () => {
         describe('Get Sum from Polygon (Multi-Polygon GeoJSON, 1 + 2)', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = Number(sum(image, polygon_geojson_collection)[0].toFixed(2));
+                return load(url).then(georaster => {
+                    let value = Number(sum(georaster, polygon_geojson_collection)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_geojson_collection_value);
                 });
             });

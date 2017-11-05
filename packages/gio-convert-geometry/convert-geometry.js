@@ -32,19 +32,22 @@ let convert_point = geometry => {
 let convert_bbox = geometry => {
     let bbox;
     if (utils.is_bbox(geometry)) {
-        if (Array.isArray(geometry) && geometry.length === 4) { // array
+        if (typeof geometry.xmin !== "undefined" && typeof geometry.ymax !== "undefined") {
             bbox = geometry;
+        }
+        else if (Array.isArray(geometry) && geometry.length === 4) { // array
+            bbox = { xmin: geometry[0], ymin: geometry[1], xmax: geometry[2], ymax: geometry[3] };
         } else if (typeof geometry === 'string') { // stringified geojson
             let geojson = JSON.parse(geometry);
             let coors = utils.get_geojson_coors(geojson)[0];
             let lngs = coors.map(coor => coor[0]);
             let lats = coors.map(coor => coor[1]);
-            bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
+            bbox = { xmin: Math.min(...lngs), ymin: Math.min(...lats), xmax: Math.max(...lngs), ymax: Math.max(...lats) };
         } else if (typeof geometry === 'object') { // geojson
             let coors = utils.get_geojson_coors(geometry)[0];
             let lngs = coors.map(coor => coor[0]);
             let lats = coors.map(coor => coor[1]);
-            bbox = [Math.min(...lngs), Math.min(...lats), Math.max(...lngs), Math.max(...lats)];
+            bbox = { xmin: Math.min(...lngs), ymin: Math.min(...lats), xmax: Math.max(...lngs), ymax: Math.max(...lats) };
         }
     }
         
