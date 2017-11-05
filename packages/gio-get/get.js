@@ -4,27 +4,44 @@ let load = require('../gio-load/load');
 let utils = require('../gio-utils/utils');
 let convert_geometry = require('../gio-convert-geometry/convert-geometry');
 
-module.exports = (image, geom) => {
+module.exports = (georaster, geom, flat) => {
     
     if (utils.is_bbox(geom)) { // bounding box
         
         // convert geometry
         let geometry = convert_geometry('bbox', geom);
 
-        let geoKeys = image.getGeoKeys();
-
-        // TEMPORARY: make sure raster is in wgs 84
-        if (geoKeys.GTModelTypeGeoKey === 2 && geoKeys.GeographicTypeGeoKey === 4326) {
+        if (georaster.projection === 4326) {
             
             // use a utility function that converts from the lat/long coordinate
             // space to the image coordinate space
-            let bbox = utils.convert_latlng_bbox_to_image_bbox(image, geometry);
+            // // left, top, right, bottom
+            let bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, geometry);
+            console.log("bbox:", bbox);
+            let bbox_left = bbox.xmin;
+            let bbox_top = bbox.ymin;
+            let bbox_right = bbox.xmax;
+            let bbox_bottom = bbox.ymax;
 
             try {
-
-                // get values
-                return image.readRasters({ window: bbox });
-
+                if (flat) {
+                    console.log("flat is true");
+                    return georaster.values.map(band => {
+                        let values = [];
+                        for (let row_index = bbox_top; row_index < bbox_bottom; row_index++) {
+                            values = values.concat(Array.prototype.slice.call(band[row_index].slice(bbox_left, bbox_right)));
+                        }
+                        return values;
+                    });
+                } else {
+                    return georaster.values.map(band => {
+                        let table = [];
+                        for (let row_index = bbox_top; row_index < bbox_bottom; row_index++) {
+                            table.push(band[row_index].slice(bbox_left, bbox_right));
+                        }
+                        return table;
+                    });
+                }
             } catch (e) {
                 throw e;
             }

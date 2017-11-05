@@ -8,32 +8,36 @@ let utils = require('../gio-utils/utils');
 let get_line_from_points = utils.get_line_from_points;
 let get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
 
-module.exports = (image, geom, run_on_values) => {
+module.exports = (georaster, geom, run_on_values) => {
 
-	// get the cell width and height, will use later
-	let info = utils.get_image_info(image);
-    let cell_width = info.cell_width;
-    let cell_height = info.cell_height;
-
-    let no_data_value = utils.get_no_data_value(image);
+    let cell_width = georaster.pixelWidth;
+    let cell_height = georaster.pixelHeight;
+    let no_data_value = georaster.no_data_value;
+    let image_height = georaster.height;
 
     // get values in a bounding box around the geometry
     let latlng_bbox = utils.get_bounding_box(geom);
-    let image_bands = get(image, latlng_bbox)
+    console.log("latlng_bbox:", latlng_bbox); //good
+    let image_bands = get(georaster, latlng_bbox)
+    //console.log("image_bands:", image_bands);
 
-    // set origin points of image, based on the returned bbox
-    let lat_0 = latlng_bbox[3] + ((info.lat_0 - latlng_bbox[3]) % cell_height);
-    let lng_0 = latlng_bbox[0] - ((latlng_bbox[0] - info.lng_0) % cell_width);
+    // set origin points of bbox of geometry in image space
+    let lat_0 = latlng_bbox.ymax + ((georaster.ymax - latlng_bbox.ymax) % cell_height);
+    console.log("lat_0:", lat_0); //good
+    let lng_0 = latlng_bbox.xmin - ((latlng_bbox.xmin - georaster.xmin) % cell_width);
+    console.log("lng_0:", lng_0); //good
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
-    let image_bbox = utils.convert_latlng_bbox_to_image_bbox(image, latlng_bbox);
-    let x_min = image_bbox[0],
-        y_min = image_bbox[1],
-        x_max = image_bbox[2],
-        y_max = image_bbox[3];
+    let image_bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox);
+    console.log("image_bbox:", image_bbox); //good
+    let x_min = image_bbox.xmin,
+        y_min = image_bbox.ymin,
+        x_max = image_bbox.xmax,
+        y_max = image_bbox.ymax;
 
     let row_length = x_max - x_min;
+    //console.log("row_length:", row_length); //good
 
     // collapse geometry down to a list of edges
     // necessary for multi-part geometries
@@ -49,11 +53,13 @@ module.exports = (image, geom, run_on_values) => {
     // iterate through image rows and convert each one to a line
     // running through the middle of the row
     let image_lines = [];
-    let image_size = image_bands[0].length;
-    for (let y = 0; y < image_size; y += row_length) {
+    let num_rows = image_bands[0].length;
+    //console.log("num_rows:", num_rows);//good
+    for (let y = 0; y < num_rows; y++) {
 
-        // get latitude of current row 
-        let lat = lat_0 - (cell_height * y / row_length + cell_height / 2);
+        // I don't understand this
+        let lat = lat_0 - (cell_height * y + cell_height / 2);
+        //console.log("lat:", lat); //good
 
         // use that point, plus another point along the same latitude to
         // create a line
@@ -62,10 +68,10 @@ module.exports = (image, geom, run_on_values) => {
         let line = get_line_from_points(point_0, point_1);
         image_lines.push(line);
     }
+    //console.log("image_lines:", image_lines);
 
     // iterate through the list of polygon vertices, convert them to
     // lines, and compute the intersections with each image row
-    let num_rows = Math.floor(image_size / row_length);
     let intersections_by_row = _.range(num_rows).map(row => []);
     for (let i = 0; i < edges.length; i++) {
         
@@ -83,6 +89,9 @@ module.exports = (image, geom, run_on_values) => {
             start_lng = end_point[0];
             end_lng = start_point[0];
         }
+        //console.log("\n\n\n");
+        //console.log("start_lng:", start_lng);
+        //console.log("end_lng:", end_lng);
 
         // find the y values in the image coordinate space
         let y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
@@ -98,12 +107,24 @@ module.exports = (image, geom, run_on_values) => {
             row_start = y_2;
             row_end = y_1;
         }
+        console.log("row_start, row_end", [row_start, row_end]);
 
         // iterate through image lines within the change in y of
         // the edge line and find all intersections
         for (let j = row_start; j < row_end + 1; j++) {
             let image_line = image_lines[j];
-            let intersection = get_intersection_of_two_lines(edge_line, image_line);
+            //console.log("image_line:", image_line);
+            try {
+            var intersection = get_intersection_of_two_lines(edge_line, image_line);
+            } catch (error) {
+                console.log("j:", j);
+                console.log("edge_line:", edge_line);
+                console.log("image_line:", image_line);
+                console.log("image_lines:", image_lines);
+                console.error(error)
+                throw error;
+            }
+            //console.log("intersection:", intersection);
 
             // check to see if the intersection point is within the range of 
             // the edge line segment. If it is, add the intersection to the 
@@ -115,6 +136,8 @@ module.exports = (image, geom, run_on_values) => {
             }
         }
     }
+
+    //console.log("intersections by row", intersections_by_row);
 
     // iterate through the list of computed intersections for each row.
     // use these intersections to split up each row into pixels that fall
@@ -135,21 +158,32 @@ module.exports = (image, geom, run_on_values) => {
             // polygon
             for (let j = 0; j < num_intersections; j++) {
                 if (j % 2 === 1) {
-                    let start_row_index = row_intersections[j - 1];
-                    let end_row_index = row_intersections[j];
 
-                    // convert the start and end row indexes to indexes
-                    // in the image
-                    let start_index = i * row_length + start_row_index;
-                    let end_index = i * row_length + end_row_index;
+                    let start_column_index = row_intersections[j - 1];
+                    let end_column_index = row_intersections[j];
+                    //console.log("start_row_index:end_row_index", start_row_index,":",end_row_index);
+
+                    // convert to start and end in the clipped image    
+                    //let start_index = start_row_index - x_min;
+                    //let end_index = end_row_index - x_min;
+
+                    //console.log("start_index:end_index", start_index,":",end_index);
 
                     // use the start and end indexes to pull pixels out of
                     // the corresponding image row
-                    for (let r = start_index; r <= end_index; r++) {
+                    for (let column_index = start_column_index; column_index <= end_column_index; column_index++) {
                         image_bands.forEach((band, band_index) => {
-                            let value = band[r];
+                            //console.log("band:", band);
+                            try {
+                                var value = band[i][column_index];
+                            } catch (error) {
+                                //console.log("band:", band);
+                                //console.log("row_index:", row_index);
+                                //console.log("column_index:", column_index);
+                                //console.error(error);
+                                throw error;
+                            }
                             if (value !== no_data_value) {
-                                
                                 // run the function provided as a parameter input
                                 // on the value
                                 run_on_values(value, band_index);

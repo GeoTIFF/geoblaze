@@ -14,9 +14,8 @@ let test = () => (
         describe('Identify Point in Raster', function() {
             this.timeout(1000000);
             it('Identified Point Correctly', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let value = identify(image, point)[0];
+                return load(url).then(georaster => {
+                    let value = identify(georaster, point)[0];
                     expect(value).to.equal(expected_value);
                 });
             });

@@ -9,9 +9,9 @@ let load = require('./load');
 let path = 'http://localhost:3000/data/test.tiff';
 
 let properties = [
-    'fileDirectory',
-    'geoKeys',
-    'dataView'
+    'projection',
+    'xmin',
+    'values'
 ];
 
 let test = () => (
@@ -19,10 +19,9 @@ let test = () => (
         describe('Load from URL', function() {
             this.timeout(1000000);
             it('Loaded tiff file', () => {
-                return load(path).then(tiff => {
-                    let image = tiff.getImage();
+                return load(path).then(georaster => {
                     properties.forEach(property => {
-                        expect(image).to.have.property(property);
+                        expect(georaster).to.have.property(property);
                     });
                 });
             });

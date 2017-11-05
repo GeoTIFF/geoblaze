@@ -6,36 +6,35 @@ let combine = require('@turf/combine');
 
 module.exports = {
 
-    get_image_info(image) {
-        let fd = image.fileDirectory;
-        let origin = image.getOrigin();
-        let cell_width = fd.ModelPixelScale[0];
-        let cell_height = fd.ModelPixelScale[1];
-        let lng_0 = origin[0];
-        let lat_0 = origin[1];
-        return { lng_0, lat_0, cell_width, cell_height };
-    },
+    convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox) {
 
-    convert_latlng_bbox_to_image_bbox(image, latlng_bbox) {
+        console.log("starting convert_latlng_bbox_to_image_bbox with", latlng_bbox); 
 
-        let info = this.get_image_info(image);
-
-        // pull out bounding box values
-        let lng_min = latlng_bbox[0];
-        let lat_min = latlng_bbox[1];
-        let lng_max = latlng_bbox[2];
-        let lat_max = latlng_bbox[3];
+        let lng_min, lat_min, lng_max, lat_max;
+        if (typeof latlng_bbox.xmin !== "undefined") {
+            lng_min = latlng_bbox.xmin;
+            lat_min = latlng_bbox.ymin;
+            lng_max = latlng_bbox.xmax;
+            lat_max = latlng_bbox.ymax;
+        } else if (Array.isArray(latlng_bbox) && latlng_bbox.length === 4) {
+            // pull out bounding box values
+            lng_min = latlng_bbox[0];
+            lat_min = latlng_bbox[1];
+            lng_max = latlng_bbox[2];
+            lat_max = latlng_bbox[3];
+        }
+        console.log("lng_min:", lng_min);
 
         // map bounding box values to image coordinate space
         /* y_min uses lat_max while y_max uses lat_min because the image coordinate
         system is inverted along the y axis relative to the lat/long (geographic)
         coordinate system */
-        let x_min = Math.floor(Math.abs(lng_min - info.lng_0) / info.cell_width);
-        let y_min = Math.floor(Math.abs(info.lat_0 - lat_max) / info.cell_height);
-        let x_max = Math.ceil(Math.abs(lng_max - info.lng_0) / info.cell_width);
-        let y_max = Math.ceil(Math.abs(info.lat_0 - lat_min) / info.cell_height);
-
-        return [x_min, y_min, x_max, y_max];
+        return {
+            xmin: Math.floor(Math.abs(lng_min - georaster.xmin) / georaster.pixelWidth),
+            ymin: Math.floor(Math.abs(georaster.ymax - lat_max) / georaster.pixelHeight),
+            xmax: Math.ceil(Math.abs(lng_max - georaster.xmin) / georaster.pixelWidth),
+            ymax: Math.ceil(Math.abs(georaster.ymax - lat_min) / georaster.pixelHeight)
+        };
     },
 
     get_geojson_coors(geojson) {
@@ -58,7 +57,11 @@ module.exports = {
     is_bbox(geometry) {
 
         // check if we are using the gio format and return true right away if so
-        if (Array.isArray(geometry) && geometry.length === 4) { // array 
+        if (geometry.xmin !== undefined && geometry.xmax !== undefined && geometry.ymax !== undefined && geometry.ymin !== undefined) {
+            return true;
+        }
+
+        if ((Array.isArray(geometry) && geometry.length === 4)) { // array 
             return true;
         }
 
@@ -119,12 +122,6 @@ module.exports = {
         return false;
     },
 
-    get_no_data_value(image) {
-
-        // so far haven't found a reason not to return as an integer
-        return parseInt(image.fileDirectory.GDAL_NODATA);
-    },
-
     get_bounding_box(geometry) {
 
         // initialize the min and max values to the first
@@ -150,7 +147,7 @@ module.exports = {
 
         });
 
-        return [ xmin, ymin, xmax, ymax ];
+        return { xmin, ymin, xmax, ymax };
     },
 
     // function to convert two points into a 

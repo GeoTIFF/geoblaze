@@ -4,6 +4,7 @@ let get = require('../gio-get/get');
 let utils = require('../gio-utils/utils');
 let convert_geometry = require('../gio-convert-geometry/convert-geometry');
 let intersect_polygon = require('../gio-intersect-polygon/intersect-polygon');
+let _ = require("underscore");
 
 let get_median = values => {
 
@@ -21,7 +22,7 @@ let get_median = values => {
     }
 }
 
-module.exports = (image, geom) => {
+module.exports = (georaster, geom) => {
     
     try {
         
@@ -29,13 +30,55 @@ module.exports = (image, geom) => {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
-            let values = get(image, geom);
-            let no_data_value = utils.get_no_data_value(image);
+            let flat = false; // get values as a one dimensional flat array rather than as a table
+            let values = get(georaster, geom, flat);
+            console.log("values:", values.length, values[0].length, values[0][0].length);
+            let no_data_value = georaster.no_data_value;
 
             // get median
-            return values
-                .map(band => band.filter(value => value !== no_data_value))
-                .map(get_median);
+            //return values
+            //    .map(band => band.filter(value => value !== no_data_value))
+            //    .map(get_median);
+
+            // median values
+            let medians = []
+            for (let band_index = 0; band_index < values.length; band_index++) {
+                let band = values[band_index];
+                let number_of_cells_with_values_in_band = 0;
+                let number_of_rows = band.length;
+                let counts = {};
+                for (let row_index = 0; row_index < number_of_rows; row_index++) {
+                    let row = band[row_index];
+                    let number_of_cells = row.length;
+                    for (let column_index = 0; column_index < number_of_cells; column_index++) {
+                        let value = row[column_index];
+                        if (value !== no_data_value) {
+                            number_of_cells_with_values_in_band++;
+                            if (value in counts) counts[value]++;
+                            else counts[value] = 1;
+                        }
+                    }
+                }
+                let sorted_counts = _.pairs(counts).sort((pair1, pair2) => Number(pair1[0]) - Number(pair2[0]));
+                console.log("sorted_counts:", sorted_counts);
+                let middle = number_of_cells_with_values_in_band / 2;
+                let running_count = 0;
+                for (let i = 0; i < sorted_counts.length; i++) {
+                    let sorted_count = sorted_counts[i];
+                    let value = Number(sorted_count[0]);
+                    let count = sorted_count[1];
+                    running_count += count;
+                    if (running_count > middle) {
+                        medians.push(value);
+                        break;
+                    } else if (running_count === middle) {
+                        medians.push((value + Number(sorted_counts[i+1])) / 2);
+                        break;
+                    }
+                }
+                console.log("medians:", medians);
+            }
+            return medians;
 
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
@@ -44,7 +87,7 @@ module.exports = (image, geom) => {
             // the third argument of this function is a function which
             // runs for every pixel in the polygon. Here we add them to
             // an array to run through the get_median function
-            intersect_polygon(image, geom, (value, band_index) => {
+            intersect_polygon(georaster, geom, (value, band_index) => {
                 if (values[band_index]) {
                     values[band_index].push(value);
                 } else {

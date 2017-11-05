@@ -7,24 +7,38 @@ let utils = require('../gio-utils/utils');
 let convert_geometry = require('../gio-convert-geometry/convert-geometry');
 let intersect_polygon = require('../gio-intersect-polygon/intersect-polygon');
 
-module.exports = (image, geom) => {
+module.exports = (georaster, geom) => {
     
     try {
 
         if (utils.is_bbox(geom)) { // if geometry is a bounding box
             geom = convert_geometry('bbox', geom);
-            let no_data_value = utils.get_no_data_value(image);
+            let no_data_value = georaster.no_data_value;
 
             // grab array of values
-            let values = get(image, geom);
+            let values = get(georaster, geom);
 
-            // run simple reduce to get average
-            return values.map(band => {
-                return band
-                    .filter(value => value !== no_data_value)
-                    .reduce((sum, value) => sum += value, 0)
-                    / band.length;
-            });
+            // sum values
+            let sums = []
+            for (let band_index = 0; band_index < values.length; band_index++) {
+                let running_sum_for_band = 0;
+                let number_of_cells_with_values_in_band = 0;
+                let band = values[band_index];
+                let number_of_rows = band.length;
+                for (let row_index = 0; row_index < number_of_rows; row_index++) {
+                    let row = band[row_index];
+                    let number_of_cells = row.length;
+                    for (let column_index = 0; column_index < number_of_cells; column_index++) {
+                        let value = row[column_index];
+                        if (value !== no_data_value) {
+                            number_of_cells_with_values_in_band++;
+                            running_sum_for_band += value;
+                        }
+                    }
+                }
+                sums.push(running_sum_for_band / number_of_cells_with_values_in_band);
+            }
+            return sums;
         } else if (utils.is_polygon(geom)) { // if geometry is a polygon
             geom = convert_geometry('polygon', geom);
             let sums = [];
@@ -33,7 +47,7 @@ module.exports = (image, geom) => {
             // the third argument of intersect_polygon is a function which
             // is run on every value, we use it to increment the sum so we
             // can later divide it by the total value count to get the mean
-            intersect_polygon(image, geom, (value, band_index) => {
+            intersect_polygon(georaster, geom, (value, band_index) => {
                 if (num_values[band_index]) {
                     sums[band_index] += value; 
                     num_values[band_index] += 1;

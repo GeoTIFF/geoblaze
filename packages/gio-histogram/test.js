@@ -83,9 +83,8 @@ let test = () => {
         describe('Get Histogram (Ratio, Quantile) from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let results = histogram(image, bbox, ratio_quantile_options)[0];
+                return load(url).then(georaster => {
+                    let results = histogram(georaster, bbox, ratio_quantile_options)[0];
                     _.keys(ratio_quantile_bbox_results).forEach(key => {
                         let value = results[key];
                         let expected_value = ratio_quantile_bbox_results[key];
@@ -97,9 +96,8 @@ let test = () => {
         describe('Get Histogram (Ratio, Quantile) from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let results = histogram(image, polygon, ratio_quantile_options)[0];
+                return load(url).then(georaster => {
+                    let results = histogram(georaster, polygon, ratio_quantile_options)[0];
                     _.keys(ratio_quantile_polygon_results).forEach(key => {
                         let value = results[key];
                         let expected_value = ratio_quantile_polygon_results[key];
@@ -111,9 +109,8 @@ let test = () => {
         describe('Get Histogram (Ratio, Equal Interval) from Polygon (GeoJSON)', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
-                return load(url).then(tiff => {
-                    let image = tiff.getImage();
-                    let results = histogram(image, polygon_geojson, ratio_ei_options)[0];
+                return load(url).then(georaster => {
+                    let results = histogram(georaster, polygon_geojson, ratio_ei_options)[0];
                     _.keys(ratio_quantile_bbox_results).forEach(key => {
                         let value = results[key];
                         let expected_value = ratio_ei_polygon_results[key];

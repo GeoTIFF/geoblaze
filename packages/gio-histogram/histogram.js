@@ -144,16 +144,17 @@ let get_histogram = (values, options) => {
     else throw 'An unexpected error occurred while running the get_histogram function.';
 }
 
-module.exports = (image, geom, options) => {
+module.exports = (georaster, geom, options) => {
 
     try {
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
-            var no_data_value = utils.get_no_data_value(image);
+            var no_data_value = georaster.no_data_value;
 
             // grab array of values by band
-            let values = get(image, geom);
+            let flat = true;
+            let values = get(georaster, geom, true);
 
             // run through histogram function
             return values
@@ -162,11 +163,11 @@ module.exports = (image, geom, options) => {
 
         } else if (utils.is_polygon(geom)) {
             geom = convert_geometry('polygon', geom);
-            let no_data_value = utils.get_no_data_value(image);
+            let no_data_value = georaster.no_data_value;
 
             // grab array of values by band
             let values = [];
-            intersect_polygon(image, geom, (value, band_index) => {
+            intersect_polygon(georaster, geom, (value, band_index) => {
                 if (values[band_index]) {
                     values[band_index].push(value); 
                 } else {
