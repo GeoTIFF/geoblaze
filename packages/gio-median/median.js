@@ -32,7 +32,7 @@ module.exports = (georaster, geom) => {
             // grab array of values;
             let flat = false; // get values as a one dimensional flat array rather than as a table
             let values = get(georaster, geom, flat);
-            console.log("values:", values.length, values[0].length, values[0][0].length);
+            //console.log("values:", values.length, values[0].length, values[0][0].length);
             let no_data_value = georaster.no_data_value;
 
             // get median
@@ -60,7 +60,7 @@ module.exports = (georaster, geom) => {
                     }
                 }
                 let sorted_counts = _.pairs(counts).sort((pair1, pair2) => Number(pair1[0]) - Number(pair2[0]));
-                console.log("sorted_counts:", sorted_counts);
+                //console.log("sorted_counts:", sorted_counts);
                 let middle = number_of_cells_with_values_in_band / 2;
                 let running_count = 0;
                 for (let i = 0; i < sorted_counts.length; i++) {
@@ -76,7 +76,7 @@ module.exports = (georaster, geom) => {
                         break;
                     }
                 }
-                console.log("medians:", medians);
+                //console.log("medians:", medians);
             }
             return medians;
 

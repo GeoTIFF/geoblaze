@@ -8,8 +8,6 @@ module.exports = {
 
     convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox) {
 
-        console.log("starting convert_latlng_bbox_to_image_bbox with", latlng_bbox); 
-
         let lng_min, lat_min, lng_max, lat_max;
         if (typeof latlng_bbox.xmin !== "undefined") {
             lng_min = latlng_bbox.xmin;
@@ -23,7 +21,6 @@ module.exports = {
             lng_max = latlng_bbox[2];
             lat_max = latlng_bbox[3];
         }
-        console.log("lng_min:", lng_min);
 
         // map bounding box values to image coordinate space
         /* y_min uses lat_max while y_max uses lat_min because the image coordinate

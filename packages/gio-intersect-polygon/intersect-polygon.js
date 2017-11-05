@@ -17,20 +17,20 @@ module.exports = (georaster, geom, run_on_values) => {
 
     // get values in a bounding box around the geometry
     let latlng_bbox = utils.get_bounding_box(geom);
-    console.log("latlng_bbox:", latlng_bbox); //good
+    //console.log("latlng_bbox:", latlng_bbox); //good
     let image_bands = get(georaster, latlng_bbox)
     //console.log("image_bands:", image_bands);
 
     // set origin points of bbox of geometry in image space
     let lat_0 = latlng_bbox.ymax + ((georaster.ymax - latlng_bbox.ymax) % cell_height);
-    console.log("lat_0:", lat_0); //good
+    //console.log("lat_0:", lat_0); //good
     let lng_0 = latlng_bbox.xmin - ((latlng_bbox.xmin - georaster.xmin) % cell_width);
-    console.log("lng_0:", lng_0); //good
+    //console.log("lng_0:", lng_0); //good
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
     let image_bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox);
-    console.log("image_bbox:", image_bbox); //good
+    //console.log("image_bbox:", image_bbox); //good
     let x_min = image_bbox.xmin,
         y_min = image_bbox.ymin,
         x_max = image_bbox.xmax,
@@ -107,7 +107,7 @@ module.exports = (georaster, geom, run_on_values) => {
             row_start = y_2;
             row_end = y_1;
         }
-        console.log("row_start, row_end", [row_start, row_end]);
+        //console.log("row_start, row_end", [row_start, row_end]);
 
         // iterate through image lines within the change in y of
         // the edge line and find all intersections

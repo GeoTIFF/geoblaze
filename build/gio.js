@@ -2103,8 +2103,6 @@ var combine = __webpack_require__(129);
 module.exports = {
     convert_latlng_bbox_to_image_bbox: function convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox) {
 
-        console.log("starting convert_latlng_bbox_to_image_bbox with", latlng_bbox);
-
         var lng_min = void 0,
             lat_min = void 0,
             lng_max = void 0,
@@ -2121,7 +2119,6 @@ module.exports = {
             lng_max = latlng_bbox[2];
             lat_max = latlng_bbox[3];
         }
-        console.log("lng_min:", lng_min);
 
         // map bounding box values to image coordinate space
         /* y_min uses lat_max while y_max uses lat_min because the image coordinate
@@ -2466,7 +2463,7 @@ module.exports = function (georaster, geom, flat) {
             // space to the image coordinate space
             // // left, top, right, bottom
             var bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, geometry);
-            console.log("bbox:", bbox);
+            //console.log("bbox:", bbox);
             var bbox_left = bbox.xmin;
             var bbox_top = bbox.ymin;
             var bbox_right = bbox.xmax;
@@ -2474,7 +2471,7 @@ module.exports = function (georaster, geom, flat) {
 
             try {
                 if (flat) {
-                    console.log("flat is true");
+                    //console.log("flat is true");
                     return georaster.values.map(function (band) {
                         var values = [];
                         for (var row_index = bbox_top; row_index < bbox_bottom; row_index++) {
@@ -4211,20 +4208,20 @@ module.exports = function (georaster, geom, run_on_values) {
 
     // get values in a bounding box around the geometry
     var latlng_bbox = utils.get_bounding_box(geom);
-    console.log("latlng_bbox:", latlng_bbox); //good
+    //console.log("latlng_bbox:", latlng_bbox); //good
     var image_bands = get(georaster, latlng_bbox);
     //console.log("image_bands:", image_bands);
 
     // set origin points of bbox of geometry in image space
     var lat_0 = latlng_bbox.ymax + (georaster.ymax - latlng_bbox.ymax) % cell_height;
-    console.log("lat_0:", lat_0); //good
+    //console.log("lat_0:", lat_0); //good
     var lng_0 = latlng_bbox.xmin - (latlng_bbox.xmin - georaster.xmin) % cell_width;
-    console.log("lng_0:", lng_0); //good
+    //console.log("lng_0:", lng_0); //good
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
     var image_bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox);
-    console.log("image_bbox:", image_bbox); //good
+    //console.log("image_bbox:", image_bbox); //good
     var x_min = image_bbox.xmin,
         y_min = image_bbox.ymin,
         x_max = image_bbox.xmax,
@@ -4305,7 +4302,7 @@ module.exports = function (georaster, geom, run_on_values) {
             row_start = y_2;
             row_end = y_1;
         }
-        console.log("row_start, row_end", [row_start, row_end]);
+        //console.log("row_start, row_end", [row_start, row_end]);
 
         // iterate through image lines within the change in y of
         // the edge line and find all intersections
@@ -11265,7 +11262,9 @@ var parse_data = function parse_data(data) {
 
     try {
 
-        var result = {};
+        var result = {
+            _arrayBuffer: data.arrayBuffer
+        };
 
         var height = void 0,
             no_data_value = void 0,
@@ -11350,7 +11349,7 @@ var parse_data = function parse_data(data) {
     }
 };
 
-var web_worker_script = "\n\n    // this is a bit of a hack to trick geotiff to work with web worker\n    let window = self;\n\n    let parse_data = " + parse_data.toString() + ";\n    //console.log(\"inside web worker, parse_data is\", parse_data);\n\n    try {\n        /* Need to find a way to do this with webpack */\n        importScripts(\"https://unpkg.com/geotiff@0.4.1/dist/geotiff.browserify.min.js\");\n    } catch (error) {\n        console.error(error);\n    }\n\n    onmessage = e => {\n        //console.error(\"inside worker on message started with\", e); \n        let data = e.data;\n        let result = parse_data(data);\n        postMessage(result);\n        close();\n    }\n";
+var web_worker_script = "\n\n    // this is a bit of a hack to trick geotiff to work with web worker\n    let window = self;\n\n    let parse_data = " + parse_data.toString() + ";\n    //console.log(\"inside web worker, parse_data is\", parse_data);\n\n    try {\n        /* Need to find a way to do this with webpack */\n        importScripts(\"https://unpkg.com/geotiff@0.4.1/dist/geotiff.browserify.min.js\");\n    } catch (error) {\n        console.error(error);\n    }\n\n    onmessage = e => {\n        //console.error(\"inside worker on message started with\", e); \n        let data = e.data;\n        let result = parse_data(data);\n        console.log(\"posting from web wroker:\", result);\n        postMessage(result, [result._arrayBuffer]);\n        close();\n    }\n";
 
 var GeoRaster = function () {
     function GeoRaster(arrayBuffer) {
@@ -11393,7 +11392,7 @@ var GeoRaster = function () {
                         var worker = new Worker(url);
                         //console.log("worker:", worker);
                         worker.onmessage = function (e) {
-                            //console.log("main thread received message:", e);
+                            console.log("main thread received message:", e);
                             var data = e.data;
                             for (var key in data) {
                                 _this[key] = data[key];
@@ -30797,7 +30796,7 @@ module.exports = function (georaster, geom) {
             // grab array of values;
             var flat = false; // get values as a one dimensional flat array rather than as a table
             var values = get(georaster, geom, flat);
-            console.log("values:", values.length, values[0].length, values[0][0].length);
+            //console.log("values:", values.length, values[0].length, values[0][0].length);
             var no_data_value = georaster.no_data_value;
 
             // get median
@@ -30826,7 +30825,7 @@ module.exports = function (georaster, geom) {
                 var sorted_counts = _.pairs(counts).sort(function (pair1, pair2) {
                     return Number(pair1[0]) - Number(pair2[0]);
                 });
-                console.log("sorted_counts:", sorted_counts);
+                //console.log("sorted_counts:", sorted_counts);
                 var middle = number_of_cells_with_values_in_band / 2;
                 var running_count = 0;
                 for (var i = 0; i < sorted_counts.length; i++) {
@@ -30842,7 +30841,7 @@ module.exports = function (georaster, geom) {
                         break;
                     }
                 }
-                console.log("medians:", medians);
+                //console.log("medians:", medians);
             }
             return medians;
         } else if (utils.is_polygon(geom)) {

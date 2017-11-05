@@ -17,7 +17,7 @@ module.exports = (georaster, geom, flat) => {
             // space to the image coordinate space
             // // left, top, right, bottom
             let bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, geometry);
-            console.log("bbox:", bbox);
+            //console.log("bbox:", bbox);
             let bbox_left = bbox.xmin;
             let bbox_top = bbox.ymin;
             let bbox_right = bbox.xmax;
@@ -25,7 +25,7 @@ module.exports = (georaster, geom, flat) => {
 
             try {
                 if (flat) {
-                    console.log("flat is true");
+                    //console.log("flat is true");
                     return georaster.values.map(band => {
                         let values = [];
                         for (let row_index = bbox_top; row_index < bbox_bottom; row_index++) {
