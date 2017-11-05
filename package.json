@@ -33,9 +33,9 @@
   },
   "homepage": "https://github.com/GeoTIFF/geotiff-io#readme",
   "dependencies": {
+    "@turf/combine": "^4.7.3",
     "@turf/turf": "^4.7.3",
     "@turf/union": "^4.7.3",
-    "@turf/combine": "^4.7.3",
     "babel-loader": "^7.1.1",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.6.0",
@@ -44,6 +44,7 @@
     "chai": "^4.1.0",
     "express": "^4.15.4",
     "fs": "0.0.1-security",
+    "georaster": "0.0.6",
     "geotiff": "^0.4.1",
     "leaflet": "^1.1.0",
     "mocha": "^3.5.0",
