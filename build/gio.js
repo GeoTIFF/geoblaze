@@ -11245,10 +11245,17 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var GeoTIFF = __webpack_require__(48);
+console.log("GeoTIFF:", GeoTIFF);
 
-var parse_data = function parse_data(data) {
+var parse_data = function parse_data(data, debug) {
 
     try {
+
+        if (debug) console.log("starting parse_data with", data);
+        if (debug) console.log("\tGeoTIFF:", GeoTIFF);
+
+        var parser = typeof GeoTIFF !== "undefined" ? GeoTIFF : typeof window !== "undefined" ? window.GeoTIFF : typeof self !== "undefined" ? self.GeoTIFF : null;
+        //console.log("parser:", parser);
 
         var result = {
             _arrayBuffer: data.arrayBuffer
@@ -11261,7 +11268,7 @@ var parse_data = function parse_data(data) {
         if (data.raster_type === "geotiff") {
 
             //console.log("data.raster_type is geotiff");
-            var geotiff = GeoTIFF.parse(data.arrayBuffer);
+            var geotiff = parser.parse(data.arrayBuffer);
             //console.log("geotiff:", geotiff);
 
             var image = geotiff.getImage();
@@ -11333,7 +11340,7 @@ var parse_data = function parse_data(data) {
         return result;
     } catch (error) {
 
-        console.error("error:", error);
+        console.error("[georaster] error parsing georaster:", error);
     }
 };
 
