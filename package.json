@@ -44,7 +44,7 @@
     "chai": "^4.1.0",
     "express": "^4.15.4",
     "fs": "0.0.1-security",
-    "georaster": "0.0.6",
+    "georaster": "0.0.7",
     "geotiff": "^0.4.1",
     "leaflet": "^1.1.0",
     "mocha": "^3.5.0",
