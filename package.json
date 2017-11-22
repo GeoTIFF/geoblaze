@@ -2,9 +2,9 @@
   "name": "geoblaze",
   "version": "0.0.45",
   "description": "process geotiffs",
-  "main": "build/gio.js",
+  "main": "build/geoblaze.js",
   "scripts": {
-    "babel": "babel --presets es2015 index.js -o build/gio.bundle.js",
+    "babel": "babel --presets es2015 index.js -o build/geoblaze.bundle.js",
     "build": "webpack",
     "test": "./node_modules/.bin/mocha --reporter spec",
     "jsdoc": "jsdoc packages -r -d docs",

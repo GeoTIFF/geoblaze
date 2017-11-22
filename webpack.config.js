@@ -5,8 +5,8 @@ module.exports = {
     entry: './index.js',
     output: {
         path: path.resolve(__dirname, 'build'),
-        filename: 'gio.js',
-        library: 'gio',
+        filename: 'geoblaze.js',
+        library: 'geoblaze',
         libraryTarget: 'umd',
         umdNamedDefine: true
     },
