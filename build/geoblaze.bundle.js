@@ -10,5 +10,5 @@ module.exports = {
 	min: require('./packages/min/min'),
 	max: require('./packages/max/max'),
 	mode: require('./packages/mode/mode'),
-    histogram: require('./packages/histogram/histogram')
+	histogram: require('./packages/histogram/histogram')
 };

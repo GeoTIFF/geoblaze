@@ -1,2 +1,2 @@
-# geotiff-io
-cool stuff with geotiffs
+# geoblaze
+blazing fast javascript raster processing engine
