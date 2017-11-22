@@ -2,11 +2,11 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define("gio", [], factory);
+		define("geoblaze", [], factory);
 	else if(typeof exports === 'object')
-		exports["gio"] = factory();
+		exports["geoblaze"] = factory();
 	else
-		root["gio"] = factory();
+		root["geoblaze"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -31303,4 +31303,4 @@ module.exports = function (georaster, geom, options) {
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=gio.js.map
+//# sourceMappingURL=geoblaze.js.map
