@@ -1,6 +1,6 @@
 {
-  "name": "@geotiff/gio",
-  "version": "0.0.42",
+  "name": "geoblaze",
+  "version": "0.0.1",
   "description": "process geotiffs",
   "main": "build/gio.js",
   "scripts": {
@@ -15,9 +15,10 @@
     "url": "git+https://github.com/GeoTIFF/geotiff-io.git"
   },
   "keywords": [
+    "geoblaze",
+    "georaster",
     "geotiff",
     "geotiff.io",
-    "geotiff-io",
     "gis",
     "maps",
     "raster",
@@ -29,9 +30,9 @@
   "author": "Daniel Dufour and Steve Peyton",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/GeoTIFF/geotiff-io/issues"
+    "url": "https://github.com/GeoTIFF/geoblaze/issues"
   },
-  "homepage": "https://github.com/GeoTIFF/geotiff-io#readme",
+  "homepage": "https://github.com/GeoTIFF/geoblaze#readme",
   "dependencies": {
     "@turf/combine": "^4.7.3",
     "@turf/turf": "^4.7.3",
