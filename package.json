@@ -5,7 +5,7 @@
   "main": "build/geoblaze.js",
   "scripts": {
     "babel": "babel --presets es2015 index.js -o build/geoblaze.bundle.js",
-    "browserify": "cd build && browserify geoblaze.bundle.js geoblaze.browserify.js",
+    "browserify": "browserify index.js -o build/geoblaze.browserify.js",
     "build": "webpack",
     "test": "./node_modules/.bin/mocha --reporter spec",
     "jsdoc": "jsdoc packages -r -d docs",
