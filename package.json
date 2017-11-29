@@ -1,12 +1,13 @@
 {
-  "name": "@geotiff/gio",
-  "version": "0.0.25",
+  "name": "geoblaze",
+  "version": "0.0.46",
   "description": "process geotiffs",
-  "main": "build/gio.js",
+  "main": "build/geoblaze.js",
   "scripts": {
-    "babel": "babel --presets es2015 index.js -o build/gio.bundle.js",
+    "babel": "babel --presets es2015 index.js -o build/geoblaze.bundle.js",
+    "browserify": "browserify index.js -o build/geoblaze.browserify.js",
     "build": "webpack",
-    "test": "./node_modules/.bin/mocha --reporter spec ",
+    "test": "./node_modules/.bin/mocha --reporter spec",
     "jsdoc": "jsdoc packages -r -d docs",
     "start": "node test-app.js"
   },
@@ -15,9 +16,10 @@
     "url": "git+https://github.com/GeoTIFF/geotiff-io.git"
   },
   "keywords": [
+    "geoblaze",
+    "georaster",
     "geotiff",
     "geotiff.io",
-    "geotiff-io",
     "gis",
     "maps",
     "raster",
@@ -29,10 +31,13 @@
   "author": "Daniel Dufour and Steve Peyton",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/GeoTIFF/geotiff-io/issues"
+    "url": "https://github.com/GeoTIFF/geoblaze/issues"
   },
-  "homepage": "https://github.com/GeoTIFF/geotiff-io#readme",
+  "homepage": "https://github.com/GeoTIFF/geoblaze#readme",
   "dependencies": {
+    "@turf/combine": "^4.7.3",
+    "@turf/turf": "^4.7.3",
+    "@turf/union": "^4.7.3",
     "babel-loader": "^7.1.1",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.6.0",
@@ -41,6 +46,7 @@
     "chai": "^4.1.0",
     "express": "^4.15.4",
     "fs": "0.0.1-security",
+    "georaster": "0.0.7",
     "geotiff": "^0.4.1",
     "leaflet": "^1.1.0",
     "mocha": "^3.5.0",
@@ -53,6 +59,7 @@
     "webpack": "^3.5.4"
   },
   "devDependencies": {
+    "browserify": "^14.5.0",
     "jsdoc": "^3.5.5",
     "memory-fs": "^0.4.1",
     "request": "^2.81.0"
