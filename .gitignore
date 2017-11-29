@@ -60,3 +60,5 @@ typings/
 # jsdoc documentation directory
 docs/
 
+# package lock
+package-lock.json
