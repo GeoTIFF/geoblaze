@@ -11218,18 +11218,31 @@ __webpack_require__(24).inherits(FetchError, Error);
 "use strict";
 
 
-module.exports = {
-	cache: __webpack_require__(28),
-	load: __webpack_require__(18),
-	identify: __webpack_require__(128),
-	sum: __webpack_require__(131),
-	mean: __webpack_require__(132),
-	median: __webpack_require__(133),
-	min: __webpack_require__(134),
-	max: __webpack_require__(135),
-	mode: __webpack_require__(136),
-	histogram: __webpack_require__(137)
+var geoblaze = {
+				cache: __webpack_require__(28),
+				load: __webpack_require__(18),
+				identify: __webpack_require__(128),
+				sum: __webpack_require__(131),
+				mean: __webpack_require__(132),
+				median: __webpack_require__(133),
+				min: __webpack_require__(134),
+				max: __webpack_require__(135),
+				mode: __webpack_require__(136),
+				histogram: __webpack_require__(137)
 };
+
+if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
+				module.exports = geoblaze;
+}
+
+/*
+    The following code allows you to use GeoRaster without requiring
+*/
+if (typeof window !== "undefined") {
+				window["geoblaze"] = geoblaze;
+} else if (typeof self !== "undefined") {
+				self["geoblaze"] = geoblaze; // jshint ignore:line
+}
 
 /***/ }),
 /* 45 */
