@@ -30,7 +30,19 @@ let get_max = (values, no_data_value) => {
     }
 }
 
-module.exports = (georaster, geom) => {
+/**
+ * The max function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the max of all the pixels
+ * in that area. If no geometry is included, the pixels returns the max of
+ * all the pixels for each band in the raster.
+ * @name max
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of maxs for each band
+ * @example
+ * var maxs = geoblaze.max(georaster, geometry);
+ */
+function get_max_for_raster(georaster, geom) {
     
     try {
         
@@ -68,3 +80,4 @@ module.exports = (georaster, geom) => {
         throw e;
     }
 }
+module.exports = get_max_for_raster;

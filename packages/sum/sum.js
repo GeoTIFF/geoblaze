@@ -5,7 +5,19 @@ let utils = require('../utils/utils');
 let convert_geometry = require('../convert-geometry/convert-geometry');
 let intersect_polygon = require('../intersect-polygon/intersect-polygon');
 
-module.exports = (georaster, geom) => {
+/**
+ * The sum function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the sum of all the pixels
+ * in that area. If no geometry is included, the pixels returns the sum of
+ * all the pixels for each band in the raster.
+ * @name sum
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of sums for each band
+ * @example
+ * var sums = geoblaze.sum(georaster, geometry);
+ */
+function sum(georaster, geom) {
     
     try {
         
@@ -62,3 +74,5 @@ module.exports = (georaster, geom) => {
         throw e;
     }
 }
+
+module.exports = sum
