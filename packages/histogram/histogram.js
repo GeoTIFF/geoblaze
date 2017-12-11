@@ -144,7 +144,19 @@ let get_histogram = (values, options) => {
     else throw 'An unexpected error occurred while running the get_histogram function.';
 }
 
-module.exports = (georaster, geom, options) => {
+/**
+ * The histogram function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the histogram of all the pixels
+ * in that area. If no geometry is included, the pixels returns the histogram of
+ * all the pixels for each band in the raster.
+ * @name histogram
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of histograms for each band
+ * @example
+ * var histograms = geoblaze.histogram(georaster, geometry);
+ */
+function get_histograms_for_raster(georaster, geom, options) {
 
     try {
 
@@ -189,3 +201,4 @@ module.exports = (georaster, geom, options) => {
     }
 
 }
+module.exports = get_histograms_for_raster;
