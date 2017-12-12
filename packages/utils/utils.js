@@ -27,10 +27,10 @@ module.exports = {
         system is inverted along the y axis relative to the lat/long (geographic)
         coordinate system */
         return {
-            xmin: Math.floor(Math.abs(lng_min - georaster.xmin) / georaster.pixelWidth),
-            ymin: Math.floor(Math.abs(georaster.ymax - lat_max) / georaster.pixelHeight),
-            xmax: Math.ceil(Math.abs(lng_max - georaster.xmin) / georaster.pixelWidth),
-            ymax: Math.ceil(Math.abs(georaster.ymax - lat_min) / georaster.pixelHeight)
+            xmin: Math.floor((lng_min - georaster.xmin) / georaster.pixelWidth),
+            ymin: Math.floor((georaster.ymax - lat_max) / georaster.pixelHeight),
+            xmax: Math.ceil((lng_max - georaster.xmin) / georaster.pixelWidth),
+            ymax: Math.ceil((georaster.ymax - lat_min) / georaster.pixelHeight)
         };
     },
 
