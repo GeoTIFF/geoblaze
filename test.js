@@ -10,3 +10,5 @@ require('./packages/min/test');
 require('./packages/max/test');
 require('./packages/mode/test');
 require('./packages/histogram/test');
+require('./packages/utils/test');
+require('./packages/get/test');

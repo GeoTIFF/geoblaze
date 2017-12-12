@@ -4,6 +4,9 @@ let expect = require('chai').expect;
 let load = require('./../load/load');
 let sum = require('./sum');
 
+let url_rwanda = 'http://localhost:3000/data/RWA_MNH_ANC.tif';
+let bbox_rwanda = require("../../data/RwandaBufferedBoundingBox.json");
+
 let url = 'http://localhost:3000/data/test.tiff';
 let bbox = [80.63, 7.42, 84.21, 10.10];
 let expected_bbox_value = 262516.50;
@@ -213,6 +216,18 @@ let test = () => {
                 return load(url).then(georaster => {
                     let value = Number(sum(georaster, bbox)[0].toFixed(2));
                     expect(value).to.equal(expected_bbox_value);
+                });
+            });
+        });
+        describe('Get Sum from Bounding Box Greater Then Raster', function() {
+            this.timeout(1000000);
+            it('Got Correct Value', () => {
+                return load(url_rwanda).then(georaster => {
+                    let value_with_buffered_bbox = Number(sum(georaster, bbox_rwanda)[0].toFixed(2));
+                    let value_without_bbox = Number(sum(georaster)[0].toFixed(2));
+                    expect(value_with_buffered_bbox).to.equal(104848.45);
+                    expect(value_without_bbox).to.equal(104848.45);
+                    expect(value_with_buffered_bbox).to.equal(value_without_bbox);
                 });
             });
         });
