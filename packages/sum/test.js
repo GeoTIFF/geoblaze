@@ -197,6 +197,16 @@ let expected_polygon_geojson_collection_value = expected_polygon_geojson_value_1
 
 let test = () => {
     describe('Gio Sum Feature', function() {
+        describe('Get Sum', function() {
+            this.timeout(1000000);
+            it('Got Correct Value', () => {
+                return load(url).then(georaster => {
+                    let actual_value = Number(sum(georaster)[0].toFixed(2));
+                    let expected_value = 108343045.4;
+                    expect(actual_value).to.equal(expected_value);
+                });
+            });
+        });
         describe('Get Sum from Bounding Box', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {

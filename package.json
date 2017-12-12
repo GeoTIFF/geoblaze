@@ -5,8 +5,11 @@
   "main": "build/geoblaze.js",
   "scripts": {
     "babel": "babel --presets es2015 index.js -o build/geoblaze.bundle.js",
+    "browserify": "browserify index.js -o build/geoblaze.browserify.js",
     "build": "webpack",
+    "build-docs": "documentation build packages/** --config documentation.yml -f html -o docs ",
     "test": "./node_modules/.bin/mocha --reporter spec",
+    "test-docs": "npm run build-docs && cd docs && http-server",
     "jsdoc": "jsdoc packages -r -d docs",
     "start": "node test-app.js"
   },
@@ -58,6 +61,7 @@
     "webpack": "^3.5.4"
   },
   "devDependencies": {
+    "browserify": "^14.5.0",
     "jsdoc": "^3.5.5",
     "memory-fs": "^0.4.1",
     "request": "^2.81.0"

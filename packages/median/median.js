@@ -22,7 +22,19 @@ let get_median = values => {
     }
 }
 
-module.exports = (georaster, geom) => {
+/**
+ * The median function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the median of all the pixels
+ * in that area. If no geometry is included, the pixels returns the median of
+ * all the pixels for each band in the raster.
+ * @name median
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of medians for each band
+ * @example
+ * var medians = geoblaze.median(georaster, geometry);
+ */
+function get_median_for_raster(georaster, geom) {
     
     try {
         
@@ -106,3 +118,4 @@ module.exports = (georaster, geom) => {
         throw e;
     }
 }
+module.exports = get_median_for_raster;

@@ -30,7 +30,19 @@ let get_min = (values, no_data_value) => {
     }
 }
 
-module.exports = (georaster, geom) => {
+/**
+ * The min function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the min of all the pixels
+ * in that area for each band. If no geometry is included, the pixels returns the min of
+ * all the pixels for each band in the raster.
+ * @name min
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of mins for each band
+ * @example
+ * var mins = geoblaze.min(georaster, geometry);
+ */
+function get_min_for_raster(georaster, geom) {
     
     try {
         
@@ -68,3 +80,4 @@ module.exports = (georaster, geom) => {
         throw e;
     }
 }
+module.exports = get_min_for_raster;

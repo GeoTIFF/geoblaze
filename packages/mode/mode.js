@@ -31,7 +31,19 @@ let get_mode = values => {
     return modes.length === 1 ? modes[0] : modes; 
 }
 
-module.exports = (georaster, geom) => {
+/**
+ * The mode function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the mode of all the pixels
+ * in that area. If no geometry is included, the pixels returns the mode of
+ * all the pixels for each band in the raster.
+ * @name mode
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of modes for each band
+ * @example
+ * var modes = geoblaze.mode(georaster, geometry);
+ */
+function get_modes_for_raster(georaster, geom) {
     
     try {
         
@@ -75,3 +87,4 @@ module.exports = (georaster, geom) => {
     }
 
 }
+module.exports = get_modes_for_raster;
