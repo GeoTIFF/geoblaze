@@ -10,7 +10,6 @@
     "build-docs": "documentation build packages/** --config documentation.yml -f html -o docs ",
     "test": "./node_modules/.bin/mocha --reporter spec",
     "test-docs": "npm run build-docs && cd docs && http-server",
-    "jsdoc": "jsdoc packages -r -d docs",
     "start": "node test-app.js"
   },
   "repository": {
