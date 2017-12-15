@@ -4,22 +4,54 @@ let _ = require('underscore');
 
 let combine = require('@turf/combine');
 
+let polygon = require("@turf/helpers").polygon;
+let bbox = require("@turf/bbox");
+
+/*
+    Runs on each value in a table,
+    represented by an array of rows.
+*/
+function run_on_table_of_values(table, no_data_value, run_on_values) {
+    let number_of_rows = table.length;
+    for (let row_index = 0; row_index < number_of_rows; row_index++) {
+        let row = table[row_index];
+        let number_of_cells = row.length;
+        for (let column_index = 0; column_index < number_of_cells; column_index++) {
+            let value = row[column_index]; 
+            if (value !== no_data_value) {
+                run_on_values(value);
+            }
+        }
+    }
+}
+
 module.exports = {
 
-    convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox) {
+    run_on_table_of_values,
 
-        let lng_min, lat_min, lng_max, lat_max;
-        if (typeof latlng_bbox.xmin !== "undefined") {
-            lng_min = latlng_bbox.xmin;
-            lat_min = latlng_bbox.ymin;
-            lng_max = latlng_bbox.xmax;
-            lat_max = latlng_bbox.ymax;
-        } else if (Array.isArray(latlng_bbox) && latlng_bbox.length === 4) {
+    count_values_in_table(table, no_data_value) {
+        let counts = {};
+        run_on_table_of_values(table, no_data_value, value => {
+            if (value in counts) counts[value]++;
+            else counts[value] = 1;
+        });
+        return counts;
+    },
+
+    convert_crs_bbox_to_image_bbox(georaster, crs_bbox) {
+
+        let crs_xmin, crs_ymin, crs_xmax, crs_ymax;
+        if (typeof crs_bbox.xmin !== "undefined") {
+            crs_xmin = crs_bbox.xmin;
+            crs_ymin = crs_bbox.ymin;
+            crs_xmax = crs_bbox.xmax;
+            crs_ymax = crs_bbox.ymax;
+        } else if (Array.isArray(crs_bbox) && crs_bbox.length === 4) {
             // pull out bounding box values
-            lng_min = latlng_bbox[0];
-            lat_min = latlng_bbox[1];
-            lng_max = latlng_bbox[2];
-            lat_max = latlng_bbox[3];
+            crs_xmin = crs_bbox[0];
+            crs_ymin = crs_bbox[1];
+            crs_xmax = crs_bbox[2];
+            crs_ymax = crs_bbox[3];
         }
 
         // map bounding box values to image coordinate space
@@ -27,10 +59,10 @@ module.exports = {
         system is inverted along the y axis relative to the lat/long (geographic)
         coordinate system */
         return {
-            xmin: Math.floor((lng_min - georaster.xmin) / georaster.pixelWidth),
-            ymin: Math.floor((georaster.ymax - lat_max) / georaster.pixelHeight),
-            xmax: Math.ceil((lng_max - georaster.xmin) / georaster.pixelWidth),
-            ymax: Math.ceil((georaster.ymax - lat_min) / georaster.pixelHeight)
+            xmin: Math.floor((crs_xmin - georaster.xmin) / georaster.pixelWidth),
+            ymin: Math.floor((georaster.ymax - crs_ymax) / georaster.pixelHeight),
+            xmax: Math.ceil((crs_xmax - georaster.xmin) / georaster.pixelWidth),
+            ymax: Math.ceil((georaster.ymax - crs_ymin) / georaster.pixelHeight)
         };
     },
 
@@ -52,6 +84,10 @@ module.exports = {
     },
 
     is_bbox(geometry) {
+
+        if (geometry === undefined || geometry === null) {
+            return false;
+        }
 
         // check if we are using the gio format and return true right away if so
         if (geometry.xmin !== undefined && geometry.xmax !== undefined && geometry.ymax !== undefined && geometry.ymin !== undefined) {
@@ -121,9 +157,7 @@ module.exports = {
 
     get_bounding_box(geometry) {
 
-        // initialize the min and max values to the first
-        // point so that we don't have to run a null check
-        // when iterating over each point
+        //let [xmin, ymin, xmax, ymax] = bbox(polygon(geometry));
         let first_point = geometry[0][0];
         let xmin = first_point[0],
             ymin = first_point[1],
@@ -132,8 +166,6 @@ module.exports = {
 
         geometry.forEach(part => {
 
-            // iterate through each point in the polygon
-            // and reset min/max values accordingly
             for (var i = 0; i < part.length; i++) {
                 let point = part[i];
                 if (point[0] < xmin) xmin = point[0];
@@ -178,5 +210,9 @@ module.exports = {
             let y = (line_1.a * line_2.c - line_2.a * line_1.c) / det;
             return { x, y };
         }
+    },
+
+    sum(values) {
+        return values.reduce((a, b) => a + b);
     }
 }
