@@ -36,6 +36,16 @@ let test = () => {
                 });
             });
         });
+        describe('Get Min from whole Raster', function() {
+            this.timeout(1000000);
+            it('Got Correct Value', () => {
+                return load(url).then(georaster => {
+                    let value = min(georaster)[0];
+                    expect(value).to.equal(expected_polygon_value);
+                });
+            });
+        });
+ 
     })
 }
 
