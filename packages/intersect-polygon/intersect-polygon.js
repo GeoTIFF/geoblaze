@@ -29,7 +29,7 @@ module.exports = (georaster, geom, run_on_values) => {
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
-    let image_bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox);
+    let image_bbox = utils.convert_crs_bbox_to_image_bbox(georaster, latlng_bbox);
     //console.log("image_bbox:", image_bbox); //good
     let x_min = image_bbox.xmin,
         y_min = image_bbox.ymin,
