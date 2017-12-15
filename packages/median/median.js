@@ -37,40 +37,27 @@ let get_median = values => {
 function get_median_for_raster(georaster, geom) {
     
     try {
+
+        let geom_is_bbox = utils.is_bbox(geom);
         
-        if (utils.is_bbox(geom)) {
-            geom = convert_geometry('bbox', geom);
+        if (geom === null || geom === undefined || geom_is_bbox) {
 
-            // grab array of values;
-            let flat = false; // get values as a one dimensional flat array rather than as a table
-            let values = get(georaster, geom, flat);
-            //console.log("values:", values.length, values[0].length, values[0][0].length);
+            if (geom_is_bbox) {
+
+                geom = convert_geometry('bbox', geom);
+
+            }
+
+            let values = get(georaster, geom);
+
             let no_data_value = georaster.no_data_value;
-
-            // get median
-            //return values
-            //    .map(band => band.filter(value => value !== no_data_value))
-            //    .map(get_median);
 
             // median values
             let medians = []
             for (let band_index = 0; band_index < values.length; band_index++) {
                 let band = values[band_index];
-                let number_of_cells_with_values_in_band = 0;
-                let number_of_rows = band.length;
-                let counts = {};
-                for (let row_index = 0; row_index < number_of_rows; row_index++) {
-                    let row = band[row_index];
-                    let number_of_cells = row.length;
-                    for (let column_index = 0; column_index < number_of_cells; column_index++) {
-                        let value = row[column_index];
-                        if (value !== no_data_value) {
-                            number_of_cells_with_values_in_band++;
-                            if (value in counts) counts[value]++;
-                            else counts[value] = 1;
-                        }
-                    }
-                }
+                let counts = utils.count_values_in_table(band, no_data_value);
+                let number_of_cells_with_values_in_band = utils.sum(_.values(counts));
                 let sorted_counts = _.pairs(counts).sort((pair1, pair2) => Number(pair1[0]) - Number(pair2[0]));
                 //console.log("sorted_counts:", sorted_counts);
                 let middle = number_of_cells_with_values_in_band / 2;

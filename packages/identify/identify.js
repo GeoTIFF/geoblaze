@@ -16,34 +16,31 @@ let identify = (georaster, geometry) => {
     // The convert_geometry function takes the input
     // geometry and converts it to a standard format.
     let point = convert_geometry('point', geometry);
-    let lng = point[0];
-    let lat = point[1];
+    let x_in_crs = point[0];
+    let y_in_crs = point[1];
 
 
-    //console.log("georaster.projection:", georaster.projection);
-    if (georaster.projection === 4326) {
-        //console.log("assed proj");
+    // By normalizing the difference in yitude and longitude between the image
+    // origin and the point geometry by the cell height and width respectively,
+    // we can map the yitude and longitude of the point geometry in the
+    // coordinate space to their associated pixel location in the image space.
+    // Note that the y value is inverted to account for the inversion between the
+    // coordinate and image spaces.
+    let x = Math.floor((x_in_crs - georaster.xmin) / georaster.pixelWidth);
+    let y = Math.floor((georaster.ymax - y_in_crs) / georaster.pixelHeight);
 
-        // By normalizing the difference in latitude and longitude between the image
-        // origin and the point geometry by the cell height and width respectively,
-        // we can map the latitude and longitude of the point geometry in the
-        // coordinate space to their associated pixel location in the image space.
-        // Note that the y value is inverted to account for the inversion between the
-        // coordinate and image spaces.
-        let x = Math.floor(Math.abs(lng - georaster.xmin) / georaster.pixelWidth);
-        let y = Math.floor(Math.abs(georaster.ymax - lat) / georaster.pixelHeight);
+    try {
 
-        try {
-
-            // iterate through the bands
-            // get the row and then the column of the pixel that you want
+        // iterate through the bands
+        // get the row and then the column of the pixel that you want
+        if (x > 0 && x < georaster.width && y > 0 && y < georaster.height) {
             return georaster.values.map(rows => rows[y][x]);
-
-        } catch(e) {
-            throw e;
+        } else {
+            return null;
         }
-    } else {
-        throw 'Identification currently only works with geotiffs in WGS 84. Please reproject the geotiff';
+
+    } catch(e) {
+        throw e;
     }
 }
 

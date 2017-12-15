@@ -63,6 +63,16 @@ let test = () => {
                 });
             });
         });
+        describe('Get Median from Whole Raster', function() {
+            this.timeout(1000000);
+            it('Got Correct Value', () => {
+                return load(url).then(georaster => {
+                    let value = median(georaster)[0];
+                    expect(value).to.equal(0);
+                });
+            });
+        });
+ 
     })
 }
 

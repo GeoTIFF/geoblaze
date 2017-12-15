@@ -4,6 +4,7 @@ let get = require('../get/get');
 let utils = require('../utils/utils');
 let convert_geometry = require('../convert-geometry/convert-geometry');
 let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let _ = require("underscore");
 
 let get_min = (values, no_data_value) => {
     let number_of_values = values.length;
@@ -45,13 +46,20 @@ let get_min = (values, no_data_value) => {
 function get_min_for_raster(georaster, geom) {
     
     try {
-        
-        if (utils.is_bbox(geom)) {
+
+        let no_data_value = georaster.no_data_value;
+
+        if (geom === null || geom === undefined) {
+
+            return georaster.values.map(band => {
+                return _.min(band.map(row => get_min(row, no_data_value)).filter(value => value !== undefined && value !== null));
+            });
+
+        } else if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
             let values = get(georaster, geom, true);
-            let no_data_value = georaster.no_data_value;
 
             // get min value
             return values.map(band => get_min(band, no_data_value));
