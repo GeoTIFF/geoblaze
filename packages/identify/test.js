@@ -20,6 +20,15 @@ let test = () => (
                 });
             });
         });
+        describe('Try to identify point outside raster', function() {
+            this.timeout(1000000);
+            it('Correctly returned null', () => {
+                return load(url).then(georaster => {
+                    let value = identify(georaster, [-200, 7.42]);
+                    expect(value).to.equal(null);
+                });
+            });
+        });
     })
 )
 
