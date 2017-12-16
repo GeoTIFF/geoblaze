@@ -8,7 +8,7 @@
     "browserify": "browserify index.js -o build/geoblaze.browserify.js",
     "build": "webpack",
     "build-docs": "documentation build packages/** --config documentation.yml -f html -o docs ",
-    "test": "./node_modules/.bin/mocha --reporter spec",
+    "test": "parallelshell 'http-server -p 3000' './node_modules/.bin/mocha --reporter spec'",
     "test-docs": "npm run build-docs && cd docs && http-server",
     "start": "node test-app.js"
   },
@@ -52,6 +52,7 @@
     "leaflet": "^1.1.0",
     "mocha": "^3.5.0",
     "node-fetch": "^1.7.1",
+    "parallelshell": "^3.0.2",
     "path": "^0.12.7",
     "proj4": "^2.4.3",
     "request": "^2.81.0",
