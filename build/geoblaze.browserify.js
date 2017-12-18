@@ -27,7 +27,35 @@ if (typeof window !== "undefined") {
     self["geoblaze"] = geoblaze; // jshint ignore:line
 }
 
-},{"./packages/cache/cache":112,"./packages/histogram/histogram":115,"./packages/identify/identify":116,"./packages/load/load":118,"./packages/max/max":119,"./packages/mean/mean":120,"./packages/median/median":121,"./packages/min/min":122,"./packages/mode/mode":123,"./packages/sum/sum":124}],2:[function(require,module,exports){
+},{"./packages/cache/cache":114,"./packages/histogram/histogram":117,"./packages/identify/identify":118,"./packages/load/load":120,"./packages/max/max":121,"./packages/mean/mean":122,"./packages/median/median":123,"./packages/min/min":124,"./packages/mode/mode":125,"./packages/sum/sum":126}],2:[function(require,module,exports){
+var coordEach = require('@turf/meta').coordEach;
+
+/**
+ * Takes a set of features, calculates the bbox of all input features, and returns a bounding box.
+ *
+ * @name bbox
+ * @param {FeatureCollection|Feature<any>} geojson input features
+ * @returns {Array<number>} bbox extent in [minX, minY, maxX, maxY] order
+ * @example
+ * var line = turf.lineString([[-74, 40], [-78, 42], [-82, 35]]);
+ * var bbox = turf.bbox(line);
+ * var bboxPolygon = turf.bboxPolygon(bbox);
+ *
+ * //addToMap
+ * var addToMap = [line, bboxPolygon]
+ */
+module.exports = function (geojson) {
+    var bbox = [Infinity, Infinity, -Infinity, -Infinity];
+    coordEach(geojson, function (coord) {
+        if (bbox[0] > coord[0]) bbox[0] = coord[0];
+        if (bbox[1] > coord[1]) bbox[1] = coord[1];
+        if (bbox[2] < coord[0]) bbox[2] = coord[0];
+        if (bbox[3] < coord[1]) bbox[3] = coord[1];
+    });
+    return bbox;
+};
+
+},{"@turf/meta":5}],3:[function(require,module,exports){
 var meta = require('@turf/meta');
 
 /**
@@ -100,7 +128,550 @@ module.exports = function (fc) {
     };
 };
 
-},{"@turf/meta":3}],3:[function(require,module,exports){
+},{"@turf/meta":5}],4:[function(require,module,exports){
+/**
+ * Wraps a GeoJSON {@link Geometry} in a GeoJSON {@link Feature}.
+ *
+ * @name feature
+ * @param {Geometry} geometry input geometry
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {Feature} a GeoJSON Feature
+ * @example
+ * var geometry = {
+ *   "type": "Point",
+ *   "coordinates": [110, 50]
+ * };
+ *
+ * var feature = turf.feature(geometry);
+ *
+ * //=feature
+ */
+function feature(geometry, properties, bbox, id) {
+    if (geometry === undefined) throw new Error('geometry is required');
+    if (properties && properties.constructor !== Object) throw new Error('properties must be an Object');
+    if (bbox && bbox.length !== 4) throw new Error('bbox must be an Array of 4 numbers');
+    if (id && ['string', 'number'].indexOf(typeof id) === -1) throw new Error('id must be a number or a string');
+
+    var feat = {type: 'Feature'};
+    if (id) feat.id = id;
+    if (bbox) feat.bbox = bbox;
+    feat.properties = properties || {};
+    feat.geometry = geometry;
+    return feat;
+}
+
+/**
+ * Creates a GeoJSON {@link Geometry} from a Geometry string type & coordinates.
+ * For GeometryCollection type use `helpers.geometryCollection`
+ *
+ * @name geometry
+ * @param {string} type Geometry Type
+ * @param {Array<number>} coordinates Coordinates
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @returns {Geometry} a GeoJSON Geometry
+ * @example
+ * var type = 'Point';
+ * var coordinates = [110, 50];
+ *
+ * var geometry = turf.geometry(type, coordinates);
+ *
+ * //=geometry
+ */
+function geometry(type, coordinates, bbox) {
+    // Validation
+    if (!type) throw new Error('type is required');
+    if (!coordinates) throw new Error('coordinates is required');
+    if (!Array.isArray(coordinates)) throw new Error('coordinates must be an Array');
+    if (bbox && bbox.length !== 4) throw new Error('bbox must be an Array of 4 numbers');
+
+    var geom;
+    switch (type) {
+    case 'Point': geom = point(coordinates).geometry; break;
+    case 'LineString': geom = lineString(coordinates).geometry; break;
+    case 'Polygon': geom = polygon(coordinates).geometry; break;
+    case 'MultiPoint': geom = multiPoint(coordinates).geometry; break;
+    case 'MultiLineString': geom = multiLineString(coordinates).geometry; break;
+    case 'MultiPolygon': geom = multiPolygon(coordinates).geometry; break;
+    default: throw new Error(type + ' is invalid');
+    }
+    if (bbox) geom.bbox = bbox;
+    return geom;
+}
+
+/**
+ * Takes coordinates and properties (optional) and returns a new {@link Point} feature.
+ *
+ * @name point
+ * @param {Array<number>} coordinates longitude, latitude position (each in decimal degrees)
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {Feature<Point>} a Point feature
+ * @example
+ * var point = turf.point([-75.343, 39.984]);
+ *
+ * //=point
+ */
+function point(coordinates, properties, bbox, id) {
+    if (!coordinates) throw new Error('No coordinates passed');
+    if (coordinates.length === undefined) throw new Error('Coordinates must be an array');
+    if (coordinates.length < 2) throw new Error('Coordinates must be at least 2 numbers long');
+    if (!isNumber(coordinates[0]) || !isNumber(coordinates[1])) throw new Error('Coordinates must contain numbers');
+
+    return feature({
+        type: 'Point',
+        coordinates: coordinates
+    }, properties, bbox, id);
+}
+
+/**
+ * Takes an array of LinearRings and optionally an {@link Object} with properties and returns a {@link Polygon} feature.
+ *
+ * @name polygon
+ * @param {Array<Array<Array<number>>>} coordinates an array of LinearRings
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {Feature<Polygon>} a Polygon feature
+ * @throws {Error} throw an error if a LinearRing of the polygon has too few positions
+ * or if a LinearRing of the Polygon does not have matching Positions at the beginning & end.
+ * @example
+ * var polygon = turf.polygon([[
+ *   [-2.275543, 53.464547],
+ *   [-2.275543, 53.489271],
+ *   [-2.215118, 53.489271],
+ *   [-2.215118, 53.464547],
+ *   [-2.275543, 53.464547]
+ * ]], { name: 'poly1', population: 400});
+ *
+ * //=polygon
+ */
+function polygon(coordinates, properties, bbox, id) {
+    if (!coordinates) throw new Error('No coordinates passed');
+
+    for (var i = 0; i < coordinates.length; i++) {
+        var ring = coordinates[i];
+        if (ring.length < 4) {
+            throw new Error('Each LinearRing of a Polygon must have 4 or more Positions.');
+        }
+        for (var j = 0; j < ring[ring.length - 1].length; j++) {
+            // Check if first point of Polygon contains two numbers
+            if (i === 0 && j === 0 && !isNumber(ring[0][0]) || !isNumber(ring[0][1])) throw new Error('Coordinates must contain numbers');
+            if (ring[ring.length - 1][j] !== ring[0][j]) {
+                throw new Error('First and last Position are not equivalent.');
+            }
+        }
+    }
+
+    return feature({
+        type: 'Polygon',
+        coordinates: coordinates
+    }, properties, bbox, id);
+}
+
+/**
+ * Creates a {@link LineString} based on a
+ * coordinate array. Properties can be added optionally.
+ *
+ * @name lineString
+ * @param {Array<Array<number>>} coordinates an array of Positions
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {Feature<LineString>} a LineString feature
+ * @throws {Error} if no coordinates are passed
+ * @example
+ * var linestring1 = turf.lineString([
+ *   [-21.964416, 64.148203],
+ *   [-21.956176, 64.141316],
+ *   [-21.93901, 64.135924],
+ *   [-21.927337, 64.136673]
+ * ]);
+ * var linestring2 = turf.lineString([
+ *   [-21.929054, 64.127985],
+ *   [-21.912918, 64.134726],
+ *   [-21.916007, 64.141016],
+ *   [-21.930084, 64.14446]
+ * ], {name: 'line 1', distance: 145});
+ *
+ * //=linestring1
+ *
+ * //=linestring2
+ */
+function lineString(coordinates, properties, bbox, id) {
+    if (!coordinates) throw new Error('No coordinates passed');
+    if (coordinates.length < 2) throw new Error('Coordinates must be an array of two or more positions');
+    // Check if first point of LineString contains two numbers
+    if (!isNumber(coordinates[0][1]) || !isNumber(coordinates[0][1])) throw new Error('Coordinates must contain numbers');
+
+    return feature({
+        type: 'LineString',
+        coordinates: coordinates
+    }, properties, bbox, id);
+}
+
+/**
+ * Takes one or more {@link Feature|Features} and creates a {@link FeatureCollection}.
+ *
+ * @name featureCollection
+ * @param {Feature[]} features input features
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {FeatureCollection} a FeatureCollection of input features
+ * @example
+ * var features = [
+ *  turf.point([-75.343, 39.984], {name: 'Location A'}),
+ *  turf.point([-75.833, 39.284], {name: 'Location B'}),
+ *  turf.point([-75.534, 39.123], {name: 'Location C'})
+ * ];
+ *
+ * var collection = turf.featureCollection(features);
+ *
+ * //=collection
+ */
+function featureCollection(features, bbox, id) {
+    if (!features) throw new Error('No features passed');
+    if (!Array.isArray(features)) throw new Error('features must be an Array');
+    if (bbox && bbox.length !== 4) throw new Error('bbox must be an Array of 4 numbers');
+    if (id && ['string', 'number'].indexOf(typeof id) === -1) throw new Error('id must be a number or a string');
+
+    var fc = {type: 'FeatureCollection'};
+    if (id) fc.id = id;
+    if (bbox) fc.bbox = bbox;
+    fc.features = features;
+    return fc;
+}
+
+/**
+ * Creates a {@link Feature<MultiLineString>} based on a
+ * coordinate array. Properties can be added optionally.
+ *
+ * @name multiLineString
+ * @param {Array<Array<Array<number>>>} coordinates an array of LineStrings
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {Feature<MultiLineString>} a MultiLineString feature
+ * @throws {Error} if no coordinates are passed
+ * @example
+ * var multiLine = turf.multiLineString([[[0,0],[10,10]]]);
+ *
+ * //=multiLine
+ */
+function multiLineString(coordinates, properties, bbox, id) {
+    if (!coordinates) throw new Error('No coordinates passed');
+
+    return feature({
+        type: 'MultiLineString',
+        coordinates: coordinates
+    }, properties, bbox, id);
+}
+
+/**
+ * Creates a {@link Feature<MultiPoint>} based on a
+ * coordinate array. Properties can be added optionally.
+ *
+ * @name multiPoint
+ * @param {Array<Array<number>>} coordinates an array of Positions
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {Feature<MultiPoint>} a MultiPoint feature
+ * @throws {Error} if no coordinates are passed
+ * @example
+ * var multiPt = turf.multiPoint([[0,0],[10,10]]);
+ *
+ * //=multiPt
+ */
+function multiPoint(coordinates, properties, bbox, id) {
+    if (!coordinates) throw new Error('No coordinates passed');
+
+    return feature({
+        type: 'MultiPoint',
+        coordinates: coordinates
+    }, properties, bbox, id);
+}
+
+/**
+ * Creates a {@link Feature<MultiPolygon>} based on a
+ * coordinate array. Properties can be added optionally.
+ *
+ * @name multiPolygon
+ * @param {Array<Array<Array<Array<number>>>>} coordinates an array of Polygons
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {Feature<MultiPolygon>} a multipolygon feature
+ * @throws {Error} if no coordinates are passed
+ * @example
+ * var multiPoly = turf.multiPolygon([[[[0,0],[0,10],[10,10],[10,0],[0,0]]]]);
+ *
+ * //=multiPoly
+ *
+ */
+function multiPolygon(coordinates, properties, bbox, id) {
+    if (!coordinates) throw new Error('No coordinates passed');
+
+    return feature({
+        type: 'MultiPolygon',
+        coordinates: coordinates
+    }, properties, bbox, id);
+}
+
+/**
+ * Creates a {@link Feature<GeometryCollection>} based on a
+ * coordinate array. Properties can be added optionally.
+ *
+ * @name geometryCollection
+ * @param {Array<Geometry>} geometries an array of GeoJSON Geometries
+ * @param {Object} [properties={}] an Object of key-value pairs to add as properties
+ * @param {Array<number>} [bbox] BBox [west, south, east, north]
+ * @param {string|number} [id] Identifier
+ * @returns {Feature<GeometryCollection>} a GeoJSON GeometryCollection Feature
+ * @example
+ * var pt = {
+ *     "type": "Point",
+ *       "coordinates": [100, 0]
+ *     };
+ * var line = {
+ *     "type": "LineString",
+ *     "coordinates": [ [101, 0], [102, 1] ]
+ *   };
+ * var collection = turf.geometryCollection([pt, line]);
+ *
+ * //=collection
+ */
+function geometryCollection(geometries, properties, bbox, id) {
+    if (!geometries) throw new Error('geometries is required');
+    if (!Array.isArray(geometries)) throw new Error('geometries must be an Array');
+
+    return feature({
+        type: 'GeometryCollection',
+        geometries: geometries
+    }, properties, bbox, id);
+}
+
+// https://en.wikipedia.org/wiki/Great-circle_distance#Radius_for_spherical_Earth
+var factors = {
+    miles: 3960,
+    nauticalmiles: 3441.145,
+    degrees: 57.2957795,
+    radians: 1,
+    inches: 250905600,
+    yards: 6969600,
+    meters: 6373000,
+    metres: 6373000,
+    centimeters: 6.373e+8,
+    centimetres: 6.373e+8,
+    kilometers: 6373,
+    kilometres: 6373,
+    feet: 20908792.65
+};
+
+var areaFactors = {
+    kilometers: 0.000001,
+    kilometres: 0.000001,
+    meters: 1,
+    metres: 1,
+    centimetres: 10000,
+    millimeter: 1000000,
+    acres: 0.000247105,
+    miles: 3.86e-7,
+    yards: 1.195990046,
+    feet: 10.763910417,
+    inches: 1550.003100006
+};
+/**
+ * Round number to precision
+ *
+ * @param {number} num Number
+ * @param {number} [precision=0] Precision
+ * @returns {number} rounded number
+ * @example
+ * turf.round(120.4321)
+ * //=120
+ *
+ * turf.round(120.4321, 2)
+ * //=120.43
+ */
+function round(num, precision) {
+    if (num === undefined || num === null || isNaN(num)) throw new Error('num is required');
+    if (precision && !(precision >= 0)) throw new Error('precision must be a positive number');
+    var multiplier = Math.pow(10, precision || 0);
+    return Math.round(num * multiplier) / multiplier;
+}
+
+/**
+ * Convert a distance measurement (assuming a spherical Earth) from radians to a more friendly unit.
+ * Valid units: miles, nauticalmiles, inches, yards, meters, metres, kilometers, centimeters, feet
+ *
+ * @name radiansToDistance
+ * @param {number} radians in radians across the sphere
+ * @param {string} [units=kilometers] can be degrees, radians, miles, or kilometers inches, yards, metres, meters, kilometres, kilometers.
+ * @returns {number} distance
+ */
+function radiansToDistance(radians, units) {
+    if (radians === undefined || radians === null) throw new Error('radians is required');
+
+    var factor = factors[units || 'kilometers'];
+    if (!factor) throw new Error('units is invalid');
+    return radians * factor;
+}
+
+/**
+ * Convert a distance measurement (assuming a spherical Earth) from a real-world unit into radians
+ * Valid units: miles, nauticalmiles, inches, yards, meters, metres, kilometers, centimeters, feet
+ *
+ * @name distanceToRadians
+ * @param {number} distance in real units
+ * @param {string} [units=kilometers] can be degrees, radians, miles, or kilometers inches, yards, metres, meters, kilometres, kilometers.
+ * @returns {number} radians
+ */
+function distanceToRadians(distance, units) {
+    if (distance === undefined || distance === null) throw new Error('distance is required');
+
+    var factor = factors[units || 'kilometers'];
+    if (!factor) throw new Error('units is invalid');
+    return distance / factor;
+}
+
+/**
+ * Convert a distance measurement (assuming a spherical Earth) from a real-world unit into degrees
+ * Valid units: miles, nauticalmiles, inches, yards, meters, metres, centimeters, kilometres, feet
+ *
+ * @name distanceToDegrees
+ * @param {number} distance in real units
+ * @param {string} [units=kilometers] can be degrees, radians, miles, or kilometers inches, yards, metres, meters, kilometres, kilometers.
+ * @returns {number} degrees
+ */
+function distanceToDegrees(distance, units) {
+    return radians2degrees(distanceToRadians(distance, units));
+}
+
+/**
+ * Converts any bearing angle from the north line direction (positive clockwise)
+ * and returns an angle between 0-360 degrees (positive clockwise), 0 being the north line
+ *
+ * @name bearingToAngle
+ * @param {number} bearing angle, between -180 and +180 degrees
+ * @returns {number} angle between 0 and 360 degrees
+ */
+function bearingToAngle(bearing) {
+    if (bearing === null || bearing === undefined) throw new Error('bearing is required');
+
+    var angle = bearing % 360;
+    if (angle < 0) angle += 360;
+    return angle;
+}
+
+/**
+ * Converts an angle in radians to degrees
+ *
+ * @name radians2degrees
+ * @param {number} radians angle in radians
+ * @returns {number} degrees between 0 and 360 degrees
+ */
+function radians2degrees(radians) {
+    if (radians === null || radians === undefined) throw new Error('radians is required');
+
+    var degrees = radians % (2 * Math.PI);
+    return degrees * 180 / Math.PI;
+}
+
+/**
+ * Converts an angle in degrees to radians
+ *
+ * @name degrees2radians
+ * @param {number} degrees angle between 0 and 360 degrees
+ * @returns {number} angle in radians
+ */
+function degrees2radians(degrees) {
+    if (degrees === null || degrees === undefined) throw new Error('degrees is required');
+
+    var radians = degrees % 360;
+    return radians * Math.PI / 180;
+}
+
+
+/**
+ * Converts a distance to the requested unit.
+ * Valid units: miles, nauticalmiles, inches, yards, meters, metres, kilometers, centimeters, feet
+ *
+ * @param {number} distance to be converted
+ * @param {string} originalUnit of the distance
+ * @param {string} [finalUnit=kilometers] returned unit
+ * @returns {number} the converted distance
+ */
+function convertDistance(distance, originalUnit, finalUnit) {
+    if (distance === null || distance === undefined) throw new Error('distance is required');
+    if (!(distance >= 0)) throw new Error('distance must be a positive number');
+
+    var convertedDistance = radiansToDistance(distanceToRadians(distance, originalUnit), finalUnit || 'kilometers');
+    return convertedDistance;
+}
+
+/**
+ * Converts a area to the requested unit.
+ * Valid units: kilometers, kilometres, meters, metres, centimetres, millimeter, acre, mile, yard, foot, inch
+ * @param {number} area to be converted
+ * @param {string} [originalUnit=meters] of the distance
+ * @param {string} [finalUnit=kilometers] returned unit
+ * @returns {number} the converted distance
+ */
+function convertArea(area, originalUnit, finalUnit) {
+    if (area === null || area === undefined) throw new Error('area is required');
+    if (!(area >= 0)) throw new Error('area must be a positive number');
+
+    var startFactor = areaFactors[originalUnit || 'meters'];
+    if (!startFactor) throw new Error('invalid original units');
+
+    var finalFactor = areaFactors[finalUnit || 'kilometers'];
+    if (!finalFactor) throw new Error('invalid final units');
+
+    return (area / startFactor) * finalFactor;
+}
+
+/**
+ * isNumber
+ *
+ * @param {*} num Number to validate
+ * @returns {boolean} true/false
+ * @example
+ * turf.isNumber(123)
+ * //=true
+ * turf.isNumber('foo')
+ * //=false
+ */
+function isNumber(num) {
+    return !isNaN(num) && num !== null && !Array.isArray(num);
+}
+
+module.exports = {
+    feature: feature,
+    geometry: geometry,
+    featureCollection: featureCollection,
+    geometryCollection: geometryCollection,
+    point: point,
+    multiPoint: multiPoint,
+    lineString: lineString,
+    multiLineString: multiLineString,
+    polygon: polygon,
+    multiPolygon: multiPolygon,
+    radiansToDistance: radiansToDistance,
+    distanceToRadians: distanceToRadians,
+    distanceToDegrees: distanceToDegrees,
+    radians2degrees: radians2degrees,
+    degrees2radians: degrees2radians,
+    bearingToAngle: bearingToAngle,
+    convertDistance: convertDistance,
+    convertArea: convertArea,
+    round: round,
+    isNumber: isNumber
+};
+
+},{}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1100,9 +1671,9 @@ exports.lineString = lineString;
 exports.lineEach = lineEach;
 exports.lineReduce = lineReduce;
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1596,7 +2167,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"util/":49}],6:[function(require,module,exports){
+},{"util/":51}],8:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -1712,7 +2283,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process,Buffer){
 'use strict';
 /* eslint camelcase: "off" */
@@ -2124,7 +2695,7 @@ Zlib.prototype._reset = function () {
 
 exports.Zlib = Zlib;
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":18,"assert":5,"buffer":9,"pako/lib/zlib/constants":98,"pako/lib/zlib/deflate.js":100,"pako/lib/zlib/inflate.js":103,"pako/lib/zlib/zstream":107}],8:[function(require,module,exports){
+},{"_process":20,"assert":7,"buffer":11,"pako/lib/zlib/constants":100,"pako/lib/zlib/deflate.js":102,"pako/lib/zlib/inflate.js":105,"pako/lib/zlib/zstream":109}],10:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -2736,7 +3307,7 @@ util.inherits(DeflateRaw, Zlib);
 util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 }).call(this,require('_process'))
-},{"./binding":7,"_process":18,"assert":5,"buffer":9,"stream":37,"util":49}],9:[function(require,module,exports){
+},{"./binding":9,"_process":20,"assert":7,"buffer":11,"stream":39,"util":51}],11:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -4452,7 +5023,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":6,"ieee754":14}],10:[function(require,module,exports){
+},{"base64-js":8,"ieee754":16}],12:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -4518,7 +5089,7 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],11:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -4629,7 +5200,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../../../insert-module-globals/node_modules/is-buffer/index.js")})
-},{"../../../../insert-module-globals/node_modules/is-buffer/index.js":86}],12:[function(require,module,exports){
+},{"../../../../insert-module-globals/node_modules/is-buffer/index.js":88}],14:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -4933,7 +5504,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var http = require('http')
 var url = require('url')
 
@@ -4966,7 +5537,7 @@ function validateParams (params) {
   return params
 }
 
-},{"http":38,"url":44}],14:[function(require,module,exports){
+},{"http":40,"url":46}],16:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -5052,7 +5623,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],15:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -5077,14 +5648,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -5131,7 +5702,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,require('_process'))
-},{"_process":18}],18:[function(require,module,exports){
+},{"_process":20}],20:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -5317,7 +5888,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -5854,7 +6425,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5940,7 +6511,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6027,16 +6598,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],22:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":20,"./encode":21}],23:[function(require,module,exports){
+},{"./decode":22,"./encode":23}],25:[function(require,module,exports){
 module.exports = require('./lib/_stream_duplex.js');
 
-},{"./lib/_stream_duplex.js":24}],24:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":26}],26:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6161,7 +6732,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":26,"./_stream_writable":28,"core-util-is":11,"inherits":15,"process-nextick-args":17}],25:[function(require,module,exports){
+},{"./_stream_readable":28,"./_stream_writable":30,"core-util-is":13,"inherits":17,"process-nextick-args":19}],27:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6209,7 +6780,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":27,"core-util-is":11,"inherits":15}],26:[function(require,module,exports){
+},{"./_stream_transform":29,"core-util-is":13,"inherits":17}],28:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7219,7 +7790,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":24,"./internal/streams/BufferList":29,"./internal/streams/destroy":30,"./internal/streams/stream":31,"_process":18,"core-util-is":11,"events":12,"inherits":15,"isarray":16,"process-nextick-args":17,"safe-buffer":36,"string_decoder/":42,"util":4}],27:[function(require,module,exports){
+},{"./_stream_duplex":26,"./internal/streams/BufferList":31,"./internal/streams/destroy":32,"./internal/streams/stream":33,"_process":20,"core-util-is":13,"events":14,"inherits":17,"isarray":18,"process-nextick-args":19,"safe-buffer":38,"string_decoder/":44,"util":6}],29:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7434,7 +8005,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":24,"core-util-is":11,"inherits":15}],28:[function(require,module,exports){
+},{"./_stream_duplex":26,"core-util-is":13,"inherits":17}],30:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8101,7 +8672,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":24,"./internal/streams/destroy":30,"./internal/streams/stream":31,"_process":18,"core-util-is":11,"inherits":15,"process-nextick-args":17,"safe-buffer":36,"util-deprecate":46}],29:[function(require,module,exports){
+},{"./_stream_duplex":26,"./internal/streams/destroy":32,"./internal/streams/stream":33,"_process":20,"core-util-is":13,"inherits":17,"process-nextick-args":19,"safe-buffer":38,"util-deprecate":48}],31:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -8176,7 +8747,7 @@ module.exports = function () {
 
   return BufferList;
 }();
-},{"safe-buffer":36}],30:[function(require,module,exports){
+},{"safe-buffer":38}],32:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -8249,13 +8820,13 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":17}],31:[function(require,module,exports){
+},{"process-nextick-args":19}],33:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":12}],32:[function(require,module,exports){
+},{"events":14}],34:[function(require,module,exports){
 module.exports = require('./readable').PassThrough
 
-},{"./readable":33}],33:[function(require,module,exports){
+},{"./readable":35}],35:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -8264,13 +8835,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":24,"./lib/_stream_passthrough.js":25,"./lib/_stream_readable.js":26,"./lib/_stream_transform.js":27,"./lib/_stream_writable.js":28}],34:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":26,"./lib/_stream_passthrough.js":27,"./lib/_stream_readable.js":28,"./lib/_stream_transform.js":29,"./lib/_stream_writable.js":30}],36:[function(require,module,exports){
 module.exports = require('./readable').Transform
 
-},{"./readable":33}],35:[function(require,module,exports){
+},{"./readable":35}],37:[function(require,module,exports){
 module.exports = require('./lib/_stream_writable.js');
 
-},{"./lib/_stream_writable.js":28}],36:[function(require,module,exports){
+},{"./lib/_stream_writable.js":30}],38:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -8334,7 +8905,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":9}],37:[function(require,module,exports){
+},{"buffer":11}],39:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8463,7 +9034,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":12,"inherits":15,"readable-stream/duplex.js":23,"readable-stream/passthrough.js":32,"readable-stream/readable.js":33,"readable-stream/transform.js":34,"readable-stream/writable.js":35}],38:[function(require,module,exports){
+},{"events":14,"inherits":17,"readable-stream/duplex.js":25,"readable-stream/passthrough.js":34,"readable-stream/readable.js":35,"readable-stream/transform.js":36,"readable-stream/writable.js":37}],40:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var extend = require('xtend')
@@ -8545,7 +9116,7 @@ http.METHODS = [
 	'UNSUBSCRIBE'
 ]
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/request":40,"builtin-status-codes":10,"url":44,"xtend":50}],39:[function(require,module,exports){
+},{"./lib/request":42,"builtin-status-codes":12,"url":46,"xtend":52}],41:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableStream)
 
@@ -8618,7 +9189,7 @@ function isFunction (value) {
 xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],40:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -8928,7 +9499,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":39,"./response":41,"_process":18,"buffer":9,"inherits":15,"readable-stream":33,"to-arraybuffer":43}],41:[function(require,module,exports){
+},{"./capability":41,"./response":43,"_process":20,"buffer":11,"inherits":17,"readable-stream":35,"to-arraybuffer":45}],43:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -9114,7 +9685,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":39,"_process":18,"buffer":9,"inherits":15,"readable-stream":33}],42:[function(require,module,exports){
+},{"./capability":41,"_process":20,"buffer":11,"inherits":17,"readable-stream":35}],44:[function(require,module,exports){
 'use strict';
 
 var Buffer = require('safe-buffer').Buffer;
@@ -9387,7 +9958,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":36}],43:[function(require,module,exports){
+},{"safe-buffer":38}],45:[function(require,module,exports){
 var Buffer = require('buffer').Buffer
 
 module.exports = function (buf) {
@@ -9416,7 +9987,7 @@ module.exports = function (buf) {
 	}
 }
 
-},{"buffer":9}],44:[function(require,module,exports){
+},{"buffer":11}],46:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10150,7 +10721,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":45,"punycode":19,"querystring":22}],45:[function(require,module,exports){
+},{"./util":47,"punycode":21,"querystring":24}],47:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -10168,7 +10739,7 @@ module.exports = {
   }
 };
 
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 (function (global){
 
 /**
@@ -10239,16 +10810,16 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],47:[function(require,module,exports){
-arguments[4][15][0].apply(exports,arguments)
-},{"dup":15}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}],50:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],49:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10838,7 +11409,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":48,"_process":18,"inherits":47}],50:[function(require,module,exports){
+},{"./support/isBuffer":50,"_process":20,"inherits":49}],52:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -10859,7 +11430,7 @@ function extend() {
     return target
 }
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -10976,7 +11547,7 @@ function checkEncoding(name) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./iconv-loader":52,"buffer":9,"iconv-lite":84}],52:[function(require,module,exports){
+},{"./iconv-loader":54,"buffer":11,"iconv-lite":86}],54:[function(require,module,exports){
 'use strict';
 
 var iconv_package;
@@ -10992,7 +11563,7 @@ try {
 
 module.exports = Iconv;
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -11175,7 +11746,7 @@ module.exports = function (input) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":9,"geotiff":63}],54:[function(require,module,exports){
+},{"buffer":11,"geotiff":65}],56:[function(require,module,exports){
 "use strict";
 
 function AbstractDecoder() {}
@@ -11188,7 +11759,7 @@ AbstractDecoder.prototype = {
 };
 
 module.exports = AbstractDecoder;
-},{}],55:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 
 var AbstractDecoder = require("../abstractdecoder.js");
@@ -11203,7 +11774,7 @@ DeflateDecoder.prototype.decodeBlock = function (buffer) {
 };
 
 module.exports = DeflateDecoder;
-},{"../abstractdecoder.js":54,"pako/lib/inflate":94}],56:[function(require,module,exports){
+},{"../abstractdecoder.js":56,"pako/lib/inflate":96}],58:[function(require,module,exports){
 "use strict";
 
 //var lzwCompress = require("lzwcompress");
@@ -11451,7 +12022,7 @@ LZWDecoder.prototype.decodeBlock = function (buffer) {
 };
 
 module.exports = LZWDecoder;
-},{"../abstractdecoder.js":54}],57:[function(require,module,exports){
+},{"../abstractdecoder.js":56}],59:[function(require,module,exports){
 "use strict";
 
 var AbstractDecoder = require("../abstractdecoder.js");
@@ -11485,7 +12056,7 @@ PackbitsDecoder.prototype.decodeBlock = function (buffer) {
 };
 
 module.exports = PackbitsDecoder;
-},{"../abstractdecoder.js":54}],58:[function(require,module,exports){
+},{"../abstractdecoder.js":56}],60:[function(require,module,exports){
 "use strict";
 
 var AbstractDecoder = require("../abstractdecoder.js");
@@ -11499,7 +12070,7 @@ RawDecoder.prototype.decodeBlock = function (buffer) {
 };
 
 module.exports = RawDecoder;
-},{"../abstractdecoder.js":54}],59:[function(require,module,exports){
+},{"../abstractdecoder.js":56}],61:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -11588,7 +12159,7 @@ var DataView64 = function () {
 }();
 
 module.exports = DataView64;
-},{}],60:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 var globals = require("./globals.js");
@@ -11826,7 +12397,7 @@ GeoTIFF.prototype = {
 };
 
 module.exports = GeoTIFF;
-},{"./dataview64.js":59,"./geotiffimage.js":61,"./globals.js":62}],61:[function(require,module,exports){
+},{"./dataview64.js":61,"./geotiffimage.js":63,"./globals.js":64}],63:[function(require,module,exports){
 "use strict";
 
 var globals = require("./globals.js");
@@ -12649,7 +13220,7 @@ GeoTIFFImage.prototype = {
 };
 
 module.exports = GeoTIFFImage;
-},{"./compression/deflate.js":55,"./compression/lzw.js":56,"./compression/packbits.js":57,"./compression/raw.js":58,"./globals.js":62,"./rgb.js":64}],62:[function(require,module,exports){
+},{"./compression/deflate.js":57,"./compression/lzw.js":58,"./compression/packbits.js":59,"./compression/raw.js":60,"./globals.js":64,"./rgb.js":66}],64:[function(require,module,exports){
 "use strict";
 
 var fieldTagNames = {
@@ -12904,7 +13475,7 @@ module.exports = {
   geoKeyNames: geoKeyNames,
   parseXml: parseXml
 };
-},{"xmldom":109}],63:[function(require,module,exports){
+},{"xmldom":111}],65:[function(require,module,exports){
 "use strict";
 
 var GeoTIFF = require("./geotiff.js");
@@ -12938,7 +13509,7 @@ if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
 if (typeof window !== "undefined") {
   window["GeoTIFF"] = { parse: parse };
 }
-},{"./geotiff.js":60}],64:[function(require,module,exports){
+},{"./geotiff.js":62}],66:[function(require,module,exports){
 "use strict";
 
 function fromWhiteIsZero(raster, max, width, height) {
@@ -13061,7 +13632,7 @@ module.exports = {
   fromYCbCr: fromYCbCr,
   fromCIELab: fromCIELab
 };
-},{}],65:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -13618,7 +14189,7 @@ function findIdx(table, val) {
 }
 
 
-},{"buffer":9}],66:[function(require,module,exports){
+},{"buffer":11}],68:[function(require,module,exports){
 "use strict";
 
 // Description of supported double byte encodings and aliases.
@@ -13796,7 +14367,7 @@ module.exports = {
     'xxbig5': 'big5hkscs',
 };
 
-},{"./tables/big5-added.json":72,"./tables/cp936.json":73,"./tables/cp949.json":74,"./tables/cp950.json":75,"./tables/eucjp.json":76,"./tables/gb18030-ranges.json":77,"./tables/gbk-added.json":78,"./tables/shiftjis.json":79}],67:[function(require,module,exports){
+},{"./tables/big5-added.json":74,"./tables/cp936.json":75,"./tables/cp949.json":76,"./tables/cp950.json":77,"./tables/eucjp.json":78,"./tables/gb18030-ranges.json":79,"./tables/gbk-added.json":80,"./tables/shiftjis.json":81}],69:[function(require,module,exports){
 "use strict";
 
 // Update this array if you add/rename/remove files in this directory.
@@ -13820,7 +14391,7 @@ for (var i = 0; i < modules.length; i++) {
             exports[enc] = module[enc];
 }
 
-},{"./dbcs-codec":65,"./dbcs-data":66,"./internal":68,"./sbcs-codec":69,"./sbcs-data":71,"./sbcs-data-generated":70,"./utf16":80,"./utf7":81}],68:[function(require,module,exports){
+},{"./dbcs-codec":67,"./dbcs-data":68,"./internal":70,"./sbcs-codec":71,"./sbcs-data":73,"./sbcs-data-generated":72,"./utf16":82,"./utf7":83}],70:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -14010,7 +14581,7 @@ InternalDecoderCesu8.prototype.end = function() {
     return res;
 }
 
-},{"buffer":9,"string_decoder":42}],69:[function(require,module,exports){
+},{"buffer":11,"string_decoder":44}],71:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -14085,7 +14656,7 @@ SBCSDecoder.prototype.write = function(buf) {
 SBCSDecoder.prototype.end = function() {
 }
 
-},{"buffer":9}],70:[function(require,module,exports){
+},{"buffer":11}],72:[function(require,module,exports){
 "use strict";
 
 // Generated data for sbcs codec. Don't edit manually. Regenerate using generation/gen-sbcs.js script.
@@ -14537,7 +15108,7 @@ module.exports = {
     "chars": "���������������������������������กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืฺุู����฿เแโใไๅๆ็่้๊๋์ํ๎๏๐๑๒๓๔๕๖๗๘๙๚๛����"
   }
 }
-},{}],71:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 "use strict";
 
 // Manually added data to be used by sbcs codec in addition to generated one.
@@ -14708,7 +15279,7 @@ module.exports = {
 };
 
 
-},{}],72:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 module.exports=[
 ["8740","䏰䰲䘃䖦䕸𧉧䵷䖳𧲱䳢𧳅㮕䜶䝄䱇䱀𤊿𣘗𧍒𦺋𧃒䱗𪍑䝏䗚䲅𧱬䴇䪤䚡𦬣爥𥩔𡩣𣸆𣽡晍囻"],
 ["8767","綕夝𨮹㷴霴𧯯寛𡵞媤㘥𩺰嫑宷峼杮薓𩥅瑡璝㡵𡵓𣚞𦀡㻬"],
@@ -14832,7 +15403,7 @@ module.exports=[
 ["fea1","𤅟𤩹𨮏孆𨰃𡢞瓈𡦈甎瓩甞𨻙𡩋寗𨺬鎅畍畊畧畮𤾂㼄𤴓疎瑝疞疴瘂瘬癑癏癯癶𦏵皐臯㟸𦤑𦤎皡皥皷盌𦾟葢𥂝𥅽𡸜眞眦着撯𥈠睘𣊬瞯𨥤𨥨𡛁矴砉𡍶𤨒棊碯磇磓隥礮𥗠磗礴碱𧘌辸袄𨬫𦂃𢘜禆褀椂禀𥡗禝𧬹礼禩渪𧄦㺨秆𩄍秔"]
 ]
 
-},{}],73:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",127,"€"],
 ["8140","丂丄丅丆丏丒丗丟丠両丣並丩丮丯丱丳丵丷丼乀乁乂乄乆乊乑乕乗乚乛乢乣乤乥乧乨乪",5,"乲乴",9,"乿",6,"亇亊"],
@@ -15098,7 +15669,7 @@ module.exports=[
 ["fe40","兀嗀﨎﨏﨑﨓﨔礼﨟蘒﨡﨣﨤﨧﨨﨩"]
 ]
 
-},{}],74:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",127],
 ["8141","갂갃갅갆갋",4,"갘갞갟갡갢갣갥",6,"갮갲갳갴"],
@@ -15373,7 +15944,7 @@ module.exports=[
 ["fda1","爻肴酵驍侯候厚后吼喉嗅帿後朽煦珝逅勛勳塤壎焄熏燻薰訓暈薨喧暄煊萱卉喙毁彙徽揮暉煇諱輝麾休携烋畦虧恤譎鷸兇凶匈洶胸黑昕欣炘痕吃屹紇訖欠欽歆吸恰洽翕興僖凞喜噫囍姬嬉希憙憘戱晞曦熙熹熺犧禧稀羲詰"]
 ]
 
-},{}],75:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",127],
 ["a140","　，、。．‧；：？！︰…‥﹐﹑﹒·﹔﹕﹖﹗｜–︱—︳╴︴﹏（）︵︶｛｝︷︸〔〕︹︺【】︻︼《》︽︾〈〉︿﹀「」﹁﹂『』﹃﹄﹙﹚"],
@@ -15552,7 +16123,7 @@ module.exports=[
 ["f9a1","龤灨灥糷虪蠾蠽蠿讞貜躩軉靋顳顴飌饡馫驤驦驧鬤鸕鸗齈戇欞爧虌躨钂钀钁驩驨鬮鸙爩虋讟钃鱹麷癵驫鱺鸝灩灪麤齾齉龘碁銹裏墻恒粧嫺╔╦╗╠╬╣╚╩╝╒╤╕╞╪╡╘╧╛╓╥╖╟╫╢╙╨╜║═╭╮╰╯▓"]
 ]
 
-},{}],76:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",127],
 ["8ea1","｡",62],
@@ -15736,9 +16307,9 @@ module.exports=[
 ["8feda1","黸黿鼂鼃鼉鼏鼐鼑鼒鼔鼖鼗鼙鼚鼛鼟鼢鼦鼪鼫鼯鼱鼲鼴鼷鼹鼺鼼鼽鼿齁齃",4,"齓齕齖齗齘齚齝齞齨齩齭",4,"齳齵齺齽龏龐龑龒龔龖龗龞龡龢龣龥"]
 ]
 
-},{}],77:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 module.exports={"uChars":[128,165,169,178,184,216,226,235,238,244,248,251,253,258,276,284,300,325,329,334,364,463,465,467,469,471,473,475,477,506,594,610,712,716,730,930,938,962,970,1026,1104,1106,8209,8215,8218,8222,8231,8241,8244,8246,8252,8365,8452,8454,8458,8471,8482,8556,8570,8596,8602,8713,8720,8722,8726,8731,8737,8740,8742,8748,8751,8760,8766,8777,8781,8787,8802,8808,8816,8854,8858,8870,8896,8979,9322,9372,9548,9588,9616,9622,9634,9652,9662,9672,9676,9680,9702,9735,9738,9793,9795,11906,11909,11913,11917,11928,11944,11947,11951,11956,11960,11964,11979,12284,12292,12312,12319,12330,12351,12436,12447,12535,12543,12586,12842,12850,12964,13200,13215,13218,13253,13263,13267,13270,13384,13428,13727,13839,13851,14617,14703,14801,14816,14964,15183,15471,15585,16471,16736,17208,17325,17330,17374,17623,17997,18018,18212,18218,18301,18318,18760,18811,18814,18820,18823,18844,18848,18872,19576,19620,19738,19887,40870,59244,59336,59367,59413,59417,59423,59431,59437,59443,59452,59460,59478,59493,63789,63866,63894,63976,63986,64016,64018,64021,64025,64034,64037,64042,65074,65093,65107,65112,65127,65132,65375,65510,65536],"gbChars":[0,36,38,45,50,81,89,95,96,100,103,104,105,109,126,133,148,172,175,179,208,306,307,308,309,310,311,312,313,341,428,443,544,545,558,741,742,749,750,805,819,820,7922,7924,7925,7927,7934,7943,7944,7945,7950,8062,8148,8149,8152,8164,8174,8236,8240,8262,8264,8374,8380,8381,8384,8388,8390,8392,8393,8394,8396,8401,8406,8416,8419,8424,8437,8439,8445,8482,8485,8496,8521,8603,8936,8946,9046,9050,9063,9066,9076,9092,9100,9108,9111,9113,9131,9162,9164,9218,9219,11329,11331,11334,11336,11346,11361,11363,11366,11370,11372,11375,11389,11682,11686,11687,11692,11694,11714,11716,11723,11725,11730,11736,11982,11989,12102,12336,12348,12350,12384,12393,12395,12397,12510,12553,12851,12962,12973,13738,13823,13919,13933,14080,14298,14585,14698,15583,15847,16318,16434,16438,16481,16729,17102,17122,17315,17320,17402,17418,17859,17909,17911,17915,17916,17936,17939,17961,18664,18703,18814,18962,19043,33469,33470,33471,33484,33485,33490,33497,33501,33505,33513,33520,33536,33550,37845,37921,37948,38029,38038,38064,38065,38066,38069,38075,38076,38078,39108,39109,39113,39114,39115,39116,39265,39394,189000]}
-},{}],78:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 module.exports=[
 ["a140","",62],
 ["a180","",32],
@@ -15795,7 +16366,7 @@ module.exports=[
 ["fe80","䜣䜩䝼䞍⻊䥇䥺䥽䦂䦃䦅䦆䦟䦛䦷䦶䲣䲟䲠䲡䱷䲢䴓",6,"䶮",93]
 ]
 
-},{}],79:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",128],
 ["a1","｡",62],
@@ -15922,7 +16493,7 @@ module.exports=[
 ["fc40","髜魵魲鮏鮱鮻鰀鵰鵫鶴鸙黑"]
 ]
 
-},{}],80:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -16101,7 +16672,7 @@ function detectEncoding(buf, defaultEncoding) {
 
 
 
-},{"buffer":9}],81:[function(require,module,exports){
+},{"buffer":11}],83:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -16393,7 +16964,7 @@ Utf7IMAPDecoder.prototype.end = function() {
 
 
 
-},{"buffer":9}],82:[function(require,module,exports){
+},{"buffer":11}],84:[function(require,module,exports){
 "use strict";
 
 var BOMChar = '\uFEFF';
@@ -16447,7 +17018,7 @@ StripBOMWrapper.prototype.end = function() {
 }
 
 
-},{}],83:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -16664,7 +17235,7 @@ module.exports = function (iconv) {
     }
 }
 
-},{"buffer":9,"stream":37}],84:[function(require,module,exports){
+},{"buffer":11,"stream":39}],86:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -16816,7 +17387,7 @@ if ("Ā" != "\u0100") {
 }
 
 }).call(this,require('_process'))
-},{"../encodings":67,"./bom-handling":82,"./extend-node":83,"./streams":85,"_process":18,"buffer":9}],85:[function(require,module,exports){
+},{"../encodings":69,"./bom-handling":84,"./extend-node":85,"./streams":87,"_process":20,"buffer":11}],87:[function(require,module,exports){
 "use strict";
 
 var Buffer = require("buffer").Buffer,
@@ -16939,7 +17510,7 @@ IconvLiteDecoderStream.prototype.collect = function(cb) {
 }
 
 
-},{"buffer":9,"stream":37}],86:[function(require,module,exports){
+},{"buffer":11,"stream":39}],88:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -16962,7 +17533,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],87:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 'use strict';
 
 var isStream = module.exports = function (stream) {
@@ -16985,7 +17556,7 @@ isStream.transform = function (stream) {
 	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
 };
 
-},{}],88:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 (function (global,Buffer){
 
 /**
@@ -17260,7 +17831,7 @@ Fetch.Headers = Headers;
 Fetch.Request = Request;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./lib/body":89,"./lib/fetch-error":90,"./lib/headers":91,"./lib/request":92,"./lib/response":93,"buffer":9,"http":38,"https":13,"stream":37,"url":44,"zlib":8}],89:[function(require,module,exports){
+},{"./lib/body":91,"./lib/fetch-error":92,"./lib/headers":93,"./lib/request":94,"./lib/response":95,"buffer":11,"http":40,"https":15,"stream":39,"url":46,"zlib":10}],91:[function(require,module,exports){
 (function (global,Buffer){
 
 /**
@@ -17525,7 +18096,7 @@ Body.prototype._clone = function(instance) {
 Body.Promise = global.Promise;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./fetch-error":90,"buffer":9,"encoding":51,"is-stream":87,"stream":37}],90:[function(require,module,exports){
+},{"./fetch-error":92,"buffer":11,"encoding":53,"is-stream":89,"stream":39}],92:[function(require,module,exports){
 
 /**
  * fetch-error.js
@@ -17560,7 +18131,7 @@ function FetchError(message, type, systemError) {
 
 require('util').inherits(FetchError, Error);
 
-},{"util":49}],91:[function(require,module,exports){
+},{"util":51}],93:[function(require,module,exports){
 
 /**
  * headers.js
@@ -17703,7 +18274,7 @@ Headers.prototype.raw = function() {
 	return this._headers;
 };
 
-},{}],92:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 
 /**
  * request.js
@@ -17780,7 +18351,7 @@ Request.prototype.clone = function() {
 	return new Request(this);
 };
 
-},{"./body":89,"./headers":91,"url":44}],93:[function(require,module,exports){
+},{"./body":91,"./headers":93,"url":46}],95:[function(require,module,exports){
 
 /**
  * response.js
@@ -17832,7 +18403,7 @@ Response.prototype.clone = function() {
 	});
 };
 
-},{"./body":89,"./headers":91,"http":38}],94:[function(require,module,exports){
+},{"./body":91,"./headers":93,"http":40}],96:[function(require,module,exports){
 'use strict';
 
 
@@ -18252,7 +18823,7 @@ exports.inflate = inflate;
 exports.inflateRaw = inflateRaw;
 exports.ungzip  = inflate;
 
-},{"./utils/common":95,"./utils/strings":96,"./zlib/constants":98,"./zlib/gzheader":101,"./zlib/inflate":103,"./zlib/messages":105,"./zlib/zstream":107}],95:[function(require,module,exports){
+},{"./utils/common":97,"./utils/strings":98,"./zlib/constants":100,"./zlib/gzheader":103,"./zlib/inflate":105,"./zlib/messages":107,"./zlib/zstream":109}],97:[function(require,module,exports){
 'use strict';
 
 
@@ -18359,7 +18930,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],96:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 // String encode/decode helpers
 'use strict';
 
@@ -18546,7 +19117,7 @@ exports.utf8border = function (buf, max) {
   return (pos + _utf8len[buf[pos]] > max) ? pos : max;
 };
 
-},{"./common":95}],97:[function(require,module,exports){
+},{"./common":97}],99:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -18599,7 +19170,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],98:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -18669,7 +19240,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],99:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -18730,7 +19301,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],100:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -20606,7 +21177,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":95,"./adler32":97,"./crc32":99,"./messages":105,"./trees":106}],101:[function(require,module,exports){
+},{"../utils/common":97,"./adler32":99,"./crc32":101,"./messages":107,"./trees":108}],103:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -20666,7 +21237,7 @@ function GZheader() {
 
 module.exports = GZheader;
 
-},{}],102:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -21013,7 +21584,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],103:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -22571,7 +23142,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":95,"./adler32":97,"./crc32":99,"./inffast":102,"./inftrees":104}],104:[function(require,module,exports){
+},{"../utils/common":97,"./adler32":99,"./crc32":101,"./inffast":104,"./inftrees":106}],106:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -22916,7 +23487,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":95}],105:[function(require,module,exports){
+},{"../utils/common":97}],107:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -22950,7 +23521,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],106:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -24172,7 +24743,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":95}],107:[function(require,module,exports){
+},{"../utils/common":97}],109:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -24221,7 +24792,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],108:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -25771,7 +26342,7 @@ module.exports = ZStream;
   }
 }.call(this));
 
-},{}],109:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 function DOMParser(options){
 	this.options = options ||{locator:{}};
 	
@@ -26024,7 +26595,7 @@ function appendElement (hander,node) {
 	exports.DOMParser = DOMParser;
 //}
 
-},{"./dom":110,"./sax":111}],110:[function(require,module,exports){
+},{"./dom":112,"./sax":113}],112:[function(require,module,exports){
 /*
  * DOM Level 2
  * Object DOMException
@@ -27270,7 +27841,7 @@ try{
 	exports.XMLSerializer = XMLSerializer;
 //}
 
-},{}],111:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 //[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
 //[4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
 //[5]   	Name	   ::=   	NameStartChar (NameChar)*
@@ -27905,11 +28476,11 @@ function split(source,start){
 exports.XMLReader = XMLReader;
 
 
-},{}],112:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 module.exports = {
     
 }
-},{}],113:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -28009,7 +28580,7 @@ module.exports = (type_of_geometry, geometry) => {
     }
 }
 
-},{"../utils/utils":125,"underscore":108}],114:[function(require,module,exports){
+},{"../utils/utils":127,"underscore":110}],116:[function(require,module,exports){
 'use strict';
 
 let load = require('../load/load');
@@ -28017,55 +28588,93 @@ let utils = require('../utils/utils');
 let convert_geometry = require('../convert-geometry/convert-geometry');
 
 module.exports = (georaster, geom, flat) => {
-    
-    if (utils.is_bbox(geom)) { // bounding box
-        
-        // convert geometry
-        let geometry = convert_geometry('bbox', geom);
 
-        if (georaster.projection === 4326) {
-            
+    let crop_top; let crop_left; let crop_right; let crop_bottom;  
+
+    if (geom === null || geom === undefined) {
+
+        try {
+
+            if (flat) {
+
+                crop_bottom = georaster.height;
+                crop_left = 0;
+                crop_right = georaster.width;
+                crop_top = 0;
+
+            } else {
+
+                return georaster.values;
+
+            }
+
+        } catch (error) {
+
+            console.error(error);
+            throw error;
+
+        }
+     
+    } else if (utils.is_bbox(geom)) { // bounding box
+
+        try {
+
+        
+            // convert geometry
+            let geometry = convert_geometry('bbox', geom);
+
             // use a utility function that converts from the lat/long coordinate
             // space to the image coordinate space
             // // left, top, right, bottom
-            let bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, geometry);
-            //console.log("bbox:", bbox);
+            let bbox = utils.convert_crs_bbox_to_image_bbox(georaster, geometry);
             let bbox_left = bbox.xmin;
             let bbox_top = bbox.ymin;
             let bbox_right = bbox.xmax;
             let bbox_bottom = bbox.ymax;
 
-            try {
-                if (flat) {
-                    //console.log("flat is true");
-                    return georaster.values.map(band => {
-                        let values = [];
-                        for (let row_index = bbox_top; row_index < bbox_bottom; row_index++) {
-                            values = values.concat(Array.prototype.slice.call(band[row_index].slice(bbox_left, bbox_right)));
-                        }
-                        return values;
-                    });
-                } else {
-                    return georaster.values.map(band => {
-                        let table = [];
-                        for (let row_index = bbox_top; row_index < bbox_bottom; row_index++) {
-                            table.push(band[row_index].slice(bbox_left, bbox_right));
-                        }
-                        return table;
-                    });
-                }
-            } catch (e) {
-                throw e;
-            }
-        } else {
-            throw 'This feature currently only works with geotiffs in WGS 84. Please reproject the geotiff';
+            crop_top = Math.max(bbox_top, 0)
+            crop_left = Math.max(bbox_left, 0);
+            crop_right = Math.min(bbox_right, georaster.width);
+            crop_bottom = Math.min(bbox_bottom, georaster.height)
+
+        } catch (error) {
+
+            console.error(error);
+            throw error;
+
         }
+
     } else {
+
         throw 'Geometry is not a bounding box - please make sure to send a bounding box when using gio-get';
+
+    }
+
+    try {
+
+         if (flat) {
+            return georaster.values.map(band => {
+                let values = [];
+                for (let row_index = crop_top; row_index < crop_bottom; row_index++) {
+                   values = values.concat(Array.prototype.slice.call(band[row_index].slice(crop_left, crop_right)));
+                }
+                return values;
+            });
+        } else {
+            return georaster.values.map(band => {
+                let table = [];
+                for (let row_index = crop_top; row_index < crop_bottom; row_index++) {
+                    table.push(band[row_index].slice(crop_left, crop_right));
+                }
+                return table;
+            });
+        }
+    } catch (e) {
+        throw e;
     }
 }
 
-},{"../convert-geometry/convert-geometry":113,"../load/load":118,"../utils/utils":125}],115:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":115,"../load/load":120,"../utils/utils":127}],117:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -28212,7 +28821,19 @@ let get_histogram = (values, options) => {
     else throw 'An unexpected error occurred while running the get_histogram function.';
 }
 
-module.exports = (georaster, geom, options) => {
+/**
+ * The histogram function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the histogram of all the pixels
+ * in that area. If no geometry is included, the pixels returns the histogram of
+ * all the pixels for each band in the raster.
+ * @name histogram
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of histograms for each band
+ * @example
+ * var histograms = geoblaze.histogram(georaster, geometry);
+ */
+function get_histograms_for_raster(georaster, geom, options) {
 
     try {
 
@@ -28257,8 +28878,9 @@ module.exports = (georaster, geom, options) => {
     }
 
 }
+module.exports = get_histograms_for_raster;
 
-},{"../convert-geometry/convert-geometry":113,"../get/get":114,"../intersect-polygon/intersect-polygon":117,"../utils/utils":125,"underscore":108}],116:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],118:[function(require,module,exports){
 'use strict';
 
 let load = require('../load/load');
@@ -28277,40 +28899,37 @@ let identify = (georaster, geometry) => {
     // The convert_geometry function takes the input
     // geometry and converts it to a standard format.
     let point = convert_geometry('point', geometry);
-    let lng = point[0];
-    let lat = point[1];
+    let x_in_crs = point[0];
+    let y_in_crs = point[1];
 
 
-    //console.log("georaster.projection:", georaster.projection);
-    if (georaster.projection === 4326) {
-        //console.log("assed proj");
+    // By normalizing the difference in yitude and longitude between the image
+    // origin and the point geometry by the cell height and width respectively,
+    // we can map the yitude and longitude of the point geometry in the
+    // coordinate space to their associated pixel location in the image space.
+    // Note that the y value is inverted to account for the inversion between the
+    // coordinate and image spaces.
+    let x = Math.floor((x_in_crs - georaster.xmin) / georaster.pixelWidth);
+    let y = Math.floor((georaster.ymax - y_in_crs) / georaster.pixelHeight);
 
-        // By normalizing the difference in latitude and longitude between the image
-        // origin and the point geometry by the cell height and width respectively,
-        // we can map the latitude and longitude of the point geometry in the
-        // coordinate space to their associated pixel location in the image space.
-        // Note that the y value is inverted to account for the inversion between the
-        // coordinate and image spaces.
-        let x = Math.floor(Math.abs(lng - georaster.xmin) / georaster.pixelWidth);
-        let y = Math.floor(Math.abs(georaster.ymax - lat) / georaster.pixelHeight);
+    try {
 
-        try {
-
-            // iterate through the bands
-            // get the row and then the column of the pixel that you want
+        // iterate through the bands
+        // get the row and then the column of the pixel that you want
+        if (x > 0 && x < georaster.width && y > 0 && y < georaster.height) {
             return georaster.values.map(rows => rows[y][x]);
-
-        } catch(e) {
-            throw e;
+        } else {
+            return null;
         }
-    } else {
-        throw 'Identification currently only works with geotiffs in WGS 84. Please reproject the geotiff';
+
+    } catch(e) {
+        throw e;
     }
 }
 
 module.exports = identify;
 
-},{"../convert-geometry/convert-geometry":113,"../load/load":118}],117:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":115,"../load/load":120}],119:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -28342,7 +28961,7 @@ module.exports = (georaster, geom, run_on_values) => {
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
-    let image_bbox = utils.convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox);
+    let image_bbox = utils.convert_crs_bbox_to_image_bbox(georaster, latlng_bbox);
     //console.log("image_bbox:", image_bbox); //good
     let x_min = image_bbox.xmin,
         y_min = image_bbox.ymin,
@@ -28509,7 +29128,7 @@ module.exports = (georaster, geom, run_on_values) => {
     }
 }
 
-},{"../get/get":114,"../utils/utils":125,"underscore":108}],118:[function(require,module,exports){
+},{"../get/get":116,"../utils/utils":127,"underscore":110}],120:[function(require,module,exports){
 'use strict';
 
 let parse_georaster = require("georaster");
@@ -28565,13 +29184,14 @@ module.exports = (url_or_file) => (
     })
 );
 
-},{"../cache/cache":112,"georaster":53,"node-fetch":88,"url":44}],119:[function(require,module,exports){
+},{"../cache/cache":114,"georaster":55,"node-fetch":90,"url":46}],121:[function(require,module,exports){
 'use strict';
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
 let convert_geometry = require('../convert-geometry/convert-geometry');
 let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let _ = require("underscore");
 
 let get_max = (values, no_data_value) => {
     let number_of_values = values.length;
@@ -28598,17 +29218,36 @@ let get_max = (values, no_data_value) => {
     }
 }
 
-module.exports = (georaster, geom) => {
+/**
+ * The max function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the max of all the pixels
+ * in that area. If no geometry is included, the pixels returns the max of
+ * all the pixels for each band in the raster.
+ * @name max
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of maxs for each band
+ * @example
+ * var maxs = geoblaze.max(georaster, geometry);
+ */
+function get_max_for_raster(georaster, geom) {
     
     try {
+
+        let no_data_value = georaster.no_data_value;
+
+        if (geom === null || geom === undefined) {
+
+            return georaster.values.map(band => {
+                return _.max(band.map(row => get_max(row, no_data_value)));
+            });
         
-        if (utils.is_bbox(geom)) {
+        } else if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
             let flat = true;
             let values = get(georaster, geom, flat);
-            let no_data_value = georaster.no_data_value;
 
             // get max value
             return values.map(band => get_max(band, no_data_value));
@@ -28636,8 +29275,9 @@ module.exports = (georaster, geom) => {
         throw e;
     }
 }
+module.exports = get_max_for_raster;
 
-},{"../convert-geometry/convert-geometry":113,"../get/get":114,"../intersect-polygon/intersect-polygon":117,"../utils/utils":125}],120:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],122:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -28717,7 +29357,7 @@ module.exports = (georaster, geom) => {
     }
 }
 
-},{"../convert-geometry/convert-geometry":113,"../get/get":114,"../intersect-polygon/intersect-polygon":117,"../utils/utils":125,"underscore":108}],121:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],123:[function(require,module,exports){
 'use strict';
 
 let get = require('../get/get');
@@ -28742,43 +29382,42 @@ let get_median = values => {
     }
 }
 
-module.exports = (georaster, geom) => {
+/**
+ * The median function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the median of all the pixels
+ * in that area. If no geometry is included, the pixels returns the median of
+ * all the pixels for each band in the raster.
+ * @name median
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of medians for each band
+ * @example
+ * var medians = geoblaze.median(georaster, geometry);
+ */
+function get_median_for_raster(georaster, geom) {
     
     try {
+
+        let geom_is_bbox = utils.is_bbox(geom);
         
-        if (utils.is_bbox(geom)) {
-            geom = convert_geometry('bbox', geom);
+        if (geom === null || geom === undefined || geom_is_bbox) {
 
-            // grab array of values;
-            let flat = false; // get values as a one dimensional flat array rather than as a table
-            let values = get(georaster, geom, flat);
-            //console.log("values:", values.length, values[0].length, values[0][0].length);
+            if (geom_is_bbox) {
+
+                geom = convert_geometry('bbox', geom);
+
+            }
+
+            let values = get(georaster, geom);
+
             let no_data_value = georaster.no_data_value;
-
-            // get median
-            //return values
-            //    .map(band => band.filter(value => value !== no_data_value))
-            //    .map(get_median);
 
             // median values
             let medians = []
             for (let band_index = 0; band_index < values.length; band_index++) {
                 let band = values[band_index];
-                let number_of_cells_with_values_in_band = 0;
-                let number_of_rows = band.length;
-                let counts = {};
-                for (let row_index = 0; row_index < number_of_rows; row_index++) {
-                    let row = band[row_index];
-                    let number_of_cells = row.length;
-                    for (let column_index = 0; column_index < number_of_cells; column_index++) {
-                        let value = row[column_index];
-                        if (value !== no_data_value) {
-                            number_of_cells_with_values_in_band++;
-                            if (value in counts) counts[value]++;
-                            else counts[value] = 1;
-                        }
-                    }
-                }
+                let counts = utils.count_values_in_table(band, no_data_value);
+                let number_of_cells_with_values_in_band = utils.sum(_.values(counts));
                 let sorted_counts = _.pairs(counts).sort((pair1, pair2) => Number(pair1[0]) - Number(pair2[0]));
                 //console.log("sorted_counts:", sorted_counts);
                 let middle = number_of_cells_with_values_in_band / 2;
@@ -28826,14 +29465,16 @@ module.exports = (georaster, geom) => {
         throw e;
     }
 }
+module.exports = get_median_for_raster;
 
-},{"../convert-geometry/convert-geometry":113,"../get/get":114,"../intersect-polygon/intersect-polygon":117,"../utils/utils":125,"underscore":108}],122:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],124:[function(require,module,exports){
 'use strict';
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
 let convert_geometry = require('../convert-geometry/convert-geometry');
 let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let _ = require("underscore");
 
 let get_min = (values, no_data_value) => {
     let number_of_values = values.length;
@@ -28860,16 +29501,35 @@ let get_min = (values, no_data_value) => {
     }
 }
 
-module.exports = (georaster, geom) => {
+/**
+ * The min function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the min of all the pixels
+ * in that area for each band. If no geometry is included, the pixels returns the min of
+ * all the pixels for each band in the raster.
+ * @name min
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of mins for each band
+ * @example
+ * var mins = geoblaze.min(georaster, geometry);
+ */
+function get_min_for_raster(georaster, geom) {
     
     try {
-        
-        if (utils.is_bbox(geom)) {
+
+        let no_data_value = georaster.no_data_value;
+
+        if (geom === null || geom === undefined) {
+
+            return georaster.values.map(band => {
+                return _.min(band.map(row => get_min(row, no_data_value)).filter(value => value !== undefined && value !== null));
+            });
+
+        } else if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
             let values = get(georaster, geom, true);
-            let no_data_value = georaster.no_data_value;
 
             // get min value
             return values.map(band => get_min(band, no_data_value));
@@ -28898,8 +29558,9 @@ module.exports = (georaster, geom) => {
         throw e;
     }
 }
+module.exports = get_min_for_raster;
 
-},{"../convert-geometry/convert-geometry":113,"../get/get":114,"../intersect-polygon/intersect-polygon":117,"../utils/utils":125}],123:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],125:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -28909,23 +29570,9 @@ let utils = require('../utils/utils');
 let convert_geometry = require('../convert-geometry/convert-geometry');
 let intersect_polygon = require('../intersect-polygon/intersect-polygon');
 
-let get_mode = values => {
-
-    // iterate through values and store in obj
-    let store = {};
-    let value_length = values.length;
-    let mode = [null, 0];
-    for (let i = 0; i < value_length; i++) {
-        let value = values[i];
-        if (store[value]) {
-            store[value] += 1;
-        } else {
-            store[value] = 1;
-        }
-    }
-
+let get_mode_from_counts_object = counts => {
     // iterate through values to get highest frequency
-    let buckets = _.sortBy(_.pairs(store), pair => pair[1])
+    let buckets = _.sortBy(_.pairs(counts), pair => pair[1])
     let max_frequency = buckets[buckets.length - 1][1];
     let modes = buckets
         .filter(pair => pair[1] === max_frequency)
@@ -28933,18 +29580,45 @@ let get_mode = values => {
     return modes.length === 1 ? modes[0] : modes; 
 }
 
-module.exports = (georaster, geom) => {
+let get_mode = values => {
+    let counts = _.countBy(values);
+    return get_mode_from_counts_object(counts);
+}
+
+
+/**
+ * The mode function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the mode of all the pixels
+ * in that area. If no geometry is included, the pixels returns the mode of
+ * all the pixels for each band in the raster.
+ * @name mode
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of modes for each band
+ * @example
+ * var modes = geoblaze.mode(georaster, geometry);
+ */
+function get_modes_for_raster(georaster, geom) {
     
     try {
+
+        let no_data_value = georaster.no_data_value;
+
+        if (geom === null || geom === undefined) {
+
+            let modes_for_all_bands = georaster.values.map(band => {
+                let counts = utils.count_values_in_table(band, no_data_value);
+                return get_mode_from_counts_object(counts);
+            });
+            return modes_for_all_bands.length === 1 ? modes_for_all_bands[0] : modes_for_all_bands; 
         
-        if (utils.is_bbox(geom)) {
+        } else if (utils.is_bbox(geom)) {
 
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
             let flat = true;
             let values = get(georaster, geom, flat);
-            let no_data_value = georaster.no_data_value;
 
             return values
                 .map(band => band.filter(value => value !== no_data_value))
@@ -28977,8 +29651,9 @@ module.exports = (georaster, geom) => {
     }
 
 }
+module.exports = get_modes_for_raster;
 
-},{"../convert-geometry/convert-geometry":113,"../get/get":114,"../intersect-polygon/intersect-polygon":117,"../utils/utils":125,"underscore":108}],124:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],126:[function(require,module,exports){
 'use strict';
 
 let get = require('../get/get');
@@ -28986,11 +29661,34 @@ let utils = require('../utils/utils');
 let convert_geometry = require('../convert-geometry/convert-geometry');
 let intersect_polygon = require('../intersect-polygon/intersect-polygon');
 
-module.exports = (georaster, geom) => {
+/**
+ * The sum function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the sum of all the pixels
+ * in that area. If no geometry is included, the pixels returns the sum of
+ * all the pixels for each band in the raster.
+ * @name sum
+ * @param {Object} a georaster from georaster library
+ * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @returns {Object} array of sums for each band
+ * @example
+ * var sums = geoblaze.sum(georaster, geometry);
+ */
+function sum(georaster, geom) {
     
     try {
         
-        if (utils.is_bbox(geom)) {
+        if (geom === null || geom === undefined) {
+
+            let no_data_value = georaster.no_data_value;
+            return georaster.values.map(band => { // iterate over each band which include rows of pixels
+                return band.reduce((sum_of_band, row) => { // reduce all the rows into one sum
+                    return sum_of_band + row.reduce((sum_of_row, cell_value) => { // reduce each row to a sum of its pixel values
+                        return cell_value !== no_data_value ? sum_of_row + cell_value : sum_of_row;
+                    }, 0);
+                }, 0);
+            });
+
+        } else if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
 
             let values = get(georaster, geom);
@@ -29033,29 +29731,63 @@ module.exports = (georaster, geom) => {
     }
 }
 
-},{"../convert-geometry/convert-geometry":113,"../get/get":114,"../intersect-polygon/intersect-polygon":117,"../utils/utils":125}],125:[function(require,module,exports){
+module.exports = sum
+
+},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127}],127:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
 
 let combine = require('@turf/combine');
 
+let polygon = require("@turf/helpers").polygon;
+let bbox = require("@turf/bbox");
+
+/*
+    Runs on each value in a table,
+    represented by an array of rows.
+*/
+function run_on_table_of_values(table, no_data_value, run_on_values) {
+    let number_of_rows = table.length;
+    for (let row_index = 0; row_index < number_of_rows; row_index++) {
+        let row = table[row_index];
+        let number_of_cells = row.length;
+        for (let column_index = 0; column_index < number_of_cells; column_index++) {
+            let value = row[column_index]; 
+            if (value !== no_data_value) {
+                run_on_values(value);
+            }
+        }
+    }
+}
+
 module.exports = {
 
-    convert_latlng_bbox_to_image_bbox(georaster, latlng_bbox) {
+    run_on_table_of_values,
 
-        let lng_min, lat_min, lng_max, lat_max;
-        if (typeof latlng_bbox.xmin !== "undefined") {
-            lng_min = latlng_bbox.xmin;
-            lat_min = latlng_bbox.ymin;
-            lng_max = latlng_bbox.xmax;
-            lat_max = latlng_bbox.ymax;
-        } else if (Array.isArray(latlng_bbox) && latlng_bbox.length === 4) {
+    count_values_in_table(table, no_data_value) {
+        let counts = {};
+        run_on_table_of_values(table, no_data_value, value => {
+            if (value in counts) counts[value]++;
+            else counts[value] = 1;
+        });
+        return counts;
+    },
+
+    convert_crs_bbox_to_image_bbox(georaster, crs_bbox) {
+
+        let crs_xmin, crs_ymin, crs_xmax, crs_ymax;
+        if (typeof crs_bbox.xmin !== "undefined") {
+            crs_xmin = crs_bbox.xmin;
+            crs_ymin = crs_bbox.ymin;
+            crs_xmax = crs_bbox.xmax;
+            crs_ymax = crs_bbox.ymax;
+        } else if (Array.isArray(crs_bbox) && crs_bbox.length === 4) {
             // pull out bounding box values
-            lng_min = latlng_bbox[0];
-            lat_min = latlng_bbox[1];
-            lng_max = latlng_bbox[2];
-            lat_max = latlng_bbox[3];
+            crs_xmin = crs_bbox[0];
+            crs_ymin = crs_bbox[1];
+            crs_xmax = crs_bbox[2];
+            crs_ymax = crs_bbox[3];
         }
 
         // map bounding box values to image coordinate space
@@ -29063,10 +29795,10 @@ module.exports = {
         system is inverted along the y axis relative to the lat/long (geographic)
         coordinate system */
         return {
-            xmin: Math.floor(Math.abs(lng_min - georaster.xmin) / georaster.pixelWidth),
-            ymin: Math.floor(Math.abs(georaster.ymax - lat_max) / georaster.pixelHeight),
-            xmax: Math.ceil(Math.abs(lng_max - georaster.xmin) / georaster.pixelWidth),
-            ymax: Math.ceil(Math.abs(georaster.ymax - lat_min) / georaster.pixelHeight)
+            xmin: Math.floor((crs_xmin - georaster.xmin) / georaster.pixelWidth),
+            ymin: Math.floor((georaster.ymax - crs_ymax) / georaster.pixelHeight),
+            xmax: Math.ceil((crs_xmax - georaster.xmin) / georaster.pixelWidth),
+            ymax: Math.ceil((georaster.ymax - crs_ymin) / georaster.pixelHeight)
         };
     },
 
@@ -29088,6 +29820,10 @@ module.exports = {
     },
 
     is_bbox(geometry) {
+
+        if (geometry === undefined || geometry === null) {
+            return false;
+        }
 
         // check if we are using the gio format and return true right away if so
         if (geometry.xmin !== undefined && geometry.xmax !== undefined && geometry.ymax !== undefined && geometry.ymin !== undefined) {
@@ -29157,9 +29893,7 @@ module.exports = {
 
     get_bounding_box(geometry) {
 
-        // initialize the min and max values to the first
-        // point so that we don't have to run a null check
-        // when iterating over each point
+        //let [xmin, ymin, xmax, ymax] = bbox(polygon(geometry));
         let first_point = geometry[0][0];
         let xmin = first_point[0],
             ymin = first_point[1],
@@ -29168,8 +29902,6 @@ module.exports = {
 
         geometry.forEach(part => {
 
-            // iterate through each point in the polygon
-            // and reset min/max values accordingly
             for (var i = 0; i < part.length; i++) {
                 let point = part[i];
                 if (point[0] < xmin) xmin = point[0];
@@ -29214,7 +29946,11 @@ module.exports = {
             let y = (line_1.a * line_2.c - line_2.a * line_1.c) / det;
             return { x, y };
         }
+    },
+
+    sum(values) {
+        return values.reduce((a, b) => a + b);
     }
 }
 
-},{"@turf/combine":2,"underscore":108}]},{},[1]);
+},{"@turf/bbox":2,"@turf/combine":3,"@turf/helpers":4,"underscore":110}]},{},[1]);

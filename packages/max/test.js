@@ -37,6 +37,15 @@ let test = () => {
                 });
             });
         });
+        describe('Get Max from Raster without polygon', function() {
+            this.timeout(1000000);
+            it('Got Correct Value', () => {
+                return load(url).then(georaster => {
+                    let value = max(georaster)[0];
+                    expect(value).to.equal(8131.2);
+                });
+            });
+        });
     })
 }
 

@@ -4,6 +4,7 @@ let get = require('../get/get');
 let utils = require('../utils/utils');
 let convert_geometry = require('../convert-geometry/convert-geometry');
 let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let _ = require("underscore");
 
 let get_max = (values, no_data_value) => {
     let number_of_values = values.length;
@@ -45,14 +46,21 @@ let get_max = (values, no_data_value) => {
 function get_max_for_raster(georaster, geom) {
     
     try {
+
+        let no_data_value = georaster.no_data_value;
+
+        if (geom === null || geom === undefined) {
+
+            return georaster.values.map(band => {
+                return _.max(band.map(row => get_max(row, no_data_value)));
+            });
         
-        if (utils.is_bbox(geom)) {
+        } else if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
 
             // grab array of values;
             let flat = true;
             let values = get(georaster, geom, flat);
-            let no_data_value = georaster.no_data_value;
 
             // get max value
             return values.map(band => get_max(band, no_data_value));

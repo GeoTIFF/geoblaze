@@ -37,6 +37,16 @@ let test = () => {
                 });
             });
         });
+        describe('Get Mode for whole raster', function() {
+            this.timeout(1000000);
+            it('Got Correct Value', () => {
+                return load(url).then(georaster => {
+                    let value = mode(georaster);
+                    expect(value).to.equal(expected_polygon_value);
+                });
+            });
+        });
+ 
     })
 }
 
