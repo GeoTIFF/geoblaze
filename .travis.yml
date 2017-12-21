@@ -1,3 +1,8 @@
+addons:
+  apt:
+    packages:
+    - gdal-bin
+    - libgdal-dev
 before_script:
     - npm run setup-gadm;
     - npm run setup-mapspam;
