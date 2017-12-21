@@ -68,3 +68,12 @@ package-lock.json
 
 # temporary backups
 *.bak
+
+# downloaded test data
+data/gadm/*.cpg
+data/gadm/*.dbf
+data/gadm/*.prj
+data/gadm/*.shp
+data/gadm/*.shx
+data/gadm/*.zip
+data/gadm/geojsons/*.geojson
