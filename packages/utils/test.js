@@ -48,7 +48,17 @@ let test = () => {
                 });
             });
         });
-    })
+    });
+    describe("Test Bifurcation", function() {
+        describe("For Array of Sample Objects", function() {
+            it("Got Correct Split", () => {
+                let objs = [{"name": "Canada"}, {"name": "United States"}, {"name": "South Sudan"}, {"name": "Croatia"}];
+                let [countries_that_start_with_c, others] = utils.bifurcate(objs, obj => obj.name.startsWith("C"));
+                let actual = JSON.stringify(countries_that_start_with_c);
+                expect(actual).to.equal('[{"name":"Canada"},{"name":"Croatia"}]');
+            });
+        });
+    });
 }
 
 test();
