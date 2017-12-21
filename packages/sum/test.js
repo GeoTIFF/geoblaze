@@ -7,6 +7,11 @@ let sum = require('./sum');
 let url_rwanda = 'http://localhost:3000/data/RWA_MNH_ANC.tif';
 let bbox_rwanda = require("../../data/RwandaBufferedBoundingBox.json");
 
+let url_to_geojson = 'http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson';
+
+let in_browser = typeof window === 'object';
+let fetch = in_browser ? window.fetch : require('node-fetch');
+
 let url = 'http://localhost:3000/data/test.tiff';
 let bbox = [80.63, 7.42, 84.21, 10.10];
 let expected_bbox_value = 262516.50;
@@ -264,6 +269,28 @@ let test = () => {
                 return load(url).then(georaster => {
                     let value = Number(sum(georaster, polygon_geojson_collection)[0].toFixed(2));
                     expect(value).to.equal(expected_polygon_geojson_collection_value);
+                });
+            });
+        });
+        describe("Test sum for Country with Multiple Rings", function() {
+            this.timeout(1000000);
+            it("Got correct sum", () => {
+                return load(url).then(georaster => {
+                    return fetch(url_to_geojson)
+                    .then(response => response.json())
+                    .then(country => {
+                        let value = sum(georaster, country);
+                        console.log("value:", value);
+                    });
+                });
+            });
+        });
+        describe('Get Sum from Polygon Above X Value', function() {
+            this.timeout(1000000);
+            it('Got Correct Value', () => {
+                return load(url).then(georaster => {
+                    let value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
+                    expect(value).to.equal(1501820.8);
                 });
             });
         });
