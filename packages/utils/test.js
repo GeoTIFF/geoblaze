@@ -5,7 +5,7 @@ let load = require('./../load/load');
 let utils = require('./utils');
 
 let url = 'http://localhost:3000/data/RWA_MNH_ANC.tif';
-let url_to_geojson = 'http://localhost:3000/data/xad.geojson';
+let url_to_geojson = 'http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson';
 
 let in_browser = typeof window === 'object';
 let fetch = in_browser ? window.fetch : require('node-fetch');
@@ -30,14 +30,21 @@ let test = () => {
                 });
             });
         });
-        describe("Get Bounding Box of GeoJSON with Multiple Rings", function() {
+        describe("Get Bounding Box of GeoJSON that has MultiPolygon Geometry (i.e., multiple rings)", function() {
             this.timeout(1000000);
             it("Got correct bounding box", () => {
                 return fetch(url_to_geojson)
                 .then(response => response.json())
                 .then(country => {
-                    //let bbox = utils.get_bounding_box(country.geometry.coordinates);
-                    //expect(bbox).to.equal(0);
+                    let bbox = utils.get_bounding_box(country.geometry.coordinates);
+                    expect(typeof bbox.xmin).to.equal("number");
+                    expect(typeof bbox.xmax).to.equal("number");
+                    expect(typeof bbox.ymin).to.equal("number");
+                    expect(typeof bbox.ymax).to.equal("number");
+                    expect(bbox.xmin).to.equal(32.76010131835966);
+                    expect(bbox.xmax).to.equal(33.92147445678711);
+                    expect(bbox.ymin).to.equal(34.56208419799816);
+                    expect(bbox.ymax).to.equal(35.118995666503906);
                 });
             });
         });

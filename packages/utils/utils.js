@@ -5,7 +5,6 @@ let _ = require('underscore');
 let combine = require('@turf/combine');
 
 let polygon = require("@turf/helpers").polygon;
-let bbox = require("@turf/bbox");
 
 /*
     Runs on each value in a table,
@@ -24,6 +23,43 @@ function run_on_table_of_values(table, no_data_value, run_on_values) {
         }
     }
 }
+
+function get_bounding_box(geometry) {
+
+    let xmin, ymin, xmax, ymax;
+
+    if (typeof(geometry[0][0]) === "number") {
+        let number_of_points = geometry.length;
+        xmin = xmax = geometry[0][0];
+        ymin = ymax = geometry[0][1];
+        for (let i = 1; i < number_of_points; i++) {
+            let [x, y] = geometry[i];
+            if (x < xmin) xmin = x;
+            else if (x > xmax) xmax = x;
+            if (y < ymin) ymin = y;
+            else if (y > ymax) ymax = y;
+        }
+    } else {
+        let bboxes = geometry.forEach((part, index) => {
+            let bbox = get_bounding_box(part);
+            if (index == 0) {
+                xmin = bbox.xmin;
+                xmax = bbox.xmax;
+                ymin = bbox.ymin;
+                ymax = bbox.ymax;
+            } else {
+                if (bbox.xmin < xmin) xmin = bbox.xmin;
+                else if (bbox.xmax > xmax) xmax = bbox.xmax;
+                if (bbox.ymin < ymin) ymin = bbox.ymin;
+                else if (bbox.ymax > ymax) ymax = bbox.ymax;
+            }
+        });
+    }
+
+    return { xmin, ymin, xmax, ymax };
+}
+
+
 
 module.exports = {
 
@@ -155,29 +191,7 @@ module.exports = {
         return false;
     },
 
-    get_bounding_box(geometry) {
-
-        //let [xmin, ymin, xmax, ymax] = bbox(polygon(geometry));
-        let first_point = geometry[0][0];
-        let xmin = first_point[0],
-            ymin = first_point[1],
-            xmax = first_point[0],
-            ymax = first_point[1];
-
-        geometry.forEach(part => {
-
-            for (var i = 0; i < part.length; i++) {
-                let point = part[i];
-                if (point[0] < xmin) xmin = point[0];
-                if (point[1] < ymin) ymin = point[1];
-                if (point[0] > xmax) xmax = point[0];
-                if (point[1] > ymax) ymax = point[1];
-            }
-
-        });
-
-        return { xmin, ymin, xmax, ymax };
-    },
+    get_bounding_box,
 
     // function to convert two points into a 
     // representation of a line
