@@ -5,7 +5,8 @@ let load = require('./../load/load');
 let utils = require('./utils');
 
 let url = 'http://localhost:3000/data/RWA_MNH_ANC.tif';
-let url_to_geojson = 'http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson';
+let url_to_geojsons = 'http://localhost:3000/data/gadm/geojsons/';
+let url_to_geojson = url_to_geojsons + 'Akrotiri and Dhekelia.geojson';
 
 let in_browser = typeof window === 'object';
 let fetch = in_browser ? window.fetch : require('node-fetch');
@@ -56,6 +57,24 @@ let test = () => {
                 let [countries_that_start_with_c, others] = utils.bifurcate(objs, obj => obj.name.startsWith("C"));
                 let actual = JSON.stringify(countries_that_start_with_c);
                 expect(actual).to.equal('[{"name":"Canada"},{"name":"Croatia"}]');
+            });
+        });
+    });
+    describe("Test Get Depth", function() {
+        describe("For Multipolygon", function() {
+            this.timeout(1000000);
+            it("Get Correct Depth", () => {
+                let country_depths = [["Afghanistan", 3], ['Akrotiri and Dhekelia', 4], ["Canada", 4]];
+                let promises = country_depths.map(country_depth => {
+                    let [country, depth] = country_depth;
+                    return fetch(url_to_geojsons + country + ".geojson")
+                    .then(response => response.json())
+                    .then(country => {
+                        let actual_depth = utils.get_depth(country.geometry.coordinates);
+                        expect(actual_depth).to.equal(depth);
+                    });
+                });
+                return Promise.all(promises);
             });
         });
     });

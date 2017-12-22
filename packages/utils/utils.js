@@ -172,6 +172,17 @@ module.exports = {
         return false;
     },
 
+
+    get_depth(geometry) {
+        let depth = 0;
+        let part = geometry;
+        while (Array.isArray(part)) {
+            depth++;
+            part = part[0];
+        }
+        return depth;
+    },
+
     is_polygon(geometry) {
 
         // convert to a geometry
