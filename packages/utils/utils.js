@@ -63,13 +63,16 @@ function get_bounding_box(geometry) {
 
 module.exports = {
 
-    bifurcate(items, test) {
+    bifurcate(items, testing) {
+
+        let test_function = typeof testing === "function" ? testing : typeof testing === "string" ? item => item[testing] : null;
+
         let trues = [];
         let falses = [];
         let items_length = items.length;
         for (let i = 0; i < items_length; i++) {
             let item = items[i];
-            if (test(item)) trues.push(item);
+            if (test_function(item)) trues.push(item);
             else falses.push(item);
         }
         return [trues, falses];

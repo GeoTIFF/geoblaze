@@ -57,6 +57,11 @@ let test = () => {
                 let [countries_that_start_with_c, others] = utils.bifurcate(objs, obj => obj.name.startsWith("C"));
                 let actual = JSON.stringify(countries_that_start_with_c);
                 expect(actual).to.equal('[{"name":"Canada"},{"name":"Croatia"}]');
+
+                objs = [{keep: true}, {keep: false}, {keep: true}, {keep: false}];
+                let [kept, thrown_away] = utils.bifurcate(objs, "keep");
+                expect(kept).to.have.lengthOf(2);
+                expect(thrown_away).to.have.lengthOf(2);
             });
         });
     });
