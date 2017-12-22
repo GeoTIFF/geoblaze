@@ -77,6 +77,43 @@ module.exports = {
 
     run_on_table_of_values,
 
+
+    /**
+     * This function clusters an array of items based on a distance.
+     * It is ordered however so the items must already be sorted by the property
+     * @name cluster
+     * @param {Object} Array of Objects
+     * @param {string} name_of_property
+     * @param {number} threshold
+     * @returns {Object} 2-dimensional array of items, clustered by distance
+     * @example
+     * var sums = geoblaze.sum(georaster, geometry);
+    */
+    cluster(items, name_of_property, threshold) {
+        let number_of_items = items.length;
+        let clusters = [];
+        let cluster = [];
+        let previous_value;
+        for (let i = 0; i < number_of_items; i++) {
+            let item = items[i];
+            let value = item[name_of_property];
+            let number_in_cluster = cluster.length;
+            if (number_in_cluster === 0) {
+                cluster.push(item);
+            } else /* assuming > 0 */ {
+                if (value >= previous_value - threshold && value <= previous_value + threshold) {
+                    cluster.push(item);
+                } else {
+                    clusters.push(cluster);
+                    cluster = [ item ];
+                }
+            }
+            previous_value = value;
+        }
+        if (cluster) clusters.push(cluster);
+        return clusters;
+    },
+
     count_values_in_table(table, no_data_value) {
         let counts = {};
         run_on_table_of_values(table, no_data_value, value => {

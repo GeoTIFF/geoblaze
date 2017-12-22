@@ -78,6 +78,20 @@ let test = () => {
             });
         });
     });
+    describe("Test Clustering", function() {
+        describe("For array of objects holding information about intersections", function() {
+            it("Got Correct Split", () => {
+                let objs = [{x: 3}, {x: 4}, {x: 5}, {x: 1000}, {x: 1002}];
+                let actual = utils.cluster(objs, "x", 1);
+                let actual_number_of_clusters = actual.length;
+                expect(actual_number_of_clusters).to.equal(3);
+                expect(actual[0].length).to.equal(3);
+                expect(actual[1].length).to.equal(1);
+                expect(actual[2].length).to.equal(1);
+            });
+        });
+    });
+ 
 }
 
 test();
