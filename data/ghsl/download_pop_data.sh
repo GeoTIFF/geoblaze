@@ -1,0 +1,7 @@
+if [ ! -f GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0.zip ]; then
+    wget http://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GPW4_GLOBE_R2015A/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k/V1-0/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0.zip;
+fi
+
+if [ ! -d GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0 ]; then
+    unzip GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0.zip;
+fi
