@@ -314,6 +314,12 @@ module.exports = {
         }
     },
 
+    get_slope_of_line(line) {
+        // assuming ax + by = c
+        // http://www.purplemath.com/modules/solvelit2.htm
+        return -1 * line.a / line.b;
+    },
+
     sum(values) {
         return values.reduce((a, b) => a + b);
     }
