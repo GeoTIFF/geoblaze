@@ -75,6 +75,27 @@ module.exports = {
         return [trues, falses];
     },
 
+
+    /**
+     * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
+     * @name couple
+     * @param {Object} array of anything
+     * @returns {Object} array of consecutive pairs
+     * @example
+     * let items = [0, 1, 18, 77, 99, 103];
+     * let unflattened = utils.couple(items);
+     * // unflattened
+     * // [ [0, 1], [18, 77], [99, 103] ]
+    */
+    couple(array) {
+        let couples = [];
+        let length_of_array = array.length;
+        for (let i = 0; i < length_of_array; i+=2) {
+            couples.push([ array[i], array[i+1] ]);
+        }
+        return couples;
+    },
+
     run_on_table_of_values,
 
 
@@ -138,7 +159,7 @@ module.exports = {
             }
             previous_value = value;
         }
-        if (cluster) clusters.push(cluster);
+        if (cluster.length > 0) clusters.push(cluster);
         return clusters;
     },
 

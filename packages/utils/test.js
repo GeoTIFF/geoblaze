@@ -91,6 +91,16 @@ let test = () => {
             });
         });
     });
+    describe("Test Coupling", function() {
+        it("Got Correct Couples", () => {
+            let items = [0, 1, 18, 77, 99, 103];
+            let actual = utils.couple(items);
+            expect(actual).to.have.lengthOf(items.length / 2);
+            actual.map(couple => {
+                expect(couple).to.have.lengthOf(2);
+            });
+        });
+    });
     describe("Test Categorization of Intersections", function() {
         describe("For sample of intersections", function() {
             it("Got Correct Categorization", () => {
