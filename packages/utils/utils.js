@@ -79,6 +79,33 @@ module.exports = {
 
 
     /**
+     * This function categorizes an intersection 
+     * @name categorize_intersection
+     * @param {Object} edges
+    */ 
+    categorize_intersection(segments) {
+        console.log("categorize_intersection:", segments);
+        let through, end, xmin, xmax;
+
+        let n = segments.length;
+        let first = segments[0];
+
+        if (n === 1) {
+            through = true;
+            xmin = first.xmin;
+            xmax = first.xmax;
+        } else /* n > 1 */ {
+            let last = segments[n - 1];
+            through = first.direction === last.direction;
+            xmin = Math.min(first.xmin, last.xmin); 
+            xmax = Math.max(first.xmax, last.xmax);
+        }
+
+        return { xmin, xmax, through };
+    },
+
+
+    /**
      * This function clusters an array of items based on a distance.
      * It is ordered however so the items must already be sorted by the property
      * @name cluster
@@ -87,7 +114,8 @@ module.exports = {
      * @param {number} threshold
      * @returns {Object} 2-dimensional array of items, clustered by distance
      * @example
-     * var sums = geoblaze.sum(georaster, geometry);
+     * let objs = [{x: 3}, {x: 4}, {x: 5}, {x: 1000}, {x: 1002}];
+     * let actual = utils.cluster(objs, "x", 1);
     */
     cluster(items, name_of_property, threshold) {
         let number_of_items = items.length;

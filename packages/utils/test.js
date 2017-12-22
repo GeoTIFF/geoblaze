@@ -91,7 +91,47 @@ let test = () => {
             });
         });
     });
- 
+    describe("Test Categorization of Intersections", function() {
+        describe("For sample of intersections", function() {
+            it("Got Correct Categorization", () => {
+                // through
+                let segments = [{xmin: -140, xmax: -140, direction: 1}];
+                let actual = utils.categorize_intersection(segments);
+                expect(actual.through).to.equal(true);
+                expect(actual.xmin).to.equal(-140);
+                expect(actual.xmax).to.equal(-140);
+
+                // rebound
+                segments = [{xmin: -140, xmax: -140, direction: 1},{xmin: -140, xmax: -140, direction: -1}];
+                actual = utils.categorize_intersection(segments);
+                expect(actual.through).to.equal(false);
+                expect(actual.xmin).to.equal(-140);
+                expect(actual.xmax).to.equal(-140);
+
+                // horizontal through
+                segments = [{xmin: -140, xmax: -140, direction: 1},{xmin: -140, xmax: -130, direction: 0},{xmin: -130, xmax: -130, direction: 1}];
+                actual = utils.categorize_intersection(segments);
+                expect(actual.through).to.equal(true);
+                expect(actual.xmin).to.equal(-140);
+                expect(actual.xmax).to.equal(-130);
+
+                // horizontal rebound
+                segments = [{xmin: -140, xmax: -140, direction: 1},{xmin: -140, xmax: -130, direction: 0},{xmin: -130, xmax: -130, direction: -1}];
+                actual = utils.categorize_intersection(segments);
+                expect(actual.through).to.equal(false);
+                expect(actual.xmin).to.equal(-140);
+                expect(actual.xmax).to.equal(-130);
+
+                // through with stop
+                segments = [{xmin: -140, xmax: -140, direction: 1}, {xmin: -140, xmax: -140, direction: 1}];
+                actual = utils.categorize_intersection(segments);
+                expect(actual.through).to.equal(true);
+                expect(actual.xmin).to.equal(-140);
+                expect(actual.xmax).to.equal(-140);
+
+            });
+        });
+    });
 }
 
 test();
