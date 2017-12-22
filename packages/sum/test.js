@@ -7,7 +7,10 @@ let sum = require('./sum');
 let url_rwanda = 'http://localhost:3000/data/RWA_MNH_ANC.tif';
 let bbox_rwanda = require("../../data/RwandaBufferedBoundingBox.json");
 
-let url_to_geojson = 'http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson';
+let url_to_data = "http://localhost:3000/data/";
+let url_to_geojsons =  url_to_data + "gadm/geojsons/";
+
+let url_to_population_raster_tile = url_to_data + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif";
 
 let in_browser = typeof window === 'object';
 let fetch = in_browser ? window.fetch : require('node-fetch');
@@ -276,7 +279,7 @@ let test = () => {
             this.timeout(1000000);
             it("Got correct sum", () => {
                 return load(url).then(georaster => {
-                    return fetch(url_to_geojson)
+                    return fetch(url_to_geojsons + "Akrotiri and Dhekelia.geojson")
                     .then(response => response.json())
                     .then(country => {
                         let value = sum(georaster, country);
@@ -294,7 +297,29 @@ let test = () => {
                 });
             });
         });
-    })
+
+        describe("Get Populations", function() {
+            this.timeout(1000000); 
+            it("Got Correct Populations for a Sample of Countries", () => {
+                return load(url_to_population_raster_tile).then(georaster => {
+                    console.log("loaded pop raster");
+                    let countries = [{name: "Afghanistan", population: 34660000}];
+                    let promises = countries.map(country => {
+                        let name = country.name;
+                        let population = country.population;
+                        return fetch(url_to_geojsons + name + ".geojson")
+                        .then(response => response.json())
+                        .then(country => {
+                            let value = sum(georaster, country);
+                            console.log("population of " + name + " : " + value);
+                            expect(value).to.equal(population);
+                        });
+                    }); 
+                    return Promise.all(promises);
+                });
+            });
+        });
+    });
 }
 
 test();

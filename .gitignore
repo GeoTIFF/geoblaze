@@ -78,6 +78,7 @@ data/gadm/*.shx
 data/gadm/*.zip
 data/ghsl/*.zip
 data/ghsl/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0/
+data/ghsl/tiles/*.tif
 data/gadm/geojsons/*.geojson
 data/mapspam/tiles/*.tif
 data/mapspam/*.tiff

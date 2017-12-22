@@ -26,6 +26,8 @@ module.exports = (georaster, geom, run_on_values) => {
     let cell_height = georaster.pixelHeight;
     let no_data_value = georaster.no_data_value;
     let image_height = georaster.height;
+    //console.log("image_height: " + image_height);
+    let image_width = georaster.width;
 
     // get values in a bounding box around the geometry
     let latlng_bbox = utils.get_bounding_box(geom);
@@ -55,7 +57,7 @@ module.exports = (georaster, geom, run_on_values) => {
     // running through the middle of the row
     let image_lines = [];
     let num_rows = image_bands[0].length;
-    //console.log("num_rows:", num_rows);//good
+    //console.log("num_rows:", num_rows);
     for (let y = 0; y < num_rows; y++) {
 
         // I don't understand this
@@ -88,8 +90,7 @@ module.exports = (georaster, geom, run_on_values) => {
         
         // get vertices that make up an edge and convert that to a line
         let edge = edges[i];
-        let start_point = edge[0];
-        let end_point = edge[1];
+        let [start_point, end_point] = edge;
         let edge_line = get_line_from_points(start_point, end_point);
 
         let start_lng, end_lng;
@@ -118,15 +119,17 @@ module.exports = (georaster, geom, run_on_values) => {
             row_start = y_2;
             row_end = y_1;
         }
-        //console.log("row_start, row_end", [row_start, row_end]);
 
+        row_start = Math.max(0, row_start);
+        row_end = Math.min(row_end, num_rows - 2);
+
+        //console.log("row_start, row_end", [row_start, row_end]);
         // iterate through image lines within the change in y of
         // the edge line and find all intersections
         for (let j = row_start; j < row_end + 1; j++) {
             let image_line = image_lines[j];
-            //console.log("image_line:", image_line);
             try {
-            var intersection = get_intersection_of_two_lines(edge_line, image_line);
+                var intersection = get_intersection_of_two_lines(edge_line, image_line);
             } catch (error) {
                 console.log("j:", j);
                 console.log("edge_line:", edge_line);
@@ -161,6 +164,7 @@ module.exports = (georaster, geom, run_on_values) => {
         // edges
         let row_intersections = intersections_by_row[i]
             .sort((a, b) => a - b);
+        //console.log((i).toString().padStart(4),":",row_intersections.toString());
         let num_intersections = row_intersections.length;
         if (num_intersections > 0) { // make sure the row is in the polygon
 
@@ -170,9 +174,9 @@ module.exports = (georaster, geom, run_on_values) => {
             for (let j = 0; j < num_intersections; j++) {
                 if (j % 2 === 1) {
 
-                    let start_column_index = row_intersections[j - 1];
-                    let end_column_index = row_intersections[j];
-                    //console.log("start_row_index:end_row_index", start_row_index,":",end_row_index);
+                    let start_column_index = Math.max(row_intersections[j - 1], 0);
+                    let end_column_index = Math.min(row_intersections[j], image_width);
+                    //console.log("start_column_index:end_column_index", start_column_index,":",end_column_index);
 
                     // convert to start and end in the clipped image    
                     //let start_index = start_row_index - x_min;
