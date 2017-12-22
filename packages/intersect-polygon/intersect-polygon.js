@@ -8,6 +8,18 @@ let utils = require('../utils/utils');
 let get_line_from_points = utils.get_line_from_points;
 let get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
 
+let get_edges_for_polygon = polygon => {
+    let edges = [];
+    polygon.forEach(ring => {
+        for (let i = 1; i < ring.length; i++) {
+            let start_point = ring[i - 1];
+            let end_point = ring[i];
+            edges.push([start_point, end_point]);
+        }
+    });
+    return edges;
+}
+
 module.exports = (georaster, geom, run_on_values) => {
 
     let cell_width = georaster.pixelWidth;
@@ -39,17 +51,6 @@ module.exports = (georaster, geom, run_on_values) => {
     let row_length = x_max - x_min;
     //console.log("row_length:", row_length); //good
 
-    // collapse geometry down to a list of edges
-    // necessary for multi-part geometries
-    let edges = [];
-    geom.forEach(part => {
-        for (let i = 1; i < part.length; i++) {
-            let start_point = part[i - 1];
-            let end_point = part[i];
-            edges.push([start_point, end_point]);
-        }
-    });
-
     // iterate through image rows and convert each one to a line
     // running through the middle of the row
     let image_lines = [];
@@ -70,10 +71,20 @@ module.exports = (georaster, geom, run_on_values) => {
     }
     //console.log("image_lines:", image_lines);
 
-    // iterate through the list of polygon vertices, convert them to
-    // lines, and compute the intersections with each image row
-    let intersections_by_row = _.range(num_rows).map(row => []);
-    for (let i = 0; i < edges.length; i++) {
+
+    // collapse geometry down to a list of edges
+    // necessary for multi-part geometries
+    let depth = utils.get_depth(geom);
+    let polygon_edges = depth === 4  ? geom.map(get_edges_for_polygon) : [get_edges_for_polygon(geom)];
+    //console.log("polygon_edges:", polygon_edges);
+
+    polygon_edges.forEach(edges => {
+
+
+      // iterate through the list of polygon vertices, convert them to
+      // lines, and compute the intersections with each image row
+      let intersections_by_row = _.range(num_rows).map(row => []);
+      for (let i = 0; i < edges.length; i++) {
         
         // get vertices that make up an edge and convert that to a line
         let edge = edges[i];
@@ -135,15 +146,15 @@ module.exports = (georaster, geom, run_on_values) => {
                 intersections_by_row[j].push(image_pixel_index);
             }
         }
-    }
+      }
 
-    //console.log("intersections by row", intersections_by_row);
+      //console.log("intersections by row", intersections_by_row);
 
-    // iterate through the list of computed intersections for each row.
-    // use these intersections to split up each row into pixels that fall
-    // within the polygon and pixels that fall outside the polygon
-    // for more information on this, review the ray casting algorithm
-    for (let i = 0; i < num_rows; i++) {
+      // iterate through the list of computed intersections for each row.
+      // use these intersections to split up each row into pixels that fall
+      // within the polygon and pixels that fall outside the polygon
+      // for more information on this, review the ray casting algorithm
+      for (let i = 0; i < num_rows; i++) {
 
         // we make sure to sort intersections here because we don't know the order
         // in which they were recorded, as it was based on the order of polygon
@@ -193,5 +204,6 @@ module.exports = (georaster, geom, run_on_values) => {
                 }
             }
         }
-    }
+      }
+  });
 }
