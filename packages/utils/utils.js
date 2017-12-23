@@ -99,6 +99,12 @@ module.exports = {
         return couples;
     },
 
+    force_within(n, min, max) {
+        if (n < min) n = min;
+        else if (n > max) n = max;
+        return n;
+    },
+
     run_on_table_of_values,
 
 

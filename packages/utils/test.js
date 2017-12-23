@@ -50,6 +50,15 @@ let test = () => {
             });
         });
     });
+    describe("Test Forcing Within", function() {
+        describe("For simple examples", function() {
+            it("Got correct values", () => {
+                expect(utils.force_within(10, 1, 11)).to.equal(10);
+                expect(utils.force_within(-10, 1, 11)).to.equal(1);
+                expect(utils.force_within(990, 1, 11)).to.equal(11);
+            });
+        });
+    });
     describe("Test Bifurcation", function() {
         describe("For Array of Sample Objects", function() {
             it("Got Correct Split", () => {
