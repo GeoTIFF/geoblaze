@@ -114,7 +114,7 @@ module.exports = {
      * @param {Object} edges
     */ 
     categorize_intersection(segments) {
-        console.log("categorize_intersection:", segments);
+        //console.log("categorize_intersection:", segments);
         let through, end, xmin, xmax;
 
         let n = segments.length;
@@ -173,9 +173,9 @@ module.exports = {
 
         // check if should merge first and last cluster
         let first_cluster = clusters[0];
-        console.log("pre:", previous_value);
-        console.log("wrap_number - threshold:", wrap_number - threshold);
-        console.log("first_cluster:", first_cluster);
+        //console.log("pre:", previous_value);
+        //console.log("wrap_number - threshold:", wrap_number - threshold);
+        //console.log("first_cluster:", first_cluster);
         if (wrap_number && previous_value >= wrap_number - threshold && first_cluster[0][name_of_property] === 0) {
             clusters[0] = first_cluster.concat(clusters.pop())
         }

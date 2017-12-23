@@ -311,7 +311,7 @@ let test = () => {
                         .then(response => response.json())
                         .then(country => {
                             let value = sum(georaster, country);
-                            console.log("population of " + name + " : " + value);
+                            console.log("population of " + name + " : " + Math.round(value).toLocaleString());
                             expect(value).to.equal(population);
                         });
                     }); 
