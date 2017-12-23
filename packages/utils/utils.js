@@ -142,12 +142,13 @@ module.exports = {
      * @param {Object} Array of Objects
      * @param {string} name_of_property
      * @param {number} threshold
+     * @param {number} wrap-around value, at which to check zero, too
      * @returns {Object} 2-dimensional array of items, clustered by distance
      * @example
      * let objs = [{x: 3}, {x: 4}, {x: 5}, {x: 1000}, {x: 1002}];
      * let actual = utils.cluster(objs, "x", 1);
     */
-    cluster(items, name_of_property, threshold) {
+    cluster(items, name_of_property, threshold, wrap_number) {
         let number_of_items = items.length;
         let clusters = [];
         let cluster = [];
@@ -169,6 +170,16 @@ module.exports = {
             previous_value = value;
         }
         if (cluster.length > 0) clusters.push(cluster);
+
+        // check if should merge first and last cluster
+        let first_cluster = clusters[0];
+        console.log("pre:", previous_value);
+        console.log("wrap_number - threshold:", wrap_number - threshold);
+        console.log("first_cluster:", first_cluster);
+        if (wrap_number && previous_value >= wrap_number - threshold && first_cluster[0][name_of_property] === 0) {
+            clusters[0] = first_cluster.concat(clusters.pop())
+        }
+
         return clusters;
     },
 

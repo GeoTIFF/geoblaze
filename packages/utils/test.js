@@ -102,6 +102,13 @@ let test = () => {
                 expect(actual[0].length).to.equal(3);
                 expect(actual[1].length).to.equal(1);
                 expect(actual[2].length).to.equal(1);
+
+                objs = [{x: 0}, {x: 1}, {x: 1000}, {x: 1002}];
+                actual = utils.cluster(objs, "x", 1, 1003);
+                actual_number_of_clusters = actual.length;
+                expect(actual_number_of_clusters).to.equal(2);
+                expect(actual[0].length).to.equal(3);
+                expect(actual[1].length).to.equal(1);
             });
         });
     });
