@@ -5,7 +5,6 @@ let _ = require('underscore');
 let combine = require('@turf/combine');
 
 let polygon = require("@turf/helpers").polygon;
-let bbox = require("@turf/bbox");
 
 /*
     Runs on each value in a table,
@@ -25,9 +24,164 @@ function run_on_table_of_values(table, no_data_value, run_on_values) {
     }
 }
 
+function get_bounding_box(geometry) {
+
+    let xmin, ymin, xmax, ymax;
+
+    if (typeof(geometry[0][0]) === "number") {
+        let number_of_points = geometry.length;
+        xmin = xmax = geometry[0][0];
+        ymin = ymax = geometry[0][1];
+        for (let i = 1; i < number_of_points; i++) {
+            let [x, y] = geometry[i];
+            if (x < xmin) xmin = x;
+            else if (x > xmax) xmax = x;
+            if (y < ymin) ymin = y;
+            else if (y > ymax) ymax = y;
+        }
+    } else {
+        let bboxes = geometry.forEach((part, index) => {
+            let bbox = get_bounding_box(part);
+            if (index == 0) {
+                xmin = bbox.xmin;
+                xmax = bbox.xmax;
+                ymin = bbox.ymin;
+                ymax = bbox.ymax;
+            } else {
+                if (bbox.xmin < xmin) xmin = bbox.xmin;
+                else if (bbox.xmax > xmax) xmax = bbox.xmax;
+                if (bbox.ymin < ymin) ymin = bbox.ymin;
+                else if (bbox.ymax > ymax) ymax = bbox.ymax;
+            }
+        });
+    }
+
+    return { xmin, ymin, xmax, ymax };
+}
+
+
+
 module.exports = {
 
+    bifurcate(items, testing) {
+
+        let test_function = typeof testing === "function" ? testing : typeof testing === "string" ? item => item[testing] : null;
+
+        let trues = [];
+        let falses = [];
+        let items_length = items.length;
+        for (let i = 0; i < items_length; i++) {
+            let item = items[i];
+            if (test_function(item)) trues.push(item);
+            else falses.push(item);
+        }
+        return [trues, falses];
+    },
+
+
+    /**
+     * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
+     * @name couple
+     * @param {Object} array of anything
+     * @returns {Object} array of consecutive pairs
+     * @example
+     * let items = [0, 1, 18, 77, 99, 103];
+     * let unflattened = utils.couple(items);
+     * // unflattened
+     * // [ [0, 1], [18, 77], [99, 103] ]
+    */
+    couple(array) {
+        let couples = [];
+        let length_of_array = array.length;
+        for (let i = 0; i < length_of_array; i+=2) {
+            couples.push([ array[i], array[i+1] ]);
+        }
+        return couples;
+    },
+
+    force_within(n, min, max) {
+        if (n < min) n = min;
+        else if (n > max) n = max;
+        return n;
+    },
+
     run_on_table_of_values,
+
+
+    /**
+     * This function categorizes an intersection 
+     * @name categorize_intersection
+     * @param {Object} edges
+    */ 
+    categorize_intersection(segments) {
+        console.log("categorize_intersection:", segments);
+        let through, end, xmin, xmax;
+
+        let n = segments.length;
+        let first = segments[0];
+
+        if (n === 1) {
+            through = true;
+            xmin = first.xmin;
+            xmax = first.xmax;
+        } else /* n > 1 */ {
+            let last = segments[n - 1];
+            through = first.direction === last.direction;
+            xmin = Math.min(first.xmin, last.xmin); 
+            xmax = Math.max(first.xmax, last.xmax);
+        }
+
+        return { xmin, xmax, through };
+    },
+
+
+    /**
+     * This function clusters an array of items based on a distance.
+     * It is ordered however so the items must already be sorted by the property
+     * @name cluster
+     * @param {Object} Array of Objects
+     * @param {string} name_of_property
+     * @param {number} threshold
+     * @param {number} wrap-around value, at which to check zero, too
+     * @returns {Object} 2-dimensional array of items, clustered by distance
+     * @example
+     * let objs = [{x: 3}, {x: 4}, {x: 5}, {x: 1000}, {x: 1002}];
+     * let actual = utils.cluster(objs, "x", 1);
+    */
+    cluster(items, name_of_property, threshold, wrap_number) {
+        let number_of_items = items.length;
+        let clusters = [];
+        let cluster = [];
+        let previous_value;
+        for (let i = 0; i < number_of_items; i++) {
+            let item = items[i];
+            let value = item[name_of_property];
+            let number_in_cluster = cluster.length;
+            if (number_in_cluster === 0) {
+                cluster.push(item);
+            } else /* assuming > 0 */ {
+                if (value >= previous_value - threshold && value <= previous_value + threshold) {
+                    cluster.push(item);
+                } else {
+                    clusters.push(cluster);
+                    cluster = [ item ];
+                }
+            }
+            previous_value = value;
+        }
+        if (cluster.length > 0) clusters.push(cluster);
+
+        // check if should merge first and last cluster
+        let first_cluster = clusters[0];
+        console.log("pre:", previous_value);
+        console.log("wrap_number - threshold:", wrap_number - threshold);
+        console.log("first_cluster:", first_cluster);
+        if (wrap_number && previous_value >= wrap_number - threshold && first_cluster[0][name_of_property] === 0) {
+            clusters[0] = first_cluster.concat(clusters.pop())
+        }
+
+        return clusters;
+    },
 
     count_values_in_table(table, no_data_value) {
         let counts = {};
@@ -124,6 +278,17 @@ module.exports = {
         return false;
     },
 
+
+    get_depth(geometry) {
+        let depth = 0;
+        let part = geometry;
+        while (Array.isArray(part)) {
+            depth++;
+            part = part[0];
+        }
+        return depth;
+    },
+
     is_polygon(geometry) {
 
         // convert to a geometry
@@ -155,29 +320,7 @@ module.exports = {
         return false;
     },
 
-    get_bounding_box(geometry) {
-
-        //let [xmin, ymin, xmax, ymax] = bbox(polygon(geometry));
-        let first_point = geometry[0][0];
-        let xmin = first_point[0],
-            ymin = first_point[1],
-            xmax = first_point[0],
-            ymax = first_point[1];
-
-        geometry.forEach(part => {
-
-            for (var i = 0; i < part.length; i++) {
-                let point = part[i];
-                if (point[0] < xmin) xmin = point[0];
-                if (point[1] < ymin) ymin = point[1];
-                if (point[0] > xmax) xmax = point[0];
-                if (point[1] > ymax) ymax = point[1];
-            }
-
-        });
-
-        return { xmin, ymin, xmax, ymax };
-    },
+    get_bounding_box,
 
     // function to convert two points into a 
     // representation of a line
@@ -210,6 +353,12 @@ module.exports = {
             let y = (line_1.a * line_2.c - line_2.a * line_1.c) / det;
             return { x, y };
         }
+    },
+
+    get_slope_of_line(line) {
+        // assuming ax + by = c
+        // http://www.purplemath.com/modules/solvelit2.htm
+        return -1 * line.a / line.b;
     },
 
     sum(values) {
