@@ -13,6 +13,8 @@ let force_within = utils.force_within;
 let get_line_from_points = utils.get_line_from_points;
 let get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
 let get_slope_of_line = utils.get_slope_of_line;
+let get_slope_of_line_segment = utils.get_slope_of_line_segment;
+
 
 let get_edges_for_polygon = polygon => {
     let edges = [];
@@ -64,6 +66,9 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
     // running through the middle of the row
     let image_lines = [];
     let num_rows = image_bands[0].length;
+
+    if (num_rows === 0) return;
+
     console.log("num_rows:", num_rows);
     for (let y = 0; y < num_rows; y++) {
 
@@ -92,6 +97,18 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
       if (debug_level >= 1) console.log("edges.length", edges.length);
 
+      let target = 41.76184321688703;
+      let overlaps = [];
+      edges.forEach((edge, index) => {
+          let [[x1,y1], [x2,y2]] = edge;
+          let ymin = Math.min(y1, y2);
+          let ymax = Math.max(y1, y2);
+          if (target >= ymin && target <= ymax) {
+              overlaps.push(JSON.stringify({ index, edge}));
+          }
+      }); 
+      //console.log("overlaps:", overlaps);
+
       // iterate through the list of polygon vertices, convert them to
       // lines, and compute the intersections with each image row
       let intersections_by_row = _.range(num_rows).map(row => []);
@@ -99,18 +116,34 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
       let number_of_edges = edges.length;
       if (debug_level >= 1) console.log("number_of_edges:", number_of_edges);
       for (let i = 0; i < number_of_edges; i++) {
-        
+
+       
         // get vertices that make up an edge and convert that to a line
         let edge = edges[i];
-        let [start_point, end_point] = edge;
-        if (debug_level >= 1) console.log("[start_point, end_point]:", start_point, end_point);
 
-        let edge_y = start_point[1];
+        if (i === 32) {
+            console.log("i32 edge:", edge);
+        }
+ 
+
+        let [start_point, end_point] = edge;
+        let [ x1, y1 ] = start_point;
+        let [ x2, y2 ] = end_point;
+        //if (debug_level >= 1) console.log("[start_point, end_point]:", start_point, end_point);
+
+        let direction = Math.sign(y2 - y1);
+        let horizontal = y1 === y2;
+        let vertical = x1 === x2;
+
+        let edge_y = y1;
 
         let edge_line = get_line_from_points(start_point, end_point);
 
+        let edge_ymin = Math.min(y1, y2);
+        let edge_ymax = Math.max(y1, y2);
+
         let start_lng, start_lat, end_lat, end_lng;
-        if (start_point[0] < end_point[0]) {
+        if (x1 < x2) {
             [ start_lng, start_lat ] = start_point;
             [ end_lng, end_lat ] = end_point;
         } else {
@@ -118,11 +151,12 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             [ end_lng, end_lat ]  = start_point;
         }
         //console.log("\n\n\n");
+        if (start_lng === undefined) throw Error("start_lng is " + start_lng);
         //console.log("start_lng:", start_lng);
         //console.log("end_lng:", end_lng);
 
         // find the y values in the image coordinate space
-        console.log("unrounede:", (lat_0 - .5*cell_height - start_lat) / cell_height);
+        //console.log("unrounede:", (lat_0 - .5*cell_height - start_lat) / cell_height);
         let y_1 = Math.round((lat_0 - .5*cell_height - start_lat ) / cell_height);
         let y_2 = Math.round((lat_0 - .5*cell_height - end_lat) / cell_height);
 
@@ -137,43 +171,58 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             row_end = y_1;
         }
 
-        if (debug_level >= 1) console.log("row_start, row_end", [row_start, row_end]);
+        //if (i === 32) console.log("row_start, row_end", [row_start, row_end]);
 
         row_start = force_within(row_start, 0, num_rows - 1);
         row_end = force_within(row_end, 0, num_rows - 1);
 
-        if (debug_level >= 1) console.log("row_start, row_end", [row_start, row_end]);
+        //if (i === 32) console.log("row_start, row_end", [row_start, row_end]);
+        //if (debug_level >= 1) console.log("row_start, row_end", [row_start, row_end]);
         // iterate through image lines within the change in y of
         // the edge line and find all intersections
         for (let j = row_start; j < row_end + 1; j++) {
             let image_line = image_lines[j];
 
+
+            if (image_line === undefined) {
+                console.error("j:", j);
+                console.error("image_lines:", image_lines);
+                throw Error("image_lines");
+            }
+
             // because you know x is zero in ax + by = c, so by = c and b = -1, so -1 * y = c or y = -1 * c
             let image_line_y = -1 * image_line.c;
-            //console.log("image_line_y for " + j + ": " + JSON.stringify(image_line));
+            //if (i == 32) console.log("i32 image_line_y for " + j + ": " + JSON.stringify(image_line));
 
-            let slope = get_slope_of_line(edge_line);
-            //if (debug_level >= 2) console.log("slope:", slope);
-
-            let horizontal = slope === 0 || slope === -0;
-
-            let direction = Math.sign(slope);
+            //if (image_line_y == 41.76184321688703) console.log("image_line_y:", 41.76184321688703);
 
             let xmin_on_line, xmax_on_line;
             if (horizontal) {
-                console.log("horizontal line:", edge_y);
-                console.log("image_line_:", image_line_y);
+                //console.log("horizontal line:", edge_y);
+                //console.log("image_line_:", image_line_y);
                 if (edge_y === image_line_y) {
-                    console.log("horizontal on line!:", edge_y);
+                    //console.log("horizontal on line!:", edge_y);
                     xmin_on_line = start_lng;
                     xmax_on_line = end_lng
+                } else {
+                    continue; // stop running calculations for this horizontal line because it doesn't intersect at all
+                }
+            } else if (vertical) {
+                /* we have to have a seprate section for vertical bc of floating point arithmetic probs with get_inter..." */
+                //if(i==32) console.log("vertical line i 32", image_line_y);
+                if (image_line_y >= edge_ymin && image_line_y < edge_ymax) {
+                    xmin_on_line = start_lng;
+                    xmax_on_line = end_lng;
                 }
             } else {
                 try {
                     xmin_on_line = xmax_on_line = get_intersection_of_two_lines(edge_line, image_line).x;
-                    //console.log("xmin_on_line:", xmin_on_line);
+                    //if (i == 32) console.log("xmin_on_line:", xmin_on_line);
                 } catch (error) {
+                    console.log("slope of edge", edge, ":", slope);
                     console.log("j:", j);
+                    console.log("edge:", edge);
+                    console.log("image_line_y:", image_line_y);
                     console.log("edge_line:", edge_line);
                     console.log("image_line:", image_line);
                     console.log("image_lines:", image_lines);
@@ -187,8 +236,19 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             // the edge line segment. If it is, add the intersection to the 
             // list of intersections at the corresponding index for that row 
             // in intersections_by_row
-            if (horizontal || (xmin_on_line && xmin_on_line >= start_lng && xmax_on_line <= end_lng)) {
-                //console.log("pushing");
+            if (i == 32) {
+                console.log("xmin_on_line:", xmin_on_line);
+                console.log("xmax_on_line:", xmax_on_line);
+                console.log("horizontal:", horizontal);
+                console.log("start_lng:", start_lng);
+                console.log("end_lng:", end_lng);
+                console.log("edge_ymax:", edge_ymax);
+                console.log("edge_ymin:", edge_ymin);
+                console.log(xmin_on_line,">=", start_lng, " = ", xmin_on_line >= start_lng);
+                console.log("passes:", xmin_on_line >= start_lng);
+            }
+            if (xmin_on_line && xmax_on_line && (horizontal || (xmin_on_line >= start_lng && xmax_on_line <= end_lng && image_line_y <= edge_ymax && image_line_y >= edge_ymin))) {
+                if (i==32) console.log("pushing");
                 //let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
                 //intersections_by_row[j].push(image_pixel_index);
                 intersections_by_row[j].push({
@@ -196,7 +256,8 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                     index: i,
                     edge: edge,
                     xmin: xmin_on_line,
-                    xmax: xmax_on_line
+                    xmax: xmax_on_line,
+                    image_line_y
                 });
             }
         }
@@ -206,6 +267,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
 
       intersections_by_row.map((segments_in_row, row_index) => {
+          //console.log("segments in row.length:", segments_in_row.length);
           if (segments_in_row.length > 0) {
               //console.log("\n\nsegments in row:", segments_in_row);
               let clusters = cluster(segments_in_row, "index", 1, number_of_edges);
@@ -213,14 +275,22 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
               let categorized = clusters.map(categorize_intersection);
               //console.log("categorized:", categorized);
               let [ throughs, nonthroughs ] = bifurcate(categorized, "through", 1);
+
+              if (throughs.length % 2 === 1) {
+                  console.log("first segment:", JSON.stringify(segments_in_row));
+                  console.log("image line y:", segments_in_row[0].image_line_y);
+                  console.log("segments_in_row.length:", segments_in_row.length);
+                  console.log("segments_in_row:", JSON.stringify(segments_in_row));
+                  console.log("clusters:", clusters);
+                  console.log("categorized:", categorized);
+                  throw Error("throughs.length is odd with " + throughs.length);
+              }
+ 
               //console.log("throughs:", throughs);
               //console.log("nonthroughs:", nonthroughs);
               let insides = nonthroughs.map(intersection => [intersection.xmin, intersection.xmax]);
               //console.log("insides from nonthroughs:", insides);
 
-              if (throughs % 2 === 1) {
-                  console.error("throughs.length is odd with " + throughs.length);
-              }
               throughs = _.sortBy(throughs, "xmin");
               //console.log("sorted throughs", throughs);
 
