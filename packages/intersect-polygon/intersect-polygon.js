@@ -1,5 +1,9 @@
 'use strict';
 
+let turf_featureCollection = require("@turf/helpers").featureCollection;
+let turf_lineString = require("@turf/helpers").lineString;
+let fs = require("fs");
+
 let _ = require('underscore');
 
 let get = require('../get/get');
@@ -9,6 +13,7 @@ let categorize_intersection = utils.categorize_intersection;
 let cluster = utils.cluster;
 let couple = utils.couple;
 let force_within = utils.force_within;
+let merge_ranges = utils.merge_ranges;
 
 let get_line_from_points = utils.get_line_from_points;
 let get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
@@ -28,39 +33,39 @@ let get_edges_for_polygon = polygon => {
     return edges;
 };
 
-module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geometry, debug_level=2) => {
+module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geometry, debug_level=0) => {
 
     let cell_width = georaster.pixelWidth;
     let cell_height = georaster.pixelHeight;
-    console.log("cell_height:", cell_height);
+    if (debug_level >= 1) console.log("cell_height:", cell_height);
     let no_data_value = georaster.no_data_value;
     let image_height = georaster.height;
-    console.log("image_height: " + image_height);
+    if (debug_level >= 1) console.log("image_height: " + image_height);
     let image_width = georaster.width;
 
     // get values in a bounding box around the geometry
     let latlng_bbox = utils.get_bounding_box(geom);
-    console.log("latlng_bbox:", latlng_bbox); //good
+    if (debug_level >= 1) console.log("latlng_bbox:", latlng_bbox); //good
     let image_bands = get(georaster, latlng_bbox)
     //console.log("image_bands:", image_bands);
 
     // set origin points of bbox of geometry in image space
     let lat_0 = latlng_bbox.ymax + ((georaster.ymax - latlng_bbox.ymax) % cell_height);
-    console.log("lat_0:", lat_0); //good
+    if (debug_level >= 1) console.log("lat_0:", lat_0); //good
     let lng_0 = latlng_bbox.xmin - ((latlng_bbox.xmin - georaster.xmin) % cell_width);
-    console.log("lng_0:", lng_0); //good
+    if (debug_level >= 1) console.log("lng_0:", lng_0); //good
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
     let image_bbox = utils.convert_crs_bbox_to_image_bbox(georaster, latlng_bbox);
-    console.log("image_bbox:", image_bbox);
+    if (debug_level >= 1)  console.log("image_bbox:", image_bbox);
     let x_min = image_bbox.xmin,
         y_min = image_bbox.ymin,
         x_max = image_bbox.xmax,
         y_max = image_bbox.ymax;
 
     let row_length = x_max - x_min;
-    console.log("row_length:", row_length); 
+    if (debug_level >= 1) console.log("row_length:", row_length); 
 
     // iterate through image rows and convert each one to a line
     // running through the middle of the row
@@ -69,12 +74,10 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
     if (num_rows === 0) return;
 
-    console.log("num_rows:", num_rows);
+    if (debug_level >= 1) console.log("num_rows:", num_rows);
     for (let y = 0; y < num_rows; y++) {
 
-        // I don't understand this
         let lat = lat_0 - cell_height * y - cell_height / 2;
-        //console.log("lat:", lat); //good
 
         // use that point, plus another point along the same latitude to
         // create a line
@@ -83,31 +86,32 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
         let line = get_line_from_points(point_0, point_1);
         image_lines.push(line);
     }
-    console.log("image_lines.length:", image_lines.length);
+    if (debug_level >= 1) console.log("image_lines.length:", image_lines.length);
 
 
     // collapse geometry down to a list of edges
     // necessary for multi-part geometries
     let depth = utils.get_depth(geom);
-    console.log("depth:", depth);
+    if (debug_level >= 1) console.log("depth:", depth);
     let polygon_edges = depth === 4  ? geom.map(get_edges_for_polygon) : [get_edges_for_polygon(geom)];
     if (debug_level >= 1) console.log("polygon_edges.length:", polygon_edges.length);
 
-    polygon_edges.forEach(edges => {
+    polygon_edges.forEach((edges, edges_index) => {
 
-      if (debug_level >= 1) console.log("edges.length", edges.length);
-
-      let target = 41.76184321688703;
-      let overlaps = [];
-      edges.forEach((edge, index) => {
-          let [[x1,y1], [x2,y2]] = edge;
-          let ymin = Math.min(y1, y2);
-          let ymax = Math.max(y1, y2);
-          if (target >= ymin && target <= ymax) {
-              overlaps.push(JSON.stringify({ index, edge}));
-          }
-      }); 
-      //console.log("overlaps:", overlaps);
+      if (debug_level >= 1) {
+          console.log("edges.length", edges.length);
+          let target = 41.76184321688703;
+          let overlaps = [];
+          edges.forEach((edge, index) => {
+              let [[x1,y1], [x2,y2]] = edge;
+              let ymin = Math.min(y1, y2);
+              let ymax = Math.max(y1, y2);
+              if (target >= ymin && target <= ymax) {
+                  overlaps.push(JSON.stringify({ index, edge}));
+              }
+          }); 
+        //console.log("overlaps:", overlaps);
+      }
 
       // iterate through the list of polygon vertices, convert them to
       // lines, and compute the intersections with each image row
@@ -121,9 +125,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
         // get vertices that make up an edge and convert that to a line
         let edge = edges[i];
 
-        if (i === 32) {
-            console.log("i32 edge:", edge);
-        }
+        //if (i === 32) { console.log("i32 edge:", edge);}
  
 
         let [start_point, end_point] = edge;
@@ -150,13 +152,11 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             [ start_lng, start_lat ] = end_point;
             [ end_lng, end_lat ]  = start_point;
         }
-        //console.log("\n\n\n");
+
+
         if (start_lng === undefined) throw Error("start_lng is " + start_lng);
-        //console.log("start_lng:", start_lng);
-        //console.log("end_lng:", end_lng);
 
         // find the y values in the image coordinate space
-        //console.log("unrounede:", (lat_0 - .5*cell_height - start_lat) / cell_height);
         let y_1 = Math.round((lat_0 - .5*cell_height - start_lat ) / cell_height);
         let y_2 = Math.round((lat_0 - .5*cell_height - end_lat) / cell_height);
 
@@ -171,13 +171,9 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             row_end = y_1;
         }
 
-        //if (i === 32) console.log("row_start, row_end", [row_start, row_end]);
-
         row_start = force_within(row_start, 0, num_rows - 1);
         row_end = force_within(row_end, 0, num_rows - 1);
 
-        //if (i === 32) console.log("row_start, row_end", [row_start, row_end]);
-        //if (debug_level >= 1) console.log("row_start, row_end", [row_start, row_end]);
         // iterate through image lines within the change in y of
         // the edge line and find all intersections
         for (let j = row_start; j < row_end + 1; j++) {
@@ -192,9 +188,6 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
             // because you know x is zero in ax + by = c, so by = c and b = -1, so -1 * y = c or y = -1 * c
             let image_line_y = -1 * image_line.c;
-            //if (i == 32) console.log("i32 image_line_y for " + j + ": " + JSON.stringify(image_line));
-
-            //if (image_line_y == 41.76184321688703) console.log("image_line_y:", 41.76184321688703);
 
             let xmin_on_line, xmax_on_line;
             if (horizontal) {
@@ -217,7 +210,6 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             } else {
                 try {
                     xmin_on_line = xmax_on_line = get_intersection_of_two_lines(edge_line, image_line).x;
-                    //if (i == 32) console.log("xmin_on_line:", xmin_on_line);
                 } catch (error) {
                     console.log("slope of edge", edge, ":", slope);
                     console.log("j:", j);
@@ -230,25 +222,12 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                     throw error;
                 }
             }
-            //console.log("intersection:", intersection);
 
             // check to see if the intersection point is within the range of 
             // the edge line segment. If it is, add the intersection to the 
             // list of intersections at the corresponding index for that row 
             // in intersections_by_row
-            if (i == 32) {
-                console.log("xmin_on_line:", xmin_on_line);
-                console.log("xmax_on_line:", xmax_on_line);
-                console.log("horizontal:", horizontal);
-                console.log("start_lng:", start_lng);
-                console.log("end_lng:", end_lng);
-                console.log("edge_ymax:", edge_ymax);
-                console.log("edge_ymin:", edge_ymin);
-                console.log(xmin_on_line,">=", start_lng, " = ", xmin_on_line >= start_lng);
-                console.log("passes:", xmin_on_line >= start_lng);
-            }
             if (xmin_on_line && xmax_on_line && (horizontal || (xmin_on_line >= start_lng && xmax_on_line <= end_lng && image_line_y <= edge_ymax && image_line_y >= edge_ymin))) {
-                if (i==32) console.log("pushing");
                 //let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
                 //intersections_by_row[j].push(image_pixel_index);
                 intersections_by_row[j].push({
@@ -266,6 +245,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
       if (debug_level >= 1) console.log("intersections_by_row.length:", intersections_by_row.length);
 
 
+      let line_strings = [];
       intersections_by_row.map((segments_in_row, row_index) => {
           //console.log("segments in row.length:", segments_in_row.length);
           if (segments_in_row.length > 0) {
@@ -278,7 +258,6 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
               if (throughs.length % 2 === 1) {
                   console.log("first segment:", JSON.stringify(segments_in_row));
-                  console.log("image line y:", segments_in_row[0].image_line_y);
                   console.log("segments_in_row.length:", segments_in_row.length);
                   console.log("segments_in_row:", JSON.stringify(segments_in_row));
                   console.log("clusters:", clusters);
@@ -295,15 +274,27 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
               //console.log("sorted throughs", throughs);
 
               let couples = couple(throughs).map(couple => {
-                  //console.log("couple:", couple);
                   let [left, right] = couple;
                   return [left.xmin, right.xmax];
               });
-              //console.log("couples:", couples);
 
               insides = insides.concat(couples);
-              //console.log("insides for iterating:", insides);
 
+              /*
+                  This makes sure we don't double count pixels.
+                  For example, converts `[[0,10],[10,10]]` to `[[0,10]]`
+              */
+              insides = merge_ranges(insides);
+
+
+              if (debug_level >= 1) {
+                insides.forEach(insidepair => {
+                    let [x1, x2] = insidepair;
+                    let y = segments_in_row[0].image_line_y;
+                    line_strings.push(turf_lineString([[x1, y], [x2, y]], {"stroke": "red", "stroke-width": 1,"stroke-opacity": 1}));
+                });
+              }
+              
               insides.forEach(pair => {
 
                   let [xmin, xmax] = pair;
@@ -311,16 +302,15 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                   //convert left and right to image pixels
                   let left = Math.round((xmin - (lng_0 + .5*cell_width)) / cell_width);
                   let right = Math.round((xmax - (lng_0 + .5*cell_width)) / cell_width);
-                  //console.log("left:", left, right);
 
                   let start_column_index = Math.max(left, 0);
                   let end_column_index = Math.min(right, image_width);
-                  //console.log("a-z", start_column_index, end_column_index);
+
 
                   for (let column_index = start_column_index; column_index <= end_column_index; column_index++) {
                       image_bands.forEach((band, band_index) => {
                           var value = band[row_index][column_index];
-                          if (value !== no_data_value) {
+                          if (value != undefined && value !== no_data_value) {
                               run_this_function_on_each_pixel_inside_geometry(value, band_index);
                           }
                       });
@@ -328,5 +318,10 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
               });
           }
       });
+      
+      if (debug_level >= 1) {
+          let fc = turf_featureCollection(line_strings);
+          fs.writeFileSync("/tmp/lns" + edges_index + ".geojson", JSON.stringify(fc));
+      }
   });
 }
