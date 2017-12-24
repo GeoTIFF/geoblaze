@@ -131,6 +131,11 @@ module.exports = {
             xmax = Math.max(first.xmax, last.xmax);
         }
 
+        if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
+            console.error("segments:", segments);
+            throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
+        }
+
         return { xmin, xmax, through };
     },
 
@@ -287,6 +292,39 @@ module.exports = {
             part = part[0];
         }
         return depth;
+    },
+
+    /**
+     * This function takes in an array of number pairs and combines where there's overlap
+     * @name 
+     * @param {Object} array of anything
+     * @returns {Object} array of index ranges
+     * @example
+     * let ranges = [ [0, 10], [10, 10], [20, 30], [30, 40] ];
+     * let merged_ranges = utils.merge_ranges(ranges);
+     * // merged_ranges
+     * // [ [0, 10], [20, 40] ]
+    */
+    merge_ranges(ranges) {
+        let number_of_ranges = ranges.length;
+        if (number_of_ranges > 0) {
+            let first_range = ranges[0];
+            let previous_end = first_range[1];
+            let previous_start = first_range[0];
+            let result = [first_range];
+            for (let i = 1; i < number_of_ranges; i++) {
+                let temp_range = ranges[i];
+                let [start, end] = temp_range;
+                if (start <= previous_end) {
+                    result[result.length - 1][1] = end;
+                } else {
+                    result.push(temp_range);
+                }
+                previous_end = end; 
+                previous_start = start;
+           }
+           return result;
+        }
     },
 
     is_polygon(geometry) {

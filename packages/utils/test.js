@@ -59,6 +59,18 @@ let test = () => {
             });
         });
     });
+    describe("Test Merging of Index Ranges", function() {
+        it("Got Correct Values", function() {
+            let original =  [ [0, 10], [10, 10], [20, 30], [30, 40] ];
+            let merged = utils.merge_ranges(original);
+            expect(JSON.stringify(merged)).to.equal('[[0,10],[20,40]]');
+
+            original =  [ [0, 10], [10, 10], [21, 31], [30, 40] ];
+            merged = utils.merge_ranges(original);
+            expect(JSON.stringify(merged)).to.equal('[[0,10],[21,40]]');
+ 
+        });
+    });
     describe("Test Bifurcation", function() {
         describe("For Array of Sample Objects", function() {
             it("Got Correct Split", () => {
