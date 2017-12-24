@@ -1,4 +1,4 @@
-echo "starting tiling of mapspam data"
+echo "starting tiling of ghsl data"
 
 $_="_";
 
