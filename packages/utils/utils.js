@@ -283,7 +283,6 @@ module.exports = {
         return false;
     },
 
-
     get_depth(geometry) {
         let depth = 0;
         let part = geometry;
@@ -344,18 +343,24 @@ module.exports = {
 
             // iterate through each geometry and make sure first and
             // last point are the same
-            let is_polygon_array = true;
-            coors.forEach(part => {
-                let first_vertex = part[0];
-                let last_vertex = part[part.length - 1]
-                if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
-                    is_polygon_array = false;
-                }
-            });
-            return is_polygon_array;
-        }
 
-        return false;
+            let depth = this.get_depth(coors);
+            if (depth === 4) {
+                return coors.map(() => this.is_polygon);
+            } else if (depth === 3) {
+                let is_polygon_array = true;
+                coors.forEach(part => {
+                    let first_vertex = part[0];
+                    let last_vertex = part[part.length - 1]
+                    if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
+                        is_polygon_array = false;
+                    }
+                });
+                return is_polygon_array;
+            }
+        } else {
+            return false;
+        }
     },
 
     get_bounding_box,
@@ -397,6 +402,16 @@ module.exports = {
         // assuming ax + by = c
         // http://www.purplemath.com/modules/solvelit2.htm
         return -1 * line.a / line.b;
+    },
+
+    get_slope_of_line_segment(line_segment) {
+        let [ [x1, y1], [x2, y2] ] = line_segment;
+        // make sure slope goes from left most to right most, so order of points doesn't matter
+        if (x2 > x1) {
+            return y2 - y1 / x2 - x1;
+        } else {
+            return y1 - y2 / x1 - x2;
+        }
     },
 
     sum(values) {
