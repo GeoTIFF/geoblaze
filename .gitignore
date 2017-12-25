@@ -70,13 +70,16 @@ package-lock.json
 *.bak
 
 # downloaded test data
+data/*.xml
 data/gadm/*.cpg
 data/gadm/*.dbf
 data/gadm/*.prj
 data/gadm/*.shp
 data/gadm/*.shx
 data/gadm/*.zip
+data/gadm/derived/*
 data/ghsl/*.zip
+data/ghsl/admins/*
 data/ghsl/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0/
 data/ghsl/tiles/*.tif
 data/gadm/geojsons/*.geojson
@@ -84,3 +87,5 @@ data/mapspam/tiles/*.tif
 data/mapspam/*.tiff
 data/mapspam/*.zip
 
+# accidental geojsons that appear in directory
+*.geojson

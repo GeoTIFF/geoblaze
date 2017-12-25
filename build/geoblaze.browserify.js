@@ -28,34 +28,6 @@ if (typeof window !== "undefined") {
 }
 
 },{"./packages/cache/cache":114,"./packages/histogram/histogram":117,"./packages/identify/identify":118,"./packages/load/load":120,"./packages/max/max":121,"./packages/mean/mean":122,"./packages/median/median":123,"./packages/min/min":124,"./packages/mode/mode":125,"./packages/sum/sum":126}],2:[function(require,module,exports){
-var coordEach = require('@turf/meta').coordEach;
-
-/**
- * Takes a set of features, calculates the bbox of all input features, and returns a bounding box.
- *
- * @name bbox
- * @param {FeatureCollection|Feature<any>} geojson input features
- * @returns {Array<number>} bbox extent in [minX, minY, maxX, maxY] order
- * @example
- * var line = turf.lineString([[-74, 40], [-78, 42], [-82, 35]]);
- * var bbox = turf.bbox(line);
- * var bboxPolygon = turf.bboxPolygon(bbox);
- *
- * //addToMap
- * var addToMap = [line, bboxPolygon]
- */
-module.exports = function (geojson) {
-    var bbox = [Infinity, Infinity, -Infinity, -Infinity];
-    coordEach(geojson, function (coord) {
-        if (bbox[0] > coord[0]) bbox[0] = coord[0];
-        if (bbox[1] > coord[1]) bbox[1] = coord[1];
-        if (bbox[2] < coord[0]) bbox[2] = coord[0];
-        if (bbox[3] < coord[1]) bbox[3] = coord[1];
-    });
-    return bbox;
-};
-
-},{"@turf/meta":5}],3:[function(require,module,exports){
 var meta = require('@turf/meta');
 
 /**
@@ -128,7 +100,7 @@ module.exports = function (fc) {
     };
 };
 
-},{"@turf/meta":5}],4:[function(require,module,exports){
+},{"@turf/meta":4}],3:[function(require,module,exports){
 /**
  * Wraps a GeoJSON {@link Geometry} in a GeoJSON {@link Feature}.
  *
@@ -671,7 +643,7 @@ module.exports = {
     isNumber: isNumber
 };
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1671,9 +1643,11 @@ exports.lineString = lineString;
 exports.lineEach = lineEach;
 exports.lineReduce = lineReduce;
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"dup":5}],7:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -7790,7 +7764,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":26,"./internal/streams/BufferList":31,"./internal/streams/destroy":32,"./internal/streams/stream":33,"_process":20,"core-util-is":13,"events":14,"inherits":17,"isarray":18,"process-nextick-args":19,"safe-buffer":38,"string_decoder/":44,"util":6}],29:[function(require,module,exports){
+},{"./_stream_duplex":26,"./internal/streams/BufferList":31,"./internal/streams/destroy":32,"./internal/streams/stream":33,"_process":20,"core-util-is":13,"events":14,"inherits":17,"isarray":18,"process-nextick-args":19,"safe-buffer":38,"string_decoder/":44,"util":5}],29:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -28932,66 +28906,84 @@ module.exports = identify;
 },{"../convert-geometry/convert-geometry":115,"../load/load":120}],119:[function(require,module,exports){
 'use strict';
 
+let turf_featureCollection = require("@turf/helpers").featureCollection;
+let turf_lineString = require("@turf/helpers").lineString;
+let fs = require("fs");
+
 let _ = require('underscore');
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
+let bifurcate = utils.bifurcate;
+let categorize_intersection = utils.categorize_intersection;
+let cluster = utils.cluster;
+let couple = utils.couple;
+let force_within = utils.force_within;
+let merge_ranges = utils.merge_ranges;
 
 let get_line_from_points = utils.get_line_from_points;
 let get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
+let get_slope_of_line = utils.get_slope_of_line;
+let get_slope_of_line_segment = utils.get_slope_of_line_segment;
 
-module.exports = (georaster, geom, run_on_values) => {
+
+let get_edges_for_polygon = polygon => {
+    let edges = [];
+    polygon.forEach(ring => {
+        for (let i = 1; i < ring.length; i++) {
+            let start_point = ring[i - 1];
+            let end_point = ring[i];
+            edges.push([start_point, end_point]);
+        }
+    });
+    return edges;
+};
+
+module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geometry, debug_level=0) => {
 
     let cell_width = georaster.pixelWidth;
     let cell_height = georaster.pixelHeight;
+    if (debug_level >= 1) console.log("cell_height:", cell_height);
     let no_data_value = georaster.no_data_value;
     let image_height = georaster.height;
+    if (debug_level >= 1) console.log("image_height: " + image_height);
+    let image_width = georaster.width;
 
     // get values in a bounding box around the geometry
     let latlng_bbox = utils.get_bounding_box(geom);
-    //console.log("latlng_bbox:", latlng_bbox); //good
+    if (debug_level >= 1) console.log("latlng_bbox:", latlng_bbox); //good
     let image_bands = get(georaster, latlng_bbox)
     //console.log("image_bands:", image_bands);
 
     // set origin points of bbox of geometry in image space
     let lat_0 = latlng_bbox.ymax + ((georaster.ymax - latlng_bbox.ymax) % cell_height);
-    //console.log("lat_0:", lat_0); //good
+    if (debug_level >= 1) console.log("lat_0:", lat_0); //good
     let lng_0 = latlng_bbox.xmin - ((latlng_bbox.xmin - georaster.xmin) % cell_width);
-    //console.log("lng_0:", lng_0); //good
+    if (debug_level >= 1) console.log("lng_0:", lng_0); //good
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
     let image_bbox = utils.convert_crs_bbox_to_image_bbox(georaster, latlng_bbox);
-    //console.log("image_bbox:", image_bbox); //good
+    if (debug_level >= 1)  console.log("image_bbox:", image_bbox);
     let x_min = image_bbox.xmin,
         y_min = image_bbox.ymin,
         x_max = image_bbox.xmax,
         y_max = image_bbox.ymax;
 
     let row_length = x_max - x_min;
-    //console.log("row_length:", row_length); //good
-
-    // collapse geometry down to a list of edges
-    // necessary for multi-part geometries
-    let edges = [];
-    geom.forEach(part => {
-        for (let i = 1; i < part.length; i++) {
-            let start_point = part[i - 1];
-            let end_point = part[i];
-            edges.push([start_point, end_point]);
-        }
-    });
+    if (debug_level >= 1) console.log("row_length:", row_length); 
 
     // iterate through image rows and convert each one to a line
     // running through the middle of the row
     let image_lines = [];
     let num_rows = image_bands[0].length;
-    //console.log("num_rows:", num_rows);//good
+
+    if (num_rows === 0) return;
+
+    if (debug_level >= 1) console.log("num_rows:", num_rows);
     for (let y = 0; y < num_rows; y++) {
 
-        // I don't understand this
-        let lat = lat_0 - (cell_height * y + cell_height / 2);
-        //console.log("lat:", lat); //good
+        let lat = lat_0 - cell_height * y - cell_height / 2;
 
         // use that point, plus another point along the same latitude to
         // create a line
@@ -29000,34 +28992,79 @@ module.exports = (georaster, geom, run_on_values) => {
         let line = get_line_from_points(point_0, point_1);
         image_lines.push(line);
     }
-    //console.log("image_lines:", image_lines);
+    if (debug_level >= 1) console.log("image_lines.length:", image_lines.length);
 
-    // iterate through the list of polygon vertices, convert them to
-    // lines, and compute the intersections with each image row
-    let intersections_by_row = _.range(num_rows).map(row => []);
-    for (let i = 0; i < edges.length; i++) {
-        
+
+    // collapse geometry down to a list of edges
+    // necessary for multi-part geometries
+    let depth = utils.get_depth(geom);
+    if (debug_level >= 1) console.log("depth:", depth);
+    let polygon_edges = depth === 4  ? geom.map(get_edges_for_polygon) : [get_edges_for_polygon(geom)];
+    if (debug_level >= 1) console.log("polygon_edges.length:", polygon_edges.length);
+
+    polygon_edges.forEach((edges, edges_index) => {
+
+      if (debug_level >= 1) {
+          console.log("edges.length", edges.length);
+          let target = 41.76184321688703;
+          let overlaps = [];
+          edges.forEach((edge, index) => {
+              let [[x1,y1], [x2,y2]] = edge;
+              let ymin = Math.min(y1, y2);
+              let ymax = Math.max(y1, y2);
+              if (target >= ymin && target <= ymax) {
+                  overlaps.push(JSON.stringify({ index, edge}));
+              }
+          }); 
+        //console.log("overlaps:", overlaps);
+      }
+
+      // iterate through the list of polygon vertices, convert them to
+      // lines, and compute the intersections with each image row
+      let intersections_by_row = _.range(num_rows).map(row => []);
+      if (debug_level >= 1) console.log("intersections_by_row.length:", intersections_by_row.length);
+      let number_of_edges = edges.length;
+      if (debug_level >= 1) console.log("number_of_edges:", number_of_edges);
+      for (let i = 0; i < number_of_edges; i++) {
+
+       
         // get vertices that make up an edge and convert that to a line
         let edge = edges[i];
-        let start_point = edge[0];
-        let end_point = edge[1];
+
+        //if (i === 32) { console.log("i32 edge:", edge);}
+ 
+
+        let [start_point, end_point] = edge;
+        let [ x1, y1 ] = start_point;
+        let [ x2, y2 ] = end_point;
+        //if (debug_level >= 1) console.log("[start_point, end_point]:", start_point, end_point);
+
+        let direction = Math.sign(y2 - y1);
+        let horizontal = y1 === y2;
+        let vertical = x1 === x2;
+
+        let edge_y = y1;
+
         let edge_line = get_line_from_points(start_point, end_point);
 
-        let start_lng, end_lng;
-        if (start_point[0] < end_point[0]) {
-            start_lng = start_point[0];
-            end_lng = end_point[0];
+        let edge_ymin = Math.min(y1, y2);
+        let edge_ymax = Math.max(y1, y2);
+
+        let start_lng, start_lat, end_lat, end_lng;
+        if (x1 < x2) {
+            [ start_lng, start_lat ] = start_point;
+            [ end_lng, end_lat ] = end_point;
         } else {
-            start_lng = end_point[0];
-            end_lng = start_point[0];
+            [ start_lng, start_lat ] = end_point;
+            [ end_lng, end_lat ]  = start_point;
         }
-        //console.log("\n\n\n");
-        //console.log("start_lng:", start_lng);
-        //console.log("end_lng:", end_lng);
+
+
+        if (start_lng === undefined) throw Error("start_lng is " + start_lng);
 
         // find the y values in the image coordinate space
-        let y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
-        let y_2 = Math.floor((lat_0 - end_point[1]) / cell_height);
+        let y_1 = Math.round((lat_0 - .5*cell_height - start_lat ) / cell_height);
+        let y_2 = Math.round((lat_0 - .5*cell_height - end_lat) / cell_height);
 
         // make sure to set the start and end points so that we are
         // incrementing upwards through rows
@@ -29039,96 +29076,163 @@ module.exports = (georaster, geom, run_on_values) => {
             row_start = y_2;
             row_end = y_1;
         }
-        //console.log("row_start, row_end", [row_start, row_end]);
+
+        row_start = force_within(row_start, 0, num_rows - 1);
+        row_end = force_within(row_end, 0, num_rows - 1);
 
         // iterate through image lines within the change in y of
         // the edge line and find all intersections
         for (let j = row_start; j < row_end + 1; j++) {
             let image_line = image_lines[j];
-            //console.log("image_line:", image_line);
-            try {
-            var intersection = get_intersection_of_two_lines(edge_line, image_line);
-            } catch (error) {
-                console.log("j:", j);
-                console.log("edge_line:", edge_line);
-                console.log("image_line:", image_line);
-                console.log("image_lines:", image_lines);
-                console.error(error)
-                throw error;
+
+
+            if (image_line === undefined) {
+                console.error("j:", j);
+                console.error("image_lines:", image_lines);
+                throw Error("image_lines");
             }
-            //console.log("intersection:", intersection);
+
+            // because you know x is zero in ax + by = c, so by = c and b = -1, so -1 * y = c or y = -1 * c
+            let image_line_y = -1 * image_line.c;
+
+            let xmin_on_line, xmax_on_line;
+            if (horizontal) {
+                //console.log("horizontal line:", edge_y);
+                //console.log("image_line_:", image_line_y);
+                if (edge_y === image_line_y) {
+                    //console.log("horizontal on line!:", edge_y);
+                    xmin_on_line = start_lng;
+                    xmax_on_line = end_lng
+                } else {
+                    continue; // stop running calculations for this horizontal line because it doesn't intersect at all
+                }
+            } else if (vertical) {
+                /* we have to have a seprate section for vertical bc of floating point arithmetic probs with get_inter..." */
+                //if(i==32) console.log("vertical line i 32", image_line_y);
+                if (image_line_y >= edge_ymin && image_line_y < edge_ymax) {
+                    xmin_on_line = start_lng;
+                    xmax_on_line = end_lng;
+                }
+            } else {
+                try {
+                    xmin_on_line = xmax_on_line = get_intersection_of_two_lines(edge_line, image_line).x;
+                } catch (error) {
+                    console.log("slope of edge", edge, ":", slope);
+                    console.log("j:", j);
+                    console.log("edge:", edge);
+                    console.log("image_line_y:", image_line_y);
+                    console.log("edge_line:", edge_line);
+                    console.log("image_line:", image_line);
+                    console.log("image_lines:", image_lines);
+                    console.error(error)
+                    throw error;
+                }
+            }
 
             // check to see if the intersection point is within the range of 
             // the edge line segment. If it is, add the intersection to the 
             // list of intersections at the corresponding index for that row 
             // in intersections_by_row
-            if (intersection && intersection.x >= start_lng && intersection.x <= end_lng) {
-                let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
-                intersections_by_row[j].push(image_pixel_index);
+            if (xmin_on_line && xmax_on_line && (horizontal || (xmin_on_line >= start_lng && xmax_on_line <= end_lng && image_line_y <= edge_ymax && image_line_y >= edge_ymin))) {
+                //let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
+                //intersections_by_row[j].push(image_pixel_index);
+                intersections_by_row[j].push({
+                    direction: direction,
+                    index: i,
+                    edge: edge,
+                    xmin: xmin_on_line,
+                    xmax: xmax_on_line,
+                    image_line_y
+                });
             }
         }
-    }
+      }
 
-    //console.log("intersections by row", intersections_by_row);
+      if (debug_level >= 1) console.log("intersections_by_row.length:", intersections_by_row.length);
 
-    // iterate through the list of computed intersections for each row.
-    // use these intersections to split up each row into pixels that fall
-    // within the polygon and pixels that fall outside the polygon
-    // for more information on this, review the ray casting algorithm
-    for (let i = 0; i < num_rows; i++) {
 
-        // we make sure to sort intersections here because we don't know the order
-        // in which they were recorded, as it was based on the order of polygon
-        // edges
-        let row_intersections = intersections_by_row[i]
-            .sort((a, b) => a - b);
-        let num_intersections = row_intersections.length;
-        if (num_intersections > 0) { // make sure the row is in the polygon
+      let line_strings = [];
+      intersections_by_row.map((segments_in_row, row_index) => {
+          //console.log("segments in row.length:", segments_in_row.length);
+          if (segments_in_row.length > 0) {
+              //console.log("\n\nsegments in row:", segments_in_row);
+              let clusters = cluster(segments_in_row, "index", 1, number_of_edges);
+              //console.log('clusters:', clusters);
+              let categorized = clusters.map(categorize_intersection);
+              //console.log("categorized:", categorized);
+              let [ throughs, nonthroughs ] = bifurcate(categorized, "through", 1);
 
-            // iterate through intersections and get the start and end
-            // indexes at odd intervals, ie where pixels are inside the
-            // polygon
-            for (let j = 0; j < num_intersections; j++) {
-                if (j % 2 === 1) {
+              if (throughs.length % 2 === 1) {
+                  console.log("first segment:", JSON.stringify(segments_in_row));
+                  console.log("segments_in_row.length:", segments_in_row.length);
+                  console.log("segments_in_row:", JSON.stringify(segments_in_row));
+                  console.log("clusters:", clusters);
+                  console.log("categorized:", categorized);
+                  throw Error("throughs.length is odd with " + throughs.length);
+              }
+ 
+              //console.log("throughs:", throughs);
+              //console.log("nonthroughs:", nonthroughs);
+              let insides = nonthroughs.map(intersection => [intersection.xmin, intersection.xmax]);
+              //console.log("insides from nonthroughs:", insides);
 
-                    let start_column_index = row_intersections[j - 1];
-                    let end_column_index = row_intersections[j];
-                    //console.log("start_row_index:end_row_index", start_row_index,":",end_row_index);
+              throughs = _.sortBy(throughs, "xmin");
+              //console.log("sorted throughs", throughs);
 
-                    // convert to start and end in the clipped image    
-                    //let start_index = start_row_index - x_min;
-                    //let end_index = end_row_index - x_min;
+              let couples = couple(throughs).map(couple => {
+                  let [left, right] = couple;
+                  return [left.xmin, right.xmax];
+              });
 
-                    //console.log("start_index:end_index", start_index,":",end_index);
+              insides = insides.concat(couples);
 
-                    // use the start and end indexes to pull pixels out of
-                    // the corresponding image row
-                    for (let column_index = start_column_index; column_index <= end_column_index; column_index++) {
-                        image_bands.forEach((band, band_index) => {
-                            //console.log("band:", band);
-                            try {
-                                var value = band[i][column_index];
-                            } catch (error) {
-                                //console.log("band:", band);
-                                //console.log("row_index:", row_index);
-                                //console.log("column_index:", column_index);
-                                //console.error(error);
-                                throw error;
-                            }
-                            if (value !== no_data_value) {
-                                // run the function provided as a parameter input
-                                // on the value
-                                run_on_values(value, band_index);
-                            }
-                        });
-                    }
-                }
-            }
-        }
-    }
+              /*
+                  This makes sure we don't double count pixels.
+                  For example, converts `[[0,10],[10,10]]` to `[[0,10]]`
+              */
+              insides = merge_ranges(insides);
+
+
+              if (debug_level >= 1) {
+                insides.forEach(insidepair => {
+                    let [x1, x2] = insidepair;
+                    let y = segments_in_row[0].image_line_y;
+                    line_strings.push(turf_lineString([[x1, y], [x2, y]], {"stroke": "red", "stroke-width": 1,"stroke-opacity": 1}));
+                });
+              }
+              
+              insides.forEach(pair => {
+
+                  let [xmin, xmax] = pair;
+
+                  //convert left and right to image pixels
+                  let left = Math.round((xmin - (lng_0 + .5*cell_width)) / cell_width);
+                  let right = Math.round((xmax - (lng_0 + .5*cell_width)) / cell_width);
+
+                  let start_column_index = Math.max(left, 0);
+                  let end_column_index = Math.min(right, image_width);
+
+
+                  for (let column_index = start_column_index; column_index <= end_column_index; column_index++) {
+                      image_bands.forEach((band, band_index) => {
+                          var value = band[row_index][column_index];
+                          if (value != undefined && value !== no_data_value) {
+                              run_this_function_on_each_pixel_inside_geometry(value, band_index);
+                          }
+                      });
+                  }
+              });
+          }
+      });
+      
+      if (debug_level >= 1) {
+          let fc = turf_featureCollection(line_strings);
+          fs.writeFileSync("/tmp/lns" + edges_index + ".geojson", JSON.stringify(fc));
+      }
+  });
 }
 
-},{"../get/get":116,"../utils/utils":127,"underscore":110}],120:[function(require,module,exports){
+},{"../get/get":116,"../utils/utils":127,"@turf/helpers":3,"fs":6,"underscore":110}],120:[function(require,module,exports){
 'use strict';
 
 let parse_georaster = require("georaster");
@@ -29673,7 +29777,7 @@ let intersect_polygon = require('../intersect-polygon/intersect-polygon');
  * @example
  * var sums = geoblaze.sum(georaster, geometry);
  */
-function sum(georaster, geom) {
+function sum(georaster, geom, test) {
     
     try {
         
@@ -29683,7 +29787,7 @@ function sum(georaster, geom) {
             return georaster.values.map(band => { // iterate over each band which include rows of pixels
                 return band.reduce((sum_of_band, row) => { // reduce all the rows into one sum
                     return sum_of_band + row.reduce((sum_of_row, cell_value) => { // reduce each row to a sum of its pixel values
-                        return cell_value !== no_data_value ? sum_of_row + cell_value : sum_of_row;
+                        return cell_value !== no_data_value && (test === undefined || test(cell_value)) ? sum_of_row + cell_value : sum_of_row;
                     }, 0);
                 }, 0);
             });
@@ -29700,7 +29804,7 @@ function sum(georaster, geom) {
             return values.map(band => { // iterate over each band which include rows of pixels
                 return band.reduce((sum_of_band, row) => { // reduce all the rows into one sum
                     return sum_of_band + row.reduce((sum_of_row, cell_value) => { // reduce each row to a sum of its pixel values
-                        return cell_value !== no_data_value ? sum_of_row + cell_value : sum_of_row;
+                        return cell_value !== no_data_value && (test === undefined || test(cell_value)) ? sum_of_row + cell_value : sum_of_row;
                     }, 0);
                 }, 0);
             });
@@ -29711,19 +29815,27 @@ function sum(georaster, geom) {
             
             // the third argument of intersect_polygon is a function which
             // is run on every value, we use it to increment the sum 
+            let passed = 0;
             intersect_polygon(georaster, geom, (value, band_index) => {
-                if (sums[band_index]) {
-                    sums[band_index] += value; 
-                } else {
-                    sums[band_index] = value;
+                if (test === undefined || test(value)) { 
+                    passed++;
+                    //console.log("value:", value);
+                    if (sums[band_index]) {
+                        sums[band_index] += value; 
+                    } else {
+                        sums[band_index] = value;
+                    }
+                    //console.log("sums[band_index] :", sums[band_index] );
                 }
             });
 
+            console.log("passed:", passed);
+            console.log("sums.length:", sums.length);
             if (sums.length > 0) return sums;
-            else throw 'No Values were found in the given geometry';
+            else return [0];
             
         } else {
-            throw 'Non-Bounding Box geometries are currently not supported.'
+            throw "Sum couldn't identify geometry"
         }            
     } catch(e) {
         console.error(e);
@@ -29741,7 +29853,6 @@ let _ = require('underscore');
 let combine = require('@turf/combine');
 
 let polygon = require("@turf/helpers").polygon;
-let bbox = require("@turf/bbox");
 
 /*
     Runs on each value in a table,
@@ -29761,9 +29872,169 @@ function run_on_table_of_values(table, no_data_value, run_on_values) {
     }
 }
 
+function get_bounding_box(geometry) {
+
+    let xmin, ymin, xmax, ymax;
+
+    if (typeof(geometry[0][0]) === "number") {
+        let number_of_points = geometry.length;
+        xmin = xmax = geometry[0][0];
+        ymin = ymax = geometry[0][1];
+        for (let i = 1; i < number_of_points; i++) {
+            let [x, y] = geometry[i];
+            if (x < xmin) xmin = x;
+            else if (x > xmax) xmax = x;
+            if (y < ymin) ymin = y;
+            else if (y > ymax) ymax = y;
+        }
+    } else {
+        let bboxes = geometry.forEach((part, index) => {
+            let bbox = get_bounding_box(part);
+            if (index == 0) {
+                xmin = bbox.xmin;
+                xmax = bbox.xmax;
+                ymin = bbox.ymin;
+                ymax = bbox.ymax;
+            } else {
+                if (bbox.xmin < xmin) xmin = bbox.xmin;
+                else if (bbox.xmax > xmax) xmax = bbox.xmax;
+                if (bbox.ymin < ymin) ymin = bbox.ymin;
+                else if (bbox.ymax > ymax) ymax = bbox.ymax;
+            }
+        });
+    }
+
+    return { xmin, ymin, xmax, ymax };
+}
+
+
+
 module.exports = {
 
+    bifurcate(items, testing) {
+
+        let test_function = typeof testing === "function" ? testing : typeof testing === "string" ? item => item[testing] : null;
+
+        let trues = [];
+        let falses = [];
+        let items_length = items.length;
+        for (let i = 0; i < items_length; i++) {
+            let item = items[i];
+            if (test_function(item)) trues.push(item);
+            else falses.push(item);
+        }
+        return [trues, falses];
+    },
+
+
+    /**
+     * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
+     * @name couple
+     * @param {Object} array of anything
+     * @returns {Object} array of consecutive pairs
+     * @example
+     * let items = [0, 1, 18, 77, 99, 103];
+     * let unflattened = utils.couple(items);
+     * // unflattened
+     * // [ [0, 1], [18, 77], [99, 103] ]
+    */
+    couple(array) {
+        let couples = [];
+        let length_of_array = array.length;
+        for (let i = 0; i < length_of_array; i+=2) {
+            couples.push([ array[i], array[i+1] ]);
+        }
+        return couples;
+    },
+
+    force_within(n, min, max) {
+        if (n < min) n = min;
+        else if (n > max) n = max;
+        return n;
+    },
+
     run_on_table_of_values,
+
+
+    /**
+     * This function categorizes an intersection 
+     * @name categorize_intersection
+     * @param {Object} edges
+    */ 
+    categorize_intersection(segments) {
+        //console.log("categorize_intersection:", segments);
+        let through, end, xmin, xmax;
+
+        let n = segments.length;
+        let first = segments[0];
+
+        if (n === 1) {
+            through = true;
+            xmin = first.xmin;
+            xmax = first.xmax;
+        } else /* n > 1 */ {
+            let last = segments[n - 1];
+            through = first.direction === last.direction;
+            xmin = Math.min(first.xmin, last.xmin); 
+            xmax = Math.max(first.xmax, last.xmax);
+        }
+
+        if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
+            console.error("segments:", segments);
+            throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
+        }
+
+        return { xmin, xmax, through };
+    },
+
+
+    /**
+     * This function clusters an array of items based on a distance.
+     * It is ordered however so the items must already be sorted by the property
+     * @name cluster
+     * @param {Object} Array of Objects
+     * @param {string} name_of_property
+     * @param {number} threshold
+     * @param {number} wrap-around value, at which to check zero, too
+     * @returns {Object} 2-dimensional array of items, clustered by distance
+     * @example
+     * let objs = [{x: 3}, {x: 4}, {x: 5}, {x: 1000}, {x: 1002}];
+     * let actual = utils.cluster(objs, "x", 1);
+    */
+    cluster(items, name_of_property, threshold, wrap_number) {
+        let number_of_items = items.length;
+        let clusters = [];
+        let cluster = [];
+        let previous_value;
+        for (let i = 0; i < number_of_items; i++) {
+            let item = items[i];
+            let value = item[name_of_property];
+            let number_in_cluster = cluster.length;
+            if (number_in_cluster === 0) {
+                cluster.push(item);
+            } else /* assuming > 0 */ {
+                if (value >= previous_value - threshold && value <= previous_value + threshold) {
+                    cluster.push(item);
+                } else {
+                    clusters.push(cluster);
+                    cluster = [ item ];
+                }
+            }
+            previous_value = value;
+        }
+        if (cluster.length > 0) clusters.push(cluster);
+
+        // check if should merge first and last cluster
+        let first_cluster = clusters[0];
+        //console.log("pre:", previous_value);
+        //console.log("wrap_number - threshold:", wrap_number - threshold);
+        //console.log("first_cluster:", first_cluster);
+        if (wrap_number && previous_value >= wrap_number - threshold && first_cluster[0][name_of_property] === 0) {
+            clusters[0] = first_cluster.concat(clusters.pop())
+        }
+
+        return clusters;
+    },
 
     count_values_in_table(table, no_data_value) {
         let counts = {};
@@ -29813,6 +30084,7 @@ module.exports = {
             return geojson.features[0].geometry.coordinates
                 .map(coors => coors[0]);
         } else if (geojson.geometry) { // for individual feature
+            //console.log("returning geojson.geometry.coordinates:", geojson.geometry.coordinates);
             return geojson.geometry.coordinates;
         } else if (geojson.coordinates) { // for just the geometry
             return geojson.coordinates;
@@ -29837,7 +30109,14 @@ module.exports = {
         // convert possible inputs to a list of coordinates
         let coors;
         if (typeof geometry === 'string') { // stringified geojson
-            let geojson = JSON.parse(geometry);
+            let geojson;
+            try {
+                geojson = JSON.parse(geometry);
+            } catch (error) {
+                console.log("geojson", geojson);
+                console.error("[geoblaze.is_bbox] error:", error);
+                throw error;
+            }
             let geojson_coors = this.get_geojson_coors(geojson);
             if (geojson_coors.length === 1 && geojson_coors[0].length === 5) {
                 coors = geojson_coors[0];
@@ -29860,8 +30139,52 @@ module.exports = {
         return false;
     },
 
+    get_depth(geometry) {
+        let depth = 0;
+        let part = geometry;
+        while (Array.isArray(part)) {
+            depth++;
+            part = part[0];
+        }
+        return depth;
+    },
+
+    /**
+     * This function takes in an array of number pairs and combines where there's overlap
+     * @name 
+     * @param {Object} array of anything
+     * @returns {Object} array of index ranges
+     * @example
+     * let ranges = [ [0, 10], [10, 10], [20, 30], [30, 40] ];
+     * let merged_ranges = utils.merge_ranges(ranges);
+     * // merged_ranges
+     * // [ [0, 10], [20, 40] ]
+    */
+    merge_ranges(ranges) {
+        let number_of_ranges = ranges.length;
+        if (number_of_ranges > 0) {
+            let first_range = ranges[0];
+            let previous_end = first_range[1];
+            let previous_start = first_range[0];
+            let result = [first_range];
+            for (let i = 1; i < number_of_ranges; i++) {
+                let temp_range = ranges[i];
+                let [start, end] = temp_range;
+                if (start <= previous_end) {
+                    result[result.length - 1][1] = end;
+                } else {
+                    result.push(temp_range);
+                }
+                previous_end = end; 
+                previous_start = start;
+           }
+           return result;
+        }
+    },
+
     is_polygon(geometry) {
 
+        //console.log("typeof geometry:", typeof geometry);
         // convert to a geometry
         let coors;
         if (Array.isArray(geometry)) {
@@ -29875,45 +30198,30 @@ module.exports = {
 
         if (coors) {
 
+            //console.log("coors exist", coors);
             // iterate through each geometry and make sure first and
             // last point are the same
-            let is_polygon_array = true;
-            coors.forEach(part => {
-                let first_vertex = part[0];
-                let last_vertex = part[part.length - 1]
-                if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
-                    is_polygon_array = false;
-                }
-            });
-            return is_polygon_array;
-        }
 
-        return false;
-    },
-
-    get_bounding_box(geometry) {
-
-        //let [xmin, ymin, xmax, ymax] = bbox(polygon(geometry));
-        let first_point = geometry[0][0];
-        let xmin = first_point[0],
-            ymin = first_point[1],
-            xmax = first_point[0],
-            ymax = first_point[1];
-
-        geometry.forEach(part => {
-
-            for (var i = 0; i < part.length; i++) {
-                let point = part[i];
-                if (point[0] < xmin) xmin = point[0];
-                if (point[1] < ymin) ymin = point[1];
-                if (point[0] > xmax) xmax = point[0];
-                if (point[1] > ymax) ymax = point[1];
+            let depth = this.get_depth(coors);
+            if (depth === 4) {
+                return coors.map(() => this.is_polygon);
+            } else if (depth === 3) {
+                let is_polygon_array = true;
+                coors.forEach(part => {
+                    let first_vertex = part[0];
+                    let last_vertex = part[part.length - 1]
+                    if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
+                        is_polygon_array = false;
+                    }
+                });
+                return is_polygon_array;
             }
-
-        });
-
-        return { xmin, ymin, xmax, ymax };
+        } else {
+            return false;
+        }
     },
+
+    get_bounding_box,
 
     // function to convert two points into a 
     // representation of a line
@@ -29948,9 +30256,25 @@ module.exports = {
         }
     },
 
+    get_slope_of_line(line) {
+        // assuming ax + by = c
+        // http://www.purplemath.com/modules/solvelit2.htm
+        return -1 * line.a / line.b;
+    },
+
+    get_slope_of_line_segment(line_segment) {
+        let [ [x1, y1], [x2, y2] ] = line_segment;
+        // make sure slope goes from left most to right most, so order of points doesn't matter
+        if (x2 > x1) {
+            return y2 - y1 / x2 - x1;
+        } else {
+            return y1 - y2 / x1 - x2;
+        }
+    },
+
     sum(values) {
         return values.reduce((a, b) => a + b);
     }
 }
 
-},{"@turf/bbox":2,"@turf/combine":3,"@turf/helpers":4,"underscore":110}]},{},[1]);
+},{"@turf/combine":2,"@turf/helpers":3,"underscore":110}]},{},[1]);
