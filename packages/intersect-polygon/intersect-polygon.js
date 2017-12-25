@@ -2,7 +2,7 @@
 
 let turf_featureCollection = require("@turf/helpers").featureCollection;
 let turf_lineString = require("@turf/helpers").lineString;
-let fs = require("fs");
+//let fs = require("fs");
 
 let _ = require('underscore');
 
@@ -87,6 +87,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
         image_lines.push(line);
     }
     if (debug_level >= 1) console.log("image_lines.length:", image_lines.length);
+    if (debug_level >= 1) console.log("image_lines[0]:", image_lines[0]);
 
 
     // collapse geometry down to a list of edges
@@ -125,13 +126,9 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
         // get vertices that make up an edge and convert that to a line
         let edge = edges[i];
 
-        //if (i === 32) { console.log("i32 edge:", edge);}
- 
-
         let [start_point, end_point] = edge;
         let [ x1, y1 ] = start_point;
         let [ x2, y2 ] = end_point;
-        //if (debug_level >= 1) console.log("[start_point, end_point]:", start_point, end_point);
 
         let direction = Math.sign(y2 - y1);
         let horizontal = y1 === y2;
@@ -143,6 +140,15 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
         let edge_ymin = Math.min(y1, y2);
         let edge_ymax = Math.max(y1, y2);
+        
+        if (debug_level >= 2) {
+            console.log("\nedge", i, ":", edge);
+            console.log("direction:", direction);
+            console.log("horizontal:", horizontal);
+            console.log("vertical:", vertical);
+            console.log("edge_ymin:", edge_ymin);
+            console.log("edge_ymax:", edge_ymax);
+        }        
 
         let start_lng, start_lat, end_lat, end_lng;
         if (x1 < x2) {
@@ -171,9 +177,14 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             row_end = y_1;
         }
 
+
         row_start = force_within(row_start, 0, num_rows - 1);
         row_end = force_within(row_end, 0, num_rows - 1);
 
+        if (debug_level >=1) {
+          console.log("row_start:", row_start);
+          console.log("row_end:", row_end);
+        }
         // iterate through image lines within the change in y of
         // the edge line and find all intersections
         for (let j = row_start; j < row_end + 1; j++) {
@@ -188,6 +199,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
             // because you know x is zero in ax + by = c, so by = c and b = -1, so -1 * y = c or y = -1 * c
             let image_line_y = -1 * image_line.c;
+            //if (j === row_start) console.log("image_line_y:", image_line_y);
 
             let xmin_on_line, xmax_on_line;
             if (horizontal) {
@@ -202,8 +214,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                 }
             } else if (vertical) {
                 /* we have to have a seprate section for vertical bc of floating point arithmetic probs with get_inter..." */
-                //if(i==32) console.log("vertical line i 32", image_line_y);
-                if (image_line_y >= edge_ymin && image_line_y < edge_ymax) {
+                if (image_line_y >= edge_ymin && image_line_y <= edge_ymax) {
                     xmin_on_line = start_lng;
                     xmax_on_line = end_lng;
                 }
@@ -211,7 +222,6 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                 try {
                     xmin_on_line = xmax_on_line = get_intersection_of_two_lines(edge_line, image_line).x;
                 } catch (error) {
-                    console.log("slope of edge", edge, ":", slope);
                     console.log("j:", j);
                     console.log("edge:", edge);
                     console.log("image_line_y:", image_line_y);
@@ -247,7 +257,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
       let line_strings = [];
       intersections_by_row.map((segments_in_row, row_index) => {
-          //console.log("segments in row.length:", segments_in_row.length);
+          if (debug_level >= 2) console.log(row_index, "segments_in_row.length:", segments_in_row.length);
           if (segments_in_row.length > 0) {
               //console.log("\n\nsegments in row:", segments_in_row);
               let clusters = cluster(segments_in_row, "index", 1, number_of_edges);
@@ -262,7 +272,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                   console.log("segments_in_row:", JSON.stringify(segments_in_row));
                   console.log("clusters:", clusters);
                   console.log("categorized:", categorized);
-                  throw Error("throughs.length is odd with " + throughs.length);
+                  throw Error("throughs.length for " + row_index + " is odd with " + throughs.length);
               }
  
               //console.log("throughs:", throughs);
@@ -321,7 +331,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
       
       if (debug_level >= 1) {
           let fc = turf_featureCollection(line_strings);
-          fs.writeFileSync("/tmp/lns" + edges_index + ".geojson", JSON.stringify(fc));
+          //fs.writeFileSync("/tmp/lns" + edges_index + ".geojson", JSON.stringify(fc));
       }
   });
 }
