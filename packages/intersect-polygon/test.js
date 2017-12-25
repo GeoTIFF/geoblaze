@@ -64,14 +64,14 @@ let test = () => {
         describe("Test intersection calculations for Country with Multiple Rings", function() {
             this.timeout(1000000);
             it("Got correct sum", () => {
-                return load(url).then(georaster => {
+                return load(url_to_data + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_30_40.tif").then(georaster => {
                     return fetch(url_to_geojson)
                     .then(response => response.json())
                     .then(country => {
                         let number_of_intersecting_pixels = 0;
                         let geom = convert_geometry('polygon', country);
                         intersect_polygon(georaster, geom, () => number_of_intersecting_pixels++);
-                        expect(number_of_intersecting_pixels).to.equal(106);
+                        expect(number_of_intersecting_pixels).to.equal(261);
                     });
                 });
             });
