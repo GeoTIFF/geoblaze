@@ -89,3 +89,6 @@ data/mapspam/*.zip
 
 # accidental geojsons that appear in directory
 *.geojson
+
+# old versions of files
+*.old
