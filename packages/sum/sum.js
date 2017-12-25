@@ -66,10 +66,10 @@ function sum(georaster, geom, test) {
             });
 
             if (sums.length > 0) return sums;
-            else throw 'No Values were found in the given geometry';
+            else return [0];
             
         } else {
-            throw 'Non-Bounding Box geometries are currently not supported.'
+            throw "Sum couldn't identify geometry"
         }            
     } catch(e) {
         console.error(e);
