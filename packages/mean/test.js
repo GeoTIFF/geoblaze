@@ -15,7 +15,7 @@ let polygon = [[
     [85.078125, 21.166483858206583], [86.044921875, 20.838277806058933], [86.98974609375, 22.49225722008518],
     [85.58349609375, 24.54712317973075], [84.6826171875, 23.36242859340884], [83.12255859375, 22.49225722008518]
 ]];
-let expected_polygon_value = 1825;
+let expected_polygon_value = 1826.74;
 
 let polygon_geojson = `{ 
     "type": "FeatureCollection",
@@ -37,7 +37,7 @@ let polygon_geojson = `{
          }
     ]
 }`
-let expected_polygon_geojson_value = 1825;
+let expected_polygon_geojson_value = 1826.74 ;
 
 let test = () => {
     describe('Gio Mean Feature', function() {
