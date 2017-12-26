@@ -59,25 +59,64 @@ function get_bounding_box(geometry) {
     return { xmin, ymin, xmax, ymax };
 }
 
+function cluster(items, new_cluster_test) {
+    try {
+        let number_of_items = items.length;
+        let clusters = [];
+        let cluster = [];
+        for (let i = 0; i < number_of_items; i++) {
+            let item = items[i];
+            cluster.push(item);
+            if (new_cluster_test(item)) {
+                clusters.push(cluster);
+                cluster = [];
+            }
+        }
+        
+        if (cluster.length > 0) clusters.push(cluster);
+        
+        return clusters;
+    } catch (error) {
+        console.error("[cluster]:", error);
+    }
+}
 
+function cluster_line_segments(line_segments, number_of_edges, debug) {
+    
+    try {
+        
+        let clusters = cluster(line_segments, s => s.ends_off_line);
+        
+        let number_of_clusters = clusters.length;
+        
+        if (debug) console.log("number_of_clusters", number_of_clusters);
+        
+        if (number_of_clusters >= 2) {
+            
+            let first_cluster = clusters[0];
+            let first_segment = first_cluster[0];
+            let last_cluster = _.last(clusters);
+            let last_segment = _.last(last_cluster);
+            
+            if (
+                last_segment.index === number_of_edges - 1
+                && first_segment.index === 0
+                && last_segment.ends_on_line
+            ) {
+                clusters[0] = clusters.pop().concat(first_cluster);
+            }
+            
+        }
+        
+        return clusters;  
+        
+    } catch (error) {
+        console.error("[cluster_line_segments]", error);
+    }
+    
+}
 
 module.exports = {
-
-    bifurcate(items, testing) {
-
-        let test_function = typeof testing === "function" ? testing : typeof testing === "string" ? item => item[testing] : null;
-
-        let trues = [];
-        let falses = [];
-        let items_length = items.length;
-        for (let i = 0; i < items_length; i++) {
-            let item = items[i];
-            if (test_function(item)) trues.push(item);
-            else falses.push(item);
-        }
-        return [trues, falses];
-    },
-
 
     /**
      * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
@@ -114,79 +153,97 @@ module.exports = {
      * @param {Object} edges
     */ 
     categorize_intersection(segments) {
-        //console.log("categorize_intersection:", segments);
-        let through, end, xmin, xmax;
+        try {
+            
+    
+            let through, end, xmin, xmax;
+    
+            let n = segments.length;
 
-        let n = segments.length;
-        let first = segments[0];
-
-        if (n === 1) {
-            through = true;
-            xmin = first.xmin;
-            xmax = first.xmax;
-        } else /* n > 1 */ {
-            let last = segments[n - 1];
-            through = first.direction === last.direction;
-            xmin = Math.min(first.xmin, last.xmin); 
-            xmax = Math.max(first.xmax, last.xmax);
+            let first = segments[0];
+    
+            if (n === 1) {
+                through = true;
+                xmin = first.xmin;
+                xmax = first.xmax;
+            } else /* n > 1 */ {
+                let last = segments[n - 1];
+                through = first.direction === last.direction;
+                xmin = Math.min(first.xmin, last.xmin); 
+                xmax = Math.max(first.xmax, last.xmax);
+            }
+    
+            if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
+                console.error("segments:", segments);
+                throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
+            }
+    
+            return { xmin, xmax, through };
+            
+        } catch (error) {
+            
+            console.error("[categorize_intersection] segments:", segments);
+            console.error("[categorize_intersection]", error);
+            throw error;
         }
 
-        if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
-            console.error("segments:", segments);
-            throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
-        }
-
-        return { xmin, xmax, through };
     },
 
+   
+   /* 
+    cluster(segments, wrap_number) {
+        
+        try {
 
-    /**
-     * This function clusters an array of items based on a distance.
-     * It is ordered however so the items must already be sorted by the property
-     * @name cluster
-     * @param {Object} Array of Objects
-     * @param {string} name_of_property
-     * @param {number} threshold
-     * @param {number} wrap-around value, at which to check zero, too
-     * @returns {Object} 2-dimensional array of items, clustered by distance
-     * @example
-     * let objs = [{x: 3}, {x: 4}, {x: 5}, {x: 1000}, {x: 1002}];
-     * let actual = utils.cluster(objs, "x", 1);
-    */
-    cluster(items, name_of_property, threshold, wrap_number) {
-        let number_of_items = items.length;
-        let clusters = [];
-        let cluster = [];
-        let previous_value;
-        for (let i = 0; i < number_of_items; i++) {
-            let item = items[i];
-            let value = item[name_of_property];
-            let number_in_cluster = cluster.length;
-            if (number_in_cluster === 0) {
-                cluster.push(item);
-            } else /* assuming > 0 */ {
-                if (value >= previous_value - threshold && value <= previous_value + threshold) {
-                    cluster.push(item);
+            //console.log("starting cluster_line_segments with ", JSON.stringify(segments));
+            
+            let number_of_segments = segments.length;
+            
+            // if don't have any segments, just skip it all and return a blank array
+            if (number_of_segments === 0) return [];
+
+            let clusters = [];
+            let cluster = [];
+
+            for (let i = 1; i < number_of_segments; i++) {
+                
+                let current = segments[i];
+                cluster.push(current);
+                
+                if (current.ends_on_line === false)
+                    clusters.push(cluster);
+                    cluster = [];
+                }
+        
+            }
+            
+            if (cluster.length > 0) {
+                let last_cluster = _.last(cluster);
+                if (last_cluster.index === wrap_number - 1 && clusters[0][0].index === 0 && _.last(cluster).ends_on_line) {
+                    clusters[0] = cluster.concat(clusters[0]);
                 } else {
                     clusters.push(cluster);
-                    cluster = [ item ];
                 }
             }
-            previous_value = value;
+            
+            if (clusters.length === 0) {
+                console.error("[cluster_line_segments] segments", segments)
+                console.error("[cluster_line_segments] clusters", clusters);
+                throw Error("[cluster_line_segments] failed to parse clusters");
+            }
+    
+            return clusters;
+            
+        } catch (error) {
+            
+            console.error("[cluster_line_segments]", segments);
+            throw error;
+            
         }
-        if (cluster.length > 0) clusters.push(cluster);
-
-        // check if should merge first and last cluster
-        let first_cluster = clusters[0];
-        //console.log("pre:", previous_value);
-        //console.log("wrap_number - threshold:", wrap_number - threshold);
-        //console.log("first_cluster:", first_cluster);
-        if (wrap_number && previous_value >= wrap_number - threshold && first_cluster[0][name_of_property] === 0) {
-            clusters[0] = first_cluster.concat(clusters.pop())
-        }
-
-        return clusters;
+        
+ 
     },
+    */
 
     count_values_in_table(table, no_data_value) {
         let counts = {};
@@ -413,6 +470,10 @@ module.exports = {
             return y1 - y2 / x1 - x2;
         }
     },
+    
+    cluster,
+    
+    cluster_line_segments,
 
     sum(values) {
         return values.reduce((a, b) => a + b);

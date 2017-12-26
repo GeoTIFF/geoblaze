@@ -71,21 +71,6 @@ let test = () => {
  
         });
     });
-    describe("Test Bifurcation", function() {
-        describe("For Array of Sample Objects", function() {
-            it("Got Correct Split", () => {
-                let objs = [{"name": "Canada"}, {"name": "United States"}, {"name": "South Sudan"}, {"name": "Croatia"}];
-                let [countries_that_start_with_c, others] = utils.bifurcate(objs, obj => obj.name.startsWith("C"));
-                let actual = JSON.stringify(countries_that_start_with_c);
-                expect(actual).to.equal('[{"name":"Canada"},{"name":"Croatia"}]');
-
-                objs = [{keep: true}, {keep: false}, {keep: true}, {keep: false}];
-                let [kept, thrown_away] = utils.bifurcate(objs, "keep");
-                expect(kept).to.have.lengthOf(2);
-                expect(thrown_away).to.have.lengthOf(2);
-            });
-        });
-    });
     describe("Test Get Depth", function() {
         describe("For Multipolygon", function() {
             this.timeout(1000000);
@@ -104,23 +89,34 @@ let test = () => {
             });
         });
     });
-    describe("Test Clustering", function() {
+    describe("Test Clustering Of Line Segments", function() {
         describe("For array of objects holding information about intersections", function() {
             it("Got Correct Split", () => {
-                let objs = [{x: 3}, {x: 4}, {x: 5}, {x: 1000}, {x: 1002}];
-                let actual = utils.cluster(objs, "x", 1);
-                let actual_number_of_clusters = actual.length;
-                expect(actual_number_of_clusters).to.equal(3);
-                expect(actual[0].length).to.equal(3);
-                expect(actual[1].length).to.equal(1);
-                expect(actual[2].length).to.equal(1);
+                
+                let segments, computed, computed_number_of_clusters;
+                
+                segments = [{ends_off_line: true}, {ends_off_line: false}, {ends_off_line: false}, {ends_off_line: true}];
+                computed = utils.cluster(segments, s => s.ends_off_line);
+                computed_number_of_clusters = computed.length;
+                expect(computed_number_of_clusters).to.equal(2);
+                expect(computed[0].length).to.equal(1);
+                expect(computed[1].length).to.equal(3);
 
-                objs = [{x: 0}, {x: 1}, {x: 1000}, {x: 1002}];
-                actual = utils.cluster(objs, "x", 1, 1003);
-                actual_number_of_clusters = actual.length;
-                expect(actual_number_of_clusters).to.equal(2);
-                expect(actual[0].length).to.equal(3);
-                expect(actual[1].length).to.equal(1);
+                segments = [{ends_off_line: true, index: 0}, {ends_off_line: false}, {ends_off_line: false}, {ends_off_line: false, index: 99}];
+                computed = utils.cluster(segments, s => s.ends_off_line);
+                console.log("computed:", computed);
+                computed_number_of_clusters = computed.length;
+                expect(computed_number_of_clusters).to.equal(2);
+                expect(computed[0].length).to.equal(1);
+                expect(computed[1].length).to.equal(3);
+                
+                segments = [{ends_off_line: true, index: 0}, {ends_off_line: false}, {ends_off_line: false}, {ends_off_line: false, ends_on_line: true, index: 99}];
+                computed = utils.cluster_line_segments(segments, 100, true);
+                console.log("computed:", computed);
+                computed_number_of_clusters = computed.length;
+                expect(computed_number_of_clusters).to.equal(1);
+                expect(computed[0].length).to.equal(4);
+                
             });
         });
     });
