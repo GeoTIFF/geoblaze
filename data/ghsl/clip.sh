@@ -8,7 +8,7 @@ geojsons="../gadm/geojsons/";
 admins="admins/";
 
 #https://stackoverflow.com/questions/8880603/loop-through-an-array-of-strings-in-bash
-declare -a country_names=("Croatia" "Cyprus" "Lebanon" "Macedonia")
+declare -a country_names=("Croatia" "Cyprus" "Jamaica" "Lebanon" "Macedonia" "Nicaragua" "Uruguay")
 
 for name in "${country_names[@]}"
 do
