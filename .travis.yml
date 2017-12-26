@@ -6,8 +6,10 @@ addons:
 before_script:
     - npm run setup-gadm;
     - npm run trim-gadm;
+    - df -H
     - npm run setup-ghsl;
     - npm run trim-ghsl;
+    - df -H
     - npm run setup-mapspam;
 cache:
   directories:
