@@ -11,6 +11,7 @@
     "build-everything": "npm run babel && npm run browserify && npm run build && npm run build-docs",
     "setup-gadm": "cd data/gadm && bash download_gadm.sh && node extract_countries.js",
     "setup-ghsl": "cd data/ghsl && bash download_pop_data.sh && bash tile.sh && bash clip.sh",
+    "setup-ghsl-for-travis-ci": "cd data/ghsl && bash download_data_for_travis_ci",
     "setup-mapspam": "cd data/mapspam && bash download_mapspam.sh && bash tile.sh",
     "test": "http-server -p 3000 & ./node_modules/.bin/mocha --reporter spec",
     "test-docs": "npm run build-docs && cd docs && http-server",
