@@ -71,7 +71,7 @@ let test = () => {
                         let number_of_intersecting_pixels = 0;
                         let geom = convert_geometry('polygon', country);
                         intersect_polygon(georaster, geom, () => number_of_intersecting_pixels++);
-                        expect(number_of_intersecting_pixels).to.equal(261);
+                        expect(number_of_intersecting_pixels).to.equal(281);
                     });
                 });
             });
