@@ -125,16 +125,6 @@
               
                 
                 <li><a
-                  href='#cluster'
-                  class="">
-                  cluster
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
                   href='#couple'
                   class="">
                   couple
@@ -853,108 +843,6 @@ all the pixels for each band in the raster.</p>
 
   
 
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='cluster'>
-      cluster
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>This function clusters an array of items based on a distance.
-It is ordered however so the items must already be sorted by the property</p>
-
-
-  <div class='pre p1 fill-light mt0'>cluster</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>Array</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    of Objects
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>name_of_property</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>threshold</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>wrap-around</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
-	    value, at which to check zero, too
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        2-dimensional array of items, clustered by distance
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Example</div>
-    
-      
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> objs = [{<span class="hljs-attr">x</span>: <span class="hljs-number">3</span>}, {<span class="hljs-attr">x</span>: <span class="hljs-number">4</span>}, {<span class="hljs-attr">x</span>: <span class="hljs-number">5</span>}, {<span class="hljs-attr">x</span>: <span class="hljs-number">1000</span>}, {<span class="hljs-attr">x</span>: <span class="hljs-number">1002</span>}];
-<span class="hljs-keyword">let</span> actual = utils.cluster(objs, <span class="hljs-string">"x"</span>, <span class="hljs-number">1</span>);</pre>
-    
   
 
   

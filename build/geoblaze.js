@@ -2159,23 +2159,59 @@ function get_bounding_box(geometry) {
     return { xmin: xmin, ymin: ymin, xmax: xmax, ymax: ymax };
 }
 
-module.exports = {
-    bifurcate: function bifurcate(items, testing) {
-
-        var test_function = typeof testing === "function" ? testing : typeof testing === "string" ? function (item) {
-            return item[testing];
-        } : null;
-
-        var trues = [];
-        var falses = [];
-        var items_length = items.length;
-        for (var i = 0; i < items_length; i++) {
+function cluster(items, new_cluster_test) {
+    try {
+        var number_of_items = items.length;
+        var clusters = [];
+        var _cluster = [];
+        for (var i = 0; i < number_of_items; i++) {
             var item = items[i];
-            if (test_function(item)) trues.push(item);else falses.push(item);
+            _cluster.push(item);
+            if (new_cluster_test(item)) {
+                clusters.push(_cluster);
+                _cluster = [];
+            }
         }
-        return [trues, falses];
-    },
 
+        if (_cluster.length > 0) clusters.push(_cluster);
+
+        return clusters;
+    } catch (error) {
+        console.error("[cluster]:", error);
+    }
+}
+
+function cluster_line_segments(line_segments, number_of_edges, debug) {
+
+    try {
+
+        var clusters = cluster(line_segments, function (s) {
+            return s.ends_off_line;
+        });
+
+        var number_of_clusters = clusters.length;
+
+        if (debug) console.log("number_of_clusters", number_of_clusters);
+
+        if (number_of_clusters >= 2) {
+
+            var first_cluster = clusters[0];
+            var first_segment = first_cluster[0];
+            var last_cluster = _.last(clusters);
+            var last_segment = _.last(last_cluster);
+
+            if (last_segment.index === number_of_edges - 1 && first_segment.index === 0 && last_segment.ends_on_line) {
+                clusters[0] = clusters.pop().concat(first_cluster);
+            }
+        }
+
+        return clusters;
+    } catch (error) {
+        console.error("[cluster_line_segments]", error);
+    }
+}
+
+module.exports = {
 
     /**
      * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
@@ -2210,82 +2246,94 @@ module.exports = {
      * @param {Object} edges
     */
     categorize_intersection: function categorize_intersection(segments) {
-        //console.log("categorize_intersection:", segments);
-        var through = void 0,
-            end = void 0,
-            xmin = void 0,
-            xmax = void 0;
+        try {
 
-        var n = segments.length;
-        var first = segments[0];
+            var through = void 0,
+                end = void 0,
+                xmin = void 0,
+                xmax = void 0;
 
-        if (n === 1) {
-            through = true;
-            xmin = first.xmin;
-            xmax = first.xmax;
-        } else /* n > 1 */{
-                var last = segments[n - 1];
-                through = first.direction === last.direction;
-                xmin = Math.min(first.xmin, last.xmin);
-                xmax = Math.max(first.xmax, last.xmax);
+            var n = segments.length;
+
+            var first = segments[0];
+
+            if (n === 1) {
+                through = true;
+                xmin = first.xmin;
+                xmax = first.xmax;
+            } else /* n > 1 */{
+                    var last = segments[n - 1];
+                    through = first.direction === last.direction;
+                    xmin = Math.min(first.xmin, last.xmin);
+                    xmax = Math.max(first.xmax, last.xmax);
+                }
+
+            if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
+                console.error("segments:", segments);
+                throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
             }
 
-        if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
-            console.error("segments:", segments);
-            throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
-        }
+            return { xmin: xmin, xmax: xmax, through: through };
+        } catch (error) {
 
-        return { xmin: xmin, xmax: xmax, through: through };
+            console.error("[categorize_intersection] segments:", segments);
+            console.error("[categorize_intersection]", error);
+            throw error;
+        }
     },
 
 
-    /**
-     * This function clusters an array of items based on a distance.
-     * It is ordered however so the items must already be sorted by the property
-     * @name cluster
-     * @param {Object} Array of Objects
-     * @param {string} name_of_property
-     * @param {number} threshold
-     * @param {number} wrap-around value, at which to check zero, too
-     * @returns {Object} 2-dimensional array of items, clustered by distance
-     * @example
-     * let objs = [{x: 3}, {x: 4}, {x: 5}, {x: 1000}, {x: 1002}];
-     * let actual = utils.cluster(objs, "x", 1);
-    */
-    cluster: function cluster(items, name_of_property, threshold, wrap_number) {
-        var number_of_items = items.length;
-        var clusters = [];
-        var cluster = [];
-        var previous_value = void 0;
-        for (var i = 0; i < number_of_items; i++) {
-            var item = items[i];
-            var value = item[name_of_property];
-            var number_in_cluster = cluster.length;
-            if (number_in_cluster === 0) {
-                cluster.push(item);
-            } else /* assuming > 0 */{
-                    if (value >= previous_value - threshold && value <= previous_value + threshold) {
-                        cluster.push(item);
-                    } else {
-                        clusters.push(cluster);
-                        cluster = [item];
-                    }
-                }
-            previous_value = value;
-        }
-        if (cluster.length > 0) clusters.push(cluster);
+    /* 
+     cluster(segments, wrap_number) {
+         
+         try {
+              //console.log("starting cluster_line_segments with ", JSON.stringify(segments));
+             
+             let number_of_segments = segments.length;
+             
+             // if don't have any segments, just skip it all and return a blank array
+             if (number_of_segments === 0) return [];
+              let clusters = [];
+             let cluster = [];
+              for (let i = 1; i < number_of_segments; i++) {
+                 
+                 let current = segments[i];
+                 cluster.push(current);
+                 
+                 if (current.ends_on_line === false)
+                     clusters.push(cluster);
+                     cluster = [];
+                 }
+         
+             }
+             
+             if (cluster.length > 0) {
+                 let last_cluster = _.last(cluster);
+                 if (last_cluster.index === wrap_number - 1 && clusters[0][0].index === 0 && _.last(cluster).ends_on_line) {
+                     clusters[0] = cluster.concat(clusters[0]);
+                 } else {
+                     clusters.push(cluster);
+                 }
+             }
+             
+             if (clusters.length === 0) {
+                 console.error("[cluster_line_segments] segments", segments)
+                 console.error("[cluster_line_segments] clusters", clusters);
+                 throw Error("[cluster_line_segments] failed to parse clusters");
+             }
+     
+             return clusters;
+             
+         } catch (error) {
+             
+             console.error("[cluster_line_segments]", segments);
+             throw error;
+             
+         }
+         
+       },
+     */
 
-        // check if should merge first and last cluster
-        var first_cluster = clusters[0];
-        //console.log("pre:", previous_value);
-        //console.log("wrap_number - threshold:", wrap_number - threshold);
-        //console.log("first_cluster:", first_cluster);
-        if (wrap_number && previous_value >= wrap_number - threshold && first_cluster[0][name_of_property] === 0) {
-            clusters[0] = first_cluster.concat(clusters.pop());
-        }
-
-        return clusters;
-    },
     count_values_in_table: function count_values_in_table(table, no_data_value) {
         var counts = {};
         run_on_table_of_values(table, no_data_value, function (value) {
@@ -2337,7 +2385,6 @@ module.exports = {
             });
         } else if (geojson.geometry) {
             // for individual feature
-            //console.log("returning geojson.geometry.coordinates:", geojson.geometry.coordinates);
             return geojson.geometry.coordinates;
         } else if (geojson.coordinates) {
             // for just the geometry
@@ -2364,14 +2411,7 @@ module.exports = {
         var coors = void 0;
         if (typeof geometry === 'string') {
             // stringified geojson
-            var geojson = void 0;
-            try {
-                geojson = JSON.parse(geometry);
-            } catch (error) {
-                console.log("geojson", geojson);
-                console.error("[geoblaze.is_bbox] error:", error);
-                throw error;
-            }
+            var geojson = JSON.parse(geometry);
             var geojson_coors = this.get_geojson_coors(geojson);
             if (geojson_coors.length === 1 && geojson_coors[0].length === 5) {
                 coors = geojson_coors[0];
@@ -2448,7 +2488,6 @@ module.exports = {
     is_polygon: function is_polygon(geometry) {
         var _this = this;
 
-        //console.log("typeof geometry:", typeof geometry);
         // convert to a geometry
         var coors = void 0;
         if (Array.isArray(geometry)) {
@@ -2462,7 +2501,6 @@ module.exports = {
 
         if (coors) {
 
-            //console.log("coors exist", coors);
             // iterate through each geometry and make sure first and
             // last point are the same
 
@@ -2546,6 +2584,12 @@ module.exports = {
             return y1 - y2 / x1 - x2;
         }
     },
+
+
+    cluster: cluster,
+
+    cluster_line_segments: cluster_line_segments,
+
     sum: function sum(values) {
         return values.reduce(function (a, b) {
             return a + b;
@@ -4494,9 +4538,8 @@ var _ = __webpack_require__(5);
 
 var get = __webpack_require__(7);
 var utils = __webpack_require__(3);
-var bifurcate = utils.bifurcate;
 var categorize_intersection = utils.categorize_intersection;
-var cluster = utils.cluster;
+var cluster_line_segments = utils.cluster_line_segments;
 var couple = utils.couple;
 var force_within = utils.force_within;
 var merge_ranges = utils.merge_ranges;
@@ -4574,6 +4617,7 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
         image_lines.push(line);
     }
     if (debug_level >= 1) console.log("image_lines.length:", image_lines.length);
+    if (debug_level >= 1) console.log("image_lines[0]:", image_lines[0]);
 
     // collapse geometry down to a list of edges
     // necessary for multi-part geometries
@@ -4619,9 +4663,6 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
             // get vertices that make up an edge and convert that to a line
             var edge = edges[i];
 
-            //if (i === 32) { console.log("i32 edge:", edge);}
-
-
             var _edge2 = _slicedToArray(edge, 2),
                 start_point = _edge2[0],
                 end_point = _edge2[1];
@@ -4633,7 +4674,6 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
             var _end_point = _slicedToArray(end_point, 2),
                 x2 = _end_point[0],
                 y2 = _end_point[1];
-            //if (debug_level >= 1) console.log("[start_point, end_point]:", start_point, end_point);
 
             var direction = Math.sign(y2 - y1);
             var horizontal = y1 === y2;
@@ -4645,6 +4685,15 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
 
             var edge_ymin = Math.min(y1, y2);
             var edge_ymax = Math.max(y1, y2);
+
+            if (debug_level >= 2) {
+                console.log("\nedge", i, ":", edge);
+                console.log("direction:", direction);
+                console.log("horizontal:", horizontal);
+                console.log("vertical:", vertical);
+                console.log("edge_ymin:", edge_ymin);
+                console.log("edge_ymax:", edge_ymax);
+            }
 
             var start_lng = void 0,
                 start_lat = void 0,
@@ -4693,6 +4742,10 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
             row_start = force_within(row_start, 0, num_rows - 1);
             row_end = force_within(row_end, 0, num_rows - 1);
 
+            if (debug_level >= 1) {
+                console.log("row_start:", row_start);
+                console.log("row_end:", row_end);
+            }
             // iterate through image lines within the change in y of
             // the edge line and find all intersections
             for (var j = row_start; j < row_end + 1; j++) {
@@ -4706,6 +4759,11 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
 
                 // because you know x is zero in ax + by = c, so by = c and b = -1, so -1 * y = c or y = -1 * c
                 var image_line_y = -1 * image_line.c;
+                //if (j === row_start) console.log("image_line_y:", image_line_y);
+
+                var starts_on_line = y1 === image_line_y;
+                var ends_on_line = y2 === image_line_y;
+                var ends_off_line = !ends_on_line;
 
                 var xmin_on_line = void 0,
                     xmax_on_line = void 0;
@@ -4721,11 +4779,16 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
                     }
                 } else if (vertical) {
                     /* we have to have a seprate section for vertical bc of floating point arithmetic probs with get_inter..." */
-                    //if(i==32) console.log("vertical line i 32", image_line_y);
-                    if (image_line_y >= edge_ymin && image_line_y < edge_ymax) {
+                    if (image_line_y >= edge_ymin && image_line_y <= edge_ymax) {
                         xmin_on_line = start_lng;
                         xmax_on_line = end_lng;
                     }
+                } else if (starts_on_line) {
+                    // we know that the other end is not on the line because then it would be horizontal
+                    xmin_on_line = xmax_on_line = x1;
+                } else if (ends_on_line) {
+                    // we know that the other end is not on the line because then it would be horizontal
+                    xmin_on_line = xmax_on_line = x2;
                 } else {
                     try {
                         xmin_on_line = xmax_on_line = get_intersection_of_two_lines(edge_line, image_line).x;
@@ -4752,6 +4815,11 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
                         direction: direction,
                         index: i,
                         edge: edge,
+                        ends_on_line: ends_on_line,
+                        ends_off_line: ends_off_line,
+                        horizontal: horizontal,
+                        starts_on_line: starts_on_line,
+                        vertical: vertical,
                         xmin: xmin_on_line,
                         xmax: xmax_on_line,
                         image_line_y: image_line_y
@@ -4764,26 +4832,29 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
 
         var line_strings = [];
         intersections_by_row.map(function (segments_in_row, row_index) {
-            //console.log("segments in row.length:", segments_in_row.length);
+            if (debug_level >= 2) console.log(row_index, "segments_in_row.length:", segments_in_row.length);
             if (segments_in_row.length > 0) {
                 //console.log("\n\nsegments in row:", segments_in_row);
-                var clusters = cluster(segments_in_row, "index", 1, number_of_edges);
+                var clusters = cluster_line_segments(segments_in_row, number_of_edges);
                 //console.log('clusters:', clusters);
                 var categorized = clusters.map(categorize_intersection);
                 //console.log("categorized:", categorized);
 
-                var _bifurcate = bifurcate(categorized, "through", 1),
-                    _bifurcate2 = _slicedToArray(_bifurcate, 2),
-                    throughs = _bifurcate2[0],
-                    nonthroughs = _bifurcate2[1];
+                var _$partition = _.partition(categorized, function (item) {
+                    return item.through;
+                }),
+                    _$partition2 = _slicedToArray(_$partition, 2),
+                    throughs = _$partition2[0],
+                    nonthroughs = _$partition2[1];
 
                 if (throughs.length % 2 === 1) {
-                    console.log("first segment:", JSON.stringify(segments_in_row));
+                    console.log("row_index:", row_index);
                     console.log("segments_in_row.length:", segments_in_row.length);
                     console.log("segments_in_row:", JSON.stringify(segments_in_row));
+                    console.log("clusters.length:", clusters.length);
                     console.log("clusters:", clusters);
                     console.log("categorized:", categorized);
-                    throw Error("throughs.length is odd with " + throughs.length);
+                    throw Error("throughs.length for " + row_index + " is odd with " + throughs.length);
                 }
 
                 //console.log("throughs:", throughs);
@@ -31690,22 +31761,16 @@ function sum(georaster, geom, test) {
 
             // the third argument of intersect_polygon is a function which
             // is run on every value, we use it to increment the sum 
-            var passed = 0;
             intersect_polygon(georaster, geom, function (value, band_index) {
                 if (test === undefined || test(value)) {
-                    passed++;
-                    //console.log("value:", value);
                     if (sums[band_index]) {
                         sums[band_index] += value;
                     } else {
                         sums[band_index] = value;
                     }
-                    //console.log("sums[band_index] :", sums[band_index] );
                 }
             });
 
-            console.log("passed:", passed);
-            console.log("sums.length:", sums.length);
             if (sums.length > 0) return sums;else return [0];
         } else {
             throw "Sum couldn't identify geometry";
@@ -32374,8 +32439,14 @@ var get_histogram = function get_histogram(values, options) {
  * var histograms = geoblaze.histogram(georaster, geometry);
  */
 function get_histograms_for_raster(georaster, geom, options) {
+    var debug_level = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+
 
     try {
+
+        if (debug_level >= 2) {
+            console.log("starting get_histograms_for_raster");
+        }
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
