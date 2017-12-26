@@ -8,9 +8,8 @@ let _ = require('underscore');
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
-let bifurcate = utils.bifurcate;
 let categorize_intersection = utils.categorize_intersection;
-let cluster = utils.cluster;
+let cluster_line_segments = utils.cluster_line_segments;
 let couple = utils.couple;
 let force_within = utils.force_within;
 let merge_ranges = utils.merge_ranges;
@@ -201,6 +200,10 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             let image_line_y = -1 * image_line.c;
             //if (j === row_start) console.log("image_line_y:", image_line_y);
 
+            let starts_on_line = y1 === image_line_y;
+            let ends_on_line = y2 === image_line_y;
+            let ends_off_line = !ends_on_line;
+
             let xmin_on_line, xmax_on_line;
             if (horizontal) {
                 //console.log("horizontal line:", edge_y);
@@ -208,7 +211,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                 if (edge_y === image_line_y) {
                     //console.log("horizontal on line!:", edge_y);
                     xmin_on_line = start_lng;
-                    xmax_on_line = end_lng
+                    xmax_on_line = end_lng;
                 } else {
                     continue; // stop running calculations for this horizontal line because it doesn't intersect at all
                 }
@@ -218,6 +221,12 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                     xmin_on_line = start_lng;
                     xmax_on_line = end_lng;
                 }
+            } else if (starts_on_line) {
+                // we know that the other end is not on the line because then it would be horizontal
+                xmin_on_line = xmax_on_line = x1;
+            } else if (ends_on_line) {
+                // we know that the other end is not on the line because then it would be horizontal
+                xmin_on_line = xmax_on_line = x2;
             } else {
                 try {
                     xmin_on_line = xmax_on_line = get_intersection_of_two_lines(edge_line, image_line).x;
@@ -241,9 +250,14 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
                 //let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
                 //intersections_by_row[j].push(image_pixel_index);
                 intersections_by_row[j].push({
-                    direction: direction,
+                    direction,
                     index: i,
                     edge: edge,
+                    ends_on_line,
+                    ends_off_line,
+                    horizontal,
+                    starts_on_line,
+                    vertical,
                     xmin: xmin_on_line,
                     xmax: xmax_on_line,
                     image_line_y
@@ -260,16 +274,17 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
           if (debug_level >= 2) console.log(row_index, "segments_in_row.length:", segments_in_row.length);
           if (segments_in_row.length > 0) {
               //console.log("\n\nsegments in row:", segments_in_row);
-              let clusters = cluster(segments_in_row, "index", 1, number_of_edges);
+              let clusters = cluster_line_segments(segments_in_row, number_of_edges);
               //console.log('clusters:', clusters);
               let categorized = clusters.map(categorize_intersection);
               //console.log("categorized:", categorized);
-              let [ throughs, nonthroughs ] = bifurcate(categorized, "through", 1);
+              let [ throughs, nonthroughs ] = _.partition(categorized, item => item.through);
 
               if (throughs.length % 2 === 1) {
-                  console.log("first segment:", JSON.stringify(segments_in_row));
+                  console.log("row_index:", row_index);
                   console.log("segments_in_row.length:", segments_in_row.length);
                   console.log("segments_in_row:", JSON.stringify(segments_in_row));
+                  console.log("clusters.length:", clusters.length);
                   console.log("clusters:", clusters);
                   console.log("categorized:", categorized);
                   throw Error("throughs.length for " + row_index + " is odd with " + throughs.length);
