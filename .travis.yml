@@ -3,8 +3,6 @@ addons:
     packages:
     - gdal-bin
     - libgdal-dev
-before_install:
-    - pip install --user awscli
 before_script:
     - npm run setup-gadm;
     - npm run trim-gadm;
