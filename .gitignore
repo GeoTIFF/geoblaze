@@ -71,6 +71,7 @@ package-lock.json
 
 # downloaded test data
 data/*.xml
+data/gadm/license.txt
 data/gadm/*.cpg
 data/gadm/*.dbf
 data/gadm/*.prj

@@ -4,7 +4,6 @@ const shapefile = require("shapefile");
 const countries_to_extract = new Set([
   "Afghanistan",
   "Akrotiri and Dhekelia",
-  "Canada",
   "Croatia",
   "Cyprus",
   "Jamaica",

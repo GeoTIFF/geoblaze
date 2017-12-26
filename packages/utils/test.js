@@ -75,7 +75,7 @@ let test = () => {
         describe("For Multipolygon", function() {
             this.timeout(1000000);
             it("Get Correct Depth", () => {
-                let country_depths = [["Afghanistan", 3], ['Akrotiri and Dhekelia', 4], ["Canada", 4]];
+                let country_depths = [["Afghanistan", 3], ['Akrotiri and Dhekelia', 4]];
                 let promises = country_depths.map(country_depth => {
                     let [country, depth] = country_depth;
                     return fetch(url_to_geojsons + country + ".geojson")
@@ -132,7 +132,7 @@ let test = () => {
     });
     describe("Test is_polygon", function() {
         it("Got all trues", () => {
-            let countries = [{name: "Afghanistan", population: "34,660,000"}, {name: "Canada", population: "36,290,000"}];
+            let countries = [{name: "Afghanistan", population: "34,660,000"}];
             let promises = countries.map(country => {
                 return fetch(url_to_geojsons + country.name + ".geojson").then(response => response.json()).then(country_geojson => {
                     expect(utils.is_polygon(country_geojson)).to.equal(true);
