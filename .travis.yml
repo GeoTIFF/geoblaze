@@ -7,6 +7,7 @@ before_script:
     - npm run setup-gadm;
     - npm run setup-ghsl;
     - npm run setup-mapspam;
+    - npm run trim-data;
 cache:
   directories:
     - "node_modules"

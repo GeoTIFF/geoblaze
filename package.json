@@ -13,6 +13,7 @@
     "setup-mapspam": "cd data/mapspam && bash download_mapspam.sh && bash tile.sh",
     "test": "http-server -p 3000 & ./node_modules/.bin/mocha --reporter spec",
     "test-docs": "npm run build-docs && cd docs && http-server",
+    "trim-data": "cd data && bash clear_for_travis_ci.sh",
     "start": "node test-app.js"
   },
   "repository": {
