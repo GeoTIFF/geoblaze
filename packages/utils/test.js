@@ -142,6 +142,7 @@ let test = () => {
                     console.log("arcgisjson:", JSON.stringify(arcgisjson).substring(0, 100) + "...");
                     expect(utils.is_polygon(geojson)).to.equal(true);
                     expect(utils.is_polygon(arcgisjson)).to.equal(true);
+                    expect(utils.is_polygon(arcgisjson.geometry)).to.equal(true);
                 });
             });
             return Promise.all(promises);

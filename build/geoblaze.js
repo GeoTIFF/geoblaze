@@ -2480,8 +2480,8 @@ module.exports = {
         if (debug) console.log("starting is_esri_json with", input);
         var input_type = typeof input === 'undefined' ? 'undefined' : _typeof(input);
         var obj = input_type === "string" ? JSON.parse(input) : input_type === "object" ? input : null;
-        if (obj.geometry) {
-            var geometry = obj.geometry;
+        var geometry = obj.geometry ? obj.geometry : obj;
+        if (geometry) {
             if (geometry.rings || geometry.x && geometry.y) {
                 try {
                     if (ArcGIS.parse(obj)) {

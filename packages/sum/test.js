@@ -262,8 +262,10 @@ let test = () => {
                             let [geojson, arcgis_json] = jsons;
                             let value_via_geojson = Number(sum(georaster, geojson)[0].toFixed(2));
                             let value_via_arcgis_json = Number(sum(georaster, arcgis_json)[0].toFixed(2));
+                            let value_via_arcgis_json_polygon = Number(sum(georaster, arcgis_json.geometry)[0].toFixed(2));
                             console.log("value_via_arcgis_json:", value_via_arcgis_json);
                             expect(value_via_geojson).to.equal(value_via_arcgis_json);
+                            expect(value_via_geojson).to.equal(value_via_arcgis_json_polygon);
                         });
                     });
                     return Promise.all(promises);
