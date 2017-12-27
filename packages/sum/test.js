@@ -2,6 +2,10 @@
 
 let _ = require("underscore");
 
+let utils = require("./../utils/utils");
+let fetch_json = utils.fetch_json;
+let fetch_jsons = utils.fetch_jsons;
+
 const fs = require("fs");
 
 let expect = require('chai').expect;
@@ -15,6 +19,7 @@ let bbox_rwanda = require("../../data/RwandaBufferedBoundingBox.json");
 
 let url_to_data = "http://localhost:3000/data/";
 let url_to_geojsons =  url_to_data + "gadm/geojsons/";
+let url_to_arcgis_jsons = url_to_data + "gadm/arcgis/";
 
 let url_to_population_raster_tile = url_to_data + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif";
 
@@ -245,6 +250,26 @@ let test = () => {
                 });
             });
         });
+        describe('Get Same Sum from GeoJSON and ESRI JSON', function() {
+            this.timeout(1000000);
+            it('Got Matching Value', () => {
+                let url_to_raster = url_to_data + "mapspam/spam2005v3r2_harvested-area_wheat_total.tiff";
+                return load(url_to_raster).then(georaster => {
+                    let country_names = ["Afghanistan", "Ukraine"];
+                    let promises = country_names.map(name => {
+                        return fetch_jsons([url_to_geojsons + name + ".geojson", url_to_arcgis_jsons + name + ".json"], true)
+                        .then(jsons => {
+                            let [geojson, arcgis_json] = jsons;
+                            let value_via_geojson = Number(sum(georaster, geojson)[0].toFixed(2));
+                            let value_via_arcgis_json = Number(sum(georaster, arcgis_json)[0].toFixed(2));
+                            console.log("value_via_arcgis_json:", value_via_arcgis_json);
+                            expect(value_via_geojson).to.equal(value_via_arcgis_json);
+                        });
+                    });
+                    return Promise.all(promises);
+                });
+            });
+        });
         describe('Get Sum from Polygon', function() {
             this.timeout(1000000);
             it('Got Correct Value', () => {
@@ -285,8 +310,7 @@ let test = () => {
             this.timeout(1000000);
             it("Got correct sum", () => {
                 return load(url).then(georaster => {
-                    return fetch(url_to_geojsons + "Akrotiri and Dhekelia.geojson")
-                    .then(response => response.json())
+                    return utils.fetch_json(url_to_geojsons + "Akrotiri and Dhekelia.geojson")
                     .then(country => {
                         let value = sum(georaster, country);
                         console.log("value:", value);
@@ -305,7 +329,7 @@ let test = () => {
         });
         describe("Test Super Simplified Albanian Polygon", function() {
             it("Finish calculation", () => {
-                return fetch(url_to_data + "gadm/derived/super-simplified-albanian-polygon.geojson").then(response => response.json()).then(feature => {
+                return utils.fetch_json(url_to_data + "gadm/derived/super-simplified-albanian-polygon.geojson").then(feature => {
                     return load(url_to_data + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif").then(georaster => {
                         let result = sum(georaster, turf_polygon(polygon))[0];
                         console.log("result:", result);
@@ -329,7 +353,7 @@ let test = () => {
                 //console.log("countries:", countries);
                 let promises = countries.map(country => {
                     //console.log("country:", country);
-                    return fetch(url_to_geojsons + country.name + ".geojson").then(response => response.json()).then(country_geojson => {
+                    return fetch_json(url_to_geojsons + country.name + ".geojson").then(country_geojson => {
                         //console.log("country_geojson:", country_geojson);
                         let country_bbox = turf_bbox(country_geojson);
                         //console.log("country_bbox:", country_bbox);
