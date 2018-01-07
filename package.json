@@ -62,6 +62,8 @@
     "path": "^0.12.7",
     "proj4": "^2.4.3",
     "request": "^2.81.0",
+    "terraformer": "^1.0.8",
+    "terraformer-arcgis-parser": "^1.0.5",
     "turf": "^3.0.14",
     "underscore": "^1.8.3",
     "webpack": "^3.5.4"

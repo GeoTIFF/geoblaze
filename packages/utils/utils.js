@@ -6,6 +6,27 @@ let combine = require('@turf/combine');
 
 let polygon = require("@turf/helpers").polygon;
 
+let in_browser = typeof window === 'object';
+let fetch = in_browser ? window.fetch : require('node-fetch');
+
+let ArcGIS = require('terraformer-arcgis-parser');
+
+
+function fetch_json(url) {
+    return fetch(url).then(response => response.json());
+}
+
+function fetch_jsons(urls, debug=false) {
+    if (debug) console.log("starting fetch_jsons with", urls);
+    try {
+        return Promise.all(urls.map(fetch_json));
+    } catch (error) {
+        console.error("urls:", urls);
+        console.error(error);
+        throw error;
+    }
+}
+
 /*
     Runs on each value in a table,
     represented by an array of rows.
@@ -81,7 +102,7 @@ function cluster(items, new_cluster_test) {
     }
 }
 
-function cluster_line_segments(line_segments, number_of_edges, debug) {
+function cluster_line_segments(line_segments, number_of_edges, debug=false) {
     
     try {
         
@@ -189,61 +210,13 @@ module.exports = {
 
     },
 
-   
-   /* 
-    cluster(segments, wrap_number) {
-        
-        try {
-
-            //console.log("starting cluster_line_segments with ", JSON.stringify(segments));
-            
-            let number_of_segments = segments.length;
-            
-            // if don't have any segments, just skip it all and return a blank array
-            if (number_of_segments === 0) return [];
-
-            let clusters = [];
-            let cluster = [];
-
-            for (let i = 1; i < number_of_segments; i++) {
-                
-                let current = segments[i];
-                cluster.push(current);
-                
-                if (current.ends_on_line === false)
-                    clusters.push(cluster);
-                    cluster = [];
-                }
-        
-            }
-            
-            if (cluster.length > 0) {
-                let last_cluster = _.last(cluster);
-                if (last_cluster.index === wrap_number - 1 && clusters[0][0].index === 0 && _.last(cluster).ends_on_line) {
-                    clusters[0] = cluster.concat(clusters[0]);
-                } else {
-                    clusters.push(cluster);
-                }
-            }
-            
-            if (clusters.length === 0) {
-                console.error("[cluster_line_segments] segments", segments)
-                console.error("[cluster_line_segments] clusters", clusters);
-                throw Error("[cluster_line_segments] failed to parse clusters");
-            }
-    
-            return clusters;
-            
-        } catch (error) {
-            
-            console.error("[cluster_line_segments]", segments);
-            throw error;
-            
+    convert_to_geojson_if_necessary(input, debug=false) {
+        if (this.is_esri_json(input, debug)) {
+            return this.toGeoJSON(input, debug);
+        } else {
+            return input;
         }
-        
- 
     },
-    */
 
     count_values_in_table(table, no_data_value) {
         let counts = {};
@@ -282,7 +255,9 @@ module.exports = {
         };
     },
 
-    get_geojson_coors(geojson) {
+    get_geojson_coors(geojson, debug=false) {
+        if (debug) console.log("[get_geojson_coors] starting with", geojson);
+        let result;
         if (geojson.features) { // for feature collections
 
             // make sure that if any polygons are overlapping, we get the union of them
@@ -290,13 +265,16 @@ module.exports = {
             
             // turf adds extra arrays when running combine, so we need to remove them
             // as we return the coordinates
-            return geojson.features[0].geometry.coordinates
+            result = geojson.features[0].geometry.coordinates
                 .map(coors => coors[0]);
         } else if (geojson.geometry) { // for individual feature
-            return geojson.geometry.coordinates;
+            if (debug) console.log("[get_geojson_coors] hits geojson.geometry");
+            result = geojson.geometry.coordinates;
         } else if (geojson.coordinates) { // for just the geometry
-            return geojson.coordinates;
+            result = geojson.coordinates;
         }
+        if (debug) console.log("[get_geojson_coors] returning", JSON.stringify(result).substring(0, 100) + "...");
+        return result;
     },
 
     is_bbox(geometry) {
@@ -382,18 +360,52 @@ module.exports = {
            return result;
         }
     },
+    
+    is_esri_json(input, debug=false) {
+        if (debug) console.log("starting is_esri_json with", input);
+        let input_type = typeof input;
+        let obj = input_type === "string" ? JSON.parse(input) : input_type === "object" ? input : null;
+        let geometry = obj.geometry ? obj.geometry : obj;
+        if (geometry) {
+            if (geometry.rings || (geometry.x && geometry.y)) {
+                try {
+                    if(ArcGIS.parse(obj)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    },
+    
+    toGeoJSON(input, debug=false) {
+        if (debug) console.log("[toGeoJSON] starting with", input);
+        let parsed = ArcGIS.toGeoJSON(input);
+        if (debug) console.log("[toGeoJSON] parsed:", parsed);
+        return Array.isArray(parsed) ? parsed[0] : parsed;
+    },
 
-    is_polygon(geometry) {
+    is_polygon(geometry, debug=false) {
 
         // convert to a geometry
         let coors;
         if (Array.isArray(geometry)) {
             coors = geometry;
         } else if (typeof geometry === 'string') {
-            let geojson = JSON.parse(geometry);
-            coors = this.get_geojson_coors(geojson);
+            let parsed = JSON.parse(geometry);
+            let geojson = this.convert_to_geojson_if_necessary(parsed, debug);
+            coors = this.get_geojson_coors(geojson, debug);
         } else if (typeof geometry === 'object') {
-            coors = this.get_geojson_coors(geometry);
+            let geojson = this.convert_to_geojson_if_necessary(geometry, debug);
+            coors = this.get_geojson_coors(geojson, debug);
         }
 
         if (coors) {
@@ -402,8 +414,9 @@ module.exports = {
             // last point are the same
 
             let depth = this.get_depth(coors);
+            if (debug) console.log("depth:", depth);
             if (depth === 4) {
-                return coors.map(() => this.is_polygon);
+                return coors.map(() => this.is_polygon).every(Boolean);
             } else if (depth === 3) {
                 let is_polygon_array = true;
                 coors.forEach(part => {
@@ -419,6 +432,10 @@ module.exports = {
             return false;
         }
     },
+    
+    fetch_json,
+    
+    fetch_jsons,
 
     get_bounding_box,
 
@@ -474,7 +491,7 @@ module.exports = {
     cluster,
     
     cluster_line_segments,
-
+    
     sum(values) {
         return values.reduce((a, b) => a + b);
     }
