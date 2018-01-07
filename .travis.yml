@@ -1,0 +1,19 @@
+addons:
+  apt:
+    packages:
+    - gdal-bin
+    - libgdal-dev
+before_script:
+    - npm run setup-gadm;
+    - npm run trim-gadm;
+    - npm run setup-ghsl-for-travis-ci;
+    - npm run setup-mapspam;
+cache:
+  directories:
+    - "node_modules"
+git:
+  depth: 3
+language: node_js
+node_js:
+  - "node"
+  - "lts/*"
