@@ -103,6 +103,46 @@
                 
                 </li>
               
+                
+                <li><a
+                  href='#utils'
+                  class="h5 bold black caps">
+                  Utils
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#categorize_intersection'
+                  class="">
+                  categorize_intersection
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#couple'
+                  class="">
+                  couple
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#merge_ranges'
+                  class="">
+                  merge_ranges
+                  
+                </a>
+                
+                </li>
+              
             </ul>
           </div>
           <div class='mt1 h6 quiet'>
@@ -727,6 +767,245 @@ all the pixels for each band in the raster.</p>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">var</span> sums = geoblaze.sum(georaster, geometry);</pre>
+    
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <div class='keyline-top-not py2'><section class='py2 clearfix'>
+
+  <h2 id='utils' class='mt0'>
+    Utils
+  </h2>
+
+  
+    
+
+  
+</section>
+</div>
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='categorize_intersection'>
+      categorize_intersection
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>This function categorizes an intersection</p>
+
+
+  <div class='pre p1 fill-light mt0'>categorize_intersection</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>edges</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='couple'>
+      couple
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;</p>
+
+
+  <div class='pre p1 fill-light mt0'>couple</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>array</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    of anything
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+        array of consecutive pairs
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> items = [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">18</span>, <span class="hljs-number">77</span>, <span class="hljs-number">99</span>, <span class="hljs-number">103</span>];
+<span class="hljs-keyword">let</span> unflattened = utils.couple(items);
+<span class="hljs-comment">// unflattened</span>
+<span class="hljs-comment">// [ [0, 1], [18, 77], [99, 103] ]</span></pre>
+    
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='merge_ranges'>
+      merge_ranges
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>This function takes in an array of number pairs and combines where there's overlap</p>
+
+
+  <div class='pre p1 fill-light mt0'>merge_ranges(ranges: any, array: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>ranges</span> <code class='quiet'>(any)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>array</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    of anything
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+        array of index ranges
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> ranges = [ [<span class="hljs-number">0</span>, <span class="hljs-number">10</span>], [<span class="hljs-number">10</span>, <span class="hljs-number">10</span>], [<span class="hljs-number">20</span>, <span class="hljs-number">30</span>], [<span class="hljs-number">30</span>, <span class="hljs-number">40</span>] ];
+<span class="hljs-keyword">let</span> merged_ranges = utils.merge_ranges(ranges);
+<span class="hljs-comment">// merged_ranges</span>
+<span class="hljs-comment">// [ [0, 10], [20, 40] ]</span></pre>
     
   
 

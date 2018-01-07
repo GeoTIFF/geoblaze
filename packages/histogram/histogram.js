@@ -156,9 +156,13 @@ let get_histogram = (values, options) => {
  * @example
  * var histograms = geoblaze.histogram(georaster, geometry);
  */
-function get_histograms_for_raster(georaster, geom, options) {
+function get_histograms_for_raster(georaster, geom, options, debug_level=0) {
 
     try {
+        
+        if (debug_level >= 2) {
+            console.log("starting get_histograms_for_raster");
+        }
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
