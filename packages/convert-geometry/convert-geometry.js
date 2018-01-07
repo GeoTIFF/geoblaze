@@ -65,10 +65,12 @@ let convert_polygon = geometry => {
         if (Array.isArray(geometry)) { // array
             polygon = geometry;
         } else if (typeof geometry === 'string') { // stringified geojson
-            let geojson = JSON.parse(geometry);
+            let parsed = JSON.parse(geometry);
+            let geojson = utils.convert_to_geojson_if_necessary(parsed);
             polygon = utils.get_geojson_coors(geojson);
         } else if (typeof geometry === 'object') { // geojson
-            polygon = utils.get_geojson_coors(geometry);
+            let geojson = utils.convert_to_geojson_if_necessary(geometry);
+            polygon = utils.get_geojson_coors(geojson);
         }
     }
 

@@ -3,10 +3,14 @@
 let expect = require('chai').expect;
 let load = require('./../load/load');
 let utils = require('./utils');
+let fetch_json = utils.fetch_json;
+let fetch_jsons = utils.fetch_jsons;
 
 let url = 'http://localhost:3000/data/RWA_MNH_ANC.tif';
-let url_to_geojsons = 'http://localhost:3000/data/gadm/geojsons/';
+let url_to_data = "http://localhost:3000/data/";
+let url_to_geojsons = url_to_data + 'gadm/geojsons/';
 let url_to_geojson = url_to_geojsons + 'Akrotiri and Dhekelia.geojson';
+let url_to_arcgis_jsons = url_to_data + "gadm/arcgis/";
 
 let in_browser = typeof window === 'object';
 let fetch = in_browser ? window.fetch : require('node-fetch');
@@ -34,8 +38,7 @@ let test = () => {
         describe("Get Bounding Box of GeoJSON that has MultiPolygon Geometry (i.e., multiple rings)", function() {
             this.timeout(1000000);
             it("Got correct bounding box", () => {
-                return fetch(url_to_geojson)
-                .then(response => response.json())
+                return fetch_json(url_to_geojson)
                 .then(country => {
                     let bbox = utils.get_bounding_box(country.geometry.coordinates);
                     expect(typeof bbox.xmin).to.equal("number");
@@ -78,8 +81,7 @@ let test = () => {
                 let country_depths = [["Afghanistan", 3], ['Akrotiri and Dhekelia', 4]];
                 let promises = country_depths.map(country_depth => {
                     let [country, depth] = country_depth;
-                    return fetch(url_to_geojsons + country + ".geojson")
-                    .then(response => response.json())
+                    return fetch_json(url_to_geojsons + country + ".geojson")
                     .then(country => {
                         let actual_depth = utils.get_depth(country.geometry.coordinates);
                         expect(actual_depth).to.equal(depth);
@@ -132,12 +134,18 @@ let test = () => {
     });
     describe("Test is_polygon", function() {
         it("Got all trues", () => {
-            let countries = [{name: "Afghanistan", population: "34,660,000"}];
-            let promises = countries.map(country => {
-                return fetch(url_to_geojsons + country.name + ".geojson").then(response => response.json()).then(country_geojson => {
-                    expect(utils.is_polygon(country_geojson)).to.equal(true);
+            let countries = ["Afghanistan", "Ukraine"];
+            let promises = countries.map(name => {
+                return fetch_jsons([url_to_geojsons + name + ".geojson", url_to_arcgis_jsons + name + ".json"]).then(jsons => {
+                    let [geojson, arcgisjson] = jsons;
+                    console.log("geojson:", JSON.stringify(geojson).substring(0, 100) + "...");
+                    console.log("arcgisjson:", JSON.stringify(arcgisjson).substring(0, 100) + "...");
+                    expect(utils.is_polygon(geojson)).to.equal(true);
+                    expect(utils.is_polygon(arcgisjson)).to.equal(true);
+                    expect(utils.is_polygon(arcgisjson.geometry)).to.equal(true);
                 });
             });
+            return Promise.all(promises);
         });
     });
     describe("Test Intersections", function() {
