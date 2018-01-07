@@ -5,7 +5,6 @@ let _ = require('underscore');
 let combine = require('@turf/combine');
 
 let polygon = require("@turf/helpers").polygon;
-let bbox = require("@turf/bbox");
 
 /*
     Runs on each value in a table,
@@ -25,9 +24,226 @@ function run_on_table_of_values(table, no_data_value, run_on_values) {
     }
 }
 
+function get_bounding_box(geometry) {
+
+    let xmin, ymin, xmax, ymax;
+
+    if (typeof(geometry[0][0]) === "number") {
+        let number_of_points = geometry.length;
+        xmin = xmax = geometry[0][0];
+        ymin = ymax = geometry[0][1];
+        for (let i = 1; i < number_of_points; i++) {
+            let [x, y] = geometry[i];
+            if (x < xmin) xmin = x;
+            else if (x > xmax) xmax = x;
+            if (y < ymin) ymin = y;
+            else if (y > ymax) ymax = y;
+        }
+    } else {
+        let bboxes = geometry.forEach((part, index) => {
+            let bbox = get_bounding_box(part);
+            if (index == 0) {
+                xmin = bbox.xmin;
+                xmax = bbox.xmax;
+                ymin = bbox.ymin;
+                ymax = bbox.ymax;
+            } else {
+                if (bbox.xmin < xmin) xmin = bbox.xmin;
+                else if (bbox.xmax > xmax) xmax = bbox.xmax;
+                if (bbox.ymin < ymin) ymin = bbox.ymin;
+                else if (bbox.ymax > ymax) ymax = bbox.ymax;
+            }
+        });
+    }
+
+    return { xmin, ymin, xmax, ymax };
+}
+
+function cluster(items, new_cluster_test) {
+    try {
+        let number_of_items = items.length;
+        let clusters = [];
+        let cluster = [];
+        for (let i = 0; i < number_of_items; i++) {
+            let item = items[i];
+            cluster.push(item);
+            if (new_cluster_test(item)) {
+                clusters.push(cluster);
+                cluster = [];
+            }
+        }
+        
+        if (cluster.length > 0) clusters.push(cluster);
+        
+        return clusters;
+    } catch (error) {
+        console.error("[cluster]:", error);
+    }
+}
+
+function cluster_line_segments(line_segments, number_of_edges, debug) {
+    
+    try {
+        
+        let clusters = cluster(line_segments, s => s.ends_off_line);
+        
+        let number_of_clusters = clusters.length;
+        
+        if (debug) console.log("number_of_clusters", number_of_clusters);
+        
+        if (number_of_clusters >= 2) {
+            
+            let first_cluster = clusters[0];
+            let first_segment = first_cluster[0];
+            let last_cluster = _.last(clusters);
+            let last_segment = _.last(last_cluster);
+            
+            if (
+                last_segment.index === number_of_edges - 1
+                && first_segment.index === 0
+                && last_segment.ends_on_line
+            ) {
+                clusters[0] = clusters.pop().concat(first_cluster);
+            }
+            
+        }
+        
+        return clusters;  
+        
+    } catch (error) {
+        console.error("[cluster_line_segments]", error);
+    }
+    
+}
+
 module.exports = {
 
+    /**
+     * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
+     * @name couple
+     * @param {Object} array of anything
+     * @returns {Object} array of consecutive pairs
+     * @example
+     * let items = [0, 1, 18, 77, 99, 103];
+     * let unflattened = utils.couple(items);
+     * // unflattened
+     * // [ [0, 1], [18, 77], [99, 103] ]
+    */
+    couple(array) {
+        let couples = [];
+        let length_of_array = array.length;
+        for (let i = 0; i < length_of_array; i+=2) {
+            couples.push([ array[i], array[i+1] ]);
+        }
+        return couples;
+    },
+
+    force_within(n, min, max) {
+        if (n < min) n = min;
+        else if (n > max) n = max;
+        return n;
+    },
+
     run_on_table_of_values,
+
+
+    /**
+     * This function categorizes an intersection 
+     * @name categorize_intersection
+     * @param {Object} edges
+    */ 
+    categorize_intersection(segments) {
+        try {
+            
+    
+            let through, end, xmin, xmax;
+    
+            let n = segments.length;
+
+            let first = segments[0];
+    
+            if (n === 1) {
+                through = true;
+                xmin = first.xmin;
+                xmax = first.xmax;
+            } else /* n > 1 */ {
+                let last = segments[n - 1];
+                through = first.direction === last.direction;
+                xmin = Math.min(first.xmin, last.xmin); 
+                xmax = Math.max(first.xmax, last.xmax);
+            }
+    
+            if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
+                console.error("segments:", segments);
+                throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
+            }
+    
+            return { xmin, xmax, through };
+            
+        } catch (error) {
+            
+            console.error("[categorize_intersection] segments:", segments);
+            console.error("[categorize_intersection]", error);
+            throw error;
+        }
+
+    },
+
+   
+   /* 
+    cluster(segments, wrap_number) {
+        
+        try {
+
+            //console.log("starting cluster_line_segments with ", JSON.stringify(segments));
+            
+            let number_of_segments = segments.length;
+            
+            // if don't have any segments, just skip it all and return a blank array
+            if (number_of_segments === 0) return [];
+
+            let clusters = [];
+            let cluster = [];
+
+            for (let i = 1; i < number_of_segments; i++) {
+                
+                let current = segments[i];
+                cluster.push(current);
+                
+                if (current.ends_on_line === false)
+                    clusters.push(cluster);
+                    cluster = [];
+                }
+        
+            }
+            
+            if (cluster.length > 0) {
+                let last_cluster = _.last(cluster);
+                if (last_cluster.index === wrap_number - 1 && clusters[0][0].index === 0 && _.last(cluster).ends_on_line) {
+                    clusters[0] = cluster.concat(clusters[0]);
+                } else {
+                    clusters.push(cluster);
+                }
+            }
+            
+            if (clusters.length === 0) {
+                console.error("[cluster_line_segments] segments", segments)
+                console.error("[cluster_line_segments] clusters", clusters);
+                throw Error("[cluster_line_segments] failed to parse clusters");
+            }
+    
+            return clusters;
+            
+        } catch (error) {
+            
+            console.error("[cluster_line_segments]", segments);
+            throw error;
+            
+        }
+        
+ 
+    },
+    */
 
     count_values_in_table(table, no_data_value) {
         let counts = {};
@@ -124,6 +340,49 @@ module.exports = {
         return false;
     },
 
+    get_depth(geometry) {
+        let depth = 0;
+        let part = geometry;
+        while (Array.isArray(part)) {
+            depth++;
+            part = part[0];
+        }
+        return depth;
+    },
+
+    /**
+     * This function takes in an array of number pairs and combines where there's overlap
+     * @name 
+     * @param {Object} array of anything
+     * @returns {Object} array of index ranges
+     * @example
+     * let ranges = [ [0, 10], [10, 10], [20, 30], [30, 40] ];
+     * let merged_ranges = utils.merge_ranges(ranges);
+     * // merged_ranges
+     * // [ [0, 10], [20, 40] ]
+    */
+    merge_ranges(ranges) {
+        let number_of_ranges = ranges.length;
+        if (number_of_ranges > 0) {
+            let first_range = ranges[0];
+            let previous_end = first_range[1];
+            let previous_start = first_range[0];
+            let result = [first_range];
+            for (let i = 1; i < number_of_ranges; i++) {
+                let temp_range = ranges[i];
+                let [start, end] = temp_range;
+                if (start <= previous_end) {
+                    result[result.length - 1][1] = end;
+                } else {
+                    result.push(temp_range);
+                }
+                previous_end = end; 
+                previous_start = start;
+           }
+           return result;
+        }
+    },
+
     is_polygon(geometry) {
 
         // convert to a geometry
@@ -141,43 +400,27 @@ module.exports = {
 
             // iterate through each geometry and make sure first and
             // last point are the same
-            let is_polygon_array = true;
-            coors.forEach(part => {
-                let first_vertex = part[0];
-                let last_vertex = part[part.length - 1]
-                if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
-                    is_polygon_array = false;
-                }
-            });
-            return is_polygon_array;
-        }
 
-        return false;
-    },
-
-    get_bounding_box(geometry) {
-
-        //let [xmin, ymin, xmax, ymax] = bbox(polygon(geometry));
-        let first_point = geometry[0][0];
-        let xmin = first_point[0],
-            ymin = first_point[1],
-            xmax = first_point[0],
-            ymax = first_point[1];
-
-        geometry.forEach(part => {
-
-            for (var i = 0; i < part.length; i++) {
-                let point = part[i];
-                if (point[0] < xmin) xmin = point[0];
-                if (point[1] < ymin) ymin = point[1];
-                if (point[0] > xmax) xmax = point[0];
-                if (point[1] > ymax) ymax = point[1];
+            let depth = this.get_depth(coors);
+            if (depth === 4) {
+                return coors.map(() => this.is_polygon);
+            } else if (depth === 3) {
+                let is_polygon_array = true;
+                coors.forEach(part => {
+                    let first_vertex = part[0];
+                    let last_vertex = part[part.length - 1]
+                    if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
+                        is_polygon_array = false;
+                    }
+                });
+                return is_polygon_array;
             }
-
-        });
-
-        return { xmin, ymin, xmax, ymax };
+        } else {
+            return false;
+        }
     },
+
+    get_bounding_box,
 
     // function to convert two points into a 
     // representation of a line
@@ -211,6 +454,26 @@ module.exports = {
             return { x, y };
         }
     },
+
+    get_slope_of_line(line) {
+        // assuming ax + by = c
+        // http://www.purplemath.com/modules/solvelit2.htm
+        return -1 * line.a / line.b;
+    },
+
+    get_slope_of_line_segment(line_segment) {
+        let [ [x1, y1], [x2, y2] ] = line_segment;
+        // make sure slope goes from left most to right most, so order of points doesn't matter
+        if (x2 > x1) {
+            return y2 - y1 / x2 - x1;
+        } else {
+            return y1 - y2 / x1 - x2;
+        }
+    },
+    
+    cluster,
+    
+    cluster_line_segments,
 
     sum(values) {
         return values.reduce((a, b) => a + b);

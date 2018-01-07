@@ -27,35 +27,7 @@ if (typeof window !== "undefined") {
     self["geoblaze"] = geoblaze; // jshint ignore:line
 }
 
-},{"./packages/cache/cache":114,"./packages/histogram/histogram":117,"./packages/identify/identify":118,"./packages/load/load":120,"./packages/max/max":121,"./packages/mean/mean":122,"./packages/median/median":123,"./packages/min/min":124,"./packages/mode/mode":125,"./packages/sum/sum":126}],2:[function(require,module,exports){
-var coordEach = require('@turf/meta').coordEach;
-
-/**
- * Takes a set of features, calculates the bbox of all input features, and returns a bounding box.
- *
- * @name bbox
- * @param {FeatureCollection|Feature<any>} geojson input features
- * @returns {Array<number>} bbox extent in [minX, minY, maxX, maxY] order
- * @example
- * var line = turf.lineString([[-74, 40], [-78, 42], [-82, 35]]);
- * var bbox = turf.bbox(line);
- * var bboxPolygon = turf.bboxPolygon(bbox);
- *
- * //addToMap
- * var addToMap = [line, bboxPolygon]
- */
-module.exports = function (geojson) {
-    var bbox = [Infinity, Infinity, -Infinity, -Infinity];
-    coordEach(geojson, function (coord) {
-        if (bbox[0] > coord[0]) bbox[0] = coord[0];
-        if (bbox[1] > coord[1]) bbox[1] = coord[1];
-        if (bbox[2] < coord[0]) bbox[2] = coord[0];
-        if (bbox[3] < coord[1]) bbox[3] = coord[1];
-    });
-    return bbox;
-};
-
-},{"@turf/meta":5}],3:[function(require,module,exports){
+},{"./packages/cache/cache":113,"./packages/histogram/histogram":116,"./packages/identify/identify":117,"./packages/load/load":119,"./packages/max/max":120,"./packages/mean/mean":121,"./packages/median/median":122,"./packages/min/min":123,"./packages/mode/mode":124,"./packages/sum/sum":125}],2:[function(require,module,exports){
 var meta = require('@turf/meta');
 
 /**
@@ -128,7 +100,7 @@ module.exports = function (fc) {
     };
 };
 
-},{"@turf/meta":5}],4:[function(require,module,exports){
+},{"@turf/meta":4}],3:[function(require,module,exports){
 /**
  * Wraps a GeoJSON {@link Geometry} in a GeoJSON {@link Feature}.
  *
@@ -671,7 +643,7 @@ module.exports = {
     isNumber: isNumber
 };
 
-},{}],5:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1671,9 +1643,9 @@ exports.lineString = lineString;
 exports.lineEach = lineEach;
 exports.lineReduce = lineReduce;
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2167,7 +2139,7 @@ var objectKeys = Object.keys || function (obj) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"util/":51}],8:[function(require,module,exports){
+},{"util/":50}],7:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -2283,7 +2255,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],9:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (process,Buffer){
 'use strict';
 /* eslint camelcase: "off" */
@@ -2695,7 +2667,7 @@ Zlib.prototype._reset = function () {
 
 exports.Zlib = Zlib;
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":20,"assert":7,"buffer":11,"pako/lib/zlib/constants":100,"pako/lib/zlib/deflate.js":102,"pako/lib/zlib/inflate.js":105,"pako/lib/zlib/zstream":109}],10:[function(require,module,exports){
+},{"_process":19,"assert":6,"buffer":10,"pako/lib/zlib/constants":99,"pako/lib/zlib/deflate.js":101,"pako/lib/zlib/inflate.js":104,"pako/lib/zlib/zstream":108}],9:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -3307,7 +3279,7 @@ util.inherits(DeflateRaw, Zlib);
 util.inherits(InflateRaw, Zlib);
 util.inherits(Unzip, Zlib);
 }).call(this,require('_process'))
-},{"./binding":9,"_process":20,"assert":7,"buffer":11,"stream":39,"util":51}],11:[function(require,module,exports){
+},{"./binding":8,"_process":19,"assert":6,"buffer":10,"stream":38,"util":50}],10:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -5023,7 +4995,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":8,"ieee754":16}],12:[function(require,module,exports){
+},{"base64-js":7,"ieee754":15}],11:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -5089,7 +5061,7 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],13:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5200,7 +5172,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../../../insert-module-globals/node_modules/is-buffer/index.js")})
-},{"../../../../insert-module-globals/node_modules/is-buffer/index.js":88}],14:[function(require,module,exports){
+},{"../../../../insert-module-globals/node_modules/is-buffer/index.js":87}],13:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5504,7 +5476,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var http = require('http')
 var url = require('url')
 
@@ -5537,7 +5509,7 @@ function validateParams (params) {
   return params
 }
 
-},{"http":40,"url":46}],16:[function(require,module,exports){
+},{"http":39,"url":45}],15:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -5623,7 +5595,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -5648,14 +5620,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -5702,7 +5674,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 }).call(this,require('_process'))
-},{"_process":20}],20:[function(require,module,exports){
+},{"_process":19}],19:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -5888,7 +5860,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -6425,7 +6397,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6511,7 +6483,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],23:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6598,16 +6570,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],24:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":22,"./encode":23}],25:[function(require,module,exports){
+},{"./decode":21,"./encode":22}],24:[function(require,module,exports){
 module.exports = require('./lib/_stream_duplex.js');
 
-},{"./lib/_stream_duplex.js":26}],26:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":25}],25:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6732,7 +6704,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":28,"./_stream_writable":30,"core-util-is":13,"inherits":17,"process-nextick-args":19}],27:[function(require,module,exports){
+},{"./_stream_readable":27,"./_stream_writable":29,"core-util-is":12,"inherits":16,"process-nextick-args":18}],26:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6780,7 +6752,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":29,"core-util-is":13,"inherits":17}],28:[function(require,module,exports){
+},{"./_stream_transform":28,"core-util-is":12,"inherits":16}],27:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7790,7 +7762,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":26,"./internal/streams/BufferList":31,"./internal/streams/destroy":32,"./internal/streams/stream":33,"_process":20,"core-util-is":13,"events":14,"inherits":17,"isarray":18,"process-nextick-args":19,"safe-buffer":38,"string_decoder/":44,"util":6}],29:[function(require,module,exports){
+},{"./_stream_duplex":25,"./internal/streams/BufferList":30,"./internal/streams/destroy":31,"./internal/streams/stream":32,"_process":19,"core-util-is":12,"events":13,"inherits":16,"isarray":17,"process-nextick-args":18,"safe-buffer":37,"string_decoder/":43,"util":5}],28:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8005,7 +7977,7 @@ function done(stream, er, data) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":26,"core-util-is":13,"inherits":17}],30:[function(require,module,exports){
+},{"./_stream_duplex":25,"core-util-is":12,"inherits":16}],29:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8672,7 +8644,7 @@ Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./_stream_duplex":26,"./internal/streams/destroy":32,"./internal/streams/stream":33,"_process":20,"core-util-is":13,"inherits":17,"process-nextick-args":19,"safe-buffer":38,"util-deprecate":48}],31:[function(require,module,exports){
+},{"./_stream_duplex":25,"./internal/streams/destroy":31,"./internal/streams/stream":32,"_process":19,"core-util-is":12,"inherits":16,"process-nextick-args":18,"safe-buffer":37,"util-deprecate":47}],30:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -8747,7 +8719,7 @@ module.exports = function () {
 
   return BufferList;
 }();
-},{"safe-buffer":38}],32:[function(require,module,exports){
+},{"safe-buffer":37}],31:[function(require,module,exports){
 'use strict';
 
 /*<replacement>*/
@@ -8820,13 +8792,13 @@ module.exports = {
   destroy: destroy,
   undestroy: undestroy
 };
-},{"process-nextick-args":19}],33:[function(require,module,exports){
+},{"process-nextick-args":18}],32:[function(require,module,exports){
 module.exports = require('events').EventEmitter;
 
-},{"events":14}],34:[function(require,module,exports){
+},{"events":13}],33:[function(require,module,exports){
 module.exports = require('./readable').PassThrough
 
-},{"./readable":35}],35:[function(require,module,exports){
+},{"./readable":34}],34:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = exports;
 exports.Readable = exports;
@@ -8835,13 +8807,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":26,"./lib/_stream_passthrough.js":27,"./lib/_stream_readable.js":28,"./lib/_stream_transform.js":29,"./lib/_stream_writable.js":30}],36:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":25,"./lib/_stream_passthrough.js":26,"./lib/_stream_readable.js":27,"./lib/_stream_transform.js":28,"./lib/_stream_writable.js":29}],35:[function(require,module,exports){
 module.exports = require('./readable').Transform
 
-},{"./readable":35}],37:[function(require,module,exports){
+},{"./readable":34}],36:[function(require,module,exports){
 module.exports = require('./lib/_stream_writable.js');
 
-},{"./lib/_stream_writable.js":30}],38:[function(require,module,exports){
+},{"./lib/_stream_writable.js":29}],37:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var buffer = require('buffer')
 var Buffer = buffer.Buffer
@@ -8905,7 +8877,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
   return buffer.SlowBuffer(size)
 }
 
-},{"buffer":11}],39:[function(require,module,exports){
+},{"buffer":10}],38:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9034,7 +9006,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":14,"inherits":17,"readable-stream/duplex.js":25,"readable-stream/passthrough.js":34,"readable-stream/readable.js":35,"readable-stream/transform.js":36,"readable-stream/writable.js":37}],40:[function(require,module,exports){
+},{"events":13,"inherits":16,"readable-stream/duplex.js":24,"readable-stream/passthrough.js":33,"readable-stream/readable.js":34,"readable-stream/transform.js":35,"readable-stream/writable.js":36}],39:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var extend = require('xtend')
@@ -9116,7 +9088,7 @@ http.METHODS = [
 	'UNSUBSCRIBE'
 ]
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/request":42,"builtin-status-codes":12,"url":46,"xtend":52}],41:[function(require,module,exports){
+},{"./lib/request":41,"builtin-status-codes":11,"url":45,"xtend":51}],40:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableStream)
 
@@ -9189,7 +9161,7 @@ function isFunction (value) {
 xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -9499,7 +9471,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":41,"./response":43,"_process":20,"buffer":11,"inherits":17,"readable-stream":35,"to-arraybuffer":45}],43:[function(require,module,exports){
+},{"./capability":40,"./response":42,"_process":19,"buffer":10,"inherits":16,"readable-stream":34,"to-arraybuffer":44}],42:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -9685,7 +9657,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":41,"_process":20,"buffer":11,"inherits":17,"readable-stream":35}],44:[function(require,module,exports){
+},{"./capability":40,"_process":19,"buffer":10,"inherits":16,"readable-stream":34}],43:[function(require,module,exports){
 'use strict';
 
 var Buffer = require('safe-buffer').Buffer;
@@ -9958,7 +9930,7 @@ function simpleWrite(buf) {
 function simpleEnd(buf) {
   return buf && buf.length ? this.write(buf) : '';
 }
-},{"safe-buffer":38}],45:[function(require,module,exports){
+},{"safe-buffer":37}],44:[function(require,module,exports){
 var Buffer = require('buffer').Buffer
 
 module.exports = function (buf) {
@@ -9987,7 +9959,7 @@ module.exports = function (buf) {
 	}
 }
 
-},{"buffer":11}],46:[function(require,module,exports){
+},{"buffer":10}],45:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10721,7 +10693,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":47,"punycode":21,"querystring":24}],47:[function(require,module,exports){
+},{"./util":46,"punycode":20,"querystring":23}],46:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -10739,7 +10711,7 @@ module.exports = {
   }
 };
 
-},{}],48:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 (function (global){
 
 /**
@@ -10810,16 +10782,16 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],49:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],50:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
+arguments[4][16][0].apply(exports,arguments)
+},{"dup":16}],49:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],51:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11409,7 +11381,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":50,"_process":20,"inherits":49}],52:[function(require,module,exports){
+},{"./support/isBuffer":49,"_process":19,"inherits":48}],51:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -11430,7 +11402,7 @@ function extend() {
     return target
 }
 
-},{}],53:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -11547,7 +11519,7 @@ function checkEncoding(name) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./iconv-loader":54,"buffer":11,"iconv-lite":86}],54:[function(require,module,exports){
+},{"./iconv-loader":53,"buffer":10,"iconv-lite":85}],53:[function(require,module,exports){
 'use strict';
 
 var iconv_package;
@@ -11563,7 +11535,7 @@ try {
 
 module.exports = Iconv;
 
-},{}],55:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -11746,7 +11718,7 @@ module.exports = function (input) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":11,"geotiff":65}],56:[function(require,module,exports){
+},{"buffer":10,"geotiff":64}],55:[function(require,module,exports){
 "use strict";
 
 function AbstractDecoder() {}
@@ -11759,7 +11731,7 @@ AbstractDecoder.prototype = {
 };
 
 module.exports = AbstractDecoder;
-},{}],57:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 "use strict";
 
 var AbstractDecoder = require("../abstractdecoder.js");
@@ -11774,7 +11746,7 @@ DeflateDecoder.prototype.decodeBlock = function (buffer) {
 };
 
 module.exports = DeflateDecoder;
-},{"../abstractdecoder.js":56,"pako/lib/inflate":96}],58:[function(require,module,exports){
+},{"../abstractdecoder.js":55,"pako/lib/inflate":95}],57:[function(require,module,exports){
 "use strict";
 
 //var lzwCompress = require("lzwcompress");
@@ -12022,7 +11994,7 @@ LZWDecoder.prototype.decodeBlock = function (buffer) {
 };
 
 module.exports = LZWDecoder;
-},{"../abstractdecoder.js":56}],59:[function(require,module,exports){
+},{"../abstractdecoder.js":55}],58:[function(require,module,exports){
 "use strict";
 
 var AbstractDecoder = require("../abstractdecoder.js");
@@ -12056,7 +12028,7 @@ PackbitsDecoder.prototype.decodeBlock = function (buffer) {
 };
 
 module.exports = PackbitsDecoder;
-},{"../abstractdecoder.js":56}],60:[function(require,module,exports){
+},{"../abstractdecoder.js":55}],59:[function(require,module,exports){
 "use strict";
 
 var AbstractDecoder = require("../abstractdecoder.js");
@@ -12070,7 +12042,7 @@ RawDecoder.prototype.decodeBlock = function (buffer) {
 };
 
 module.exports = RawDecoder;
-},{"../abstractdecoder.js":56}],61:[function(require,module,exports){
+},{"../abstractdecoder.js":55}],60:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -12159,7 +12131,7 @@ var DataView64 = function () {
 }();
 
 module.exports = DataView64;
-},{}],62:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 
 var globals = require("./globals.js");
@@ -12397,7 +12369,7 @@ GeoTIFF.prototype = {
 };
 
 module.exports = GeoTIFF;
-},{"./dataview64.js":61,"./geotiffimage.js":63,"./globals.js":64}],63:[function(require,module,exports){
+},{"./dataview64.js":60,"./geotiffimage.js":62,"./globals.js":63}],62:[function(require,module,exports){
 "use strict";
 
 var globals = require("./globals.js");
@@ -13220,7 +13192,7 @@ GeoTIFFImage.prototype = {
 };
 
 module.exports = GeoTIFFImage;
-},{"./compression/deflate.js":57,"./compression/lzw.js":58,"./compression/packbits.js":59,"./compression/raw.js":60,"./globals.js":64,"./rgb.js":66}],64:[function(require,module,exports){
+},{"./compression/deflate.js":56,"./compression/lzw.js":57,"./compression/packbits.js":58,"./compression/raw.js":59,"./globals.js":63,"./rgb.js":65}],63:[function(require,module,exports){
 "use strict";
 
 var fieldTagNames = {
@@ -13475,7 +13447,7 @@ module.exports = {
   geoKeyNames: geoKeyNames,
   parseXml: parseXml
 };
-},{"xmldom":111}],65:[function(require,module,exports){
+},{"xmldom":110}],64:[function(require,module,exports){
 "use strict";
 
 var GeoTIFF = require("./geotiff.js");
@@ -13509,7 +13481,7 @@ if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
 if (typeof window !== "undefined") {
   window["GeoTIFF"] = { parse: parse };
 }
-},{"./geotiff.js":62}],66:[function(require,module,exports){
+},{"./geotiff.js":61}],65:[function(require,module,exports){
 "use strict";
 
 function fromWhiteIsZero(raster, max, width, height) {
@@ -13632,7 +13604,7 @@ module.exports = {
   fromYCbCr: fromYCbCr,
   fromCIELab: fromCIELab
 };
-},{}],67:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -14189,7 +14161,7 @@ function findIdx(table, val) {
 }
 
 
-},{"buffer":11}],68:[function(require,module,exports){
+},{"buffer":10}],67:[function(require,module,exports){
 "use strict";
 
 // Description of supported double byte encodings and aliases.
@@ -14367,7 +14339,7 @@ module.exports = {
     'xxbig5': 'big5hkscs',
 };
 
-},{"./tables/big5-added.json":74,"./tables/cp936.json":75,"./tables/cp949.json":76,"./tables/cp950.json":77,"./tables/eucjp.json":78,"./tables/gb18030-ranges.json":79,"./tables/gbk-added.json":80,"./tables/shiftjis.json":81}],69:[function(require,module,exports){
+},{"./tables/big5-added.json":73,"./tables/cp936.json":74,"./tables/cp949.json":75,"./tables/cp950.json":76,"./tables/eucjp.json":77,"./tables/gb18030-ranges.json":78,"./tables/gbk-added.json":79,"./tables/shiftjis.json":80}],68:[function(require,module,exports){
 "use strict";
 
 // Update this array if you add/rename/remove files in this directory.
@@ -14391,7 +14363,7 @@ for (var i = 0; i < modules.length; i++) {
             exports[enc] = module[enc];
 }
 
-},{"./dbcs-codec":67,"./dbcs-data":68,"./internal":70,"./sbcs-codec":71,"./sbcs-data":73,"./sbcs-data-generated":72,"./utf16":82,"./utf7":83}],70:[function(require,module,exports){
+},{"./dbcs-codec":66,"./dbcs-data":67,"./internal":69,"./sbcs-codec":70,"./sbcs-data":72,"./sbcs-data-generated":71,"./utf16":81,"./utf7":82}],69:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -14581,7 +14553,7 @@ InternalDecoderCesu8.prototype.end = function() {
     return res;
 }
 
-},{"buffer":11,"string_decoder":44}],71:[function(require,module,exports){
+},{"buffer":10,"string_decoder":43}],70:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -14656,7 +14628,7 @@ SBCSDecoder.prototype.write = function(buf) {
 SBCSDecoder.prototype.end = function() {
 }
 
-},{"buffer":11}],72:[function(require,module,exports){
+},{"buffer":10}],71:[function(require,module,exports){
 "use strict";
 
 // Generated data for sbcs codec. Don't edit manually. Regenerate using generation/gen-sbcs.js script.
@@ -15108,7 +15080,7 @@ module.exports = {
     "chars": "���������������������������������กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืฺุู����฿เแโใไๅๆ็่้๊๋์ํ๎๏๐๑๒๓๔๕๖๗๘๙๚๛����"
   }
 }
-},{}],73:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 "use strict";
 
 // Manually added data to be used by sbcs codec in addition to generated one.
@@ -15279,7 +15251,7 @@ module.exports = {
 };
 
 
-},{}],74:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 module.exports=[
 ["8740","䏰䰲䘃䖦䕸𧉧䵷䖳𧲱䳢𧳅㮕䜶䝄䱇䱀𤊿𣘗𧍒𦺋𧃒䱗𪍑䝏䗚䲅𧱬䴇䪤䚡𦬣爥𥩔𡩣𣸆𣽡晍囻"],
 ["8767","綕夝𨮹㷴霴𧯯寛𡵞媤㘥𩺰嫑宷峼杮薓𩥅瑡璝㡵𡵓𣚞𦀡㻬"],
@@ -15403,7 +15375,7 @@ module.exports=[
 ["fea1","𤅟𤩹𨮏孆𨰃𡢞瓈𡦈甎瓩甞𨻙𡩋寗𨺬鎅畍畊畧畮𤾂㼄𤴓疎瑝疞疴瘂瘬癑癏癯癶𦏵皐臯㟸𦤑𦤎皡皥皷盌𦾟葢𥂝𥅽𡸜眞眦着撯𥈠睘𣊬瞯𨥤𨥨𡛁矴砉𡍶𤨒棊碯磇磓隥礮𥗠磗礴碱𧘌辸袄𨬫𦂃𢘜禆褀椂禀𥡗禝𧬹礼禩渪𧄦㺨秆𩄍秔"]
 ]
 
-},{}],75:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",127,"€"],
 ["8140","丂丄丅丆丏丒丗丟丠両丣並丩丮丯丱丳丵丷丼乀乁乂乄乆乊乑乕乗乚乛乢乣乤乥乧乨乪",5,"乲乴",9,"乿",6,"亇亊"],
@@ -15669,7 +15641,7 @@ module.exports=[
 ["fe40","兀嗀﨎﨏﨑﨓﨔礼﨟蘒﨡﨣﨤﨧﨨﨩"]
 ]
 
-},{}],76:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",127],
 ["8141","갂갃갅갆갋",4,"갘갞갟갡갢갣갥",6,"갮갲갳갴"],
@@ -15944,7 +15916,7 @@ module.exports=[
 ["fda1","爻肴酵驍侯候厚后吼喉嗅帿後朽煦珝逅勛勳塤壎焄熏燻薰訓暈薨喧暄煊萱卉喙毁彙徽揮暉煇諱輝麾休携烋畦虧恤譎鷸兇凶匈洶胸黑昕欣炘痕吃屹紇訖欠欽歆吸恰洽翕興僖凞喜噫囍姬嬉希憙憘戱晞曦熙熹熺犧禧稀羲詰"]
 ]
 
-},{}],77:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",127],
 ["a140","　，、。．‧；：？！︰…‥﹐﹑﹒·﹔﹕﹖﹗｜–︱—︳╴︴﹏（）︵︶｛｝︷︸〔〕︹︺【】︻︼《》︽︾〈〉︿﹀「」﹁﹂『』﹃﹄﹙﹚"],
@@ -16123,7 +16095,7 @@ module.exports=[
 ["f9a1","龤灨灥糷虪蠾蠽蠿讞貜躩軉靋顳顴飌饡馫驤驦驧鬤鸕鸗齈戇欞爧虌躨钂钀钁驩驨鬮鸙爩虋讟钃鱹麷癵驫鱺鸝灩灪麤齾齉龘碁銹裏墻恒粧嫺╔╦╗╠╬╣╚╩╝╒╤╕╞╪╡╘╧╛╓╥╖╟╫╢╙╨╜║═╭╮╰╯▓"]
 ]
 
-},{}],78:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",127],
 ["8ea1","｡",62],
@@ -16307,9 +16279,9 @@ module.exports=[
 ["8feda1","黸黿鼂鼃鼉鼏鼐鼑鼒鼔鼖鼗鼙鼚鼛鼟鼢鼦鼪鼫鼯鼱鼲鼴鼷鼹鼺鼼鼽鼿齁齃",4,"齓齕齖齗齘齚齝齞齨齩齭",4,"齳齵齺齽龏龐龑龒龔龖龗龞龡龢龣龥"]
 ]
 
-},{}],79:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 module.exports={"uChars":[128,165,169,178,184,216,226,235,238,244,248,251,253,258,276,284,300,325,329,334,364,463,465,467,469,471,473,475,477,506,594,610,712,716,730,930,938,962,970,1026,1104,1106,8209,8215,8218,8222,8231,8241,8244,8246,8252,8365,8452,8454,8458,8471,8482,8556,8570,8596,8602,8713,8720,8722,8726,8731,8737,8740,8742,8748,8751,8760,8766,8777,8781,8787,8802,8808,8816,8854,8858,8870,8896,8979,9322,9372,9548,9588,9616,9622,9634,9652,9662,9672,9676,9680,9702,9735,9738,9793,9795,11906,11909,11913,11917,11928,11944,11947,11951,11956,11960,11964,11979,12284,12292,12312,12319,12330,12351,12436,12447,12535,12543,12586,12842,12850,12964,13200,13215,13218,13253,13263,13267,13270,13384,13428,13727,13839,13851,14617,14703,14801,14816,14964,15183,15471,15585,16471,16736,17208,17325,17330,17374,17623,17997,18018,18212,18218,18301,18318,18760,18811,18814,18820,18823,18844,18848,18872,19576,19620,19738,19887,40870,59244,59336,59367,59413,59417,59423,59431,59437,59443,59452,59460,59478,59493,63789,63866,63894,63976,63986,64016,64018,64021,64025,64034,64037,64042,65074,65093,65107,65112,65127,65132,65375,65510,65536],"gbChars":[0,36,38,45,50,81,89,95,96,100,103,104,105,109,126,133,148,172,175,179,208,306,307,308,309,310,311,312,313,341,428,443,544,545,558,741,742,749,750,805,819,820,7922,7924,7925,7927,7934,7943,7944,7945,7950,8062,8148,8149,8152,8164,8174,8236,8240,8262,8264,8374,8380,8381,8384,8388,8390,8392,8393,8394,8396,8401,8406,8416,8419,8424,8437,8439,8445,8482,8485,8496,8521,8603,8936,8946,9046,9050,9063,9066,9076,9092,9100,9108,9111,9113,9131,9162,9164,9218,9219,11329,11331,11334,11336,11346,11361,11363,11366,11370,11372,11375,11389,11682,11686,11687,11692,11694,11714,11716,11723,11725,11730,11736,11982,11989,12102,12336,12348,12350,12384,12393,12395,12397,12510,12553,12851,12962,12973,13738,13823,13919,13933,14080,14298,14585,14698,15583,15847,16318,16434,16438,16481,16729,17102,17122,17315,17320,17402,17418,17859,17909,17911,17915,17916,17936,17939,17961,18664,18703,18814,18962,19043,33469,33470,33471,33484,33485,33490,33497,33501,33505,33513,33520,33536,33550,37845,37921,37948,38029,38038,38064,38065,38066,38069,38075,38076,38078,39108,39109,39113,39114,39115,39116,39265,39394,189000]}
-},{}],80:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 module.exports=[
 ["a140","",62],
 ["a180","",32],
@@ -16366,7 +16338,7 @@ module.exports=[
 ["fe80","䜣䜩䝼䞍⻊䥇䥺䥽䦂䦃䦅䦆䦟䦛䦷䦶䲣䲟䲠䲡䱷䲢䴓",6,"䶮",93]
 ]
 
-},{}],81:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 module.exports=[
 ["0","\u0000",128],
 ["a1","｡",62],
@@ -16493,7 +16465,7 @@ module.exports=[
 ["fc40","髜魵魲鮏鮱鮻鰀鵰鵫鶴鸙黑"]
 ]
 
-},{}],82:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -16672,7 +16644,7 @@ function detectEncoding(buf, defaultEncoding) {
 
 
 
-},{"buffer":11}],83:[function(require,module,exports){
+},{"buffer":10}],82:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -16964,7 +16936,7 @@ Utf7IMAPDecoder.prototype.end = function() {
 
 
 
-},{"buffer":11}],84:[function(require,module,exports){
+},{"buffer":10}],83:[function(require,module,exports){
 "use strict";
 
 var BOMChar = '\uFEFF';
@@ -17018,7 +16990,7 @@ StripBOMWrapper.prototype.end = function() {
 }
 
 
-},{}],85:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 "use strict";
 var Buffer = require("buffer").Buffer;
 
@@ -17235,7 +17207,7 @@ module.exports = function (iconv) {
     }
 }
 
-},{"buffer":11,"stream":39}],86:[function(require,module,exports){
+},{"buffer":10,"stream":38}],85:[function(require,module,exports){
 (function (process){
 "use strict";
 
@@ -17387,7 +17359,7 @@ if ("Ā" != "\u0100") {
 }
 
 }).call(this,require('_process'))
-},{"../encodings":69,"./bom-handling":84,"./extend-node":85,"./streams":87,"_process":20,"buffer":11}],87:[function(require,module,exports){
+},{"../encodings":68,"./bom-handling":83,"./extend-node":84,"./streams":86,"_process":19,"buffer":10}],86:[function(require,module,exports){
 "use strict";
 
 var Buffer = require("buffer").Buffer,
@@ -17510,7 +17482,7 @@ IconvLiteDecoderStream.prototype.collect = function(cb) {
 }
 
 
-},{"buffer":11,"stream":39}],88:[function(require,module,exports){
+},{"buffer":10,"stream":38}],87:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -17533,7 +17505,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],89:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 'use strict';
 
 var isStream = module.exports = function (stream) {
@@ -17556,7 +17528,7 @@ isStream.transform = function (stream) {
 	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
 };
 
-},{}],90:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 (function (global,Buffer){
 
 /**
@@ -17831,7 +17803,7 @@ Fetch.Headers = Headers;
 Fetch.Request = Request;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./lib/body":91,"./lib/fetch-error":92,"./lib/headers":93,"./lib/request":94,"./lib/response":95,"buffer":11,"http":40,"https":15,"stream":39,"url":46,"zlib":10}],91:[function(require,module,exports){
+},{"./lib/body":90,"./lib/fetch-error":91,"./lib/headers":92,"./lib/request":93,"./lib/response":94,"buffer":10,"http":39,"https":14,"stream":38,"url":45,"zlib":9}],90:[function(require,module,exports){
 (function (global,Buffer){
 
 /**
@@ -18096,7 +18068,7 @@ Body.prototype._clone = function(instance) {
 Body.Promise = global.Promise;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./fetch-error":92,"buffer":11,"encoding":53,"is-stream":89,"stream":39}],92:[function(require,module,exports){
+},{"./fetch-error":91,"buffer":10,"encoding":52,"is-stream":88,"stream":38}],91:[function(require,module,exports){
 
 /**
  * fetch-error.js
@@ -18131,7 +18103,7 @@ function FetchError(message, type, systemError) {
 
 require('util').inherits(FetchError, Error);
 
-},{"util":51}],93:[function(require,module,exports){
+},{"util":50}],92:[function(require,module,exports){
 
 /**
  * headers.js
@@ -18274,7 +18246,7 @@ Headers.prototype.raw = function() {
 	return this._headers;
 };
 
-},{}],94:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 
 /**
  * request.js
@@ -18351,7 +18323,7 @@ Request.prototype.clone = function() {
 	return new Request(this);
 };
 
-},{"./body":91,"./headers":93,"url":46}],95:[function(require,module,exports){
+},{"./body":90,"./headers":92,"url":45}],94:[function(require,module,exports){
 
 /**
  * response.js
@@ -18403,7 +18375,7 @@ Response.prototype.clone = function() {
 	});
 };
 
-},{"./body":91,"./headers":93,"http":40}],96:[function(require,module,exports){
+},{"./body":90,"./headers":92,"http":39}],95:[function(require,module,exports){
 'use strict';
 
 
@@ -18823,7 +18795,7 @@ exports.inflate = inflate;
 exports.inflateRaw = inflateRaw;
 exports.ungzip  = inflate;
 
-},{"./utils/common":97,"./utils/strings":98,"./zlib/constants":100,"./zlib/gzheader":103,"./zlib/inflate":105,"./zlib/messages":107,"./zlib/zstream":109}],97:[function(require,module,exports){
+},{"./utils/common":96,"./utils/strings":97,"./zlib/constants":99,"./zlib/gzheader":102,"./zlib/inflate":104,"./zlib/messages":106,"./zlib/zstream":108}],96:[function(require,module,exports){
 'use strict';
 
 
@@ -18930,7 +18902,7 @@ exports.setTyped = function (on) {
 
 exports.setTyped(TYPED_OK);
 
-},{}],98:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 // String encode/decode helpers
 'use strict';
 
@@ -19117,7 +19089,7 @@ exports.utf8border = function (buf, max) {
   return (pos + _utf8len[buf[pos]] > max) ? pos : max;
 };
 
-},{"./common":97}],99:[function(require,module,exports){
+},{"./common":96}],98:[function(require,module,exports){
 'use strict';
 
 // Note: adler32 takes 12% for level 0 and 2% for level 6.
@@ -19170,7 +19142,7 @@ function adler32(adler, buf, len, pos) {
 
 module.exports = adler32;
 
-},{}],100:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -19240,7 +19212,7 @@ module.exports = {
   //Z_NULL:                 null // Use -1 or null inline, depending on var type
 };
 
-},{}],101:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 'use strict';
 
 // Note: we can't get significant speed boost here.
@@ -19301,7 +19273,7 @@ function crc32(crc, buf, len, pos) {
 
 module.exports = crc32;
 
-},{}],102:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -21177,7 +21149,7 @@ exports.deflatePrime = deflatePrime;
 exports.deflateTune = deflateTune;
 */
 
-},{"../utils/common":97,"./adler32":99,"./crc32":101,"./messages":107,"./trees":108}],103:[function(require,module,exports){
+},{"../utils/common":96,"./adler32":98,"./crc32":100,"./messages":106,"./trees":107}],102:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -21237,7 +21209,7 @@ function GZheader() {
 
 module.exports = GZheader;
 
-},{}],104:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -21584,7 +21556,7 @@ module.exports = function inflate_fast(strm, start) {
   return;
 };
 
-},{}],105:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -23142,7 +23114,7 @@ exports.inflateSyncPoint = inflateSyncPoint;
 exports.inflateUndermine = inflateUndermine;
 */
 
-},{"../utils/common":97,"./adler32":99,"./crc32":101,"./inffast":104,"./inftrees":106}],106:[function(require,module,exports){
+},{"../utils/common":96,"./adler32":98,"./crc32":100,"./inffast":103,"./inftrees":105}],105:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -23487,7 +23459,7 @@ module.exports = function inflate_table(type, lens, lens_index, codes, table, ta
   return 0;
 };
 
-},{"../utils/common":97}],107:[function(require,module,exports){
+},{"../utils/common":96}],106:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -23521,7 +23493,7 @@ module.exports = {
   '-6':   'incompatible version' /* Z_VERSION_ERROR (-6) */
 };
 
-},{}],108:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -24743,7 +24715,7 @@ exports._tr_flush_block  = _tr_flush_block;
 exports._tr_tally = _tr_tally;
 exports._tr_align = _tr_align;
 
-},{"../utils/common":97}],109:[function(require,module,exports){
+},{"../utils/common":96}],108:[function(require,module,exports){
 'use strict';
 
 // (C) 1995-2013 Jean-loup Gailly and Mark Adler
@@ -24792,7 +24764,7 @@ function ZStream() {
 
 module.exports = ZStream;
 
-},{}],110:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -26342,7 +26314,7 @@ module.exports = ZStream;
   }
 }.call(this));
 
-},{}],111:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 function DOMParser(options){
 	this.options = options ||{locator:{}};
 	
@@ -26595,7 +26567,7 @@ function appendElement (hander,node) {
 	exports.DOMParser = DOMParser;
 //}
 
-},{"./dom":112,"./sax":113}],112:[function(require,module,exports){
+},{"./dom":111,"./sax":112}],111:[function(require,module,exports){
 /*
  * DOM Level 2
  * Object DOMException
@@ -27841,7 +27813,7 @@ try{
 	exports.XMLSerializer = XMLSerializer;
 //}
 
-},{}],113:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 //[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
 //[4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
 //[5]   	Name	   ::=   	NameStartChar (NameChar)*
@@ -28476,11 +28448,11 @@ function split(source,start){
 exports.XMLReader = XMLReader;
 
 
-},{}],114:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 module.exports = {
     
 }
-},{}],115:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -28580,7 +28552,7 @@ module.exports = (type_of_geometry, geometry) => {
     }
 }
 
-},{"../utils/utils":127,"underscore":110}],116:[function(require,module,exports){
+},{"../utils/utils":126,"underscore":109}],115:[function(require,module,exports){
 'use strict';
 
 let load = require('../load/load');
@@ -28674,7 +28646,7 @@ module.exports = (georaster, geom, flat) => {
     }
 }
 
-},{"../convert-geometry/convert-geometry":115,"../load/load":120,"../utils/utils":127}],117:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../load/load":119,"../utils/utils":126}],116:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -28833,9 +28805,13 @@ let get_histogram = (values, options) => {
  * @example
  * var histograms = geoblaze.histogram(georaster, geometry);
  */
-function get_histograms_for_raster(georaster, geom, options) {
+function get_histograms_for_raster(georaster, geom, options, debug_level=0) {
 
     try {
+        
+        if (debug_level >= 2) {
+            console.log("starting get_histograms_for_raster");
+        }
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
@@ -28880,7 +28856,7 @@ function get_histograms_for_raster(georaster, geom, options) {
 }
 module.exports = get_histograms_for_raster;
 
-},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],118:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../get/get":115,"../intersect-polygon/intersect-polygon":118,"../utils/utils":126,"underscore":109}],117:[function(require,module,exports){
 'use strict';
 
 let load = require('../load/load');
@@ -28929,69 +28905,86 @@ let identify = (georaster, geometry) => {
 
 module.exports = identify;
 
-},{"../convert-geometry/convert-geometry":115,"../load/load":120}],119:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../load/load":119}],118:[function(require,module,exports){
 'use strict';
+
+let turf_featureCollection = require("@turf/helpers").featureCollection;
+let turf_lineString = require("@turf/helpers").lineString;
+//let fs = require("fs");
 
 let _ = require('underscore');
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
+let categorize_intersection = utils.categorize_intersection;
+let cluster_line_segments = utils.cluster_line_segments;
+let couple = utils.couple;
+let force_within = utils.force_within;
+let merge_ranges = utils.merge_ranges;
 
 let get_line_from_points = utils.get_line_from_points;
 let get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
+let get_slope_of_line = utils.get_slope_of_line;
+let get_slope_of_line_segment = utils.get_slope_of_line_segment;
 
-module.exports = (georaster, geom, run_on_values) => {
+
+let get_edges_for_polygon = polygon => {
+    let edges = [];
+    polygon.forEach(ring => {
+        for (let i = 1; i < ring.length; i++) {
+            let start_point = ring[i - 1];
+            let end_point = ring[i];
+            edges.push([start_point, end_point]);
+        }
+    });
+    return edges;
+};
+
+module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geometry, debug_level=0) => {
 
     let cell_width = georaster.pixelWidth;
     let cell_height = georaster.pixelHeight;
+    if (debug_level >= 1) console.log("cell_height:", cell_height);
     let no_data_value = georaster.no_data_value;
     let image_height = georaster.height;
+    if (debug_level >= 1) console.log("image_height: " + image_height);
+    let image_width = georaster.width;
 
     // get values in a bounding box around the geometry
     let latlng_bbox = utils.get_bounding_box(geom);
-    //console.log("latlng_bbox:", latlng_bbox); //good
+    if (debug_level >= 1) console.log("latlng_bbox:", latlng_bbox); //good
     let image_bands = get(georaster, latlng_bbox)
     //console.log("image_bands:", image_bands);
 
     // set origin points of bbox of geometry in image space
     let lat_0 = latlng_bbox.ymax + ((georaster.ymax - latlng_bbox.ymax) % cell_height);
-    //console.log("lat_0:", lat_0); //good
+    if (debug_level >= 1) console.log("lat_0:", lat_0); //good
     let lng_0 = latlng_bbox.xmin - ((latlng_bbox.xmin - georaster.xmin) % cell_width);
-    //console.log("lng_0:", lng_0); //good
+    if (debug_level >= 1) console.log("lng_0:", lng_0); //good
 
     // calculate size of bbox in image coordinates
     // to derive out the row length
     let image_bbox = utils.convert_crs_bbox_to_image_bbox(georaster, latlng_bbox);
-    //console.log("image_bbox:", image_bbox); //good
+    if (debug_level >= 1)  console.log("image_bbox:", image_bbox);
     let x_min = image_bbox.xmin,
         y_min = image_bbox.ymin,
         x_max = image_bbox.xmax,
         y_max = image_bbox.ymax;
 
     let row_length = x_max - x_min;
-    //console.log("row_length:", row_length); //good
-
-    // collapse geometry down to a list of edges
-    // necessary for multi-part geometries
-    let edges = [];
-    geom.forEach(part => {
-        for (let i = 1; i < part.length; i++) {
-            let start_point = part[i - 1];
-            let end_point = part[i];
-            edges.push([start_point, end_point]);
-        }
-    });
+    if (debug_level >= 1) console.log("row_length:", row_length); 
 
     // iterate through image rows and convert each one to a line
     // running through the middle of the row
     let image_lines = [];
     let num_rows = image_bands[0].length;
-    //console.log("num_rows:", num_rows);//good
+
+    if (num_rows === 0) return;
+
+    if (debug_level >= 1) console.log("num_rows:", num_rows);
     for (let y = 0; y < num_rows; y++) {
 
-        // I don't understand this
-        let lat = lat_0 - (cell_height * y + cell_height / 2);
-        //console.log("lat:", lat); //good
+        let lat = lat_0 - cell_height * y - cell_height / 2;
 
         // use that point, plus another point along the same latitude to
         // create a line
@@ -29000,34 +28993,85 @@ module.exports = (georaster, geom, run_on_values) => {
         let line = get_line_from_points(point_0, point_1);
         image_lines.push(line);
     }
-    //console.log("image_lines:", image_lines);
+    if (debug_level >= 1) console.log("image_lines.length:", image_lines.length);
+    if (debug_level >= 1) console.log("image_lines[0]:", image_lines[0]);
 
-    // iterate through the list of polygon vertices, convert them to
-    // lines, and compute the intersections with each image row
-    let intersections_by_row = _.range(num_rows).map(row => []);
-    for (let i = 0; i < edges.length; i++) {
-        
+
+    // collapse geometry down to a list of edges
+    // necessary for multi-part geometries
+    let depth = utils.get_depth(geom);
+    if (debug_level >= 1) console.log("depth:", depth);
+    let polygon_edges = depth === 4  ? geom.map(get_edges_for_polygon) : [get_edges_for_polygon(geom)];
+    if (debug_level >= 1) console.log("polygon_edges.length:", polygon_edges.length);
+
+    polygon_edges.forEach((edges, edges_index) => {
+
+      if (debug_level >= 1) {
+          console.log("edges.length", edges.length);
+          let target = 41.76184321688703;
+          let overlaps = [];
+          edges.forEach((edge, index) => {
+              let [[x1,y1], [x2,y2]] = edge;
+              let ymin = Math.min(y1, y2);
+              let ymax = Math.max(y1, y2);
+              if (target >= ymin && target <= ymax) {
+                  overlaps.push(JSON.stringify({ index, edge}));
+              }
+          }); 
+        //console.log("overlaps:", overlaps);
+      }
+
+      // iterate through the list of polygon vertices, convert them to
+      // lines, and compute the intersections with each image row
+      let intersections_by_row = _.range(num_rows).map(row => []);
+      if (debug_level >= 1) console.log("intersections_by_row.length:", intersections_by_row.length);
+      let number_of_edges = edges.length;
+      if (debug_level >= 1) console.log("number_of_edges:", number_of_edges);
+      for (let i = 0; i < number_of_edges; i++) {
+
+       
         // get vertices that make up an edge and convert that to a line
         let edge = edges[i];
-        let start_point = edge[0];
-        let end_point = edge[1];
+
+        let [start_point, end_point] = edge;
+        let [ x1, y1 ] = start_point;
+        let [ x2, y2 ] = end_point;
+
+        let direction = Math.sign(y2 - y1);
+        let horizontal = y1 === y2;
+        let vertical = x1 === x2;
+
+        let edge_y = y1;
+
         let edge_line = get_line_from_points(start_point, end_point);
 
-        let start_lng, end_lng;
-        if (start_point[0] < end_point[0]) {
-            start_lng = start_point[0];
-            end_lng = end_point[0];
+        let edge_ymin = Math.min(y1, y2);
+        let edge_ymax = Math.max(y1, y2);
+        
+        if (debug_level >= 2) {
+            console.log("\nedge", i, ":", edge);
+            console.log("direction:", direction);
+            console.log("horizontal:", horizontal);
+            console.log("vertical:", vertical);
+            console.log("edge_ymin:", edge_ymin);
+            console.log("edge_ymax:", edge_ymax);
+        }        
+
+        let start_lng, start_lat, end_lat, end_lng;
+        if (x1 < x2) {
+            [ start_lng, start_lat ] = start_point;
+            [ end_lng, end_lat ] = end_point;
         } else {
-            start_lng = end_point[0];
-            end_lng = start_point[0];
+            [ start_lng, start_lat ] = end_point;
+            [ end_lng, end_lat ]  = start_point;
         }
-        //console.log("\n\n\n");
-        //console.log("start_lng:", start_lng);
-        //console.log("end_lng:", end_lng);
+
+
+        if (start_lng === undefined) throw Error("start_lng is " + start_lng);
 
         // find the y values in the image coordinate space
-        let y_1 = Math.floor((lat_0 - start_point[1]) / cell_height);
-        let y_2 = Math.floor((lat_0 - end_point[1]) / cell_height);
+        let y_1 = Math.round((lat_0 - .5*cell_height - start_lat ) / cell_height);
+        let y_2 = Math.round((lat_0 - .5*cell_height - end_lat) / cell_height);
 
         // make sure to set the start and end points so that we are
         // incrementing upwards through rows
@@ -29039,96 +29083,183 @@ module.exports = (georaster, geom, run_on_values) => {
             row_start = y_2;
             row_end = y_1;
         }
-        //console.log("row_start, row_end", [row_start, row_end]);
 
+
+        row_start = force_within(row_start, 0, num_rows - 1);
+        row_end = force_within(row_end, 0, num_rows - 1);
+
+        if (debug_level >=1) {
+          console.log("row_start:", row_start);
+          console.log("row_end:", row_end);
+        }
         // iterate through image lines within the change in y of
         // the edge line and find all intersections
         for (let j = row_start; j < row_end + 1; j++) {
             let image_line = image_lines[j];
-            //console.log("image_line:", image_line);
-            try {
-            var intersection = get_intersection_of_two_lines(edge_line, image_line);
-            } catch (error) {
-                console.log("j:", j);
-                console.log("edge_line:", edge_line);
-                console.log("image_line:", image_line);
-                console.log("image_lines:", image_lines);
-                console.error(error)
-                throw error;
+
+
+            if (image_line === undefined) {
+                console.error("j:", j);
+                console.error("image_lines:", image_lines);
+                throw Error("image_lines");
             }
-            //console.log("intersection:", intersection);
+
+            // because you know x is zero in ax + by = c, so by = c and b = -1, so -1 * y = c or y = -1 * c
+            let image_line_y = -1 * image_line.c;
+            //if (j === row_start) console.log("image_line_y:", image_line_y);
+
+            let starts_on_line = y1 === image_line_y;
+            let ends_on_line = y2 === image_line_y;
+            let ends_off_line = !ends_on_line;
+
+            let xmin_on_line, xmax_on_line;
+            if (horizontal) {
+                //console.log("horizontal line:", edge_y);
+                //console.log("image_line_:", image_line_y);
+                if (edge_y === image_line_y) {
+                    //console.log("horizontal on line!:", edge_y);
+                    xmin_on_line = start_lng;
+                    xmax_on_line = end_lng;
+                } else {
+                    continue; // stop running calculations for this horizontal line because it doesn't intersect at all
+                }
+            } else if (vertical) {
+                /* we have to have a seprate section for vertical bc of floating point arithmetic probs with get_inter..." */
+                if (image_line_y >= edge_ymin && image_line_y <= edge_ymax) {
+                    xmin_on_line = start_lng;
+                    xmax_on_line = end_lng;
+                }
+            } else if (starts_on_line) {
+                // we know that the other end is not on the line because then it would be horizontal
+                xmin_on_line = xmax_on_line = x1;
+            } else if (ends_on_line) {
+                // we know that the other end is not on the line because then it would be horizontal
+                xmin_on_line = xmax_on_line = x2;
+            } else {
+                try {
+                    xmin_on_line = xmax_on_line = get_intersection_of_two_lines(edge_line, image_line).x;
+                } catch (error) {
+                    console.log("j:", j);
+                    console.log("edge:", edge);
+                    console.log("image_line_y:", image_line_y);
+                    console.log("edge_line:", edge_line);
+                    console.log("image_line:", image_line);
+                    console.log("image_lines:", image_lines);
+                    console.error(error)
+                    throw error;
+                }
+            }
 
             // check to see if the intersection point is within the range of 
             // the edge line segment. If it is, add the intersection to the 
             // list of intersections at the corresponding index for that row 
             // in intersections_by_row
-            if (intersection && intersection.x >= start_lng && intersection.x <= end_lng) {
-                let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
-                intersections_by_row[j].push(image_pixel_index);
+            if (xmin_on_line && xmax_on_line && (horizontal || (xmin_on_line >= start_lng && xmax_on_line <= end_lng && image_line_y <= edge_ymax && image_line_y >= edge_ymin))) {
+                //let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
+                //intersections_by_row[j].push(image_pixel_index);
+                intersections_by_row[j].push({
+                    direction,
+                    index: i,
+                    edge: edge,
+                    ends_on_line,
+                    ends_off_line,
+                    horizontal,
+                    starts_on_line,
+                    vertical,
+                    xmin: xmin_on_line,
+                    xmax: xmax_on_line,
+                    image_line_y
+                });
             }
         }
-    }
+      }
 
-    //console.log("intersections by row", intersections_by_row);
+      if (debug_level >= 1) console.log("intersections_by_row.length:", intersections_by_row.length);
 
-    // iterate through the list of computed intersections for each row.
-    // use these intersections to split up each row into pixels that fall
-    // within the polygon and pixels that fall outside the polygon
-    // for more information on this, review the ray casting algorithm
-    for (let i = 0; i < num_rows; i++) {
 
-        // we make sure to sort intersections here because we don't know the order
-        // in which they were recorded, as it was based on the order of polygon
-        // edges
-        let row_intersections = intersections_by_row[i]
-            .sort((a, b) => a - b);
-        let num_intersections = row_intersections.length;
-        if (num_intersections > 0) { // make sure the row is in the polygon
+      let line_strings = [];
+      intersections_by_row.map((segments_in_row, row_index) => {
+          if (debug_level >= 2) console.log(row_index, "segments_in_row.length:", segments_in_row.length);
+          if (segments_in_row.length > 0) {
+              //console.log("\n\nsegments in row:", segments_in_row);
+              let clusters = cluster_line_segments(segments_in_row, number_of_edges);
+              //console.log('clusters:', clusters);
+              let categorized = clusters.map(categorize_intersection);
+              //console.log("categorized:", categorized);
+              let [ throughs, nonthroughs ] = _.partition(categorized, item => item.through);
 
-            // iterate through intersections and get the start and end
-            // indexes at odd intervals, ie where pixels are inside the
-            // polygon
-            for (let j = 0; j < num_intersections; j++) {
-                if (j % 2 === 1) {
+              if (throughs.length % 2 === 1) {
+                  console.log("row_index:", row_index);
+                  console.log("segments_in_row.length:", segments_in_row.length);
+                  console.log("segments_in_row:", JSON.stringify(segments_in_row));
+                  console.log("clusters.length:", clusters.length);
+                  console.log("clusters:", clusters);
+                  console.log("categorized:", categorized);
+                  throw Error("throughs.length for " + row_index + " is odd with " + throughs.length);
+              }
+ 
+              //console.log("throughs:", throughs);
+              //console.log("nonthroughs:", nonthroughs);
+              let insides = nonthroughs.map(intersection => [intersection.xmin, intersection.xmax]);
+              //console.log("insides from nonthroughs:", insides);
 
-                    let start_column_index = row_intersections[j - 1];
-                    let end_column_index = row_intersections[j];
-                    //console.log("start_row_index:end_row_index", start_row_index,":",end_row_index);
+              throughs = _.sortBy(throughs, "xmin");
+              //console.log("sorted throughs", throughs);
 
-                    // convert to start and end in the clipped image    
-                    //let start_index = start_row_index - x_min;
-                    //let end_index = end_row_index - x_min;
+              let couples = couple(throughs).map(couple => {
+                  let [left, right] = couple;
+                  return [left.xmin, right.xmax];
+              });
 
-                    //console.log("start_index:end_index", start_index,":",end_index);
+              insides = insides.concat(couples);
 
-                    // use the start and end indexes to pull pixels out of
-                    // the corresponding image row
-                    for (let column_index = start_column_index; column_index <= end_column_index; column_index++) {
-                        image_bands.forEach((band, band_index) => {
-                            //console.log("band:", band);
-                            try {
-                                var value = band[i][column_index];
-                            } catch (error) {
-                                //console.log("band:", band);
-                                //console.log("row_index:", row_index);
-                                //console.log("column_index:", column_index);
-                                //console.error(error);
-                                throw error;
-                            }
-                            if (value !== no_data_value) {
-                                // run the function provided as a parameter input
-                                // on the value
-                                run_on_values(value, band_index);
-                            }
-                        });
-                    }
-                }
-            }
-        }
-    }
+              /*
+                  This makes sure we don't double count pixels.
+                  For example, converts `[[0,10],[10,10]]` to `[[0,10]]`
+              */
+              insides = merge_ranges(insides);
+
+
+              if (debug_level >= 1) {
+                insides.forEach(insidepair => {
+                    let [x1, x2] = insidepair;
+                    let y = segments_in_row[0].image_line_y;
+                    line_strings.push(turf_lineString([[x1, y], [x2, y]], {"stroke": "red", "stroke-width": 1,"stroke-opacity": 1}));
+                });
+              }
+              
+              insides.forEach(pair => {
+
+                  let [xmin, xmax] = pair;
+
+                  //convert left and right to image pixels
+                  let left = Math.round((xmin - (lng_0 + .5*cell_width)) / cell_width);
+                  let right = Math.round((xmax - (lng_0 + .5*cell_width)) / cell_width);
+
+                  let start_column_index = Math.max(left, 0);
+                  let end_column_index = Math.min(right, image_width);
+
+
+                  for (let column_index = start_column_index; column_index <= end_column_index; column_index++) {
+                      image_bands.forEach((band, band_index) => {
+                          var value = band[row_index][column_index];
+                          if (value != undefined && value !== no_data_value) {
+                              run_this_function_on_each_pixel_inside_geometry(value, band_index);
+                          }
+                      });
+                  }
+              });
+          }
+      });
+      
+      if (debug_level >= 1) {
+          let fc = turf_featureCollection(line_strings);
+          //fs.writeFileSync("/tmp/lns" + edges_index + ".geojson", JSON.stringify(fc));
+      }
+  });
 }
 
-},{"../get/get":116,"../utils/utils":127,"underscore":110}],120:[function(require,module,exports){
+},{"../get/get":115,"../utils/utils":126,"@turf/helpers":3,"underscore":109}],119:[function(require,module,exports){
 'use strict';
 
 let parse_georaster = require("georaster");
@@ -29184,7 +29315,7 @@ module.exports = (url_or_file) => (
     })
 );
 
-},{"../cache/cache":114,"georaster":55,"node-fetch":90,"url":46}],121:[function(require,module,exports){
+},{"../cache/cache":113,"georaster":54,"node-fetch":89,"url":45}],120:[function(require,module,exports){
 'use strict';
 
 let get = require('../get/get');
@@ -29277,7 +29408,7 @@ function get_max_for_raster(georaster, geom) {
 }
 module.exports = get_max_for_raster;
 
-},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],122:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../get/get":115,"../intersect-polygon/intersect-polygon":118,"../utils/utils":126,"underscore":109}],121:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -29357,7 +29488,7 @@ module.exports = (georaster, geom) => {
     }
 }
 
-},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],123:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../get/get":115,"../intersect-polygon/intersect-polygon":118,"../utils/utils":126,"underscore":109}],122:[function(require,module,exports){
 'use strict';
 
 let get = require('../get/get');
@@ -29467,7 +29598,7 @@ function get_median_for_raster(georaster, geom) {
 }
 module.exports = get_median_for_raster;
 
-},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],124:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../get/get":115,"../intersect-polygon/intersect-polygon":118,"../utils/utils":126,"underscore":109}],123:[function(require,module,exports){
 'use strict';
 
 let get = require('../get/get');
@@ -29560,7 +29691,7 @@ function get_min_for_raster(georaster, geom) {
 }
 module.exports = get_min_for_raster;
 
-},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],125:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../get/get":115,"../intersect-polygon/intersect-polygon":118,"../utils/utils":126,"underscore":109}],124:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -29653,7 +29784,7 @@ function get_modes_for_raster(georaster, geom) {
 }
 module.exports = get_modes_for_raster;
 
-},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127,"underscore":110}],126:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../get/get":115,"../intersect-polygon/intersect-polygon":118,"../utils/utils":126,"underscore":109}],125:[function(require,module,exports){
 'use strict';
 
 let get = require('../get/get');
@@ -29673,7 +29804,7 @@ let intersect_polygon = require('../intersect-polygon/intersect-polygon');
  * @example
  * var sums = geoblaze.sum(georaster, geometry);
  */
-function sum(georaster, geom) {
+function sum(georaster, geom, test) {
     
     try {
         
@@ -29683,7 +29814,7 @@ function sum(georaster, geom) {
             return georaster.values.map(band => { // iterate over each band which include rows of pixels
                 return band.reduce((sum_of_band, row) => { // reduce all the rows into one sum
                     return sum_of_band + row.reduce((sum_of_row, cell_value) => { // reduce each row to a sum of its pixel values
-                        return cell_value !== no_data_value ? sum_of_row + cell_value : sum_of_row;
+                        return cell_value !== no_data_value && (test === undefined || test(cell_value)) ? sum_of_row + cell_value : sum_of_row;
                     }, 0);
                 }, 0);
             });
@@ -29700,7 +29831,7 @@ function sum(georaster, geom) {
             return values.map(band => { // iterate over each band which include rows of pixels
                 return band.reduce((sum_of_band, row) => { // reduce all the rows into one sum
                     return sum_of_band + row.reduce((sum_of_row, cell_value) => { // reduce each row to a sum of its pixel values
-                        return cell_value !== no_data_value ? sum_of_row + cell_value : sum_of_row;
+                        return cell_value !== no_data_value && (test === undefined || test(cell_value)) ? sum_of_row + cell_value : sum_of_row;
                     }, 0);
                 }, 0);
             });
@@ -29712,18 +29843,20 @@ function sum(georaster, geom) {
             // the third argument of intersect_polygon is a function which
             // is run on every value, we use it to increment the sum 
             intersect_polygon(georaster, geom, (value, band_index) => {
-                if (sums[band_index]) {
-                    sums[band_index] += value; 
-                } else {
-                    sums[band_index] = value;
+                if (test === undefined || test(value)) { 
+                    if (sums[band_index]) {
+                        sums[band_index] += value; 
+                    } else {
+                        sums[band_index] = value;
+                    }
                 }
             });
 
             if (sums.length > 0) return sums;
-            else throw 'No Values were found in the given geometry';
+            else return [0];
             
         } else {
-            throw 'Non-Bounding Box geometries are currently not supported.'
+            throw "Sum couldn't identify geometry"
         }            
     } catch(e) {
         console.error(e);
@@ -29733,7 +29866,7 @@ function sum(georaster, geom) {
 
 module.exports = sum
 
-},{"../convert-geometry/convert-geometry":115,"../get/get":116,"../intersect-polygon/intersect-polygon":119,"../utils/utils":127}],127:[function(require,module,exports){
+},{"../convert-geometry/convert-geometry":114,"../get/get":115,"../intersect-polygon/intersect-polygon":118,"../utils/utils":126}],126:[function(require,module,exports){
 'use strict';
 
 let _ = require('underscore');
@@ -29741,7 +29874,6 @@ let _ = require('underscore');
 let combine = require('@turf/combine');
 
 let polygon = require("@turf/helpers").polygon;
-let bbox = require("@turf/bbox");
 
 /*
     Runs on each value in a table,
@@ -29761,9 +29893,226 @@ function run_on_table_of_values(table, no_data_value, run_on_values) {
     }
 }
 
+function get_bounding_box(geometry) {
+
+    let xmin, ymin, xmax, ymax;
+
+    if (typeof(geometry[0][0]) === "number") {
+        let number_of_points = geometry.length;
+        xmin = xmax = geometry[0][0];
+        ymin = ymax = geometry[0][1];
+        for (let i = 1; i < number_of_points; i++) {
+            let [x, y] = geometry[i];
+            if (x < xmin) xmin = x;
+            else if (x > xmax) xmax = x;
+            if (y < ymin) ymin = y;
+            else if (y > ymax) ymax = y;
+        }
+    } else {
+        let bboxes = geometry.forEach((part, index) => {
+            let bbox = get_bounding_box(part);
+            if (index == 0) {
+                xmin = bbox.xmin;
+                xmax = bbox.xmax;
+                ymin = bbox.ymin;
+                ymax = bbox.ymax;
+            } else {
+                if (bbox.xmin < xmin) xmin = bbox.xmin;
+                else if (bbox.xmax > xmax) xmax = bbox.xmax;
+                if (bbox.ymin < ymin) ymin = bbox.ymin;
+                else if (bbox.ymax > ymax) ymax = bbox.ymax;
+            }
+        });
+    }
+
+    return { xmin, ymin, xmax, ymax };
+}
+
+function cluster(items, new_cluster_test) {
+    try {
+        let number_of_items = items.length;
+        let clusters = [];
+        let cluster = [];
+        for (let i = 0; i < number_of_items; i++) {
+            let item = items[i];
+            cluster.push(item);
+            if (new_cluster_test(item)) {
+                clusters.push(cluster);
+                cluster = [];
+            }
+        }
+        
+        if (cluster.length > 0) clusters.push(cluster);
+        
+        return clusters;
+    } catch (error) {
+        console.error("[cluster]:", error);
+    }
+}
+
+function cluster_line_segments(line_segments, number_of_edges, debug) {
+    
+    try {
+        
+        let clusters = cluster(line_segments, s => s.ends_off_line);
+        
+        let number_of_clusters = clusters.length;
+        
+        if (debug) console.log("number_of_clusters", number_of_clusters);
+        
+        if (number_of_clusters >= 2) {
+            
+            let first_cluster = clusters[0];
+            let first_segment = first_cluster[0];
+            let last_cluster = _.last(clusters);
+            let last_segment = _.last(last_cluster);
+            
+            if (
+                last_segment.index === number_of_edges - 1
+                && first_segment.index === 0
+                && last_segment.ends_on_line
+            ) {
+                clusters[0] = clusters.pop().concat(first_cluster);
+            }
+            
+        }
+        
+        return clusters;  
+        
+    } catch (error) {
+        console.error("[cluster_line_segments]", error);
+    }
+    
+}
+
 module.exports = {
 
+    /**
+     * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
+     * @name couple
+     * @param {Object} array of anything
+     * @returns {Object} array of consecutive pairs
+     * @example
+     * let items = [0, 1, 18, 77, 99, 103];
+     * let unflattened = utils.couple(items);
+     * // unflattened
+     * // [ [0, 1], [18, 77], [99, 103] ]
+    */
+    couple(array) {
+        let couples = [];
+        let length_of_array = array.length;
+        for (let i = 0; i < length_of_array; i+=2) {
+            couples.push([ array[i], array[i+1] ]);
+        }
+        return couples;
+    },
+
+    force_within(n, min, max) {
+        if (n < min) n = min;
+        else if (n > max) n = max;
+        return n;
+    },
+
     run_on_table_of_values,
+
+
+    /**
+     * This function categorizes an intersection 
+     * @name categorize_intersection
+     * @param {Object} edges
+    */ 
+    categorize_intersection(segments) {
+        try {
+            
+    
+            let through, end, xmin, xmax;
+    
+            let n = segments.length;
+
+            let first = segments[0];
+    
+            if (n === 1) {
+                through = true;
+                xmin = first.xmin;
+                xmax = first.xmax;
+            } else /* n > 1 */ {
+                let last = segments[n - 1];
+                through = first.direction === last.direction;
+                xmin = Math.min(first.xmin, last.xmin); 
+                xmax = Math.max(first.xmax, last.xmax);
+            }
+    
+            if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
+                console.error("segments:", segments);
+                throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
+            }
+    
+            return { xmin, xmax, through };
+            
+        } catch (error) {
+            
+            console.error("[categorize_intersection] segments:", segments);
+            console.error("[categorize_intersection]", error);
+            throw error;
+        }
+
+    },
+
+   
+   /* 
+    cluster(segments, wrap_number) {
+        
+        try {
+
+            //console.log("starting cluster_line_segments with ", JSON.stringify(segments));
+            
+            let number_of_segments = segments.length;
+            
+            // if don't have any segments, just skip it all and return a blank array
+            if (number_of_segments === 0) return [];
+
+            let clusters = [];
+            let cluster = [];
+
+            for (let i = 1; i < number_of_segments; i++) {
+                
+                let current = segments[i];
+                cluster.push(current);
+                
+                if (current.ends_on_line === false)
+                    clusters.push(cluster);
+                    cluster = [];
+                }
+        
+            }
+            
+            if (cluster.length > 0) {
+                let last_cluster = _.last(cluster);
+                if (last_cluster.index === wrap_number - 1 && clusters[0][0].index === 0 && _.last(cluster).ends_on_line) {
+                    clusters[0] = cluster.concat(clusters[0]);
+                } else {
+                    clusters.push(cluster);
+                }
+            }
+            
+            if (clusters.length === 0) {
+                console.error("[cluster_line_segments] segments", segments)
+                console.error("[cluster_line_segments] clusters", clusters);
+                throw Error("[cluster_line_segments] failed to parse clusters");
+            }
+    
+            return clusters;
+            
+        } catch (error) {
+            
+            console.error("[cluster_line_segments]", segments);
+            throw error;
+            
+        }
+        
+ 
+    },
+    */
 
     count_values_in_table(table, no_data_value) {
         let counts = {};
@@ -29860,6 +30209,49 @@ module.exports = {
         return false;
     },
 
+    get_depth(geometry) {
+        let depth = 0;
+        let part = geometry;
+        while (Array.isArray(part)) {
+            depth++;
+            part = part[0];
+        }
+        return depth;
+    },
+
+    /**
+     * This function takes in an array of number pairs and combines where there's overlap
+     * @name 
+     * @param {Object} array of anything
+     * @returns {Object} array of index ranges
+     * @example
+     * let ranges = [ [0, 10], [10, 10], [20, 30], [30, 40] ];
+     * let merged_ranges = utils.merge_ranges(ranges);
+     * // merged_ranges
+     * // [ [0, 10], [20, 40] ]
+    */
+    merge_ranges(ranges) {
+        let number_of_ranges = ranges.length;
+        if (number_of_ranges > 0) {
+            let first_range = ranges[0];
+            let previous_end = first_range[1];
+            let previous_start = first_range[0];
+            let result = [first_range];
+            for (let i = 1; i < number_of_ranges; i++) {
+                let temp_range = ranges[i];
+                let [start, end] = temp_range;
+                if (start <= previous_end) {
+                    result[result.length - 1][1] = end;
+                } else {
+                    result.push(temp_range);
+                }
+                previous_end = end; 
+                previous_start = start;
+           }
+           return result;
+        }
+    },
+
     is_polygon(geometry) {
 
         // convert to a geometry
@@ -29877,43 +30269,27 @@ module.exports = {
 
             // iterate through each geometry and make sure first and
             // last point are the same
-            let is_polygon_array = true;
-            coors.forEach(part => {
-                let first_vertex = part[0];
-                let last_vertex = part[part.length - 1]
-                if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
-                    is_polygon_array = false;
-                }
-            });
-            return is_polygon_array;
-        }
 
-        return false;
-    },
-
-    get_bounding_box(geometry) {
-
-        //let [xmin, ymin, xmax, ymax] = bbox(polygon(geometry));
-        let first_point = geometry[0][0];
-        let xmin = first_point[0],
-            ymin = first_point[1],
-            xmax = first_point[0],
-            ymax = first_point[1];
-
-        geometry.forEach(part => {
-
-            for (var i = 0; i < part.length; i++) {
-                let point = part[i];
-                if (point[0] < xmin) xmin = point[0];
-                if (point[1] < ymin) ymin = point[1];
-                if (point[0] > xmax) xmax = point[0];
-                if (point[1] > ymax) ymax = point[1];
+            let depth = this.get_depth(coors);
+            if (depth === 4) {
+                return coors.map(() => this.is_polygon);
+            } else if (depth === 3) {
+                let is_polygon_array = true;
+                coors.forEach(part => {
+                    let first_vertex = part[0];
+                    let last_vertex = part[part.length - 1]
+                    if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
+                        is_polygon_array = false;
+                    }
+                });
+                return is_polygon_array;
             }
-
-        });
-
-        return { xmin, ymin, xmax, ymax };
+        } else {
+            return false;
+        }
     },
+
+    get_bounding_box,
 
     // function to convert two points into a 
     // representation of a line
@@ -29948,9 +30324,29 @@ module.exports = {
         }
     },
 
+    get_slope_of_line(line) {
+        // assuming ax + by = c
+        // http://www.purplemath.com/modules/solvelit2.htm
+        return -1 * line.a / line.b;
+    },
+
+    get_slope_of_line_segment(line_segment) {
+        let [ [x1, y1], [x2, y2] ] = line_segment;
+        // make sure slope goes from left most to right most, so order of points doesn't matter
+        if (x2 > x1) {
+            return y2 - y1 / x2 - x1;
+        } else {
+            return y1 - y2 / x1 - x2;
+        }
+    },
+    
+    cluster,
+    
+    cluster_line_segments,
+
     sum(values) {
         return values.reduce((a, b) => a + b);
     }
 }
 
-},{"@turf/bbox":2,"@turf/combine":3,"@turf/helpers":4,"underscore":110}]},{},[1]);
+},{"@turf/combine":2,"@turf/helpers":3,"underscore":109}]},{},[1]);

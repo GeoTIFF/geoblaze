@@ -30,7 +30,17 @@ let test = () => {
                 });
             });
         });
- 
+        describe('Get flat values for whole raster', function() {
+            this.timeout(1000000);
+            it('Got Correct flat values', () => {
+                return load(url_rwanda).then(georaster => {
+                    let flat = true;
+                    let actual_values = get(georaster, null, flat);
+                    expect(actual_values).to.have.lengthOf(1);
+                    expect(actual_values[0]).to.have.lengthOf(georaster.height * georaster.width);
+                });
+            });
+        });
     })
 }
 

@@ -37,7 +37,7 @@ let polygon_geojson = `{
          }
     ]
 }`
-let expected_polygon_geojson_value = 1826.74;
+let expected_polygon_geojson_value = 1826.74 ;
 
 let test = () => {
     describe('Gio Mean Feature', function() {
