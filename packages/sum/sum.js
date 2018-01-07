@@ -17,7 +17,7 @@ let intersect_polygon = require('../intersect-polygon/intersect-polygon');
  * @example
  * var sums = geoblaze.sum(georaster, geometry);
  */
-function sum(georaster, geom, test) {
+function sum(georaster, geom, test, debug=false) {
     
     try {
         
@@ -49,7 +49,7 @@ function sum(georaster, geom, test) {
                 }, 0);
             });
 
-        } else if (utils.is_polygon(geom)) {
+        } else if (utils.is_polygon(geom, debug)) {
             geom = convert_geometry('polygon', geom);
             let sums = [];
             
