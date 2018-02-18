@@ -17,7 +17,7 @@ let ratio_ei_options = {
     class_type: 'equal-interval'
 }
 
-let ratio_quantile_bbox_results = { 
+let ratio_quantile_bbox_results = {
     '0 - 93.2': 31,
     '>93.2 - 272': 31,
     '>272 - 724': 31,
@@ -36,14 +36,14 @@ let ratio_quantile_polygon_results = {
   '>3483.9 - 7807.4': 246
 };
 
-let ratio_ei_polygon_results = { 
+let ratio_ei_polygon_results = {
     '0 - 1115.34': 719,
     '>1115.34 - 2230.69': 373,
     '>2230.69 - 3346.03': 359,
     '>3346.03 - 4461.37': 170,
     '>4461.37 - 5576.71': 78,
     '>5576.71 - 6692.06': 25,
-    '>6692.06 - 7807.4': 9 
+    '>6692.06 - 7807.4': 9
 }
 
 let url = 'http://localhost:3000/data/test.tiff';
@@ -57,7 +57,7 @@ let polygon = [[
     [85.58349609375, 24.54712317973075], [84.6826171875, 23.36242859340884], [83.12255859375, 22.49225722008518]
 ]];
 
-let polygon_geojson = `{ 
+let polygon_geojson = `{
     "type": "FeatureCollection",
     "features": [
         { "type": "Feature",

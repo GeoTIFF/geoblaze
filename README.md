@@ -3,3 +3,6 @@
 
 # geoblaze
 blazing fast javascript raster processing engine
+
+### documentation
+https://geoblaze.io

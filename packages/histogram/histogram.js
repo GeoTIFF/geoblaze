@@ -1,24 +1,26 @@
 'use strict';
 
-let _ = require('underscore');
+const _ = require('underscore');
 
-let get = require('../get/get');
-let utils = require('../utils/utils');
-let convert_geometry = require('../convert-geometry/convert-geometry');
-let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+const get = require('../get/get');
+const utils = require('../utils/utils');
+const convert_geometry = require('../convert-geometry/convert-geometry');
+const intersect_polygon = require('../intersect-polygon/intersect-polygon');
 
-let get_equal_interval_bins = (values, num_classes) => {
+const logger = require('../../logger');
+
+const get_equal_interval_bins = (values, num_classes) => {
 
     // get min and max values
-    let min_value = _.min(values);
-    let max_value = _.max(values);
+    const min_value = _.min(values);
+    const max_value = _.max(values);
 
     // specify bins, bins represented as a list of [min, max] values
     // and are divided up based on number of classes
-    let interval = (max_value - min_value) / num_classes;
-    let bins = _.range(num_classes).map((num, index) => {
-        let start = Number((min_value + num * interval).toFixed(2));
-        let end = Number((min_value + (num + 1) * interval).toFixed(2));
+    const interval = (max_value - min_value) / num_classes;
+    const bins = _.range(num_classes).map((num, index) => {
+        const start = Number((min_value + num * interval).toFixed(2));
+        const end = Number((min_value + (num + 1) * interval).toFixed(2));
         return [start, end];
     });
 
@@ -56,10 +58,10 @@ let get_equal_interval_bins = (values, num_classes) => {
     return results;
 }
 
-let get_quantile_bins = (values, num_classes) => {
+const get_quantile_bins = (values, num_classes) => {
 
     // get the number of values in each bin
-    let values_per_bin = values.length / num_classes;
+    const values_per_bin = values.length / num_classes;
 
     // iterate through values and use a counter to
     // decide when to set up the next bin. Bins are
@@ -83,7 +85,7 @@ let get_quantile_bins = (values, num_classes) => {
     }
 
     // add the last bin
-    let bin_max = values[values.length - 1];
+    const bin_max = values[values.length - 1];
     num_values_in_current_bin += 1;
     bin_min = `>${bin_min}`;
     results[`${bin_min} - ${bin_max}`] = num_values_in_current_bin;
@@ -91,18 +93,18 @@ let get_quantile_bins = (values, num_classes) => {
     return results;
 }
 
-let get_histogram = (values, options) => {
+const get_histogram = (values, options) => {
 
     // pull out options, possible options are:
     // scale_type: measurement scale, options are: nominal, ratio
     // num_classes: number of classes/bins, only available for ratio data
     // class_type: method of breaking data into classes, only available
     //             for ratio data, options are: equal-interval, quantile
-    //             
+    //
     var options = options || {};
-    let scale_type = options.scale_type;
-    let num_classes = options.num_classes;
-    let class_type = options.class_type;
+    const scale_type = options.scale_type;
+    const num_classes = options.num_classes;
+    const class_type = options.class_type;
 
     if (!scale_type) {
         throw 'Insufficient options were provided, need a value for "scale_type." Possible values include "nominal" and "ratio".';
@@ -156,13 +158,11 @@ let get_histogram = (values, options) => {
  * @example
  * var histograms = geoblaze.histogram(georaster, geometry);
  */
-function get_histograms_for_raster(georaster, geom, options, debug_level=0) {
+function get_histograms_for_raster(georaster, geom, options) {
 
     try {
-        
-        if (debug_level >= 2) {
-            console.log("starting get_histograms_for_raster");
-        }
+
+        logger.info('starting get_histograms_for_raster');
 
         if (utils.is_bbox(geom)) {
             geom = convert_geometry('bbox', geom);
@@ -185,7 +185,7 @@ function get_histograms_for_raster(georaster, geom, options, debug_level=0) {
             let values = [];
             intersect_polygon(georaster, geom, (value, band_index) => {
                 if (values[band_index]) {
-                    values[band_index].push(value); 
+                    values[band_index].push(value);
                 } else {
                     values[band_index] = [value];
                 }
@@ -203,6 +203,6 @@ function get_histograms_for_raster(georaster, geom, options, debug_level=0) {
         console.error(e);
         throw e;
     }
-
 }
+
 module.exports = get_histograms_for_raster;
