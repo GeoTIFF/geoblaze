@@ -1,5 +1,7 @@
 'use strict';
 
+process.env.DEBUG_LEVEL = 1;
+
 require('./packages/get/test');
 require('./packages/load/test');
 require('./packages/convert-geometry/test');
