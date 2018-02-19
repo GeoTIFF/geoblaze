@@ -40,7 +40,7 @@ let polygon_geojson = `{
 let expected_polygon_geojson_value = 1826.74 ;
 
 let test = () => {
-  describe('Gio Mean Feature', function() {
+  describe('Geoblaze Mean Feature', function() {
     describe('Get Mean from Bounding Box', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {

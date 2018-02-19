@@ -10,7 +10,7 @@ let point = [80.63, 7.42];
 let expected_value = 350.7;
 
 let test = () => (
-  describe('Gio Identify Feature', function() {
+  describe('Geoblaze Identify Feature', function() {
     describe('Identify Point in Raster', function() {
       this.timeout(1000000);
       it('Identified Point Correctly', () => {

@@ -18,7 +18,7 @@ let polygon = [[
 let expected_polygon_value = 0;
 
 let test = () => {
-  describe('Gio Mode Feature', function() {
+  describe('Geoblaze Mode Feature', function() {
     describe('Get Mode from Bounding Box', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {
