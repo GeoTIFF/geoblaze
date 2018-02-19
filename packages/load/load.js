@@ -24,29 +24,31 @@ module.exports = (url_or_file) => (
     if (cache[url]) {
       resolve(cache[url]);
     } else {
-      fetch(url).then(response => {
-        if (response.ok) return in_browser ? response.arrayBuffer() : response.buffer()
+      fetch(url)
+        .then(response => {
+          if (response.ok) return in_browser ? response.arrayBuffer() : response.buffer()
 
-        const domain = new URL(url).host;
-        reject(new Error(error_bad_url));
-      }).then(b => {
-        try {
-          if (b) {
-            let array_buffer;
-            if (in_browser) {
-              array_buffer = b;
-            } else {
-              array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+          reject(new Error(error_bad_url));
+        })
+        .catch(e => reject(new Error(error_bad_url)))
+        .then(b => {
+          try {
+            if (b) {
+              let array_buffer;
+              if (in_browser) {
+                array_buffer = b;
+              } else {
+                array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+              }
+              parse_georaster(array_buffer).then(georaster => {
+                cache[url] = georaster;
+                resolve(georaster);
+              });
             }
-            parse_georaster(array_buffer).then(georaster => {
-              cache[url] = georaster;
-              resolve(georaster);
-            });
+          } catch (e) {
+            reject(new Error(error_parsing_geotiff));
           }
-        } catch (e) {
-          reject(new Error(error_parsing_geotiff));
-        }
-      });
+        });
     }
   })
 );
