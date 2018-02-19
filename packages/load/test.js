@@ -8,6 +8,7 @@ const load = require('./load');
 
 const path = 'http://localhost:3000/data/test.tiff';
 const incorrect_path = 'http://localhost:3000/data/this-is-not-a-real-dataset.tiff';
+const incorrect_path_2 = 'this-is-a-fake-path';
 
 const error_bad_url = require('../../constants').ERROR_BAD_URL;
 
@@ -34,6 +35,15 @@ const test = () => (
       this.timeout(1000000);
       it('Loaded tiff file', () => {
         return load(incorrect_path).then(null, error => {
+          expect(error.message).to.equal(error_bad_url);
+        });
+      });
+    });
+
+    describe('Error from another invalid URL', function() {
+      this.timeout(1000000);
+      it('Loaded tiff file', () => {
+        return load(incorrect_path_2).then(null, error => {
           expect(error.message).to.equal(error_bad_url);
         });
       });

@@ -6291,8 +6291,9 @@ module.exports = function (url_or_file) {
       fetch(url).then(function (response) {
         if (response.ok) return in_browser ? response.arrayBuffer() : response.buffer();
 
-        var domain = new URL(url).host;
         reject(new Error(error_bad_url));
+      }).catch(function (e) {
+        return reject(new Error(error_bad_url));
       }).then(function (b) {
         try {
           if (b) {
