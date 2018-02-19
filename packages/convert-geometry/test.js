@@ -1,7 +1,7 @@
 'use strict';
 
 let expect = require('chai').expect;
-let gio_convert_geometry = require('./convert-geometry');
+let geoblaze_convert_geometry = require('./convert-geometry');
 
 let array_point = [102, 0.5];
 
@@ -51,13 +51,13 @@ let geojson_polygon_1 = JSON.parse(geojson_polygon_str_1);
 let geojson_polygon_2 = JSON.parse(geojson_polygon_str_2);
 
 let test_point_load = feature => {
-  let point = gio_convert_geometry('point', feature);
+  let point = geoblaze_convert_geometry('point', feature);
   expect(point[0]).to.equal(102);
   expect(point[1]).to.equal(0.5);
 }
 
 let test_bbox_load = feature => {
-  let bbox = gio_convert_geometry('bbox', feature);
+  let bbox = geoblaze_convert_geometry('bbox', feature);
   expect(bbox.xmin).to.equal(100);
   expect(bbox.ymin).to.equal(0);
   expect(bbox.xmax).to.equal(101);
@@ -65,7 +65,7 @@ let test_bbox_load = feature => {
 }
 
 let test_polygon_load = feature => {
-  let polygon = gio_convert_geometry('polygon', feature);
+  let polygon = geoblaze_convert_geometry('polygon', feature);
 
 }
 

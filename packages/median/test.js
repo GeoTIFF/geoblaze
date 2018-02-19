@@ -35,7 +35,7 @@ let polygon = [[
 let expected_polygon_value = 2750.5;
 
 let test = () => {
-  describe('Gio Median Feature', function() {
+  describe('Geoblaze Median Feature', function() {
     describe('Get Median from Bounding Box', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {

@@ -1,21 +1,24 @@
 'use strict';
 
-let expect = require('chai').expect;
+const expect = require('chai').expect;
 
-let fetch = require('node-fetch');
+const fetch = require('node-fetch');
 
-let load = require('./load');
+const load = require('./load');
 
-let path = 'http://localhost:3000/data/test.tiff';
+const path = 'http://localhost:3000/data/test.tiff';
+const incorrect_path = 'http://localhost:3000/data/this-is-not-a-real-dataset.tiff';
 
-let properties = [
+const error_bad_url = require('../../constants').ERROR_BAD_URL;
+
+const properties = [
   'projection',
   'xmin',
   'values'
 ];
 
-let test = () => (
-  describe('Gio Load Feature', function() {
+const test = () => (
+  describe('Geoblaze Load Feature', function() {
     describe('Load from URL', function() {
       this.timeout(1000000);
       it('Loaded tiff file', () => {
@@ -23,6 +26,15 @@ let test = () => (
           properties.forEach(property => {
             expect(georaster).to.have.property(property);
           });
+        });
+      });
+    });
+
+    describe('Error from invalid URL', function() {
+      this.timeout(1000000);
+      it('Loaded tiff file', () => {
+        return load(incorrect_path).then(null, error => {
+          expect(error.message).to.equal(error_bad_url);
         });
       });
     });
