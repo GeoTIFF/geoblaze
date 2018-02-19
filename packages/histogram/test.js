@@ -79,7 +79,7 @@ let polygon_geojson = `{
 }`
 
 let test = () => {
-  describe('Gio Histogram Feature', function() {
+  describe('Geoblaze Histogram Feature', function() {
     describe('Get Histogram (Ratio, Quantile) from Bounding Box', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {

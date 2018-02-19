@@ -18,7 +18,7 @@ let polygon = [[
 let expected_polygon_value = 7807.40;
 
 let test = () => {
-  describe('Gio Max Feature', function() {
+  describe('Geoblaze Max Feature', function() {
     describe('Get Max from Bounding Box', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {
