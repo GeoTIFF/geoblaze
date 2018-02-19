@@ -283,7 +283,7 @@ module.exports = {
       return false;
     }
 
-    // check if we are using the gio format and return true right away if so
+    // check if we are using the geoblaze format and return true right away if so
     if (geometry.xmin !== undefined && geometry.xmax !== undefined && geometry.ymax !== undefined && geometry.ymin !== undefined) {
       return true;
     }

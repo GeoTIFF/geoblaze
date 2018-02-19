@@ -218,7 +218,7 @@ let polygon_geojson_collection = `{
 let expected_polygon_geojson_collection_value = expected_polygon_geojson_value_1 + expected_polygon_geojson_value_2;
 
 let test = () => {
-  describe('Gio Sum Feature', function() {
+  describe('Geoblaze Sum Feature', function() {
     describe('Get Sum', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {

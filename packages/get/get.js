@@ -63,7 +63,7 @@ module.exports = (georaster, geom, flat) => {
 
   } else {
 
-    throw 'Geometry is not a bounding box - please make sure to send a bounding box when using gio-get';
+    throw 'Geometry is not a bounding box - please make sure to send a bounding box when using geoblaze.get';
 
   }
 
