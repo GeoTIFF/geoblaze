@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset='utf-8' />
-  <title>geoblaze 0.0.47 | Documentation</title>
+  <title>geoblaze 0.0.55 | Documentation</title>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
   <link href='assets/bass.css' type='text/css' rel='stylesheet' />
   <link href='assets/style.css' type='text/css' rel='stylesheet' />
@@ -14,7 +14,7 @@
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
           <h3 class='mb0 no-anchor'>geoblaze</h3>
-          <div class='mb1'><code>0.0.47</code></div>
+          <div class='mb1'><code>0.0.55</code></div>
           <input
             placeholder='Filter'
             id='filter-input'
@@ -22,6 +22,26 @@
             type='text' />
           <div id='toc'>
             <ul class='list-reset h5 py1-ul'>
+              
+                
+                <li><a
+                  href='#load'
+                  class="">
+                  load
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#get'
+                  class="">
+                  get
+                  
+                </a>
+                
+                </li>
               
                 
                 <li><a
@@ -75,6 +95,16 @@
               
                 
                 <li><a
+                  href='#mean'
+                  class="">
+                  mean
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#mode'
                   class="">
                   mode
@@ -105,9 +135,9 @@
               
                 
                 <li><a
-                  href='#utils'
-                  class="h5 bold black caps">
-                  Utils
+                  href='#couple'
+                  class="">
+                  couple
                   
                 </a>
                 
@@ -118,16 +148,6 @@
                   href='#categorize_intersection'
                   class="">
                   categorize_intersection
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#couple'
-                  class="">
-                  couple
                   
                 </a>
                 
@@ -151,6 +171,188 @@
         </div>
       </div>
       <div id='split-right' class='relative overflow-auto height-viewport-100'>
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='load'>
+      load
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The load function takes a url to a geotiff or geotiff file as an input
+and returns a promise. The promise resolves as a georaster, which
+can be used as input in other geoblaze methods, such as identify, sum,
+or histogram.</p>
+
+
+  <div class='pre p1 fill-light mt0'>load</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>url_or_file</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>))</code>
+	    a string representation of a url or a geotiff file
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> sums = geoblaze.load(url_or_file).then(<span class="hljs-function"><span class="hljs-params">georaster</span> =&gt;</span> sum(georaster, geometry));</pre>
+    
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='get'>
+      get
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The get function takes a raster and a bounding box as input. It returns
+the subset of pixels in the raster found within the bounding box. It also
+takes an optional parameter "flat" which will flatten the returning pixel
+matrix across bands instead of retaining a nested array structure.</p>
+
+
+  <div class='pre p1 fill-light mt0'>get</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    a raster from the georaster library
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>bounding_box</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    can be an 
+[
+xmin, ymin, xmax, ymax
+]
+ array, a [[
+[
+x00,y00
+]
+,...,
+[
+x0n,y0n
+]
+,
+[
+x00,y00
+]
+]...] GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>flat</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a>)</code>
+	    whether or not the resulting output should be flattened into a single array
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+        array of pixel values
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> pixels = geoblaze.get(georaster, geometry);</pre>
+    
+  
+
+  
+
+  
+
+  
+</section>
+
+          
         
           
             <div class='keyline-top-not py2'><section class='py2 clearfix'>
@@ -376,8 +578,8 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>a</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    georaster from georaster library
+            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    a raster from the georaster library
 
           </div>
           
@@ -385,9 +587,24 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>input</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
-            = <code>undefined</code>)</code>
-	    a geometry, which we'll use for clipping result
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[
+xmin, ymin, xmax, ymax
+]
+ array for a bounding box, [[
+[
+x00,y00
+]
+,...,
+[
+x0n,y0n
+]
+,
+[
+x00,y00
+]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
           
@@ -414,7 +631,7 @@ all the pixels for each band in the raster.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">var</span> maxs = geoblaze.max(georaster, geometry);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> maxs = geoblaze.max(georaster, geometry);</pre>
     
   
 
@@ -464,8 +681,8 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>a</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    georaster from georaster library
+            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    a raster from the georaster library
 
           </div>
           
@@ -473,9 +690,24 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>input</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
-            = <code>undefined</code>)</code>
-	    a geometry, which we'll use for clipping result
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[
+xmin, ymin, xmax, ymax
+]
+ array for a bounding box, [[
+[
+x00,y00
+]
+,...,
+[
+x0n,y0n
+]
+,
+[
+x00,y00
+]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
           
@@ -502,7 +734,110 @@ all the pixels for each band in the raster.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">var</span> medians = geoblaze.median(georaster, geometry);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> medians = geoblaze.median(georaster, geometry);</pre>
+    
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='mean'>
+      mean
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The mean function takes a raster as an input and an optional geometry.
+If a geometry is included, the function returns the mean of all the pixels
+in that area. If no geometry is included, the pixels returns the mean of
+all the pixels for each band in the raster.</p>
+
+
+  <div class='pre p1 fill-light mt0'>mean</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    a raster from the georaster library
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[
+xmin, ymin, xmax, ymax
+]
+ array for a bounding box, [[
+[
+x00,y00
+]
+,...,
+[
+x0n,y0n
+]
+,
+[
+x00,y00
+]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+        array of means for each band
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> means = geoblaze.mean(georaster, geometry);</pre>
     
   
 
@@ -552,8 +887,8 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>a</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    georaster from georaster library
+            <span class='code bold'>georaster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    a georaster from the georaster library
 
           </div>
           
@@ -561,9 +896,24 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>input</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
-            = <code>undefined</code>)</code>
-	    a geometry, which we'll use for clipping result
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[
+xmin, ymin, xmax, ymax
+]
+ array for a bounding box, [[
+[
+x00,y00
+]
+,...,
+[
+x0n,y0n
+]
+,
+[
+x00,y00
+]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
           
@@ -590,7 +940,7 @@ all the pixels for each band in the raster.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">var</span> modes = geoblaze.mode(georaster, geometry);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> modes = geoblaze.mode(georaster, geometry);</pre>
     
   
 
@@ -640,8 +990,8 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>a</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    georaster from georaster library
+            <span class='code bold'>georaster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    a georaster from the georaster library
 
           </div>
           
@@ -649,9 +999,24 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>input</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
-            = <code>undefined</code>)</code>
-	    a geometry, which we'll use for clipping result
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[
+xmin, ymin, xmax, ymax
+]
+ array for a bounding box, [[
+[
+x00,y00
+]
+,...,
+[
+x0n,y0n
+]
+,
+[
+x00,y00
+]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
           
@@ -678,7 +1043,7 @@ all the pixels for each band in the raster.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">var</span> mins = geoblaze.min(georaster, geometry);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> mins = geoblaze.min(georaster, geometry);</pre>
     
   
 
@@ -728,8 +1093,8 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>a</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    georaster from georaster library
+            <span class='code bold'>georaster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    a georaster from the georaster library
 
           </div>
           
@@ -737,9 +1102,24 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>input</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>
-            = <code>undefined</code>)</code>
-	    a geometry, which we'll use for clipping result
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[
+xmin, ymin, xmax, ymax
+]
+ array for a bounding box, [[
+[
+x00,y00
+]
+,...,
+[
+x0n,y0n
+]
+,
+[
+x00,y00
+]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
           
@@ -766,83 +1146,8 @@ all the pixels for each band in the raster.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">var</span> sums = geoblaze.sum(georaster, geometry);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> sums = geoblaze.sum(georaster, geometry);</pre>
     
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <div class='keyline-top-not py2'><section class='py2 clearfix'>
-
-  <h2 id='utils' class='mt0'>
-    Utils
-  </h2>
-
-  
-    
-
-  
-</section>
-</div>
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='categorize_intersection'>
-      categorize_intersection
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>This function categorizes an intersection</p>
-
-
-  <div class='pre p1 fill-light mt0'>categorize_intersection</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>edges</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-
-  
-
   
 
   
@@ -938,18 +1243,18 @@ all the pixels for each band in the raster.</p>
   
   <div class='clearfix'>
     
-    <h3 class='fl m0' id='merge_ranges'>
-      merge_ranges
+    <h3 class='fl m0' id='categorize_intersection'>
+      categorize_intersection
     </h3>
     
     
   </div>
   
 
-  <p>This function takes in an array of number pairs and combines where there's overlap</p>
+  <p>This function categorizes an intersection</p>
 
 
-  <div class='pre p1 fill-light mt0'>merge_ranges(ranges: any, array: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></div>
+  <div class='pre p1 fill-light mt0'>categorize_intersection</div>
   
   
 
@@ -966,11 +1271,63 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>ranges</span> <code class='quiet'>(any)</code>
+            <span class='code bold'>edges</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
 	    
           </div>
           
         </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+            <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='merge_ranges'>
+      merge_ranges
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>This function takes in an array of number pairs and combines where there's overlap</p>
+
+
+  <div class='pre p1 fill-light mt0'>merge_ranges</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
       
         <div class='space-bottom0'>
           <div>
