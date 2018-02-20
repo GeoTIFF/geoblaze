@@ -37,11 +37,11 @@ let get_max = (values, no_data_value) => {
  * in that area. If no geometry is included, the pixels returns the max of
  * all the pixels for each band in the raster.
  * @name max
- * @param {Object} a georaster from georaster library
- * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @param {Object} raster - a raster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of maxs for each band
  * @example
- * var maxs = geoblaze.max(georaster, geometry);
+ * const maxs = geoblaze.max(georaster, geometry);
  */
 function get_max_for_raster(georaster, geom) {
 
