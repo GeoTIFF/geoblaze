@@ -12,9 +12,18 @@ const error_parsing_geotiff = require('../../constants').ERROR_PARSING_GEOTIFF;
 
 let cache = require('../cache/cache');
 
-module.exports = (url_or_file) => (
-
-  new Promise((resolve, reject) => {
+/**
+ * The load function takes a url to a geotiff or geotiff file as an input
+ * and returns a promise. The promise resolves as a georaster, which
+ * can be used as input in other geoblaze methods, such as identify, sum,
+ * or histogram.
+ * @name load
+ * @param {Object|string} url_or_file - a string representation of a url or a geotiff file
+ * @example
+ * const sums = geoblaze.load(url_or_file).then(georaster => sum(georaster, geometry));
+ */
+function load(url_or_file) {
+  return new Promise((resolve, reject) => {
     if (!in_browser && typeof url_or_file === 'object') {
       reject(new Error(error_load_file_outside_browser));
     }
@@ -24,29 +33,33 @@ module.exports = (url_or_file) => (
     if (cache[url]) {
       resolve(cache[url]);
     } else {
-      fetch(url).then(response => {
-        if (response.ok) return in_browser ? response.arrayBuffer() : response.buffer()
+      fetch(url)
+        .then(response => {
+          if (response.ok) return in_browser ? response.arrayBuffer() : response.buffer()
 
-        const domain = new URL(url).host;
-        reject(new Error(error_bad_url));
-      }).then(b => {
-        try {
-          if (b) {
-            let array_buffer;
-            if (in_browser) {
-              array_buffer = b;
-            } else {
-              array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+          reject(new Error(error_bad_url));
+        })
+        .catch(e => reject(new Error(error_bad_url)))
+        .then(b => {
+          try {
+            if (b) {
+              let array_buffer;
+              if (in_browser) {
+                array_buffer = b;
+              } else {
+                array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+              }
+              parse_georaster(array_buffer).then(georaster => {
+                cache[url] = georaster;
+                resolve(georaster);
+              });
             }
-            parse_georaster(array_buffer).then(georaster => {
-              cache[url] = georaster;
-              resolve(georaster);
-            });
+          } catch (e) {
+            reject(new Error(error_parsing_geotiff));
           }
-        } catch (e) {
-          reject(new Error(error_parsing_geotiff));
-        }
-      });
+        });
     }
-  })
-);
+  });
+}
+
+module.exports = load;

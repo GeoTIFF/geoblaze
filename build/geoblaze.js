@@ -4348,7 +4348,20 @@ var load = __webpack_require__(18);
 var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
 
-module.exports = function (georaster, geom, flat) {
+/**
+ * The get function takes a raster and a bounding box as input. It returns
+ * the subset of pixels in the raster found within the bounding box. It also
+ * takes an optional parameter "flat" which will flatten the returning pixel
+ * matrix across bands instead of retaining a nested array structure.
+ * @name get
+ * @param {Object} raster - a raster from the georaster library
+ * @param {Object} bounding_box - can be an [xmin, ymin, xmax, ymax] array, a [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+ * @param {Boolean} flat - whether or not the resulting output should be flattened into a single array
+ * @returns {Object} array of pixel values
+ * @example
+ * const pixels = geoblaze.get(georaster, geometry);
+ */
+function get(georaster, geom, flat) {
 
   var crop_top = void 0;var crop_left = void 0;var crop_right = void 0;var crop_bottom = void 0;
 
@@ -4424,7 +4437,9 @@ module.exports = function (georaster, geom, flat) {
   } catch (e) {
     throw e;
   }
-};
+}
+
+module.exports = get;
 
 /***/ }),
 /* 8 */
@@ -6277,7 +6292,17 @@ var error_parsing_geotiff = __webpack_require__(28).ERROR_PARSING_GEOTIFF;
 
 var cache = __webpack_require__(30);
 
-module.exports = function (url_or_file) {
+/**
+ * The load function takes a url to a geotiff or geotiff file as an input
+ * and returns a promise. The promise resolves as a georaster, which
+ * can be used as input in other geoblaze methods, such as identify, sum,
+ * or histogram.
+ * @name load
+ * @param {Object|string} url_or_file - a string representation of a url or a geotiff file
+ * @example
+ * const sums = geoblaze.load(url_or_file).then(georaster => sum(georaster, geometry));
+ */
+function load(url_or_file) {
   return new Promise(function (resolve, reject) {
     if (!in_browser && (typeof url_or_file === 'undefined' ? 'undefined' : _typeof(url_or_file)) === 'object') {
       reject(new Error(error_load_file_outside_browser));
@@ -6291,8 +6316,9 @@ module.exports = function (url_or_file) {
       fetch(url).then(function (response) {
         if (response.ok) return in_browser ? response.arrayBuffer() : response.buffer();
 
-        var domain = new URL(url).host;
         reject(new Error(error_bad_url));
+      }).catch(function (e) {
+        return reject(new Error(error_bad_url));
       }).then(function (b) {
         try {
           if (b) {
@@ -6313,7 +6339,9 @@ module.exports = function (url_or_file) {
       });
     }
   });
-};
+}
+
+module.exports = load;
 
 /***/ }),
 /* 19 */
@@ -30699,7 +30727,7 @@ var convert_geometry = __webpack_require__(4);
   @param {object} raster - a raster from the georaster library
   @param {string|object} geometry - geometry can be an [x,y] array, a GeoJSON point object, or a string representation of a GeoJSON point object.
 */
-var identify = function identify(georaster, geometry) {
+function identify(georaster, geometry) {
 
   // The convert_geometry function takes the input
   // geometry and converts it to a standard format.
@@ -30730,7 +30758,7 @@ var identify = function identify(georaster, geometry) {
   } catch (e) {
     throw e;
   }
-};
+}
 
 module.exports = identify;
 
@@ -33667,11 +33695,11 @@ var intersect_polygon = __webpack_require__(9);
  * in that area. If no geometry is included, the pixels returns the sum of
  * all the pixels for each band in the raster.
  * @name sum
- * @param {Object} a georaster from georaster library
- * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @param {Object} georaster - a georaster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of sums for each band
  * @example
- * var sums = geoblaze.sum(georaster, geometry);
+ * const sums = geoblaze.sum(georaster, geometry);
  */
 function sum(georaster, geom, test) {
   var debug = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
@@ -33767,7 +33795,19 @@ var utils = __webpack_require__(3);
 var convert_geometry = __webpack_require__(4);
 var intersect_polygon = __webpack_require__(9);
 
-module.exports = function (georaster, geom) {
+/**
+ * The mean function takes a raster as an input and an optional geometry.
+ * If a geometry is included, the function returns the mean of all the pixels
+ * in that area. If no geometry is included, the pixels returns the mean of
+ * all the pixels for each band in the raster.
+ * @name median
+ * @param {Object} raster - a raster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+ * @returns {Object} array of means for each band
+ * @example
+ * const means = geoblaze.mean(georaster, geometry);
+ */
+function mean(georaster, geom) {
 
   try {
 
@@ -33835,7 +33875,9 @@ module.exports = function (georaster, geom) {
     console.error(e);
     throw e;
   }
-};
+}
+
+module.exports = mean;
 
 /***/ }),
 /* 139 */
@@ -33872,11 +33914,11 @@ var get_median = function get_median(values) {
  * in that area. If no geometry is included, the pixels returns the median of
  * all the pixels for each band in the raster.
  * @name median
- * @param {Object} a georaster from georaster library
- * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @param {Object} raster - a raster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of medians for each band
  * @example
- * var medians = geoblaze.median(georaster, geometry);
+ * const medians = geoblaze.median(georaster, geometry);
  */
 function get_median_for_raster(georaster, geom) {
 
@@ -33947,6 +33989,7 @@ function get_median_for_raster(georaster, geom) {
     throw e;
   }
 }
+
 module.exports = get_median_for_raster;
 
 /***/ }),
@@ -33993,11 +34036,11 @@ var get_min = function get_min(values, no_data_value) {
  * in that area for each band. If no geometry is included, the pixels returns the min of
  * all the pixels for each band in the raster.
  * @name min
- * @param {Object} a georaster from georaster library
- * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @param {Object} georaster - a georaster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of mins for each band
  * @example
- * var mins = geoblaze.min(georaster, geometry);
+ * const mins = geoblaze.min(georaster, geometry);
  */
 function get_min_for_raster(georaster, geom) {
 
@@ -34045,6 +34088,7 @@ function get_min_for_raster(georaster, geom) {
     throw e;
   }
 }
+
 module.exports = get_min_for_raster;
 
 /***/ }),
@@ -34091,11 +34135,11 @@ var get_max = function get_max(values, no_data_value) {
  * in that area. If no geometry is included, the pixels returns the max of
  * all the pixels for each band in the raster.
  * @name max
- * @param {Object} a georaster from georaster library
- * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @param {Object} raster - a raster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of maxs for each band
  * @example
- * var maxs = geoblaze.max(georaster, geometry);
+ * const maxs = geoblaze.max(georaster, geometry);
  */
 function get_max_for_raster(georaster, geom) {
 
@@ -34142,6 +34186,7 @@ function get_max_for_raster(georaster, geom) {
     throw e;
   }
 }
+
 module.exports = get_max_for_raster;
 
 /***/ }),
@@ -34183,11 +34228,11 @@ var get_mode = function get_mode(values) {
  * in that area. If no geometry is included, the pixels returns the mode of
  * all the pixels for each band in the raster.
  * @name mode
- * @param {Object} a georaster from georaster library
- * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @param {Object} georaster - a georaster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of modes for each band
  * @example
- * var modes = geoblaze.mode(georaster, geometry);
+ * const modes = geoblaze.mode(georaster, geometry);
  */
 function get_modes_for_raster(georaster, geom) {
 
@@ -34239,6 +34284,7 @@ function get_modes_for_raster(georaster, geom) {
     throw e;
   }
 }
+
 module.exports = get_modes_for_raster;
 
 /***/ }),
