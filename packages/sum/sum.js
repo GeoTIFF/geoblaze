@@ -11,11 +11,11 @@ let intersect_polygon = require('../intersect-polygon/intersect-polygon');
  * in that area. If no geometry is included, the pixels returns the sum of
  * all the pixels for each band in the raster.
  * @name sum
- * @param {Object} a georaster from georaster library
- * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @param {Object} georaster - a georaster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of sums for each band
  * @example
- * var sums = geoblaze.sum(georaster, geometry);
+ * const sums = geoblaze.sum(georaster, geometry);
  */
 function sum(georaster, geom, test, debug=false) {
 

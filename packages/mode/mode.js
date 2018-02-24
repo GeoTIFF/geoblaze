@@ -29,11 +29,11 @@ let get_mode = values => {
  * in that area. If no geometry is included, the pixels returns the mode of
  * all the pixels for each band in the raster.
  * @name mode
- * @param {Object} a georaster from georaster library
- * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
+ * @param {Object} georaster - a georaster from the georaster library
+ * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of modes for each band
  * @example
- * var modes = geoblaze.mode(georaster, geometry);
+ * const modes = geoblaze.mode(georaster, geometry);
  */
 function get_modes_for_raster(georaster, geom) {
 
