@@ -11,7 +11,7 @@ let convert_geometry = require('../convert-geometry/convert-geometry');
   @param {object} raster - a raster from the georaster library
   @param {string|object} geometry - geometry can be an [x,y] array, a GeoJSON point object, or a string representation of a GeoJSON point object.
 */
-let identify = (georaster, geometry) => {
+function identify(georaster, geometry) {
 
   // The convert_geometry function takes the input
   // geometry and converts it to a standard format.

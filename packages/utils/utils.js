@@ -330,7 +330,7 @@ module.exports = {
 
   /**
    * This function takes in an array of number pairs and combines where there's overlap
-   * @name
+   * @name merge_ranges
    * @param {Object} array of anything
    * @returns {Object} array of index ranges
    * @example

@@ -22,9 +22,8 @@ let cache = require('../cache/cache');
  * @example
  * const sums = geoblaze.load(url_or_file).then(georaster => sum(georaster, geometry));
  */
-module.exports = (url_or_file) => (
-
-  new Promise((resolve, reject) => {
+function load(url_or_file) {
+  return new Promise((resolve, reject) => {
     if (!in_browser && typeof url_or_file === 'object') {
       reject(new Error(error_load_file_outside_browser));
     }
@@ -60,5 +59,7 @@ module.exports = (url_or_file) => (
           }
         });
     }
-  })
-);
+  });
+}
+
+module.exports = load;

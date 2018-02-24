@@ -86,6 +86,6 @@ function get_modes_for_raster(georaster, geom) {
     console.error(e);
     throw e;
   }
-
 }
+
 module.exports = get_modes_for_raster;

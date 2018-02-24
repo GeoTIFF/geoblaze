@@ -77,4 +77,4 @@ function sum(georaster, geom, test, debug=false) {
   }
 }
 
-module.exports = sum
+module.exports = sum;

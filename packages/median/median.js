@@ -105,4 +105,5 @@ function get_median_for_raster(georaster, geom) {
     throw e;
   }
 }
+
 module.exports = get_median_for_raster;

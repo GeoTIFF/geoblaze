@@ -88,4 +88,5 @@ function get_max_for_raster(georaster, geom) {
     throw e;
   }
 }
+
 module.exports = get_max_for_raster;
