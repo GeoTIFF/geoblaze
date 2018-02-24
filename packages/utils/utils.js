@@ -141,7 +141,7 @@ module.exports = {
 
   /**
    * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
-   * @name couple
+   * @name
    * @param {Object} array of anything
    * @returns {Object} array of consecutive pairs
    * @example
@@ -170,7 +170,7 @@ module.exports = {
 
   /**
    * This function categorizes an intersection
-   * @name categorize_intersection
+   * @name
    * @param {Object} edges
   */
   categorize_intersection(segments) {
@@ -330,7 +330,7 @@ module.exports = {
 
   /**
    * This function takes in an array of number pairs and combines where there's overlap
-   * @name merge_ranges
+   * @name
    * @param {Object} array of anything
    * @returns {Object} array of index ranges
    * @example
