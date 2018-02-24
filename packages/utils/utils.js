@@ -139,7 +139,7 @@ function cluster_line_segments(line_segments, number_of_edges, debug=false) {
 
 module.exports = {
 
-  /**
+  /*
    * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
    * @name
    * @param {Object} array of anything
@@ -168,7 +168,7 @@ module.exports = {
   run_on_table_of_values,
 
 
-  /**
+  /*
    * This function categorizes an intersection
    * @name
    * @param {Object} edges
@@ -328,7 +328,7 @@ module.exports = {
     return depth;
   },
 
-  /**
+  /*
    * This function takes in an array of number pairs and combines where there's overlap
    * @name
    * @param {Object} array of anything
