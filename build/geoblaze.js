@@ -2239,9 +2239,9 @@ function cluster_line_segments(line_segments, number_of_edges) {
 
 module.exports = {
 
-  /**
+  /*
    * This function takes in an array with an even number of elements and returns an array that couples every two consecutive elements;
-   * @name couple
+   * @name
    * @param {Object} array of anything
    * @returns {Object} array of consecutive pairs
    * @example
@@ -2266,9 +2266,9 @@ module.exports = {
 
   run_on_table_of_values: run_on_table_of_values,
 
-  /**
+  /*
    * This function categorizes an intersection
-   * @name categorize_intersection
+   * @name
    * @param {Object} edges
   */
   categorize_intersection: function categorize_intersection(segments) {
@@ -2438,7 +2438,7 @@ module.exports = {
   },
 
 
-  /**
+  /*
    * This function takes in an array of number pairs and combines where there's overlap
    * @name
    * @param {Object} array of anything
@@ -4963,7 +4963,7 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
             image_bands.forEach(function (band, band_index) {
               var value = band[row_index][column_index];
               if (value != undefined && value !== no_data_value) {
-                run_this_function_on_each_pixel_inside_geometry(value, band_index);
+                run_this_function_on_each_pixel_inside_geometry(value, band_index, row_index, column_index);
               }
             });
           };
@@ -20306,7 +20306,7 @@ module.exports = function () {
 /* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {var apply = Function.prototype.apply;
+var apply = Function.prototype.apply;
 
 // DOM APIs, for completeness
 
@@ -20357,17 +20357,9 @@ exports._unrefActive = exports.active = function(item) {
 
 // setimmediate attaches itself to the global object
 __webpack_require__(85);
-// On some exotic environments, it's not clear which object `setimmeidate` was
-// able to install onto.  Search each possibility in the same order as the
-// `setimmediate` library.
-exports.setImmediate = (typeof self !== "undefined" && self.setImmediate) ||
-                       (typeof global !== "undefined" && global.setImmediate) ||
-                       (this && this.setImmediate);
-exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
-                         (typeof global !== "undefined" && global.clearImmediate) ||
-                         (this && this.clearImmediate);
+exports.setImmediate = setImmediate;
+exports.clearImmediate = clearImmediate;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
 /* 85 */
@@ -33800,7 +33792,7 @@ var intersect_polygon = __webpack_require__(9);
  * If a geometry is included, the function returns the mean of all the pixels
  * in that area. If no geometry is included, the pixels returns the mean of
  * all the pixels for each band in the raster.
- * @name median
+ * @name mean
  * @param {Object} raster - a raster from the georaster library
  * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of means for each band
