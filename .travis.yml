@@ -8,6 +8,7 @@ before_script:
     - npm run trim-gadm;
     - npm run setup-ghsl-for-travis-ci;
     - npm run setup-mapspam;
+    - npm run build-geotiff;
 cache:
   directories:
     - "node_modules"
