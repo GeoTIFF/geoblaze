@@ -338,7 +338,7 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
             image_bands.forEach((band, band_index) => {
               var value = band[row_index][column_index];
               if (value != undefined && value !== no_data_value) {
-                run_this_function_on_each_pixel_inside_geometry(value, band_index);
+                run_this_function_on_each_pixel_inside_geometry(value, band_index, row_index, column_index);
               }
             });
           }

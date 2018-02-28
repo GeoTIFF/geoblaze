@@ -4963,7 +4963,7 @@ module.exports = function (georaster, geom, run_this_function_on_each_pixel_insi
             image_bands.forEach(function (band, band_index) {
               var value = band[row_index][column_index];
               if (value != undefined && value !== no_data_value) {
-                run_this_function_on_each_pixel_inside_geometry(value, band_index);
+                run_this_function_on_each_pixel_inside_geometry(value, band_index, row_index, column_index);
               }
             });
           };
