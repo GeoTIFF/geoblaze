@@ -20,6 +20,19 @@ const properties = [
 
 const test = () => (
   describe('Geoblaze Load Feature', function() {
+    
+    describe('Load GeoNode Export', function() {
+      this.timeout(1000000);
+      it('Loaded tiff from geonode', () => {
+        let url = "https://s3.amazonaws.com/georaster/geonode_atlanteil.tif";
+        return load(url).then(georaster => {
+          properties.forEach(property => {
+            expect(georaster).to.have.property(property);
+          });
+        });
+      });
+    });    
+    
     describe('Load from URL', function() {
       this.timeout(1000000);
       it('Loaded tiff file', () => {

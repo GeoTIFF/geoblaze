@@ -88,6 +88,7 @@ data/ghsl/tiles/*.tif
 data/mapspam/tiles/*.tif
 data/mapspam/*.tiff
 data/mapspam/*.zip
+data/veneto/*.tif
 
 # accidental geojsons that appear in directory
 *.geojson
