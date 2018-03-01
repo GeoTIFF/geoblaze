@@ -1,6 +1,6 @@
 {
   "name": "geoblaze",
-  "version": "0.0.55",
+  "version": "0.0.56",
   "description": "process geotiffs",
   "main": "build/geoblaze.js",
   "scripts": {
@@ -8,8 +8,7 @@
     "browserify": "browserify index.js -o build/geoblaze.browserify.js",
     "build": "webpack",
     "build-docs": "documentation build packages/** --config documentation.yml -f html -o docs && echo 'geoblaze.io' > docs/CNAME",
-    "build-everything": "npm run build-geotiff && npm run babel && npm run browserify && npm run build && npm run build-docs",
-    "build-geotiff": "cd node_modules/georaster/node_modules/geotiff/ && npm install && npm run build",
+    "build-everything": "npm run babel && npm run browserify && npm run build && npm run build-docs",
     "setup-gadm": "cd data/gadm && bash download_gadm.sh && node extract_countries.js",
     "setup-ghsl": "cd data/ghsl && bash download_pop_data.sh && bash tile.sh && bash clip.sh",
     "setup-ghsl-for-travis-ci": "cd data/ghsl && bash download_data_for_travis_ci.sh",
@@ -55,7 +54,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.1.0",
     "express": "^4.15.4",
-    "georaster": "0.2.0",
+    "georaster": "0.2.1",
     "geotiff": "^0.4.1",
     "leaflet": "^1.1.0",
     "mocha": "^3.5.0",
