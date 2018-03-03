@@ -1,0 +1,61 @@
+Homework 1
+
+Written Questions
+
+	1) When performance measures are designed based on the behavior of the agent, then we would be assessing a change in agent states as interpreted through percepts. For example, if a self-driving car drove from LA to San Fransico, its performance measures could be determined by the distance the agent percieves it has travelled. While it would be possible in a fully observable, deterministic environment to determine an appropriate percept sequence according to agent behavior, for environments that do not fit this criteria, there would be no way of successfully implementing the goal test. In other words, we would be assuming a goal state from the agent's assumptions of its performance rather than the known state of the environment, resulting in uncertainty and inaccuracy. 
+
+	Alternatively, performance measures can (and should) be designed according to the resulting environment state after an agent's actions. In this way, an action sequence can be conceptualized as resulting in a sequence of environment states. This conceptualization allows for more robust models and methods of accounting for uncertainty derived from both percepts and the nature of the environment. In our self-driving car example, the performance measure would be adjusted to recognize the travel distance as a path cost between two environment states, LA and San Francisco.
+
+	2)  States in this problem are formulated as an array holding two values [A(x),B(x)] | x = current quantity of water and a store holding the number and order of all previous dumps (water moved out of one jug) as DUMP(j) | j = jug, fills (water completely filling a jug) as FILL(j) | j = jug, and pours (water moved from one jug to another) as POUR(j0,j1) | j0 = jug to pour out of, j1 = jug to pour into. Since the agent cannot measure how much water is in each bucket, this knowledge is determined based on the store of previous actions.
+
+		1. Initial State - [A(5),B(0)]
+
+		2. Goal Test - Check if the current state = [A(y),B(1)] | 0 <= y <= 5
+
+		3. Actions/Assessor Function - Actions are described above. After each action is performed, If the goal test indicates that CURRENT-STATE = GOAL-STATE, the agent terminates. Depening on the value of j and the current state, the effect (how much water is moved) would differ (eg POUR(A,B) for [A(4),B(1)] vs POUR(A,B) for [A(0),B(2)])
+
+		4. Path Cost - The path cost would be determined as 
+
+		5. State Space - The initial state and store of actons imply a state space consisting of all possible sequences of the three aforementioned actions (wiwth no repeats). In other words, the state space is represented by all finite, non-repetative permutations of the aforementioned three actions.
+
+		6. Tree or Graph - Graph, since you could get an infinite loop otherwise
+
+		7. Search Algorithm - Since the state space is relatively small and there are several known goal-states with fairly shallow paths, I would recommend using a simple breadth-first search
+
+		8. Solution - Using BFS, the solution would be (please view in text editor like sublime, gedit does not format this well):
+
+																	|- [A(5),B(0)]
+													|- [A(2),B(0)] -|				|- [A(0),B(2)]
+									|- [A(0),B(2)] -|				|- [A(2),B(2)] -|- [A(2),B(0)]
+									|				|- [A(5),B(2)]
+									|								|- [A(5),B(2)]
+									|				|- [A(1),B(2)] -|- [A(3),B(0)]	|- [A(5),B(0)]
+					|- [A(3),B(2)] -|- [A(3),B(0)] -|				|- [A(1),B(0)] -|- [A(0),B(1)] ****** Solution
+					|				|				|- [A(0),B(0)]					|- [A(1),B(2)]
+					|				|				|
+					|				|				|- [A(5),B(0)]
+					|				|- [A(5),B(2)]	|
+					|								|- [A(3),B(2)]
+					|				
+					|							 
+		[A(5),B(0)] |- [A(0),B(0)] -|- [A(0),B(2)] 
+					|								
+					|
+					|
+					|
+					|
+					|				|- [A(0),B(2)]
+					|				|
+					|				|
+					|- [A(5),B(2)] -|
+									|
+									|
+									|- [A(5),B(0)]
+
+	3) Since the signing of the Future of Life's open letter outlining both the potential benefits and risks of future advancements in AI by prominent figures Stephen Hawking and Elon Musk, there has been a lot of mention in popular media of possible risks to AI. Although the open letter, as well as a large majority of its knowledgeable signers understand the current scope of impact of AI and the tremendous benefits to society that AI technologies have contributed to, media conversations surrounding AI technologies have since begun to focus on doomsday hypotheses surrounding near-human intelligence in AI and the singularity. As the popular media theory goes, once AI reaches a particular state of near-human or better-than-human intelligence, due to the nature of learning in AI (machine learning), AI will be able to advance beyond a point of human conceptualization, such that our knowledge structures would be far too inferior to comprehend the decisions and logic guiding machines. Such a state, called the 'singularity' due to the unknowability beyond such a point, could lead to uncomprehendable future outcomes.
+
+	Although such a future scenario is a possibility, much of the hype surrounding this doomsday theory fails to take into consideration the ability of developers and engineers to establish restrictions in AI technology. Although such potential dangers should be taken seriously, current advancements in AI technology are nowhere near as integrated or advanced to achieve such a state, and should not be restricted due to such fears. Moving forward, careful problem formulation and AI restrictions must be established, but this conversation should not restrict funding, with a careful weighing of the potential benefits and risks of certain technologies.
+
+Lisp Questions
+	
+	Please view the text files attached with this document. The answers (in dribble format) for problem 1 are found in lispProblem1.text, while the answers for problems 2 and 3 are found in lispProblem2.text.
