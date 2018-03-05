@@ -219,6 +219,20 @@ let expected_polygon_geojson_collection_value = expected_polygon_geojson_value_1
 
 let test = () => {
   describe('Geoblaze Sum Feature', function() {
+    describe("Get Sum from Veneto Geonode", function() {
+      this.timeout(1000000);
+      it("Got Correct Value", () => {
+        return Promise.all([
+            load("https://s3.amazonaws.com/geoblaze/geonode_atlanteil.tif"),
+            fetch_json("https://s3.amazonaws.com/geoblaze/veneto.geojson")
+        ]).then(values => {
+          let [georaster, geojson] = values;
+          let actual_value = Number(sum(georaster, geojson)[0].toFixed(2));
+          let expected_value = 25323.11;
+          expect(actual_value).to.equal(expected_value);
+        });
+      });
+    });
     describe('Get Sum', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {
