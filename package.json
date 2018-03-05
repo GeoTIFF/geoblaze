@@ -1,6 +1,6 @@
 {
   "name": "geoblaze",
-  "version": "0.0.59",
+  "version": "0.0.60",
   "description": "process geotiffs",
   "main": "build/geoblaze.js",
   "scripts": {
