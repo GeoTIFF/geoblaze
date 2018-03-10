@@ -9,8 +9,10 @@ const load = require('./load');
 const path = 'http://localhost:3000/data/test.tiff';
 const incorrect_path = 'http://localhost:3000/data/this-is-not-a-real-dataset.tiff';
 const incorrect_path_2 = 'this-is-a-fake-path';
+const incorrect_path_3 = 'http://localhost:3000/data/random-file';
 
 const error_bad_url = require('../../constants').ERROR_BAD_URL;
+const error_parsing_geotiff = require('../../constants').ERROR_PARSING_GEOTIFF;
 
 const properties = [
   'projection',
@@ -20,7 +22,7 @@ const properties = [
 
 const test = () => (
   describe('Geoblaze Load Feature', function() {
-    
+
     describe('Load GeoNode Export', function() {
       this.timeout(1000000);
       it('Loaded tiff from geonode', () => {
@@ -31,8 +33,8 @@ const test = () => (
           });
         });
       });
-    });    
-    
+    });
+
     describe('Load from URL', function() {
       this.timeout(1000000);
       it('Loaded tiff file', () => {
@@ -58,6 +60,15 @@ const test = () => (
       it('Loaded tiff file', () => {
         return load(incorrect_path_2).then(null, error => {
           expect(error.message).to.equal(error_bad_url);
+        });
+      });
+    });
+
+    describe('Error from an invalid file', function() {
+      this.timeout(1000000);
+      it('Loaded tiff file', () => {
+        return load(incorrect_path_3).then(null, error => {
+          expect(error.message).to.equal(error_parsing_geotiff);
         });
       });
     });
