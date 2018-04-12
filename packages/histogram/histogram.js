@@ -50,8 +50,9 @@ const get_equal_interval_bins = (values, num_classes) => {
         bin_index += 1;
         bin = bins[bin_index];
         bin_key = `>${bin[0]} - ${bin[1]}`;
+        results[bin_key] = 0; // initialize that bin
       }
-      results[bin_key] = 1; // initialize that bin with the first occupant
+      results[bin_key] += 1; // add first occupant
     }
   }
 
@@ -164,13 +165,22 @@ function get_histograms_for_raster(georaster, geom, options) {
 
     logger.info('starting get_histograms_for_raster');
 
-    if (utils.is_bbox(geom)) {
+    if (geom === null || geom === undefined) {
+      const flat = true;
+      const values = get(georaster, null, flat);
+      const no_data_value = georaster.no_data_value;
+
+      return values
+        .map(band => band.filter(value => value !== no_data_value))
+        .map(band => get_histogram(band, options));
+
+    } else if (utils.is_bbox(geom)) {
       geom = convert_geometry('bbox', geom);
-      var no_data_value = georaster.no_data_value;
+      const no_data_value = georaster.no_data_value;
 
       // grab array of values by band
-      let flat = true;
-      let values = get(georaster, geom, true);
+      const flat = true;
+      const values = get(georaster, geom, flat);
 
       // run through histogram function
       return values
