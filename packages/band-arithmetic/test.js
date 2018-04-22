@@ -5,37 +5,111 @@ const load = require('./../load/load');
 const band_arithmetic = require('./band-arithmetic');
 const sum = require('../sum/sum');
 
-// TODO - find a 3 band raster, this one wont work
-const url = 'http://localhost:3000/data/test.tiff';
-
-const geometry = [[
-  [83.12255859375, 22.49225722008518], [82.96875, 21.57571893245848], [81.58447265624999,  1.207458730482642],
-  [83.07861328125, 20.34462694382967], [83.8037109375,  19.497664168139053], [84.814453125, 19.766703551716976],
-  [85.078125, 21.166483858206583], [86.044921875, 20.838277806058933], [86.98974609375, 22.49225722008518],
-  [85.58349609375, 24.54712317973075], [84.6826171875, 23.36242859340884], [83.12255859375, 22.49225722008518]
-]];
+const url = 'http://localhost:3000/data/rgb_raster.tif';
+const geometry = JSON.parse('{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[-124.63632922153921,50.4730947075256],[-124.68136768089609,50.49208460687918],[-124.69775722478518,50.543015499517765],[-124.61816815193745,50.57098391856333],[-124.55232914071532,50.58311475541861],[-124.57418505800888,50.50812939831994],[-124.56121949013325,50.46627096391081],[-124.63632922153921,50.4730947075256]]]}}');
 
 const calculation_1 = 'a + b';
-const expected_value_1 = 0;
+const get_expected_value_1 = (a, b) => a + b;
 
 const calculation_2 = 'b - a * 2';
-const expected_value_2 = 0;
+const get_expected_value_2 = (a, b) => b - a * 2;
 
 const calculation_3 = '2a * c + 10';
-const expected_value_3 = 0;
+const get_expected_value_3 = (a, c) => 2 * a * c + 10;
 
 const calculation_4 = '(a - b)/(a + b)';
-const expected_value_4 = 0;
+const get_expected_value_4 = (a, b) => (a - b) / (a + b);
 
-let test = () => {
+const calculation_5 = '2(b + a * c) - 100';
+const get_expected_value_5 = (a, b, c) => 2 * (b + a * c) - 100;
+
+// left the time measuring code commented out in the tests to make
+// it easier to return and further optimize the code
+
+const test = () => {
   describe('Geoblaze Band Arithmetic Feature', function() {
     describe('Run Calculation 1', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {
         return load(url).then(georaster => {
-          const computed_georaster = band_arithmetic(georaster, calculation_1);
-          const value = sum(computed_georaster, geometry);
-          expect(value).to.equal(expected_value_1);
+          // const then = new Date().getTime();
+          return band_arithmetic(georaster, calculation_1).then(computed_georaster => {
+            // const now = new Date().getTime();
+            // console.error('time: ', (now - then) / 1000);
+            const value = computed_georaster.values[0][0][0];
+            const a = georaster.values[0][0][0];
+            const b = georaster.values[1][0][0];
+            expect(value).to.equal(get_expected_value_1(a, b));
+          });
+        });
+      });
+    });
+
+    describe('Run Calculation 2', function() {
+      this.timeout(1000000);
+      it('Got Correct Value', () => {
+        return load(url).then(georaster => {
+          // const then = new Date().getTime();
+          return band_arithmetic(georaster, calculation_2).then(computed_georaster => {
+            // const now = new Date().getTime();
+            // console.error('time: ', (now - then) / 1000);
+            const value = computed_georaster.values[0][0][0];
+            const a = georaster.values[0][0][0];
+            const b = georaster.values[1][0][0];
+            expect(value).to.equal(get_expected_value_2(a, b));
+          });
+        });
+      });
+    });
+
+    describe('Run Calculation 3', function() {
+      this.timeout(1000000);
+      it('Got Correct Value', () => {
+        return load(url).then(georaster => {
+          // const then = new Date().getTime();
+          return band_arithmetic(georaster, calculation_3).then(computed_georaster => {
+            // const now = new Date().getTime();
+            // console.error('time: ', (now - then) / 1000);
+            const value = computed_georaster.values[0][0][0];
+            const a = georaster.values[0][0][0];
+            const c = georaster.values[2][0][0];
+            expect(value).to.equal(get_expected_value_3(a, c));
+          });
+        });
+      });
+    });
+
+    describe('Run Calculation 4', function() {
+      this.timeout(1000000);
+      it('Got Correct Value', () => {
+        return load(url).then(georaster => {
+          // const then = new Date().getTime();
+          return band_arithmetic(georaster, calculation_4).then(computed_georaster => {
+            // const now = new Date().getTime();
+            // console.error('time: ', (now - then) / 1000);
+            const value = computed_georaster.values[0][0][0];
+            const a = georaster.values[0][0][0];
+            const b = georaster.values[1][0][0];
+          expect(value).to.equal(get_expected_value_4(a, b));
+          });
+        });
+      });
+    });
+
+    describe('Run Calculation 5', function() {
+      this.timeout(1000000);
+      it('Got Correct Value', () => {
+        return load(url).then(georaster => {
+          // const then = new Date().getTime();
+          return band_arithmetic(georaster, calculation_5).then(computed_georaster => {
+            // const now = new Date().getTime();
+            // console.error('time: ', (now - then) / 1000);
+            const value = computed_georaster.values[0][0][0];
+            const a = georaster.values[0][0][0];
+            const b = georaster.values[1][0][0];
+            const c = georaster.values[2][0][0];
+            expect(value).to.equal(get_expected_value_5(a, b, c));
+          });
         });
       });
     });
