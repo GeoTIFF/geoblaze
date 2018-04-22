@@ -13,5 +13,6 @@ require('./packages/mean/test');
 require('./packages/median/test');
 require('./packages/min/test');
 require('./packages/mode/test');
+require('./packages/band-arithmetic/test');
 require('./packages/sum/test');
 require('./packages/utils/test');
