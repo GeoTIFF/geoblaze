@@ -52,7 +52,7 @@ function load(url_or_file) {
               parse_georaster(array_buffer).then(georaster => {
                 cache[url] = georaster;
                 resolve(georaster);
-              });
+              }, error => reject(new Error(error_parsing_geotiff)));
             }
           } catch (e) {
             reject(new Error(error_parsing_geotiff));
