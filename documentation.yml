@@ -1,17 +1,15 @@
 toc:
+  - load
+  - get
   - name: Basic Zonal Statistics
   - histogram
   - identify
   - max
   - median
+  - mean
   - mode
   - min
   - sum
-  - name: Utils
-  - categorize_intersection
-  - cluster
-  - couple
-  - merge_ranges
 
 paths:
     GeoJSON: 'https://tools.ietf.org/html/rfc7946#section-3'

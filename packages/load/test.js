@@ -1,46 +1,92 @@
 'use strict';
 
-let expect = require('chai').expect;
+const expect = require('chai').expect;
 
-let fetch = require('node-fetch');
+const fetch = require('node-fetch');
 
-let load = require('./load');
+const load = require('./load');
 
-let path = 'http://localhost:3000/data/test.tiff';
+const path = 'http://localhost:3000/data/test.tiff';
+const incorrect_path = 'http://localhost:3000/data/this-is-not-a-real-dataset.tiff';
+const incorrect_path_2 = 'this-is-a-fake-path';
+const incorrect_path_3 = 'http://localhost:3000/data/random-file';
 
-let properties = [
-    'projection',
-    'xmin',
-    'values'
+const error_bad_url = require('../../constants').ERROR_BAD_URL;
+const error_parsing_geotiff = require('../../constants').ERROR_PARSING_GEOTIFF;
+
+const properties = [
+  'projection',
+  'xmin',
+  'values'
 ];
 
-let test = () => (
-    describe('Gio Load Feature', function() {
-        describe('Load from URL', function() {
-            this.timeout(1000000);
-            it('Loaded tiff file', () => {
-                return load(path).then(georaster => {
-                    properties.forEach(property => {
-                        expect(georaster).to.have.property(property);
-                    });
-                });
-            });
-        });
+const test = () => (
+  describe('Geoblaze Load Feature', function() {
 
-        // describe('Load from File', function() {
-        //  this.timeout(1000000);
-        //  it('Loaded tiff file', () => {
-        //      return fetch(path).then(image => {
-        //          return load(blob).then(tiff => {
-        //              let image = tiff.getImage();
-        //              properties.forEach(property => {
-        //                  expect(image).to.have.property(property);
-        //              })
-        //          });
-        //      });
-        //  })
-        // })
-    })
+    describe('Load GeoNode Export', function() {
+      this.timeout(1000000);
+      it('Loaded tiff from geonode', () => {
+        let url = "https://s3.amazonaws.com/georaster/geonode_atlanteil.tif";
+        return load(url).then(georaster => {
+          properties.forEach(property => {
+            expect(georaster).to.have.property(property);
+          });
+        });
+      });
+    });
+
+    describe('Load from URL', function() {
+      this.timeout(1000000);
+      it('Loaded tiff file', () => {
+        return load(path).then(georaster => {
+          properties.forEach(property => {
+            expect(georaster).to.have.property(property);
+          });
+        });
+      });
+    });
+
+    describe('Error from invalid URL', function() {
+      this.timeout(1000000);
+      it('Loaded tiff file', () => {
+        return load(incorrect_path).then(null, error => {
+          expect(error.message).to.equal(error_bad_url);
+        });
+      });
+    });
+
+    describe('Error from another invalid URL', function() {
+      this.timeout(1000000);
+      it('Loaded tiff file', () => {
+        return load(incorrect_path_2).then(null, error => {
+          expect(error.message).to.equal(error_bad_url);
+        });
+      });
+    });
+
+    describe('Error from an invalid file', function() {
+      this.timeout(1000000);
+      it('Loaded tiff file', () => {
+        return load(incorrect_path_3).then(null, error => {
+          expect(error.message).to.equal(error_parsing_geotiff);
+        });
+      });
+    });
+
+    // describe('Load from File', function() {
+    //  this.timeout(1000000);
+    //  it('Loaded tiff file', () => {
+    //    return fetch(path).then(image => {
+    //      return load(blob).then(tiff => {
+    //        let image = tiff.getImage();
+    //        properties.forEach(property => {
+    //          expect(image).to.have.property(property);
+    //        })
+    //      });
+    //    });
+    //  })
+    // })
+  })
 )
 
 test();
