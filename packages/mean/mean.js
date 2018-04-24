@@ -4,8 +4,8 @@ let _ = require('underscore');
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
-let convert_geometry = require('../convert-geometry/convert-geometry');
-let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let convertGeometry = require('../convert-geometry/convert-geometry');
+let intersectPolygon = require('../intersect-polygon/intersect-polygon');
 
 /**
  * The mean function takes a raster as an input and an optional geometry.
@@ -23,49 +23,49 @@ function mean(georaster, geom) {
 
   try {
 
-    if (utils.is_bbox(geom)) { // if geometry is a bounding box
-      geom = convert_geometry('bbox', geom);
-      let no_data_value = georaster.no_data_value;
+    if (utils.isBbox(geom)) { // if geometry is a bounding box
+      geom = convertGeometry('bbox', geom);
+      let noDataValue = georaster.no_data_value;
 
       // grab array of values
       let values = get(georaster, geom);
 
       // sum values
       let sums = []
-      for (let band_index = 0; band_index < values.length; band_index++) {
-        let running_sum_for_band = 0;
-        let number_of_cells_with_values_in_band = 0;
-        let band = values[band_index];
-        let number_of_rows = band.length;
-        for (let row_index = 0; row_index < number_of_rows; row_index++) {
-          let row = band[row_index];
-          let number_of_cells = row.length;
-          for (let column_index = 0; column_index < number_of_cells; column_index++) {
-            let value = row[column_index];
-            if (value !== no_data_value) {
-              number_of_cells_with_values_in_band++;
-              running_sum_for_band += value;
+      for (let bandIndex = 0; bandIndex < values.length; bandIndex++) {
+        let sumForBand = 0;
+        let cellsWithValues = 0;
+        let band = values[bandIndex];
+        let numberOfRows = band.length;
+        for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+          let row = band[rowIndex];
+          let numCells = row.length;
+          for (let columnIndex = 0; columnIndex < numCells; columnIndex++) {
+            let value = row[columnIndex];
+            if (value !== noDataValue) {
+              cellsWithValues++;
+              sumForBand += value;
             }
           }
         }
-        sums.push(running_sum_for_band / number_of_cells_with_values_in_band);
+        sums.push(sumForBand / cellsWithValues);
       }
       return sums;
-    } else if (utils.is_polygon(geom)) { // if geometry is a polygon
-      geom = convert_geometry('polygon', geom);
+    } else if (utils.isPolygon(geom)) { // if geometry is a polygon
+      geom = convertGeometry('polygon', geom);
       let sums = [];
-      let num_values = [];
+      let numValues = [];
 
-      // the third argument of intersect_polygon is a function which
+      // the third argument of intersectPolygon is a function which
       // is run on every value, we use it to increment the sum so we
       // can later divide it by the total value count to get the mean
-      intersect_polygon(georaster, geom, (value, band_index) => {
-        if (num_values[band_index]) {
-          sums[band_index] += value;
-          num_values[band_index] += 1;
+      intersectPolygon(georaster, geom, (value, bandIndex) => {
+        if (numValues[bandIndex]) {
+          sums[bandIndex] += value;
+          numValues[bandIndex] += 1;
         } else {
-          sums[band_index] = value;
-          num_values[band_index] = 1;
+          sums[bandIndex] = value;
+          numValues[bandIndex] = 1;
         }
       });
 
@@ -73,7 +73,7 @@ function mean(georaster, geom) {
       // based on the sums and use that to select how we display
       // the result
       let results = [];
-      num_values.forEach((num, index) => {
+      numValues.forEach((num, index) => {
         if (num > 0) results.push(sums[index] / num);
       });
 
