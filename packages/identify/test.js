@@ -7,7 +7,7 @@ let identify = require('./identify');
 
 let url = 'http://localhost:3000/data/test.tiff';
 let point = [80.63, 7.42];
-let expected_value = 350.7;
+let expectedValue = 350.7;
 
 let test = () => (
   describe('Geoblaze Identify Feature', function() {
@@ -16,7 +16,7 @@ let test = () => (
       it('Identified Point Correctly', () => {
         return load(url).then(georaster => {
           let value = identify(georaster, point)[0];
-          expect(value).to.equal(expected_value);
+          expect(value).to.equal(expectedValue);
         });
       });
     });

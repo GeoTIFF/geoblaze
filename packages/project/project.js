@@ -4,7 +4,7 @@ let proj4 = require('proj4');
 
 module.exports = {
 
-  get_projection(image) {
+  getProjection(image) {
     let geoKeys = image.getGeoKeys();
 
 

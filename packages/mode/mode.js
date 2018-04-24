@@ -4,22 +4,22 @@ let _ = require('underscore');
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
-let convert_geometry = require('../convert-geometry/convert-geometry');
-let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let convertGeometry = require('../convert-geometry/convert-geometry');
+let intersectPolygon = require('../intersect-polygon/intersect-polygon');
 
-let get_mode_from_counts_object = counts => {
+let getModeFromCounts = counts => {
   // iterate through values to get highest frequency
   let buckets = _.sortBy(_.pairs(counts), pair => pair[1])
-  let max_frequency = buckets[buckets.length - 1][1];
+  let maxFrequency = buckets[buckets.length - 1][1];
   let modes = buckets
-    .filter(pair => pair[1] === max_frequency)
+    .filter(pair => pair[1] === maxFrequency)
     .map(pair => Number(pair[0]));
   return modes.length === 1 ? modes[0] : modes;
 }
 
-let get_mode = values => {
+let getMode = values => {
   let counts = _.countBy(values);
-  return get_mode_from_counts_object(counts);
+  return getModeFromCounts(counts);
 }
 
 
@@ -35,48 +35,48 @@ let get_mode = values => {
  * @example
  * const modes = geoblaze.mode(georaster, geometry);
  */
-function get_modes_for_raster(georaster, geom) {
+function getModesForRaster(georaster, geom) {
 
   try {
 
-    let no_data_value = georaster.no_data_value;
+    let noDataValue = georaster.no_data_value;
 
     if (geom === null || geom === undefined) {
 
-      let modes_for_all_bands = georaster.values.map(band => {
-        let counts = utils.count_values_in_table(band, no_data_value);
-        return get_mode_from_counts_object(counts);
+      let modesForAllBands = georaster.values.map(band => {
+        let counts = utils.countValuesInTable(band, noDataValue);
+        return getModeFromCounts(counts);
       });
-      return modes_for_all_bands.length === 1 ? modes_for_all_bands[0] : modes_for_all_bands;
+      return modesForAllBands.length === 1 ? modesForAllBands[0] : modesForAllBands;
 
-    } else if (utils.is_bbox(geom)) {
+    } else if (utils.isBbox(geom)) {
 
-      geom = convert_geometry('bbox', geom);
+      geom = convertGeometry('bbox', geom);
 
       // grab array of values;
       let flat = true;
       let values = get(georaster, geom, flat);
 
       return values
-        .map(band => band.filter(value => value !== no_data_value))
-        .map(get_mode);
+        .map(band => band.filter(value => value !== noDataValue))
+        .map(getMode);
 
-    } else if (utils.is_polygon(geom)) {
-      geom = convert_geometry('polygon', geom);
+    } else if (utils.isPolygon(geom)) {
+      geom = convertGeometry('polygon', geom);
       let values = [];
 
       // the third argument of this function is a function which
       // runs for every pixel in the polygon. Here we add them to
-      // an array to run through the get_mode function
-      intersect_polygon(georaster, geom, (value, band_index) => {
-        if (values[band_index]) {
-          values[band_index].push(value);
+      // an array to run through the getMode function
+      intersectPolygon(georaster, geom, (value, bandIndex) => {
+        if (values[bandIndex]) {
+          values[bandIndex].push(value);
         } else {
-          values[band_index] = [value];
+          values[bandIndex] = [value];
         }
       });
 
-      if (values.length > 0) return values.map(get_mode);
+      if (values.length > 0) return values.map(getMode);
       else throw 'No Values were found in the given geometry';
 
     } else {
@@ -88,4 +88,4 @@ function get_modes_for_raster(georaster, geom) {
   }
 }
 
-module.exports = get_modes_for_raster;
+module.exports = getModesForRaster;

@@ -5,19 +5,19 @@ const _ = require('underscore');
 const load = require('./../load/load');
 const histogram = require('./histogram');
 
-const ratio_quantile_options = {
-  scale_type: 'ratio',
-  num_classes: 7,
-  class_type: 'quantile'
+const ratioQuantileOptions = {
+  scaleType: 'ratio',
+  numClasses: 7,
+  classType: 'quantile'
 }
 
-const ratio_ei_options = {
-  scale_type: 'ratio',
-  num_classes: 7,
-  class_type: 'equal-interval'
+const ratioEIOptions = {
+  scaleType: 'ratio',
+  numClasses: 7,
+  classType: 'equal-interval'
 }
 
-const ratio_ei_georaster_results = {
+const ratioEIGeorasterResults = {
   '0 - 36.43': 1,
   '>36.43 - 72.86': 0,
   '>72.86 - 109.29': 269,
@@ -27,7 +27,7 @@ const ratio_ei_georaster_results = {
   '>218.57 - 255': 92
 };
 
-const ratio_quantile_bbox_results = {
+const ratioQuantileBboxResults = {
   '0 - 93.2': 31,
   '>93.2 - 272': 31,
   '>272 - 724': 31,
@@ -37,7 +37,7 @@ const ratio_quantile_bbox_results = {
   '>2732.4 - 5166.7': 28
 };
 
-const ratio_quantile_polygon_results = {
+let ratioQuantilePolygonResults = {
   '0 - 129.3': 248,
   '>129.3 - 683.8': 248,
   '>683.8 - 1191': 248,
@@ -47,7 +47,7 @@ const ratio_quantile_polygon_results = {
   '>3483.9 - 7807.4': 246
 };
 
-const ratio_ei_polygon_results = {
+let ratioEIPolygonResults = {
   '0 - 1115.34': 719,
   '>1115.34 - 2230.69': 373,
   '>2230.69 - 3346.03': 359,
@@ -58,7 +58,7 @@ const ratio_ei_polygon_results = {
 }
 
 const url = 'http://localhost:3000/data/test.tiff';
-const url_small_raster = 'http://localhost:3000/data/example_4326.tif';
+const urlSmallRaster = 'http://localhost:3000/data/example_4326.tif';
 
 const bbox = [80.63, 7.42, 84.21, 10.10];
 
@@ -69,7 +69,7 @@ const polygon = [[
   [85.58349609375, 24.54712317973075], [84.6826171875, 23.36242859340884], [83.12255859375, 22.49225722008518]
 ]];
 
-const polygon_geojson = `{
+let polygonGeojson = `{
   "type": "FeatureCollection",
   "features": [
     { "type": "Feature",
@@ -95,12 +95,12 @@ const test = () => {
     describe('Get Histogram (Ratio, Equal Interval) from GeoRaster', function() {
       this.timeout(1000000);
       it('Got Correct Value', () => {
-        return load(url_small_raster).then(georaster => {
-          const results = histogram(georaster, null, ratio_ei_options)[0];
-          _.keys(ratio_ei_georaster_results).forEach(key => {
+        return load(urlSmallRaster).then(georaster => {
+          const results = histogram(georaster, null, ratioEIOptions)[0];
+          _.keys(ratioEIGeorasterResults).forEach(key => {
             const value = results[key];
-            const expected_value = ratio_ei_georaster_results[key];
-            expect(value).to.equal(expected_value);
+            const expectedValue = ratioEIGeorasterResults[key];
+            expect(value).to.equal(expectedValue);
           });
         });
       });
@@ -109,11 +109,11 @@ const test = () => {
       this.timeout(1000000);
       it('Got Correct Value', () => {
         return load(url).then(georaster => {
-          const results = histogram(georaster, bbox, ratio_quantile_options)[0];
-          _.keys(ratio_quantile_bbox_results).forEach(key => {
-            const value = results[key];
-            const expected_value = ratio_quantile_bbox_results[key];
-            expect(value).to.equal(expected_value);
+          let results = histogram(georaster, bbox, ratioQuantileOptions)[0];
+          _.keys(ratioQuantileBboxResults).forEach(key => {
+            let value = results[key];
+            let expectedValue = ratioQuantileBboxResults[key];
+            expect(value).to.equal(expectedValue);
           });
         });
       });
@@ -122,11 +122,11 @@ const test = () => {
       this.timeout(1000000);
       it('Got Correct Value', () => {
         return load(url).then(georaster => {
-          const results = histogram(georaster, polygon, ratio_quantile_options)[0];
-          _.keys(ratio_quantile_polygon_results).forEach(key => {
-            const value = results[key];
-            const expected_value = ratio_quantile_polygon_results[key];
-            expect(value).to.equal(expected_value);
+          let results = histogram(georaster, polygon, ratioQuantileOptions)[0];
+          _.keys(ratioQuantilePolygonResults).forEach(key => {
+            let value = results[key];
+            let expectedValue = ratioQuantilePolygonResults[key];
+            expect(value).to.equal(expectedValue);
           });
         });
       });
@@ -135,11 +135,11 @@ const test = () => {
       this.timeout(1000000);
       it('Got Correct Value', () => {
         return load(url).then(georaster => {
-          const results = histogram(georaster, polygon_geojson, ratio_ei_options)[0];
-          _.keys(ratio_ei_polygon_results).forEach(key => {
+          const results = histogram(georaster, polygonGeojson, ratioEIOptions)[0];
+          _.keys(ratioEIPolygonResults).forEach(key => {
             const value = results[key];
-            const expected_value = ratio_ei_polygon_results[key];
-            expect(value).to.equal(expected_value);
+            const expectedValue = ratioEIPolygonResults[key];
+            expect(value).to.equal(expectedValue);
           });
         });
       });

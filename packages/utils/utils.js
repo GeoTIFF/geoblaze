@@ -6,20 +6,19 @@ let combine = require('@turf/combine');
 
 let polygon = require("@turf/helpers").polygon;
 
-let in_browser = typeof window === 'object';
-let fetch = in_browser ? window.fetch : require('node-fetch');
+let inBrowser = typeof window === 'object';
+let fetch = inBrowser ? window.fetch : require('node-fetch');
 
 let ArcGIS = require('terraformer-arcgis-parser');
 
-
-function fetch_json(url) {
+function fetchJson(url) {
   return fetch(url).then(response => response.json());
 }
 
-function fetch_jsons(urls, debug=false) {
-  if (debug) console.log("starting fetch_jsons with", urls);
+function fetchJsons(urls, debug=false) {
+  if (debug) console.log("starting fetchJsons with", urls);
   try {
-    return Promise.all(urls.map(fetch_json));
+    return Promise.all(urls.map(fetchJson));
   } catch (error) {
     console.error("urls:", urls);
     console.error(error);
@@ -31,29 +30,29 @@ function fetch_jsons(urls, debug=false) {
   Runs on each value in a table,
   represented by an array of rows.
 */
-function run_on_table_of_values(table, no_data_value, run_on_values) {
-  let number_of_rows = table.length;
-  for (let row_index = 0; row_index < number_of_rows; row_index++) {
-    let row = table[row_index];
-    let number_of_cells = row.length;
-    for (let column_index = 0; column_index < number_of_cells; column_index++) {
-      let value = row[column_index];
-      if (value !== no_data_value) {
-        run_on_values(value);
+function runOnTableOfValues(table, noDataValue, runOnValues) {
+  let numberOfRows = table.length;
+  for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
+    let row = table[rowIndex];
+    let numberOfCells = row.length;
+    for (let columnIndex = 0; columnIndex < numberOfCells; columnIndex++) {
+      let value = row[columnIndex];
+      if (value !== noDataValue) {
+        runOnValues(value);
       }
     }
   }
 }
 
-function get_bounding_box(geometry) {
+function getBoundingBox(geometry) {
 
   let xmin, ymin, xmax, ymax;
 
   if (typeof(geometry[0][0]) === "number") {
-    let number_of_points = geometry.length;
+    let numberOfPoints = geometry.length;
     xmin = xmax = geometry[0][0];
     ymin = ymax = geometry[0][1];
-    for (let i = 1; i < number_of_points; i++) {
+    for (let i = 1; i < numberOfPoints; i++) {
       let [x, y] = geometry[i];
       if (x < xmin) xmin = x;
       else if (x > xmax) xmax = x;
@@ -62,7 +61,7 @@ function get_bounding_box(geometry) {
     }
   } else {
     let bboxes = geometry.forEach((part, index) => {
-      let bbox = get_bounding_box(part);
+      let bbox = getBoundingBox(part);
       if (index == 0) {
         xmin = bbox.xmin;
         xmax = bbox.xmax;
@@ -80,15 +79,15 @@ function get_bounding_box(geometry) {
   return { xmin, ymin, xmax, ymax };
 }
 
-function cluster(items, new_cluster_test) {
+function cluster(items, newClusterTest) {
   try {
-    let number_of_items = items.length;
+    let numberOfItems = items.length;
     let clusters = [];
     let cluster = [];
-    for (let i = 0; i < number_of_items; i++) {
+    for (let i = 0; i < numberOfItems; i++) {
       let item = items[i];
       cluster.push(item);
-      if (new_cluster_test(item)) {
+      if (newClusterTest(item)) {
         clusters.push(cluster);
         cluster = [];
       }
@@ -102,29 +101,29 @@ function cluster(items, new_cluster_test) {
   }
 }
 
-function cluster_line_segments(line_segments, number_of_edges, debug=false) {
+function clusterLineSegments(lineSegments, numberOfEdges, debug=false) {
 
   try {
 
-    let clusters = cluster(line_segments, s => s.ends_off_line);
+    let clusters = cluster(lineSegments, s => s.endsOffLine);
 
-    let number_of_clusters = clusters.length;
+    let numberOfClusters = clusters.length;
 
-    if (debug) console.log("number_of_clusters", number_of_clusters);
+    if (debug) console.log("numberOfClusters", numberOfClusters);
 
-    if (number_of_clusters >= 2) {
+    if (numberOfClusters >= 2) {
 
-      let first_cluster = clusters[0];
-      let first_segment = first_cluster[0];
-      let last_cluster = _.last(clusters);
-      let last_segment = _.last(last_cluster);
+      let firstCluster = clusters[0];
+      let firstSegment = firstCluster[0];
+      let lastCluster = _.last(clusters);
+      let lastSegment = _.last(lastCluster);
 
       if (
-        last_segment.index === number_of_edges - 1
-        && first_segment.index === 0
-        && last_segment.ends_on_line
+        lastSegment.index === numberOfEdges - 1
+        && firstSegment.index === 0
+        && lastSegment.endsOnLine
       ) {
-        clusters[0] = clusters.pop().concat(first_cluster);
+        clusters[0] = clusters.pop().concat(firstCluster);
       }
 
     }
@@ -132,7 +131,7 @@ function cluster_line_segments(line_segments, number_of_edges, debug=false) {
     return clusters;
 
   } catch (error) {
-    console.error("[cluster_line_segments]", error);
+    console.error("[clusterLineSegments]", error);
   }
 
 }
@@ -152,20 +151,20 @@ module.exports = {
   */
   couple(array) {
     let couples = [];
-    let length_of_array = array.length;
-    for (let i = 0; i < length_of_array; i+=2) {
+    let lengthOfArray = array.length;
+    for (let i = 0; i < lengthOfArray; i+=2) {
       couples.push([ array[i], array[i+1] ]);
     }
     return couples;
   },
 
-  force_within(n, min, max) {
+  forceWithin(n, min, max) {
     if (n < min) n = min;
     else if (n > max) n = max;
     return n;
   },
 
-  run_on_table_of_values,
+  runOnTableOfValues,
 
 
   /*
@@ -173,7 +172,7 @@ module.exports = {
    * @name
    * @param {Object} edges
   */
-  categorize_intersection(segments) {
+  categorizeIntersection(segments) {
     try {
 
 
@@ -195,68 +194,63 @@ module.exports = {
       }
 
       if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
-        console.error("segments:", segments);
-        throw Error("categorize_intersection failed with xmin", xmin, "and xmax", xmax);
+        throw Error("categorizeIntersection failed with xmin", xmin, "and xmax", xmax);
       }
 
       return { xmin, xmax, through };
-
     } catch (error) {
-
-      console.error("[categorize_intersection] segments:", segments);
-      console.error("[categorize_intersection]", error);
+      console.error("[categorizeIntersection] segments:", segments);
+      console.error("[categorizeIntersection]", error);
       throw error;
     }
 
   },
 
-  convert_to_geojson_if_necessary(input, debug=false) {
-    if (this.is_esri_json(input, debug)) {
+  convertToGeojsonIfNecessary(input, debug=false) {
+    if (this.isEsriJson(input, debug)) {
       return this.toGeoJSON(input, debug);
     } else {
       return input;
     }
   },
 
-  count_values_in_table(table, no_data_value) {
+  countValuesInTable(table, noDataValue) {
     let counts = {};
-    run_on_table_of_values(table, no_data_value, value => {
+    runOnTableOfValues(table, noDataValue, value => {
       if (value in counts) counts[value]++;
       else counts[value] = 1;
     });
     return counts;
   },
 
-  convert_crs_bbox_to_image_bbox(georaster, crs_bbox) {
-
-    let crs_xmin, crs_ymin, crs_xmax, crs_ymax;
-    if (typeof crs_bbox.xmin !== "undefined") {
-      crs_xmin = crs_bbox.xmin;
-      crs_ymin = crs_bbox.ymin;
-      crs_xmax = crs_bbox.xmax;
-      crs_ymax = crs_bbox.ymax;
-    } else if (Array.isArray(crs_bbox) && crs_bbox.length === 4) {
+  convertCrsBboxToImageBbox(georaster, crsBbox) {
+    let crsXMin, crsYMin, crsXMax, crsYMax;
+    if (typeof crsBbox.xmin !== "undefined") {
+      crsXMin = crsBbox.xmin;
+      crsYMin = crsBbox.ymin;
+      crsXMax = crsBbox.xmax;
+      crsYMax = crsBbox.ymax;
+    } else if (Array.isArray(crsBbox) && crsBbox.length === 4) {
       // pull out bounding box values
-      crs_xmin = crs_bbox[0];
-      crs_ymin = crs_bbox[1];
-      crs_xmax = crs_bbox[2];
-      crs_ymax = crs_bbox[3];
+      crsXMin = crsBbox[0];
+      crsYMin = crsBbox[1];
+      crsXMax = crsBbox[2];
+      crsYMax = crsBbox[3];
     }
 
     // map bounding box values to image coordinate space
-    /* y_min uses lat_max while y_max uses lat_min because the image coordinate
+    /* yMin uses latMax while yMax uses latMin because the image coordinate
     system is inverted along the y axis relative to the lat/long (geographic)
     coordinate system */
     return {
-      xmin: Math.floor((crs_xmin - georaster.xmin) / georaster.pixelWidth),
-      ymin: Math.floor((georaster.ymax - crs_ymax) / georaster.pixelHeight),
-      xmax: Math.ceil((crs_xmax - georaster.xmin) / georaster.pixelWidth),
-      ymax: Math.ceil((georaster.ymax - crs_ymin) / georaster.pixelHeight)
+      xmin: Math.floor((crsXMin - georaster.xmin) / georaster.pixelWidth),
+      ymin: Math.floor((georaster.ymax - crsYMax) / georaster.pixelHeight),
+      xmax: Math.ceil((crsXMax - georaster.xmin) / georaster.pixelWidth),
+      ymax: Math.ceil((georaster.ymax - crsYMin) / georaster.pixelHeight)
     };
   },
 
-  get_geojson_coors(geojson, debug=false) {
-    if (debug) console.log("[get_geojson_coors] starting with", geojson);
+  getGeojsonCoors(geojson, debug=false) {
     let result;
     if (geojson.features) { // for feature collections
 
@@ -268,16 +262,14 @@ module.exports = {
       result = geojson.features[0].geometry.coordinates
         .map(coors => coors[0]);
     } else if (geojson.geometry) { // for individual feature
-      if (debug) console.log("[get_geojson_coors] hits geojson.geometry");
       result = geojson.geometry.coordinates;
     } else if (geojson.coordinates) { // for just the geometry
       result = geojson.coordinates;
     }
-    if (debug) console.log("[get_geojson_coors] returning", JSON.stringify(result).substring(0, 100) + "...");
     return result;
   },
 
-  is_bbox(geometry) {
+  isBbox(geometry) {
 
     if (geometry === undefined || geometry === null) {
       return false;
@@ -296,13 +288,13 @@ module.exports = {
     let coors;
     if (typeof geometry === 'string') { // stringified geojson
       let geojson = JSON.parse(geometry);
-      let geojson_coors = this.get_geojson_coors(geojson);
-      if (geojson_coors.length === 1 && geojson_coors[0].length === 5) {
-        coors = geojson_coors[0];
+      let geojsonCoors = this.getGeojsonCoors(geojson);
+      if (geojsonCoors.length === 1 && geojsonCoors[0].length === 5) {
+        coors = geojsonCoors[0];
       }
     } else if (typeof geometry === 'object') { // geojson
-      let geojson_coors = this.get_geojson_coors(geometry);
-      if (geojson_coors) coors = geojson_coors[0];
+      let geojsonCoors = this.getGeojsonCoors(geometry);
+      if (geojsonCoors) coors = geojsonCoors[0];
     } else {
       return false;
     }
@@ -318,7 +310,7 @@ module.exports = {
     return false;
   },
 
-  get_depth(geometry) {
+  getDepth(geometry) {
     let depth = 0;
     let part = geometry;
     while (Array.isArray(part)) {
@@ -335,36 +327,36 @@ module.exports = {
    * @returns {Object} array of index ranges
    * @example
    * let ranges = [ [0, 10], [10, 10], [20, 30], [30, 40] ];
-   * let merged_ranges = utils.merge_ranges(ranges);
-   * // merged_ranges
+   * let mergedRanges = utils.mergeRanges(ranges);
+   * // mergedRanges
    * // [ [0, 10], [20, 40] ]
   */
-  merge_ranges(ranges) {
-    let number_of_ranges = ranges.length;
-    if (number_of_ranges > 0) {
-      let first_range = ranges[0];
-      let previous_end = first_range[1];
-      let previous_start = first_range[0];
-      let result = [first_range];
-      for (let i = 1; i < number_of_ranges; i++) {
-        let temp_range = ranges[i];
-        let [start, end] = temp_range;
-        if (start <= previous_end) {
+  mergeRanges(ranges) {
+    let numberOfRanges = ranges.length;
+    if (numberOfRanges > 0) {
+      let firstRange = ranges[0];
+      let previousEnd = firstRange[1];
+      let previousStart = firstRange[0];
+      let result = [firstRange];
+      for (let i = 1; i < numberOfRanges; i++) {
+        let tempRange = ranges[i];
+        let [start, end] = tempRange;
+        if (start <= previousEnd) {
           result[result.length - 1][1] = end;
         } else {
-          result.push(temp_range);
+          result.push(tempRange);
         }
-        previous_end = end;
-        previous_start = start;
+        previousEnd = end;
+        previousStart = start;
        }
        return result;
     }
   },
 
-  is_esri_json(input, debug=false) {
-    if (debug) console.log("starting is_esri_json with", input);
-    let input_type = typeof input;
-    let obj = input_type === "string" ? JSON.parse(input) : input_type === "object" ? input : null;
+  isEsriJson(input, debug=false) {
+    if (debug) console.log("starting isEsriJson with", input);
+    let inputType = typeof input;
+    let obj = inputType === "string" ? JSON.parse(input) : inputType === "object" ? input : null;
     let geometry = obj.geometry ? obj.geometry : obj;
     if (geometry) {
       if (geometry.rings || (geometry.x && geometry.y)) {
@@ -387,13 +379,11 @@ module.exports = {
   },
 
   toGeoJSON(input, debug=false) {
-    if (debug) console.log("[toGeoJSON] starting with", input);
     let parsed = ArcGIS.toGeoJSON(input);
-    if (debug) console.log("[toGeoJSON] parsed:", parsed);
     return Array.isArray(parsed) ? parsed[0] : parsed;
   },
 
-  is_polygon(geometry, debug=false) {
+  isPolygon(geometry, debug=false) {
 
     // convert to a geometry
     let coors;
@@ -401,11 +391,11 @@ module.exports = {
       coors = geometry;
     } else if (typeof geometry === 'string') {
       let parsed = JSON.parse(geometry);
-      let geojson = this.convert_to_geojson_if_necessary(parsed, debug);
-      coors = this.get_geojson_coors(geojson, debug);
+      let geojson = this.convertToGeojsonIfNecessary(parsed, debug);
+      coors = this.getGeojsonCoors(geojson, debug);
     } else if (typeof geometry === 'object') {
-      let geojson = this.convert_to_geojson_if_necessary(geometry, debug);
-      coors = this.get_geojson_coors(geojson, debug);
+      let geojson = this.convertToGeojsonIfNecessary(geometry, debug);
+      coors = this.getGeojsonCoors(geojson, debug);
     }
 
     if (coors) {
@@ -413,41 +403,41 @@ module.exports = {
       // iterate through each geometry and make sure first and
       // last point are the same
 
-      let depth = this.get_depth(coors);
+      let depth = this.getDepth(coors);
       if (debug) console.log("depth:", depth);
       if (depth === 4) {
-        return coors.map(() => this.is_polygon).every(Boolean);
+        return coors.map(() => this.isPolygon).every(Boolean);
       } else if (depth === 3) {
-        let is_polygon_array = true;
+        let isPolygonArray = true;
         coors.forEach(part => {
-          let first_vertex = part[0];
-          let last_vertex = part[part.length - 1]
-          if (first_vertex[0] !== last_vertex[0] || first_vertex[1] !== last_vertex[1]) {
-            is_polygon_array = false;
+          let firstVertex = part[0];
+          let lastVertex = part[part.length - 1]
+          if (firstVertex[0] !== lastVertex[0] || firstVertex[1] !== lastVertex[1]) {
+            isPolygonArray = false;
           }
         });
-        return is_polygon_array;
+        return isPolygonArray;
       }
     } else {
       return false;
     }
   },
 
-  fetch_json,
+  fetchJson,
 
-  fetch_jsons,
+  fetchJsons,
 
-  get_bounding_box,
+  getBoundingBox,
 
   // function to convert two points into a
   // representation of a line
-  get_line_from_points(start_point, end_point) {
+  getLineFromPoints(startPoint, endPoint) {
 
     // get a, b, and c from line equation ax + by = c
-    let x1 = start_point[0],
-      x2 = end_point[0],
-      y1 = start_point[1],
-      y2 = end_point[1];
+    let x1 = startPoint[0],
+      x2 = endPoint[0],
+      y1 = startPoint[1],
+      y2 = endPoint[1];
     let a = y2 - y1;
     let b = x1 - x2;
     let c = a * x1 + b * y1
@@ -459,27 +449,27 @@ module.exports = {
 
   // function to get the point at which two lines intersect
   // the input uses the line representations from the
-  // get_line_from_points function
-  get_intersection_of_two_lines(line_1, line_2) {
+  // getLineFromPoints function
+  getIntersectionOfTwoLines(line1, line2) {
 
     // calculate the determinant, ad - cb in a square matrix |a b|
-    let det = line_1.a * line_2.b - line_2.a * line_1.b; /*  |c d| */
+    let det = line1.a * line2.b - line2.a * line1.b; /*  |c d| */
 
     if (det) { // this makes sure the lines aren't parallel, if they are, det will equal 0
-      let x = (line_2.b * line_1.c - line_1.b * line_2.c) / det;
-      let y = (line_1.a * line_2.c - line_2.a * line_1.c) / det;
+      let x = (line2.b * line1.c - line1.b * line2.c) / det;
+      let y = (line1.a * line2.c - line2.a * line1.c) / det;
       return { x, y };
     }
   },
 
-  get_slope_of_line(line) {
+  getSlopeOfLine(line) {
     // assuming ax + by = c
     // http://www.purplemath.com/modules/solvelit2.htm
     return -1 * line.a / line.b;
   },
 
-  get_slope_of_line_segment(line_segment) {
-    let [ [x1, y1], [x2, y2] ] = line_segment;
+  getSlopeOfLineSegment(lineSegment) {
+    let [ [x1, y1], [x2, y2] ] = lineSegment;
     // make sure slope goes from left most to right most, so order of points doesn't matter
     if (x2 > x1) {
       return y2 - y1 / x2 - x1;
@@ -490,7 +480,7 @@ module.exports = {
 
   cluster,
 
-  cluster_line_segments,
+  clusterLineSegments,
 
   sum(values) {
     return values.reduce((a, b) => a + b);

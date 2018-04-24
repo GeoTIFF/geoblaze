@@ -1,14 +1,14 @@
 'use strict';
 
-const parse_georaster = require("georaster");
+const parseGeoraster = require("georaster");
 
-const in_browser = typeof window === 'object';
-var fetch = in_browser ? window.fetch : require('node-fetch');
-var URL = in_browser ? window.URL : require("url").parse;
+const inBrowser = typeof window === 'object';
+var fetch = inBrowser ? window.fetch : require('node-fetch');
+var URL = inBrowser ? window.URL : require("url").parse;
 
-const error_load_file_outside_browser = require('../../constants').ERROR_LOAD_FILE_OUTSIDE_BROSWER;
-const error_bad_url = require('../../constants').ERROR_BAD_URL;
-const error_parsing_geotiff = require('../../constants').ERROR_PARSING_GEOTIFF;
+const errorLoadFileOutsideBrowser = require('../../constants').ERROR_LOAD_FILE_OUTSIDE_BROSWER;
+const errorBadURL = require('../../constants').ERROR_BAD_URL;
+const errorParsingGeotiff = require('../../constants').ERROR_PARSING_GEOTIFF;
 
 let cache = require('../cache/cache');
 
@@ -18,44 +18,44 @@ let cache = require('../cache/cache');
  * can be used as input in other geoblaze methods, such as identify, sum,
  * or histogram.
  * @name load
- * @param {Object|string} url_or_file - a string representation of a url or a geotiff file
+ * @param {Object|string} urlOrFile - a string representation of a url or a geotiff file
  * @example
- * const sums = geoblaze.load(url_or_file).then(georaster => sum(georaster, geometry));
+ * const sums = geoblaze.load(urlOrFile).then(georaster => sum(georaster, geometry));
  */
-function load(url_or_file) {
+function load(urlOrFile) {
   return new Promise((resolve, reject) => {
-    if (!in_browser && typeof url_or_file === 'object') {
-      reject(new Error(error_load_file_outside_browser));
+    if (!inBrowser && typeof urlOrFile === 'object') {
+      reject(new Error(errorLoadFileOutsideBrowser));
     }
 
-    const url = typeof url_or_file === 'object' ? URL.createObjectURL(url_or_file) : url_or_file;
+    const url = typeof urlOrFile === 'object' ? URL.createObjectURL(urlOrFile) : urlOrFile;
 
     if (cache[url]) {
       resolve(cache[url]);
     } else {
       fetch(url)
         .then(response => {
-          if (response.ok) return in_browser ? response.arrayBuffer() : response.buffer()
+          if (response.ok) return inBrowser ? response.arrayBuffer() : response.buffer()
 
-          reject(new Error(error_bad_url));
+          reject(new Error(errorBadURL));
         })
-        .catch(e => reject(new Error(error_bad_url)))
+        .catch(e => reject(new Error(errorBadURL)))
         .then(b => {
           try {
             if (b) {
-              let array_buffer;
-              if (in_browser) {
-                array_buffer = b;
+              let arrayBuffer;
+              if (inBrowser) {
+                arrayBuffer = b;
               } else {
-                array_buffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+                arrayBuffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
               }
-              parse_georaster(array_buffer).then(georaster => {
+              parseGeoraster(arrayBuffer).then(georaster => {
                 cache[url] = georaster;
                 resolve(georaster);
               }, error => reject(new Error(error_parsing_geotiff)));
             }
           } catch (e) {
-            reject(new Error(error_parsing_geotiff));
+            reject(new Error(errorParsingGeotiff));
           }
         });
     }
