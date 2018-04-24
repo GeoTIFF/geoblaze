@@ -11,7 +11,7 @@ var geoblaze = {
   max: require('./packages/max/max'),
   mode: require('./packages/mode/mode'),
   histogram: require('./packages/histogram/histogram'),
-  band_arithmetic: require('./packages/band-arithmetic/band-arithmetic'),
+  bandArithmetic: require('./packages/band-arithmetic/band-arithmetic'),
 };
 
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {

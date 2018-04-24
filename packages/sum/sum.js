@@ -2,8 +2,8 @@
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
-let convert_geometry = require('../convert-geometry/convert-geometry');
-let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let convertGeometry = require('../convert-geometry/convert-geometry');
+let intersectPolygon = require('../intersect-polygon/intersect-polygon');
 
 /**
  * The sum function takes a raster as an input and an optional geometry.
@@ -23,44 +23,44 @@ function sum(georaster, geom, test, debug=false) {
 
     if (geom === null || geom === undefined) {
 
-      let no_data_value = georaster.no_data_value;
+      let noDataValue = georaster.no_data_value;
       return georaster.values.map(band => { // iterate over each band which include rows of pixels
-        return band.reduce((sum_of_band, row) => { // reduce all the rows into one sum
-          return sum_of_band + row.reduce((sum_of_row, cell_value) => { // reduce each row to a sum of its pixel values
-            return cell_value !== no_data_value && (test === undefined || test(cell_value)) ? sum_of_row + cell_value : sum_of_row;
+        return band.reduce((sumOfBand, row) => { // reduce all the rows into one sum
+          return sumOfBand + row.reduce((sumOfRow, cellValue) => { // reduce each row to a sum of its pixel values
+            return cellValue !== noDataValue && (test === undefined || test(cellValue)) ? sumOfRow + cellValue : sumOfRow;
           }, 0);
         }, 0);
       });
 
-    } else if (utils.is_bbox(geom)) {
-      geom = convert_geometry('bbox', geom);
+    } else if (utils.isBbox(geom)) {
+      geom = convertGeometry('bbox', geom);
 
       let values = get(georaster, geom);
       let height = georaster.height;
       let width = georaster.width;
-      let no_data_value = georaster.no_data_value;
+      let noDataValue = georaster.no_data_value;
 
       // sum values
       return values.map(band => { // iterate over each band which include rows of pixels
-        return band.reduce((sum_of_band, row) => { // reduce all the rows into one sum
-          return sum_of_band + row.reduce((sum_of_row, cell_value) => { // reduce each row to a sum of its pixel values
-            return cell_value !== no_data_value && (test === undefined || test(cell_value)) ? sum_of_row + cell_value : sum_of_row;
+        return band.reduce((sumOfBand, row) => { // reduce all the rows into one sum
+          return sumOfBand + row.reduce((sumOfRow, cellValue) => { // reduce each row to a sum of its pixel values
+            return cellValue !== noDataValue && (test === undefined || test(cellValue)) ? sumOfRow + cellValue : sumOfRow;
           }, 0);
         }, 0);
       });
 
-    } else if (utils.is_polygon(geom, debug)) {
-      geom = convert_geometry('polygon', geom);
+    } else if (utils.isPolygon(geom, debug)) {
+      geom = convertGeometry('polygon', geom);
       let sums = [];
 
-      // the third argument of intersect_polygon is a function which
+      // the third argument of intersectPolygon is a function which
       // is run on every value, we use it to increment the sum
-      intersect_polygon(georaster, geom, (value, band_index) => {
+      intersectPolygon(georaster, geom, (value, bandIndex) => {
         if (test === undefined || test(value)) {
-          if (sums[band_index]) {
-            sums[band_index] += value;
+          if (sums[bandIndex]) {
+            sums[bandIndex] += value;
           } else {
-            sums[band_index] = value;
+            sums[bandIndex] = value;
           }
         }
       });

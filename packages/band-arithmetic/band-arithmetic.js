@@ -1,19 +1,17 @@
 'use strict';
 
 const _ = require('underscore');
-const parse_georaster = require("georaster");
+const parseGeoraster = require("georaster");
 
 const get = require('../get/get');
 const utils = require('../utils/utils');
-const convert_geometry = require('../convert-geometry/convert-geometry');
-const intersect_polygon = require('../intersect-polygon/intersect-polygon');
 
 const logger = require('../../logger');
 const parse = require('mathjs').parse;
 
-const regex_multi_character = /[A-z]{2}/g;
+const regexMultiCharacter = /[A-z]{2}/g;
 
-const is_leaf_node = node => !node.op;
+const isLeafNode = node => !node.op;
 
 const variables = [...Array(13)].map((val, i) => String.fromCharCode(i + 65).toLowerCase());
 const operations = {
@@ -23,62 +21,62 @@ const operations = {
   divide: (a, b) => a / b
 };
 
-const get_value = (input, band_values) => {
+const getValue = (input, bandValues) => {
   if (input.value) return input.value;
 
-  const variable_index = variables.findIndex(variable => variable === input.name);
-  return band_values[variable_index];
+  const variableIndex = variables.findIndex(variable => variable === input.name);
+  return bandValues[variableIndex];
 };
 
-const compute_value = (node, band_values) => {
-  const left_node = node.args[0];
-  const right_node = node.args[1];
+const computeValue = (node, bandValues) => {
+  const leftNode = node.args[0];
+  const rightNode = node.args[1];
 
   const operation = node.fn;
 
-  let left_value;
-  if (left_node.content) { // if the node represents parentheses, it will be an object with a single property "content" which contains a node
-    left_value = compute_value(left_node.content, band_values);
-  } else if (is_leaf_node(left_node)) {
-    left_value = get_value(left_node, band_values);
+  let leftValue;
+  if (leftNode.content) { // if the node represents parentheses, it will be an object with a single property "content" which contains a node
+    leftValue = computeValue(leftNode.content, bandValues);
+  } else if (isLeafNode(leftNode)) {
+    leftValue = getValue(leftNode, bandValues);
   } else {
-    left_value = compute_value(left_node, band_values);
+    leftValue = computeValue(leftNode, bandValues);
   }
 
-  let right_value;
-  if (right_node.content) { // if the node represents parentheses, it will be an object with a single property "content" which contains a node
-    right_value = compute_value(right_node.content, band_values);
-  } else if (is_leaf_node(right_node)) {
-    right_value = get_value(right_node, band_values);
+  let rightValue;
+  if (rightNode.content) { // if the node represents parentheses, it will be an object with a single property "content" which contains a node
+    rightValue = computeValue(rightNode.content, bandValues);
+  } else if (isLeafNode(rightNode)) {
+    rightValue = getValue(rightNode, bandValues);
   } else {
-    right_value = compute_value(right_node, band_values);
+    rightValue = computeValue(rightNode, bandValues);
   }
 
-  return operations[operation](left_value, right_value);
+  return operations[operation](leftValue, rightValue);
 };
 
-const get_band_rows = (bands, index) => {
+const getBandRows = (bands, index) => {
   // using a for loop here instead of map leads to a significant performance improvement
-  const band_rows = [];
+  const bandRows = [];
   for (let i = 0; i < bands.length; i++) {
-    band_rows.push(bands[i][index]);
+    bandRows.push(bands[i][index]);
   }
-  return band_rows;
+  return bandRows;
 };
 
-const get_band_values = (band_rows, index) => {
+const getBandValues = (bandRows, index) => {
   // using a for loop here instead of map leads to a significant performance improvement
-  const band_values = [];
-  for (let i = 0; i < band_rows.length; i++) {
-    band_values.push(band_rows[i][index]);
+  const bandValues = [];
+  for (let i = 0; i < bandRows.length; i++) {
+    bandValues.push(bandRows[i][index]);
   }
-  return band_values;
+  return bandValues;
 }
 
 // pre-parse arithmetic string to catch limitations with arithmetic operations
 // before attempting to compute
-const arithmetic_error = (arithmetic) => {
-  if (arithmetic.match(regex_multi_character)) {
+const arithmeticError = (arithmetic) => {
+  if (arithmetic.match(regexMultiCharacter)) {
     return ('Geoblaze does not currently support implicit multiplication between variables. Please use the multiplication (*) symbol for these operations.');
   }
 }
@@ -98,26 +96,26 @@ const arithmetic_error = (arithmetic) => {
 
 module.exports = (georaster, arithmetic) => {
   return new Promise((resolve, reject) => {
-    const parsed_arithmetic = parse(arithmetic.toLowerCase());
+    const parsedArithmetic = parse(arithmetic.toLowerCase());
 
     if (georaster.values.length < 2) {
       return reject(new Error('Band arithmetic is not available for this raster. Please make sure you are using a multi-band raster.'));
     }
 
-    const parse_error = arithmetic_error(arithmetic);
-    if (parse_error) return reject(new Error(parse_error));
+    const parseError = arithmeticError(arithmetic);
+    if (parseError) return reject(new Error(parseError));
 
     try {
       const bands = georaster.values;
       const values = [];
 
       for (let i = 0; i < bands[0].length; i++) {
-        const band_rows = get_band_rows(bands, i);
+        const bandRows = getBandRows(bands, i);
         const row = [];
 
-        for (let j = 0; j < band_rows[0].length; j++) {
-          const band_values = get_band_values(band_rows, j);
-          row.push(compute_value(parsed_arithmetic, band_values));
+        for (let j = 0; j < bandRows[0].length; j++) {
+          const bandValues = getBandValues(bandRows, j);
+          row.push(computeValue(parsedArithmetic, bandValues));
         }
         values.push(row);
       }
@@ -127,10 +125,10 @@ module.exports = (georaster, arithmetic) => {
         'projection',
         'xmin',
         'ymax',
-        'pixelWidth',
-        'pixelHeight'
+        'pixel_width',
+        'pixel_height'
       ]);
-      return parse_georaster([values], metadata).then(georaster => resolve(georaster));
+      return parseGeoraster([values], metadata).then(georaster => resolve(georaster));
 
     } catch(e) {
       console.error(e);

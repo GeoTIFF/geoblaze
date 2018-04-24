@@ -2,17 +2,17 @@
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
-let convert_geometry = require('../convert-geometry/convert-geometry');
-let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let convertGeometry = require('../convert-geometry/convert-geometry');
+let intersectPolygon = require('../intersect-polygon/intersect-polygon');
 let _ = require("underscore");
 
-let get_min = (values, no_data_value) => {
-  let number_of_values = values.length;
-  if (number_of_values > 0) {
+let getMin = (values, noDataValue) => {
+  let numberOfValues = values.length;
+  if (numberOfValues > 0) {
     let min = null;
-    for (let i = 0; i < number_of_values; i++) {
+    for (let i = 0; i < numberOfValues; i++) {
       let value = values[i];
-      if (value !== no_data_value) {
+      if (value !== noDataValue) {
 
         /* We first compare the current value to the stored minimum.
         If the new value is less than the stored minimum, replace the
@@ -43,37 +43,37 @@ let get_min = (values, no_data_value) => {
  * @example
  * const mins = geoblaze.min(georaster, geometry);
  */
-function get_min_for_raster(georaster, geom) {
+function getMinForRaster(georaster, geom) {
 
   try {
 
-    let no_data_value = georaster.no_data_value;
+    let noDataValue = georaster.no_data_value;
 
     if (geom === null || geom === undefined) {
 
       return georaster.values.map(band => {
-        return _.min(band.map(row => get_min(row, no_data_value)).filter(value => value !== undefined && value !== null));
+        return _.min(band.map(row => getMin(row, noDataValue)).filter(value => value !== undefined && value !== null));
       });
 
-    } else if (utils.is_bbox(geom)) {
-      geom = convert_geometry('bbox', geom);
+    } else if (utils.isBbox(geom)) {
+      geom = convertGeometry('bbox', geom);
 
       // grab array of values;
       let values = get(georaster, geom, true);
 
       // get min value
-      return values.map(band => get_min(band, no_data_value));
+      return values.map(band => getMin(band, noDataValue));
 
 
-    } else if (utils.is_polygon(geom)) {
-      geom = convert_geometry('polygon', geom);
+    } else if (utils.isPolygon(geom)) {
+      geom = convertGeometry('polygon', geom);
       let values = [];
 
-      intersect_polygon(georaster, geom, (value, band_index) => {
-        if (typeof values[band_index] === 'undefined') {
-          values[band_index] = value;
-        } else if (value < values[band_index]) {
-          values[band_index] = value;
+      intersectPolygon(georaster, geom, (value, bandIndex) => {
+        if (typeof values[bandIndex] === 'undefined') {
+          values[bandIndex] = value;
+        } else if (value < values[bandIndex]) {
+          values[bandIndex] = value;
         }
       });
 
@@ -89,4 +89,4 @@ function get_min_for_raster(georaster, geom) {
   }
 }
 
-module.exports = get_min_for_raster;
+module.exports = getMinForRaster;
