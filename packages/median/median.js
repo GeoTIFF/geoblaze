@@ -2,22 +2,22 @@
 
 let get = require('../get/get');
 let utils = require('../utils/utils');
-let convert_geometry = require('../convert-geometry/convert-geometry');
-let intersect_polygon = require('../intersect-polygon/intersect-polygon');
+let convertGeometry = require('../convert-geometry/convert-geometry');
+let intersectPolygon = require('../intersect-polygon/intersect-polygon');
 let _ = require("underscore");
 
-let get_median = values => {
+let getMedian = values => {
 
   // sort values
   values.sort();
-  let values_length = values.length;
+  let valuesLength = values.length;
 
   // pull middle value from sorted array
-  if (values_length % 2 !== 0) {
-    let middle = Math.floor(values_length / 2);
+  if (valuesLength % 2 !== 0) {
+    let middle = Math.floor(valuesLength / 2);
     return values[middle];
   } else {
-    let middle = values_length / 2;
+    let middle = valuesLength / 2;
     return (values[middle - 1] + values[middle]) / 2;
   }
 }
@@ -34,44 +34,44 @@ let get_median = values => {
  * @example
  * const medians = geoblaze.median(georaster, geometry);
  */
-function get_median_for_raster(georaster, geom) {
+function getMedianForRaster(georaster, geom) {
 
   try {
 
-    let geom_is_bbox = utils.is_bbox(geom);
+    let geomIsBbox = utils.isBbox(geom);
 
-    if (geom === null || geom === undefined || geom_is_bbox) {
+    if (geom === null || geom === undefined || geomIsBbox) {
 
-      if (geom_is_bbox) {
+      if (geomIsBbox) {
 
-        geom = convert_geometry('bbox', geom);
+        geom = convertGeometry('bbox', geom);
 
       }
 
       let values = get(georaster, geom);
 
-      let no_data_value = georaster.no_data_value;
+      let noDataValue = georaster.no_data_value;
 
       // median values
       let medians = []
-      for (let band_index = 0; band_index < values.length; band_index++) {
-        let band = values[band_index];
-        let counts = utils.count_values_in_table(band, no_data_value);
-        let number_of_cells_with_values_in_band = utils.sum(_.values(counts));
-        let sorted_counts = _.pairs(counts).sort((pair1, pair2) => Number(pair1[0]) - Number(pair2[0]));
-        //console.log("sorted_counts:", sorted_counts);
-        let middle = number_of_cells_with_values_in_band / 2;
-        let running_count = 0;
-        for (let i = 0; i < sorted_counts.length; i++) {
-          let sorted_count = sorted_counts[i];
-          let value = Number(sorted_count[0]);
-          let count = sorted_count[1];
-          running_count += count;
-          if (running_count > middle) {
+      for (let bandIndex = 0; bandIndex < values.length; bandIndex++) {
+        let band = values[bandIndex];
+        let counts = utils.countValuesInTable(band, noDataValue);
+        let numCellsWithValue = utils.sum(_.values(counts));
+        let sortedCounts = _.pairs(counts).sort((pair1, pair2) => Number(pair1[0]) - Number(pair2[0]));
+        //console.log("sortedCounts:", sortedCounts);
+        let middle = numCellsWithValue / 2;
+        let runningCount = 0;
+        for (let i = 0; i < sortedCounts.length; i++) {
+          let sortedCount = sortedCounts[i];
+          let value = Number(sortedCount[0]);
+          let count = sortedCount[1];
+          runningCount += count;
+          if (runningCount > middle) {
             medians.push(value);
             break;
-          } else if (running_count === middle) {
-            medians.push((value + Number(sorted_counts[i+1])) / 2);
+          } else if (runningCount === middle) {
+            medians.push((value + Number(sortedCounts[i+1])) / 2);
             break;
           }
         }
@@ -79,22 +79,22 @@ function get_median_for_raster(georaster, geom) {
       }
       return medians;
 
-    } else if (utils.is_polygon(geom)) {
-      geom = convert_geometry('polygon', geom);
+    } else if (utils.isPolygon(geom)) {
+      geom = convertGeometry('polygon', geom);
       let values = [];
 
       // the third argument of this function is a function which
       // runs for every pixel in the polygon. Here we add them to
-      // an array to run through the get_median function
-      intersect_polygon(georaster, geom, (value, band_index) => {
-        if (values[band_index]) {
-          values[band_index].push(value);
+      // an array to run through the getMedian function
+      intersectPolygon(georaster, geom, (value, bandIndex) => {
+        if (values[bandIndex]) {
+          values[bandIndex].push(value);
         } else {
-          values[band_index] = [value];
+          values[bandIndex] = [value];
         }
       });
 
-      if (values.length > 0) return values.map(get_median);
+      if (values.length > 0) return values.map(getMedian);
       else throw 'No Values were found in the given geometry';
 
     } else {
@@ -106,4 +106,4 @@ function get_median_for_raster(georaster, geom) {
   }
 }
 
-module.exports = get_median_for_raster;
+module.exports = getMedianForRaster;

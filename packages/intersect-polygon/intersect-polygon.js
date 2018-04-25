@@ -1,113 +1,113 @@
 'use strict';
 
-const turf_featureCollection = require("@turf/helpers").featureCollection;
-const turf_lineString = require("@turf/helpers").lineString;
+const turfFeatureCollection = require("@turf/helpers").featureCollection;
+const turfLineString = require("@turf/helpers").lineString;
 //const fs = require("fs");
 
 const _ = require('underscore');
 
 const get = require('../get/get');
 const utils = require('../utils/utils');
-const categorize_intersection = utils.categorize_intersection;
-const cluster_line_segments = utils.cluster_line_segments;
+const categorizeIntersection = utils.categorizeIntersection;
+const clusterLineSegments = utils.clusterLineSegments;
 const couple = utils.couple;
-const force_within = utils.force_within;
-const merge_ranges = utils.merge_ranges;
+const forceWithin = utils.forceWithin;
+const mergeRanges = utils.mergeRanges;
 
-const get_line_from_points = utils.get_line_from_points;
-const get_intersection_of_two_lines = utils.get_intersection_of_two_lines;
-const get_slope_of_line = utils.get_slope_of_line;
-const get_slope_of_line_segment = utils.get_slope_of_line_segment;
+const getLineFromPoints = utils.getLineFromPoints;
+const getIntersectionOfTwoLines = utils.getIntersectionOfTwoLines;
+const getSlopeOfLine = utils.getSlopeOfLine;
+const getSlopeOfLineSegment = utils.getSlopeOfLineSegment;
 
 const logger = require('../../logger');
 
-const get_edges_for_polygon = polygon => {
+const getEdgesForPolygon = polygon => {
   let edges = [];
   polygon.forEach(ring => {
     for (let i = 1; i < ring.length; i++) {
-      let start_point = ring[i - 1];
-      let end_point = ring[i];
-      edges.push([start_point, end_point]);
+      let startPoint = ring[i - 1];
+      let endPoint = ring[i];
+      edges.push([startPoint, endPoint]);
     }
   });
   return edges;
 };
 
-module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geometry) => {
+module.exports = (georaster, geom, perPixelFunction) => {
 
-  let cell_width = georaster.pixelWidth;
-  let cell_height = georaster.pixelHeight;
-  logger.debug("cell_height:", cell_height);
+  let cellWidth = georaster.pixelWidth;
+  let cellHeight = georaster.pixelHeight;
+  logger.debug("cellHeight:", cellHeight);
 
-  let no_data_value = georaster.no_data_value;
-  let image_height = georaster.height;
-  logger.debug("image_height: " + image_height);
+  let noDataValue = georaster.no_data_value;
+  let imageHeight = georaster.height;
+  logger.debug("imageHeight: " + imageHeight);
 
-  let image_width = georaster.width;
+  let imageWidth = georaster.width;
 
   // get values in a bounding box around the geometry
-  let latlng_bbox = utils.get_bounding_box(geom);
-  logger.debug("latlng_bbox:", latlng_bbox);
+  let latlngBbox = utils.getBoundingBox(geom);
+  logger.debug("latlngBbox:", latlngBbox);
 
-  let image_bands = get(georaster, latlng_bbox)
+  let imageBands = get(georaster, latlngBbox)
 
   // set origin points of bbox of geometry in image space
-  let lat_0 = latlng_bbox.ymax + ((georaster.ymax - latlng_bbox.ymax) % cell_height);
-  logger.debug("lat_0:", lat_0);
-  let lng_0 = latlng_bbox.xmin - ((latlng_bbox.xmin - georaster.xmin) % cell_width);
-  logger.debug("lng_0:", lng_0);
+  let lat0 = latlngBbox.ymax + ((georaster.ymax - latlngBbox.ymax) % cellHeight);
+  logger.debug("lat0:", lat0);
+  let lng0 = latlngBbox.xmin - ((latlngBbox.xmin - georaster.xmin) % cellWidth);
+  logger.debug("lng0:", lng0);
 
   // calculate size of bbox in image coordinates
   // to derive out the row length
-  let image_bbox = utils.convert_crs_bbox_to_image_bbox(georaster, latlng_bbox);
-  logger.debug("image_bbox:", image_bbox);
+  let imageBbox = utils.convertCrsBboxToImageBbox(georaster, latlngBbox);
+  logger.debug("imageBbox:", imageBbox);
 
-  let x_min = image_bbox.xmin,
-    y_min = image_bbox.ymin,
-    x_max = image_bbox.xmax,
-    y_max = image_bbox.ymax;
+  let xmin = imageBbox.xmin,
+    ymin = imageBbox.ymin,
+    xmax = imageBbox.xmax,
+    ymax = imageBbox.ymax;
 
-  let row_length = x_max - x_min;
-  logger.debug("row_length:", row_length);
+  let rowLength = xmax - xmin;
+  logger.debug("rowLength:", rowLength);
 
   // iterate through image rows and convert each one to a line
   // running through the middle of the row
-  let image_lines = [];
-  let num_rows = image_bands[0].length;
+  let imageLines = [];
+  let numRows = imageBands[0].length;
 
-  if (num_rows === 0) return;
+  if (numRows === 0) return;
 
-  logger.debug("num_rows:", num_rows);
-  for (let y = 0; y < num_rows; y++) {
+  logger.debug("numRows:", numRows);
+  for (let y = 0; y < numRows; y++) {
 
-    let lat = lat_0 - cell_height * y - cell_height / 2;
+    let lat = lat0 - cellHeight * y - cellHeight / 2;
 
     // use that point, plus another point along the same latitude to
     // create a line
-    let point_0 = [lng_0, lat];
-    let point_1 = [lng_0 + 1, lat];
-    let line = get_line_from_points(point_0, point_1);
-    image_lines.push(line);
+    let point0 = [lng0, lat];
+    let point1 = [lng0 + 1, lat];
+    let line = getLineFromPoints(point0, point1);
+    imageLines.push(line);
   }
-  logger.debug("image_lines.length:", image_lines.length);
-  logger.debug("image_lines[0]:", image_lines[0]);
+  logger.debug("imageLines.length:", imageLines.length);
+  logger.debug("imageLines[0]:", imageLines[0]);
 
 
   // collapse geometry down to a list of edges
   // necessary for multi-part geometries
-  let depth = utils.get_depth(geom);
+  let depth = utils.getDepth(geom);
   logger.debug("depth:", depth);
-  let polygon_edges = depth === 4  ? geom.map(get_edges_for_polygon) : [get_edges_for_polygon(geom)];
-  logger.debug("polygon_edges.length:", polygon_edges.length);
+  let polygonEdges = depth === 4  ? geom.map(getEdgesForPolygon) : [getEdgesForPolygon(geom)];
+  logger.debug("polygonEdges.length:", polygonEdges.length);
 
-  polygon_edges.forEach((edges, edges_index) => {
+  polygonEdges.forEach((edges, edgesIndex) => {
 
     logger.debug(() => {
       console.log("edges.length", edges.length);
       let target = 41.76184321688703;
       let overlaps = [];
       edges.forEach((edge, index) => {
-        let [[x1,y1], [x2,y2]] = edge;
+        let [[x1, y1], [x2, y2]] = edge;
         let ymin = Math.min(y1, y2);
         let ymax = Math.max(y1, y2);
         if (target >= ymin && target <= ymax) {
@@ -119,126 +119,126 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
 
     // iterate through the list of polygon vertices, convert them to
     // lines, and compute the intersections with each image row
-    let intersections_by_row = _.range(num_rows).map(row => []);
-    logger.debug("intersections_by_row.length:", intersections_by_row.length);
-    let number_of_edges = edges.length;
-    logger.debug("number_of_edges:", number_of_edges);
-    for (let i = 0; i < number_of_edges; i++) {
+    let intersectionsByRow = _.range(numRows).map(row => []);
+    logger.debug("intersectionsByRow.length:", intersectionsByRow.length);
+    let numberOfEdges = edges.length;
+    logger.debug("numberOfEdges:", numberOfEdges);
+    for (let i = 0; i < numberOfEdges; i++) {
 
 
       // get vertices that make up an edge and convert that to a line
       let edge = edges[i];
 
-      let [start_point, end_point] = edge;
-      let [ x1, y1 ] = start_point;
-      let [ x2, y2 ] = end_point;
+      let [startPoint, endPoint] = edge;
+      let [ x1, y1 ] = startPoint;
+      let [ x2, y2 ] = endPoint;
 
       let direction = Math.sign(y2 - y1);
       let horizontal = y1 === y2;
       let vertical = x1 === x2;
 
-      let edge_y = y1;
+      let edgeY = y1;
 
-      let edge_line = get_line_from_points(start_point, end_point);
+      let edgeLine = getLineFromPoints(startPoint, endPoint);
 
-      let edge_ymin = Math.min(y1, y2);
-      let edge_ymax = Math.max(y1, y2);
+      let edgeYMin = Math.min(y1, y2);
+      let edgeYMax = Math.max(y1, y2);
 
       logger.debug("\nedge", i, ":", edge);
       logger.debug("direction:", direction);
       logger.debug("horizontal:", horizontal);
       logger.debug("vertical:", vertical);
-      logger.debug("edge_ymin:", edge_ymin);
-      logger.debug("edge_ymax:", edge_ymax);
+      logger.debug("edgeYMin:", edgeYMin);
+      logger.debug("edgeYMax:", edgeYMax);
 
-      let start_lng, start_lat, end_lat, end_lng;
+      let startLng, startLat, endLat, endLng;
       if (x1 < x2) {
-        [ start_lng, start_lat ] = start_point;
-        [ end_lng, end_lat ] = end_point;
+        [ startLng, startLat ] = startPoint;
+        [ endLng, endLat ] = endPoint;
       } else {
-        [ start_lng, start_lat ] = end_point;
-        [ end_lng, end_lat ]  = start_point;
+        [ startLng, startLat ] = endPoint;
+        [ endLng, endLat ]  = startPoint;
       }
 
 
-      if (start_lng === undefined) throw Error("start_lng is " + start_lng);
+      if (startLng === undefined) throw Error("startLng is " + startLng);
 
       // find the y values in the image coordinate space
-      let y_1 = Math.round((lat_0 - .5*cell_height - start_lat ) / cell_height);
-      let y_2 = Math.round((lat_0 - .5*cell_height - end_lat) / cell_height);
+      const imageY1 = Math.round((lat0 - .5*cellHeight - startLat ) / cellHeight);
+      const imageY2 = Math.round((lat0 - .5*cellHeight - endLat) / cellHeight);
 
       // make sure to set the start and end points so that we are
       // incrementing upwards through rows
-      let row_start, row_end;
-      if (y_1 < y_2) {
-        row_start = y_1;
-        row_end = y_2;
+      let rowStart, rowEnd;
+      if (imageY1 < imageY2) {
+        rowStart = imageY1;
+        rowEnd = imageY2;
       } else {
-        row_start = y_2;
-        row_end = y_1;
+        rowStart = imageY2;
+        rowEnd = imageY1;
       }
 
 
-      row_start = force_within(row_start, 0, num_rows - 1);
-      row_end = force_within(row_end, 0, num_rows - 1);
+      rowStart = forceWithin(rowStart, 0, numRows - 1);
+      rowEnd = forceWithin(rowEnd, 0, numRows - 1);
 
-      logger.debug("row_start:", row_start);
-      logger.debug("row_end:", row_end);
+      logger.debug("rowStart:", rowStart);
+      logger.debug("rowEnd:", rowEnd);
 
       // iterate through image lines within the change in y of
       // the edge line and find all intersections
-      for (let j = row_start; j < row_end + 1; j++) {
-        let image_line = image_lines[j];
+      for (let j = rowStart; j < rowEnd + 1; j++) {
+        let imageLine = imageLines[j];
 
 
-        if (image_line === undefined) {
+        if (imageLine === undefined) {
           console.error("j:", j);
-          console.error("image_lines:", image_lines);
-          throw Error("image_lines");
+          console.error("imageLines:", imageLines);
+          throw Error("imageLines");
         }
 
         // because you know x is zero in ax + by = c, so by = c and b = -1, so -1 * y = c or y = -1 * c
-        let image_line_y = -1 * image_line.c;
-        //if (j === row_start) console.log("image_line_y:", image_line_y);
+        let imageLineY = -1 * imageLine.c;
+        //if (j === rowStart) console.log("imageLineY:", imageLineY);
 
-        let starts_on_line = y1 === image_line_y;
-        let ends_on_line = y2 === image_line_y;
-        let ends_off_line = !ends_on_line;
+        let startsOnLine = y1 === imageLineY;
+        let endsOnLine = y2 === imageLineY;
+        let endsOffLine = !endsOnLine;
 
-        let xmin_on_line, xmax_on_line;
+        let xminOnLine, xmaxOnLine;
         if (horizontal) {
-          //console.log("horizontal line:", edge_y);
-          //console.log("image_line_:", image_line_y);
-          if (edge_y === image_line_y) {
-            //console.log("horizontal on line!:", edge_y);
-            xmin_on_line = start_lng;
-            xmax_on_line = end_lng;
+          //console.log("horizontal line:", edgeY);
+          //console.log("imageLine_:", imageLineY);
+          if (edgeY === imageLineY) {
+            //console.log("horizontal on line!:", edgeY);
+            xminOnLine = startLng;
+            xmaxOnLine = endLng;
           } else {
             continue; // stop running calculations for this horizontal line because it doesn't intersect at all
           }
         } else if (vertical) {
           /* we have to have a seprate section for vertical bc of floating point arithmetic probs with get_inter..." */
-          if (image_line_y >= edge_ymin && image_line_y <= edge_ymax) {
-            xmin_on_line = start_lng;
-            xmax_on_line = end_lng;
+          if (imageLineY >= edgeYMin && imageLineY <= edgeYMax) {
+            xminOnLine = startLng;
+            xmaxOnLine = endLng;
           }
-        } else if (starts_on_line) {
+        } else if (startsOnLine) {
           // we know that the other end is not on the line because then it would be horizontal
-          xmin_on_line = xmax_on_line = x1;
-        } else if (ends_on_line) {
+          xminOnLine = xmaxOnLine = x1;
+        } else if (endsOnLine) {
           // we know that the other end is not on the line because then it would be horizontal
-          xmin_on_line = xmax_on_line = x2;
+          xminOnLine = xmaxOnLine = x2;
         } else {
           try {
-            xmin_on_line = xmax_on_line = get_intersection_of_two_lines(edge_line, image_line).x;
+            xminOnLine = xmaxOnLine = getIntersectionOfTwoLines(edgeLine, imageLine).x;
           } catch (error) {
             logger.error('error getting intersection of two lines: ', error);
             logger.info("j:", j);
             logger.info("edge:", edge);
-            logger.info("image_line_y:", image_line_y);
-            logger.info("edge_line:", edge_line);
-            logger.info("image_line:", image_line);
-            logger.info("image_lines:", image_lines);
+            logger.info("imageLineY:", imageLineY);
+            logger.info("edgeLine:", edgeLine);
+            logger.info("imageLine:", imageLine);
+            logger.info("imageLines:", imageLines);
             throw error;
           }
         }
@@ -246,50 +246,50 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
         // check to see if the intersection point is within the range of
         // the edge line segment. If it is, add the intersection to the
         // list of intersections at the corresponding index for that row
-        // in intersections_by_row
-        if (xmin_on_line && xmax_on_line && (horizontal || (xmin_on_line >= start_lng && xmax_on_line <= end_lng && image_line_y <= edge_ymax && image_line_y >= edge_ymin))) {
-          //let image_pixel_index = Math.floor((intersection.x - lng_0) / cell_width);
-          //intersections_by_row[j].push(image_pixel_index);
-          intersections_by_row[j].push({
+        // in intersectionsByRow
+        if (xminOnLine && xmaxOnLine && (horizontal || (xminOnLine >= startLng && xmaxOnLine <= endLng && imageLineY <= edgeYMax && imageLineY >= edgeYMin))) {
+          //let image_pixel_index = Math.floor((intersection.x - lng0) / cellWidth);
+          //intersectionsByRow[j].push(image_pixel_index);
+          intersectionsByRow[j].push({
             direction,
             index: i,
             edge: edge,
-            ends_on_line,
-            ends_off_line,
+            endsOnLine,
+            endsOffLine,
             horizontal,
-            starts_on_line,
+            startsOnLine,
             vertical,
-            xmin: xmin_on_line,
-            xmax: xmax_on_line,
-            image_line_y
+            xmin: xminOnLine,
+            xmax: xmaxOnLine,
+            imageLineY
           });
         }
       }
     }
 
-    logger.debug("intersections_by_row.length:", intersections_by_row.length);
+    logger.debug("intersectionsByRow.length:", intersectionsByRow.length);
 
 
-    let line_strings = [];
-    intersections_by_row.map((segments_in_row, row_index) => {
-      logger.debug(row_index, "segments_in_row.length:", segments_in_row.length);
-      if (segments_in_row.length > 0) {
-        //console.log("\n\nsegments in row:", segments_in_row);
-        let clusters = cluster_line_segments(segments_in_row, number_of_edges);
+    let lineStrings = [];
+    intersectionsByRow.map((segmentsInRow, rowIndex) => {
+      logger.debug(rowIndex, "segmentsInRow.length:", segmentsInRow.length);
+      if (segmentsInRow.length > 0) {
+        //console.log("\n\nsegments in row:", segmentsInRow);
+        let clusters = clusterLineSegments(segmentsInRow, numberOfEdges);
         //console.log('clusters:', clusters);
-        let categorized = clusters.map(categorize_intersection);
+        let categorized = clusters.map(categorizeIntersection);
         //console.log("categorized:", categorized);
         let [ throughs, nonthroughs ] = _.partition(categorized, item => item.through);
 
         if (throughs.length % 2 === 1) {
           logger.error('number of indexes for this row are incorrect, resolving as an odd number');
-          logger.info("row_index:", row_index);
-          logger.info("segments_in_row.length:", segments_in_row.length);
-          logger.info("segments_in_row:", JSON.stringify(segments_in_row));
+          logger.info("rowIndex:", rowIndex);
+          logger.info("segmentsInRow.length:", segmentsInRow.length);
+          logger.info("segmentsInRow:", JSON.stringify(segmentsInRow));
           logger.info("clusters.length:", clusters.length);
           logger.info("clusters:", clusters);
           logger.info("categorized:", categorized);
-          throw Error("throughs.length for " + row_index + " is odd with " + throughs.length);
+          throw Error("throughs.length for " + rowIndex + " is odd with " + throughs.length);
         }
 
         //console.log("throughs:", throughs);
@@ -311,14 +311,14 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
           This makes sure we don't double count pixels.
           For example, converts `[[0,10],[10,10]]` to `[[0,10]]`
         */
-        insides = merge_ranges(insides);
+        insides = mergeRanges(insides);
 
 
         logger.debug(() => {
           insides.forEach(insidepair => {
             let [x1, x2] = insidepair;
-            let y = segments_in_row[0].image_line_y;
-            line_strings.push(turf_lineString([[x1, y], [x2, y]], {"stroke": "red", "stroke-width": 1,"stroke-opacity": 1}));
+            let y = segmentsInRow[0].imageLineY;
+            lineStrings.push(turfLineString([[x1, y], [x2, y]], {"stroke": "red", "stroke-width": 1,"stroke-opacity": 1}));
           });
         });
 
@@ -327,18 +327,18 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
           let [xmin, xmax] = pair;
 
           //convert left and right to image pixels
-          let left = Math.round((xmin - (lng_0 + .5*cell_width)) / cell_width);
-          let right = Math.round((xmax - (lng_0 + .5*cell_width)) / cell_width);
+          let left = Math.round((xmin - (lng0 + .5*cellWidth)) / cellWidth);
+          let right = Math.round((xmax - (lng0 + .5*cellWidth)) / cellWidth);
 
-          let start_column_index = Math.max(left, 0);
-          let end_column_index = Math.min(right, image_width);
+          let startColumnIndex = Math.max(left, 0);
+          let endColumnIndex = Math.min(right, imageWidth);
 
 
-          for (let column_index = start_column_index; column_index <= end_column_index; column_index++) {
-            image_bands.forEach((band, band_index) => {
-              var value = band[row_index][column_index];
-              if (value != undefined && value !== no_data_value) {
-                run_this_function_on_each_pixel_inside_geometry(value, band_index, row_index, column_index);
+          for (let columnIndex = startColumnIndex; columnIndex <= endColumnIndex; columnIndex++) {
+            imageBands.forEach((band, bandIndex) => {
+              var value = band[rowIndex][columnIndex];
+              if (value != undefined && value !== noDataValue) {
+                perPixelFunction(value, bandIndex, rowIndex, columnIndex);
               }
             });
           }
@@ -347,8 +347,8 @@ module.exports = (georaster, geom, run_this_function_on_each_pixel_inside_geomet
     });
 
     logger.debug(() => {
-      let fc = turf_featureCollection(line_strings);
-      //fs.writeFileSync("/tmp/lns" + edges_index + ".geojson", JSON.stringify(fc));
+      let fc = turfFeatureCollection(lineStrings);
+      //fs.writeFileSync("/tmp/lns" + edgesIndex + ".geojson", JSON.stringify(fc));
     });
   });
 }

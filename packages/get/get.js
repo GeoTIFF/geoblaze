@@ -2,7 +2,7 @@
 
 let load = require('../load/load');
 let utils = require('../utils/utils');
-let convert_geometry = require('../convert-geometry/convert-geometry');
+let convertGeometry = require('../convert-geometry/convert-geometry');
 
 /**
  * The get function takes a raster and a bounding box as input. It returns
@@ -11,7 +11,7 @@ let convert_geometry = require('../convert-geometry/convert-geometry');
  * matrix across bands instead of retaining a nested array structure.
  * @name get
  * @param {Object} raster - a raster from the georaster library
- * @param {Object} bounding_box - can be an [xmin, ymin, xmax, ymax] array, a [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+ * @param {Object} boundingBox - can be an [xmin, ymin, xmax, ymax] array, a [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @param {Boolean} flat - whether or not the resulting output should be flattened into a single array
  * @returns {Object} array of pixel values
  * @example
@@ -19,7 +19,7 @@ let convert_geometry = require('../convert-geometry/convert-geometry');
  */
 function get(georaster, geom, flat) {
 
-  let crop_top; let crop_left; let crop_right; let crop_bottom;
+  let cropTop; let cropLeft; let cropRight; let cropBottom;
 
   if (geom === null || geom === undefined) {
 
@@ -27,10 +27,10 @@ function get(georaster, geom, flat) {
 
       if (flat) {
 
-        crop_bottom = georaster.height;
-        crop_left = 0;
-        crop_right = georaster.width;
-        crop_top = 0;
+        cropBottom = georaster.height;
+        cropLeft = 0;
+        cropRight = georaster.width;
+        cropTop = 0;
 
       } else {
 
@@ -45,27 +45,27 @@ function get(georaster, geom, flat) {
 
     }
 
-  } else if (utils.is_bbox(geom)) { // bounding box
+  } else if (utils.isBbox(geom)) { // bounding box
 
     try {
 
 
       // convert geometry
-      let geometry = convert_geometry('bbox', geom);
+      let geometry = convertGeometry('bbox', geom);
 
       // use a utility function that converts from the lat/long coordinate
       // space to the image coordinate space
       // // left, top, right, bottom
-      let bbox = utils.convert_crs_bbox_to_image_bbox(georaster, geometry);
-      let bbox_left = bbox.xmin;
-      let bbox_top = bbox.ymin;
-      let bbox_right = bbox.xmax;
-      let bbox_bottom = bbox.ymax;
+      let bbox = utils.convertCrsBboxToImageBbox(georaster, geometry);
+      let bboxLeft = bbox.xmin;
+      let bboxTop = bbox.ymin;
+      let bboxRight = bbox.xmax;
+      let bboxBottom = bbox.ymax;
 
-      crop_top = Math.max(bbox_top, 0)
-      crop_left = Math.max(bbox_left, 0);
-      crop_right = Math.min(bbox_right, georaster.width);
-      crop_bottom = Math.min(bbox_bottom, georaster.height)
+      cropTop = Math.max(bboxTop, 0)
+      cropLeft = Math.max(bboxLeft, 0);
+      cropRight = Math.min(bboxRight, georaster.width);
+      cropBottom = Math.min(bboxBottom, georaster.height)
 
     } catch (error) {
 
@@ -85,16 +85,16 @@ function get(georaster, geom, flat) {
      if (flat) {
       return georaster.values.map(band => {
         let values = [];
-        for (let row_index = crop_top; row_index < crop_bottom; row_index++) {
-           values = values.concat(Array.prototype.slice.call(band[row_index].slice(crop_left, crop_right)));
+        for (let rowIndex = cropTop; rowIndex < cropBottom; rowIndex++) {
+           values = values.concat(Array.prototype.slice.call(band[rowIndex].slice(cropLeft, cropRight)));
         }
         return values;
       });
     } else {
       return georaster.values.map(band => {
         let table = [];
-        for (let row_index = crop_top; row_index < crop_bottom; row_index++) {
-          table.push(band[row_index].slice(crop_left, crop_right));
+        for (let rowIndex = cropTop; rowIndex < cropBottom; rowIndex++) {
+          table.push(band[rowIndex].slice(cropLeft, cropRight));
         }
         return table;
       });
