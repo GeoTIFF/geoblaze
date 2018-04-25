@@ -11,48 +11,46 @@ const parse = require('mathjs').parse;
 
 const regexMultiCharacter = /[A-z]{2}/g;
 
+const containsNoDataValue = (bandValues, noDataValue) => {
+  const numBandValues = bandValues.length;
+  for (let i = 0; i < numBandValues; i++) {
+    if (bandValues[i] === noDataValue) return true;
+  }
+  return false;
+}
+
 const isLeafNode = node => !node.op;
+const listVariables = numVariables => [...Array(numVariables)].map((val, i) => String.fromCharCode(i + 65).toLowerCase());
 
-const variables = [...Array(13)].map((val, i) => String.fromCharCode(i + 65).toLowerCase());
-const operations = {
-  add: (a, b) => a + b,
-  subtract: (a, b) => a - b,
-  multiply: (a, b) => a * b,
-  divide: (a, b) => a / b
-};
+const parseAST = (ast, numBands) => {
+  return new Function(...listVariables(numBands), `return ${parseNode(ast)}`);
+}
 
-const getValue = (input, bandValues) => {
-  if (input.value) return input.value;
-
-  const variableIndex = variables.findIndex(variable => variable === input.name);
-  return bandValues[variableIndex];
-};
-
-const computeValue = (node, bandValues) => {
+const parseNode = (node) => {
   const leftNode = node.args[0];
   const rightNode = node.args[1];
 
-  const operation = node.fn;
+  const operation = node.op;
 
-  let leftValue;
+  let leftHandSide;
   if (leftNode.content) { // if the node represents parentheses, it will be an object with a single property "content" which contains a node
-    leftValue = computeValue(leftNode.content, bandValues);
+    leftHandSide = `(${parseNode(leftNode.content)}`;
   } else if (isLeafNode(leftNode)) {
-    leftValue = getValue(leftNode, bandValues);
+    leftHandSide = `(${leftNode.value || leftNode.name}`;
   } else {
-    leftValue = computeValue(leftNode, bandValues);
+    leftHandSide = `(${parseNode(leftNode)}`;
   }
 
-  let rightValue;
+  let rightHandSide;
   if (rightNode.content) { // if the node represents parentheses, it will be an object with a single property "content" which contains a node
-    rightValue = computeValue(rightNode.content, bandValues);
+    rightHandSide = `${parseNode(rightNode.content)})`;
   } else if (isLeafNode(rightNode)) {
-    rightValue = getValue(rightNode, bandValues);
+    rightHandSide = `${rightNode.value || rightNode.name})`;
   } else {
-    rightValue = computeValue(rightNode, bandValues);
+    rightHandSide = `${parseNode(rightNode)})`;
   }
 
-  return operations[operation](leftValue, rightValue);
+  return `${leftHandSide} ${operation} ${rightHandSide}`;
 };
 
 const getBandRows = (bands, index) => {
@@ -96,8 +94,6 @@ const arithmeticError = (arithmetic) => {
 
 module.exports = (georaster, arithmetic) => {
   return new Promise((resolve, reject) => {
-    const parsedArithmetic = parse(arithmetic.toLowerCase());
-
     if (georaster.values.length < 2) {
       return reject(new Error('Band arithmetic is not available for this raster. Please make sure you are using a multi-band raster.'));
     }
@@ -107,15 +103,25 @@ module.exports = (georaster, arithmetic) => {
 
     try {
       const bands = georaster.values;
+      const noDataValue = georaster.no_data_value;
       const values = [];
+      const numRows = bands[0].length;
 
-      for (let i = 0; i < bands[0].length; i++) {
+      const ast = parse(arithmetic.toLowerCase());
+      const arithmeticFunction = parseAST(ast, bands.length);
+
+      for (let i = 0; i < numRows; i++) {
         const bandRows = getBandRows(bands, i);
         const row = [];
+        const numValues = bandRows[0].length;
 
-        for (let j = 0; j < bandRows[0].length; j++) {
+        for (let j = 0; j < numValues; j++) {
           const bandValues = getBandValues(bandRows, j);
-          row.push(computeValue(parsedArithmetic, bandValues));
+          if (containsNoDataValue(bandValues, noDataValue)) {
+            row.push(noDataValue);
+          } else {
+            row.push(arithmeticFunction(...bandValues));
+          }
         }
         values.push(row);
       }
