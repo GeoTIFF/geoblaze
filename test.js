@@ -15,4 +15,5 @@ require('./packages/min/test');
 require('./packages/mode/test');
 require('./packages/band-arithmetic/test');
 require('./packages/sum/test');
+require('./packages/raster-calculator/test');
 require('./packages/utils/test');
