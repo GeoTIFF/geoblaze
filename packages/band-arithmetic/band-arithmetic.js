@@ -3,10 +3,6 @@
 const _ = require('underscore');
 const parseGeoraster = require("georaster");
 
-const get = require('../get/get');
-const utils = require('../utils/utils');
-
-const logger = require('../../logger');
 const parse = require('mathjs').parse;
 
 const regexMultiCharacter = /[A-z]{2}/g;
@@ -84,14 +80,13 @@ const arithmeticError = (arithmetic) => {
  * a string as input. The function performs pixel-by-pixel calculation according to the
  * arithmetic operation provided. This is only possible for a multiband raster and not
  * for single band rasters. The output is a computed single band raster.
- * @name band_arithmetic
+ * @name bandArithmetic
  * @param {Object} raster - a raster from the georaster library
  * @param {String} operation - a string representation of a arithmetic operation to perform
- * @returns {Object} array of computed values for each band
+ * @returns {Object} raster - the computed georaster
  * @example
- * const ndvi = geoblaze.band_arithmetic(georaster, '(c - b)/(c + b)');
+ * const ndvi = geoblaze.bandArithmetic(georaster, '(c - b)/(c + b)');
  */
-
 module.exports = (georaster, arithmetic) => {
   return new Promise((resolve, reject) => {
     if (georaster.values.length < 2) {
@@ -131,14 +126,14 @@ module.exports = (georaster, arithmetic) => {
         'projection',
         'xmin',
         'ymax',
-        'pixel_width',
-        'pixel_height'
+        'pixelWidth',
+        'pixelHeight'
       ]);
       return parseGeoraster([values], metadata).then(georaster => resolve(georaster));
 
     } catch(e) {
       console.error(e);
-      reject(e);
+      return reject(e);
     }
   });
 };
