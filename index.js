@@ -12,7 +12,7 @@ var geoblaze = {
   mode: require('./packages/mode/mode'),
   histogram: require('./packages/histogram/histogram'),
   bandArithmetic: require('./packages/band-arithmetic/band-arithmetic'),
-  rasterCalculator: require('./package/raster-calculator/raster-calculator'),
+  rasterCalculator: require('./packages/raster-calculator/raster-calculator'),
 };
 
 if (typeof module !== "undefined" && typeof module.exports !== "undefined") {
