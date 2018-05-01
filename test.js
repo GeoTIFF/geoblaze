@@ -2,18 +2,18 @@
 
 process.env.DEBUG_LEVEL = 1;
 
-require('./packages/get/test');
-require('./packages/load/test');
-require('./packages/convert-geometry/test');
-require('./packages/histogram/test');
-require('./packages/identify/test');
-require('./packages/intersect-polygon/test');
-require('./packages/max/test');
-require('./packages/mean/test');
-require('./packages/median/test');
-require('./packages/min/test');
-require('./packages/mode/test');
-require('./packages/band-arithmetic/test');
-require('./packages/sum/test');
-require('./packages/raster-calculator/test');
-require('./packages/utils/test');
+require('./src/get/get.test');
+require('./src/load/load.test');
+require('./src/convert-geometry/convert-geometry.test');
+require('./src/histogram/histogram.test');
+require('./src/identify/identify.test');
+require('./src/intersect-polygon/interset-polygon.test');
+require('./src/max/max.test');
+require('./src/mean/mean.test');
+require('./src/median/median.test');
+require('./src/min/min.test');
+require('./src/mode/mode.test');
+require('./src/band-arithmetic/band-arithmetic.test');
+require('./src/sum/sum.test');
+require('./src/raster-calculator/raster-calculator.test');
+require('./src/utils/utils.test');
