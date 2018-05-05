@@ -1,4 +1,3 @@
-import load from '../load';
 import utils from '../utils';
 import convertGeometry from '../convert-geometry';
 
@@ -21,21 +20,21 @@ const get = (georaster, geom, flat) => {
     }
   } else if (utils.isBbox(geom)) { // bounding box
     try {
-      let geometry = convertGeometry('bbox', geom);
+      const geometry = convertGeometry('bbox', geom);
 
       // use a utility function that converts from the lat/long coordinate
       // space to the image coordinate space
       // // left, top, right, bottom
-      let bbox = utils.convertCrsBboxToImageBbox(georaster, geometry);
-      let bboxLeft = bbox.xmin;
-      let bboxTop = bbox.ymin;
-      let bboxRight = bbox.xmax;
-      let bboxBottom = bbox.ymax;
+      const bbox = utils.convertCrsBboxToImageBbox(georaster, geometry);
+      const bboxLeft = bbox.xmin;
+      const bboxTop = bbox.ymin;
+      const bboxRight = bbox.xmax;
+      const bboxBottom = bbox.ymax;
 
-      cropTop = Math.max(bboxTop, 0)
+      cropTop = Math.max(bboxTop, 0);
       cropLeft = Math.max(bboxLeft, 0);
       cropRight = Math.min(bboxRight, georaster.width);
-      cropBottom = Math.min(bboxBottom, georaster.height)
+      cropBottom = Math.min(bboxBottom, georaster.height);
     } catch (error) {
       console.error(error);
       throw error;
@@ -45,17 +44,17 @@ const get = (georaster, geom, flat) => {
   }
 
   try {
-     if (flat) {
+    if (flat) {
       return georaster.values.map(band => {
         let values = [];
         for (let rowIndex = cropTop; rowIndex < cropBottom; rowIndex++) {
-           values = values.concat(Array.prototype.slice.call(band[rowIndex].slice(cropLeft, cropRight)));
+          values = values.concat(Array.prototype.slice.call(band[rowIndex].slice(cropLeft, cropRight)));
         }
         return values;
       });
     } else {
       return georaster.values.map(band => {
-        let table = [];
+        const table = [];
         for (let rowIndex = cropTop; rowIndex < cropBottom; rowIndex++) {
           table.push(band[rowIndex].slice(cropLeft, cropRight));
         }
@@ -65,6 +64,6 @@ const get = (georaster, geom, flat) => {
   } catch (e) {
     throw e;
   }
-}
+};
 
 export default get;

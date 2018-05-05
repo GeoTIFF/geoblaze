@@ -19,14 +19,14 @@ const getEqualIntervalBins = (values, numClasses) => {
     return [start, end];
   });
 
-  let results = {};
+  const results = {};
 
   // set first bin in results to eliminate the need to check
   // for the existence of the key in every iteration
   let binIndex = 0;
   let bin = bins[binIndex];
   let binKey = `${bin[0]} - ${bin[1]}`;
-  let firstValue = values[0];
+  const firstValue = values[0];
 
   while (firstValue > bin[1]) { // this is in case the first value isn't in the first bin
     binIndex += 1;
@@ -36,8 +36,8 @@ const getEqualIntervalBins = (values, numClasses) => {
   results[binKey] = 1;
 
   // add to results based on bins
-  for (var i = 1; i < values.length; i++) {
-    let value = values[i];
+  for (let i = 1; i < values.length; i++) {
+    const value = values[i];
     if (value <= bin[1]) { // add to existing bin if its in the correct range
       results[binKey] += 1;
     } else { // otherwise keep searching for an appropriate bin until one is found
@@ -45,14 +45,14 @@ const getEqualIntervalBins = (values, numClasses) => {
         binIndex += 1;
         bin = bins[binIndex];
         binKey = `>${bin[0]} - ${bin[1]}`;
-        results[binKey] = 0 // initialize that bin
+        results[binKey] = 0; // initialize that bin
       }
       results[binKey] = 1; // initialize that bin with the first occupant
     }
   }
 
   return results;
-}
+};
 
 const getQuantileBins = (values, numClasses) => {
 
@@ -62,16 +62,15 @@ const getQuantileBins = (values, numClasses) => {
   // iterate through values and use a counter to
   // decide when to set up the next bin. Bins are
   // represented as a list of [min, max] values
-  let results = {}
-  let binIndex = 0;
+  const results = {};
   let binMin = values[0];
   let numValuesInCurrentBin = 1;
-  for (var i = 1; i < values.length; i++) {
+  for (let i = 1; i < values.length; i++) {
     if (numValuesInCurrentBin + 1 < valuesPerBin) {
       numValuesInCurrentBin += 1;
     } else { // if it is the last value, add it to the bin and start setting up for the next one
-      let value = values[i];
-      let binMax = value;
+      const value = values[i];
+      const binMax = value;
       numValuesInCurrentBin += 1;
       if (_.keys(results).length > 0) binMin = `>${binMin}`;
       results[`${binMin} - ${binMax}`] = numValuesInCurrentBin;
@@ -87,9 +86,9 @@ const getQuantileBins = (values, numClasses) => {
   results[`${binMin} - ${binMax}`] = numValuesInCurrentBin;
 
   return results;
-}
+};
 
-const getHistogram = (values, options) => {
+const getHistogram = (values, options = {}) => {
 
   // pull out options, possible options are:
   // scaleType: measurement scale, options are: nominal, ratio
@@ -97,7 +96,6 @@ const getHistogram = (values, options) => {
   // classType: method of breaking data into classes, only available
   //       for ratio data, options are: equal-interval, quantile
   //
-  var options = options || {};
   const scaleType = options.scaleType;
   const numClasses = options.numClasses;
   const classType = options.classType;
@@ -113,7 +111,7 @@ const getHistogram = (values, options) => {
   if (scaleType === 'nominal') {
     results = {};
     for (let i = 0; i < values.length; i++) {
-      let value = values[i];
+      const value = values[i];
       if (results[value]) results[value] += 1;
       else results[value] = 1;
     }
@@ -140,7 +138,7 @@ const getHistogram = (values, options) => {
 
   if (results) return results;
   else throw 'An unexpected error occurred while running the getHistogram function.';
-}
+};
 
 const getHistogramsForRaster = (georaster, geom, options) => {
 
@@ -169,7 +167,7 @@ const getHistogramsForRaster = (georaster, geom, options) => {
 
     } else if (utils.isPolygon(geom)) {
       geom = convertGeometry('polygon', geom);
-      let noDataValue = georaster.no_data_value;
+      const noDataValue = georaster.no_data_value;
 
       // grab array of values by band
       let values = [];
@@ -187,12 +185,12 @@ const getHistogramsForRaster = (georaster, geom, options) => {
       return values.map(band => getHistogram(band, options));
 
     } else {
-      throw 'Only Bounding Box and Polygon geometries are currently supported.'
+      throw 'Only Bounding Box and Polygon geometries are currently supported.';
     }
   } catch(e) {
     console.error(e);
     throw e;
   }
-}
+};
 
 export default getHistogramsForRaster;

@@ -1,13 +1,12 @@
-import load from 'load';
-import convertGeometry from 'convert-geometry';
+import convertGeometry from '../convert-geometry';
 
 const identify = (georaster, geometry) => {
 
   // The convertGeometry function takes the input
   // geometry and converts it to a standard format.
-  let point = convertGeometry('point', geometry);
-  let xInCrs = point[0];
-  let yInCrs = point[1];
+  const point = convertGeometry('point', geometry);
+  const xInCrs = point[0];
+  const yInCrs = point[1];
 
 
   // By normalizing the difference in latitude and longitude between the image
@@ -16,8 +15,8 @@ const identify = (georaster, geometry) => {
   // coordinate space to their associated pixel location in the image space.
   // Note that the y value is inverted to account for the inversion between the
   // coordinate and image spaces.
-  let x = Math.floor((xInCrs - georaster.xmin) / georaster.pixelWidth);
-  let y = Math.floor((georaster.ymax - yInCrs) / georaster.pixelHeight);
+  const x = Math.floor((xInCrs - georaster.xmin) / georaster.pixelWidth);
+  const y = Math.floor((georaster.ymax - yInCrs) / georaster.pixelHeight);
 
   try {
 
@@ -32,6 +31,6 @@ const identify = (georaster, geometry) => {
   } catch(e) {
     throw e;
   }
-}
+};
 
 export default identify;
