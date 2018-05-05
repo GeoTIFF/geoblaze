@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import load from '../load';
-import max from './max';
+import max from './max.module';
 
 const url = 'http://localhost:3000/data/test.tiff';
 
@@ -15,38 +15,32 @@ const polygon = [[
 ]];
 const expectedPolygonValue = 7807.40;
 
-const test = () => {
-  describe('Geoblaze Max Feature', function() {
-    describe('Get Max from Bounding Box', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(max(georaster, bbox)[0].toFixed(2));
-          expect(value).to.equal(expectedBboxValue);
-        });
+describe('Geoblaze Max Feature', () => {
+  describe('Get Max from Bounding Box', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(max(georaster, bbox)[0].toFixed(2));
+        expect(value).to.equal(expectedBboxValue);
       });
     });
-    describe('Get Max from Polygon', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(max(georaster, polygon)[0].toFixed(2));
-          expect(value).to.equal(expectedPolygonValue);
-        });
+  });
+  describe('Get Max from Polygon', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(max(georaster, polygon)[0].toFixed(2));
+        expect(value).to.equal(expectedPolygonValue);
       });
     });
-    describe('Get Max from Raster without polygon', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = max(georaster)[0];
-          expect(value).to.equal(8131.2);
-        });
+  });
+  describe('Get Max from Raster without polygon', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = max(georaster)[0];
+        expect(value).to.equal(8131.2);
       });
     });
-  })
-}
-
-test();
-
-module.exports = test;
+  });
+});

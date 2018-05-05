@@ -34,41 +34,35 @@ const polygonGeojson = `{
       }
      }
   ]
-}`
+}`;
 const expectedPolygonGeojsonValue = 1826.74 ;
 
-const test = () => {
-  describe('Geoblaze Mean Feature', function() {
-    describe('Get Mean from Bounding Box', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(mean(georaster, bbox)[0].toFixed(2));
-          expect(value).to.equal(expectedBboxValue);
-        });
+describe('Geoblaze Mean Feature', () => {
+  describe('Get Mean from Bounding Box', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(mean(georaster, bbox)[0].toFixed(2));
+        expect(value).to.equal(expectedBboxValue);
       });
     });
-    describe('Get Mean from Polygon', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(mean(georaster, polygon)[0].toFixed(2));
-          expect(value).to.equal(expectedPolygonValue);
-        })
-      })
+  });
+  describe('Get Mean from Polygon', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(mean(georaster, polygon)[0].toFixed(2));
+        expect(value).to.equal(expectedPolygonValue);
+      });
     });
-    describe('Get Mean from Polygon (GeoJSON)', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(mean(georaster, polygonGeojson)[0].toFixed(2));
-          expect(value).to.equal(expectedPolygonGeojsonValue);
-        })
-      })
-    })
-  })
-}
-
-test();
-
-module.exports = test;
+  });
+  describe('Get Mean from Polygon (GeoJSON)', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(mean(georaster, polygonGeojson)[0].toFixed(2));
+        expect(value).to.equal(expectedPolygonGeojsonValue);
+      });
+    });
+  });
+});

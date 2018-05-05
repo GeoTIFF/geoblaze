@@ -7,7 +7,7 @@ const containsNoDataValue = (bandValues, noDataValue) => {
     if (bandValues[i] === noDataValue) return true;
   }
   return false;
-}
+};
 
 const getBandRows = (bands, index) => {
   // using a for loop here instead of map leads to a significant performance improvement
@@ -25,7 +25,7 @@ const getBandValues = (bandRows, index) => {
     bandValues.push(bandRows[i][index]);
   }
   return bandValues;
-}
+};
 
 const rasterCalculator = (georaster, func) => {
   return new Promise((resolve, reject) => {

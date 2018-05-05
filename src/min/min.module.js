@@ -5,11 +5,11 @@ import convertGeometry from '../convert-geometry';
 import intersectPolygon from '../intersect-polygon';
 
 const getMin = (values, noDataValue) => {
-  let numberOfValues = values.length;
+  const numberOfValues = values.length;
   if (numberOfValues > 0) {
     let min = null;
     for (let i = 0; i < numberOfValues; i++) {
-      let value = values[i];
+      const value = values[i];
       if (value !== noDataValue) {
 
         /* We first compare the current value to the stored minimum.
@@ -27,13 +27,13 @@ const getMin = (values, noDataValue) => {
   } else {
     throw 'No values were provided';
   }
-}
+};
 
 const getMinForRaster = (georaster, geom) => {
 
   try {
 
-    let noDataValue = georaster.no_data_value;
+    const noDataValue = georaster.no_data_value;
 
     if (geom === null || geom === undefined) {
 
@@ -45,7 +45,7 @@ const getMinForRaster = (georaster, geom) => {
       geom = convertGeometry('bbox', geom);
 
       // grab array of values;
-      let values = get(georaster, geom, true);
+      const values = get(georaster, geom, true);
 
       // get min value
       return values.map(band => getMin(band, noDataValue));
@@ -53,7 +53,7 @@ const getMinForRaster = (georaster, geom) => {
 
     } else if (utils.isPolygon(geom)) {
       geom = convertGeometry('polygon', geom);
-      let values = [];
+      const values = [];
 
       intersectPolygon(georaster, geom, (value, bandIndex) => {
         if (typeof values[bandIndex] === 'undefined') {
@@ -67,12 +67,12 @@ const getMinForRaster = (georaster, geom) => {
       else throw 'No Values were found in the given geometry';
 
     } else {
-      throw 'Non-Bounding Box geometries are currently not supported.'
+      throw 'Non-Bounding Box geometries are currently not supported.';
     }
   } catch(e) {
     console.error(e);
     throw e;
   }
-}
+};
 
 export default getMinForRaster;

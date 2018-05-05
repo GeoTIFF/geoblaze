@@ -5,14 +5,16 @@
   "main": "dist/geoblaze.js",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
+    "build:dev": "webpack --config webpack.dev.js",
     "build-docs": "documentation build packages/** --config documentation.yml -f html -o docs && echo 'geoblaze.io' > docs/CNAME",
     "setup-gadm": "cd data/gadm && bash download_gadm.sh && node extract_countries.js",
     "setup-ghsl": "cd data/ghsl && bash download_pop_data.sh && bash tile.sh && bash clip.sh",
     "setup-ghsl-for-travis-ci": "cd data/ghsl && bash download_data_for_travis_ci.sh",
     "setup-mapspam": "cd data/mapspam && bash download_mapspam.sh && bash tile.sh",
     "setup-veneto": "cd data/veneto && bash setup.sh",
+    "lint": "eslint src",
     "start": "webpack-dev-server --config webpack.dev.js",
-    "test": "npm run build && ./node_modules/.bin/mocha dist --compilers js:babel-core/register",
+    "test": "BABEL_ENV=test ./node_modules/.bin/mocha src --recursive --compilers js:babel-core/register",
     "test-docs": "npm run build-docs && cd docs && http-server",
     "trim-gadm": "cd data/gadm && bash trim_gadm.sh",
     "trim-ghsl": "cd data/ghsl && bash trim_ghsl.sh"
@@ -60,7 +62,9 @@
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.3",
+    "babel-loader": "7.1.2",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.1.2",
     "clean-webpack-plugin": "^0.1.17",

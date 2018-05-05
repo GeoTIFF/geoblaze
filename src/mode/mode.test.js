@@ -15,39 +15,32 @@ const polygon = [[
 ]];
 const expectedPolygonValue = 0;
 
-const test = () => {
-  describe('Geoblaze Mode Feature', function() {
-    describe('Get Mode from Bounding Box', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          let value = mode(georaster, bbox)[0];
-          expect(value).to.equal(expectedBboxValue);
-        });
+describe('Geoblaze Mode Feature', () => {
+  describe('Get Mode from Bounding Box', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = mode(georaster, bbox)[0];
+        expect(value).to.equal(expectedBboxValue);
       });
     });
-    describe('Get Mode from Polygon', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          let value = mode(georaster, polygon)[0];
-          expect(value).to.equal(expectedPolygonValue);
-        });
+  });
+  describe('Get Mode from Polygon', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = mode(georaster, polygon)[0];
+        expect(value).to.equal(expectedPolygonValue);
       });
     });
-    describe('Get Mode for whole raster', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          let value = mode(georaster);
-          expect(value).to.equal(expectedPolygonValue);
-        });
+  });
+  describe('Get Mode for whole raster', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = mode(georaster);
+        expect(value).to.equal(expectedPolygonValue);
       });
     });
-
-  })
-}
-
-test();
-
-module.exports = test;
+  });
+});
