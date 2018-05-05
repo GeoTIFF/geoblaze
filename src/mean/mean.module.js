@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import get from '../get';
 import utils from '../utils';
 import convertGeometry from '../convert-geometry';
@@ -10,23 +9,23 @@ const mean = (georaster, geom) => {
 
     if (utils.isBbox(geom)) { // if geometry is a bounding box
       geom = convertGeometry('bbox', geom);
-      let noDataValue = georaster.no_data_value;
+      const noDataValue = georaster.no_data_value;
 
       // grab array of values
-      let values = get(georaster, geom);
+      const values = get(georaster, geom);
 
       // sum values
-      let sums = []
+      const sums = [];
       for (let bandIndex = 0; bandIndex < values.length; bandIndex++) {
         let sumForBand = 0;
         let cellsWithValues = 0;
-        let band = values[bandIndex];
-        let numberOfRows = band.length;
+        const band = values[bandIndex];
+        const numberOfRows = band.length;
         for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
-          let row = band[rowIndex];
-          let numCells = row.length;
+          const row = band[rowIndex];
+          const numCells = row.length;
           for (let columnIndex = 0; columnIndex < numCells; columnIndex++) {
-            let value = row[columnIndex];
+            const value = row[columnIndex];
             if (value !== noDataValue) {
               cellsWithValues++;
               sumForBand += value;
@@ -38,8 +37,8 @@ const mean = (georaster, geom) => {
       return sums;
     } else if (utils.isPolygon(geom)) { // if geometry is a polygon
       geom = convertGeometry('polygon', geom);
-      let sums = [];
-      let numValues = [];
+      const sums = [];
+      const numValues = [];
 
       // the third argument of intersectPolygon is a function which
       // is run on every value, we use it to increment the sum so we
@@ -57,7 +56,7 @@ const mean = (georaster, geom) => {
       // here we check to see how many bands were in the image
       // based on the sums and use that to select how we display
       // the result
-      let results = [];
+      const results = [];
       numValues.forEach((num, index) => {
         if (num > 0) results.push(sums[index] / num);
       });
@@ -66,12 +65,12 @@ const mean = (georaster, geom) => {
       else throw 'No Values were found in the given geometry';
 
     } else {
-      throw 'Only Bounding Box and Polygon geometries are currently supported.'
+      throw 'Only Bounding Box and Polygon geometries are currently supported.';
     }
   } catch(e) {
     console.error(e);
     throw e;
   }
-}
+};
 
 export default mean;

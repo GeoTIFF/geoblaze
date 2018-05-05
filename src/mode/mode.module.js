@@ -6,29 +6,29 @@ import intersectPolygon from '../intersect-polygon';
 
 const getModeFromCounts = counts => {
   // iterate through values to get highest frequency
-  let buckets = _.sortBy(_.pairs(counts), pair => pair[1])
-  let maxFrequency = buckets[buckets.length - 1][1];
-  let modes = buckets
+  const buckets = _.sortBy(_.pairs(counts), pair => pair[1]);
+  const maxFrequency = buckets[buckets.length - 1][1];
+  const modes = buckets
     .filter(pair => pair[1] === maxFrequency)
     .map(pair => Number(pair[0]));
   return modes.length === 1 ? modes[0] : modes;
-}
+};
 
-let getMode = values => {
-  let counts = _.countBy(values);
+const getMode = values => {
+  const counts = _.countBy(values);
   return getModeFromCounts(counts);
-}
+};
 
 const getModesForRaster = (georaster, geom) => {
 
   try {
 
-    let noDataValue = georaster.no_data_value;
+    const noDataValue = georaster.no_data_value;
 
     if (geom === null || geom === undefined) {
 
-      let modesForAllBands = georaster.values.map(band => {
-        let counts = utils.countValuesInTable(band, noDataValue);
+      const modesForAllBands = georaster.values.map(band => {
+        const counts = utils.countValuesInTable(band, noDataValue);
         return getModeFromCounts(counts);
       });
       return modesForAllBands.length === 1 ? modesForAllBands[0] : modesForAllBands;
@@ -38,8 +38,8 @@ const getModesForRaster = (georaster, geom) => {
       geom = convertGeometry('bbox', geom);
 
       // grab array of values;
-      let flat = true;
-      let values = get(georaster, geom, flat);
+      const flat = true;
+      const values = get(georaster, geom, flat);
 
       return values
         .map(band => band.filter(value => value !== noDataValue))
@@ -47,7 +47,7 @@ const getModesForRaster = (georaster, geom) => {
 
     } else if (utils.isPolygon(geom)) {
       geom = convertGeometry('polygon', geom);
-      let values = [];
+      const values = [];
 
       // the third argument of this function is a function which
       // runs for every pixel in the polygon. Here we add them to
@@ -64,12 +64,12 @@ const getModesForRaster = (georaster, geom) => {
       else throw 'No Values were found in the given geometry';
 
     } else {
-      throw 'Non-Bounding Box geometries are currently not supported.'
+      throw 'Non-Bounding Box geometries are currently not supported.';
     }
   } catch(e) {
     console.error(e);
     throw e;
   }
-}
+};
 
 export default getModesForRaster;

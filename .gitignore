@@ -92,3 +92,6 @@ data/veneto/*.tif
 
 # old versions of files
 *.old
+
+# build
+dist/

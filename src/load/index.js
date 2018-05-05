@@ -1,4 +1,4 @@
-import load from './load';
+import load from './load.module';
 
 /**
  * The load function takes a url to a geotiff or geotiff file as an input

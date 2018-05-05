@@ -2,14 +2,14 @@ import _ from 'underscore';
 import get from '../get';
 import utils from '../utils';
 import convertGeometry from '../convert-geometry';
-import intersect-polygon from '../intersect-polygon';
+import intersectPolygon from '../intersect-polygon';
 
 const getMax = (values, noDataValue) => {
-  let numberOfValues = values.length;
+  const numberOfValues = values.length;
   if (numberOfValues > 0) {
     let max = null;
     for (let i = 0; i < numberOfValues; i++) {
-      let value = values[i];
+      const value = values[i];
       if (value !== noDataValue) {
 
         /* We first compare the current value to the stored maximum.
@@ -27,13 +27,13 @@ const getMax = (values, noDataValue) => {
   } else {
     throw 'No values were provided';
   }
-}
+};
 
 const getMaxForRaster = (georaster, geom) => {
 
   try {
 
-    let noDataValue = georaster.no_date_value;
+    const noDataValue = georaster.no_date_value;
 
     if (geom === null || geom === undefined) {
 
@@ -45,15 +45,15 @@ const getMaxForRaster = (georaster, geom) => {
       geom = convertGeometry('bbox', geom);
 
       // grab array of values;
-      let flat = true;
-      let values = get(georaster, geom, flat);
+      const flat = true;
+      const values = get(georaster, geom, flat);
 
       // get max value
       return values.map(band => getMax(band, noDataValue));
 
     } else if (utils.isPolygon(geom)) {
       geom = convertGeometry('polygon', geom);
-      let values = [];
+      const values = [];
 
       intersectPolygon(georaster, geom, (value, bandIndex) => {
         if (!values[bandIndex]) {
@@ -67,12 +67,12 @@ const getMaxForRaster = (georaster, geom) => {
       else throw 'No Values were found in the given geometry';
 
     } else {
-      throw 'Non-Bounding Box geometries are currently not supported.'
+      throw 'Non-Bounding Box geometries are currently not supported.';
     }
   } catch(e) {
     console.error(e);
     throw e;
   }
-}
+};
 
 export default getMaxForRaster;

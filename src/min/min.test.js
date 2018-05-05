@@ -14,39 +14,32 @@ const polygon = [[
 ]];
 const expectedPolygonValue = 0;
 
-const test = () => {
-  describe('Geoblaze Min Feature', function() {
-    describe('Get Min from Bounding Box', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(min(georaster, bbox)[0].toFixed(2));
-          expect(value).to.equal(expectedBboxValue);
-        });
+describe('Geoblaze Min Feature', () => {
+  describe('Get Min from Bounding Box', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(min(georaster, bbox)[0].toFixed(2));
+        expect(value).to.equal(expectedBboxValue);
       });
     });
-    describe('Get Min from Polygon', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(min(georaster, polygon)[0].toFixed(2));
-          expect(value).to.equal(expectedPolygonValue);
-        });
+  });
+  describe('Get Min from Polygon', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(min(georaster, polygon)[0].toFixed(2));
+        expect(value).to.equal(expectedPolygonValue);
       });
     });
-    describe('Get Min from whole Raster', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = min(georaster)[0];
-          expect(value).to.equal(expectedPolygonValue);
-        });
+  });
+  describe('Get Min from whole Raster', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = min(georaster)[0];
+        expect(value).to.equal(expectedPolygonValue);
       });
     });
-
-  })
-}
-
-test();
-
-module.exports = test;
+  });
+});

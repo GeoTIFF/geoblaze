@@ -10,16 +10,16 @@ const containsNoDataValue = (bandValues, noDataValue) => {
     if (bandValues[i] === noDataValue) return true;
   }
   return false;
-}
+};
 
 const isLeafNode = node => !node.op;
 const listVariables = numVariables => [...Array(numVariables)].map((val, i) => String.fromCharCode(i + 65).toLowerCase());
 
 const parseAST = (ast, numBands) => {
   return new Function(...listVariables(numBands), `return ${parseNode(ast)}`);
-}
+};
 
-const parseNode = (node) => {
+const parseNode = node => {
   const leftNode = node.args[0];
   const rightNode = node.args[1];
 
@@ -62,15 +62,15 @@ const getBandValues = (bandRows, index) => {
     bandValues.push(bandRows[i][index]);
   }
   return bandValues;
-}
+};
 
 // pre-parse arithmetic string to catch limitations with arithmetic operations
 // before attempting to compute
-const arithmeticError = (arithmetic) => {
+const arithmeticError = arithmetic => {
   if (arithmetic.match(regexMultiCharacter)) {
     return ('Geoblaze does not currently support implicit multiplication between variables. Please use the multiplication (*) symbol for these operations.');
   }
-}
+};
 
 const bandArithmetic = (georaster, arithmetic) => {
   return new Promise((resolve, reject) => {
