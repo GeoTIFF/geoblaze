@@ -6,14 +6,14 @@ import histogram from './histogram.module';
 const ratioQuantileOptions = {
   scaleType: 'ratio',
   numClasses: 7,
-  classType: 'quantile'
-}
+  classType: 'quantile',
+};
 
 const ratioEIOptions = {
   scaleType: 'ratio',
   numClasses: 7,
-  classType: 'equal-interval'
-}
+  classType: 'equal-interval',
+};
 
 const ratioEIGeorasterResults = {
   '0 - 36.43': 1,
@@ -22,7 +22,7 @@ const ratioEIGeorasterResults = {
   '>109.29 - 145.71': 526,
   '>145.71 - 182.14': 244,
   '>182.14 - 218.57': 68,
-  '>218.57 - 255': 92
+  '>218.57 - 255': 92,
 };
 
 const ratioQuantileBboxResults = {
@@ -32,7 +32,7 @@ const ratioQuantileBboxResults = {
   '>724 - 1141.9': 31,
   '>1141.9 - 1700.6': 31,
   '>1700.6 - 2732.4': 31,
-  '>2732.4 - 5166.7': 28
+  '>2732.4 - 5166.7': 28,
 };
 
 const ratioQuantilePolygonResults = {
@@ -42,7 +42,7 @@ const ratioQuantilePolygonResults = {
   '>1191 - 1948.7': 248,
   '>1948.7 - 2567.7': 248,
   '>2567.7 - 3483.9': 248,
-  '>3483.9 - 7807.4': 246
+  '>3483.9 - 7807.4': 246,
 };
 
 const ratioEIPolygonResults = {
@@ -52,8 +52,8 @@ const ratioEIPolygonResults = {
   '>3346.03 - 4461.37': 170,
   '>4461.37 - 5576.71': 78,
   '>5576.71 - 6692.06': 25,
-  '>6692.06 - 7807.4': 9
-}
+  '>6692.06 - 7807.4': 9,
+};
 
 const url = 'http://localhost:3000/data/test.tiff';
 const urlSmallRaster = 'http://localhost:3000/data/example_4326.tif';
@@ -86,65 +86,59 @@ const polygonGeojson = `{
       }
      }
   ]
-}`
+}`;
 
-const test = () => {
-  describe('Geoblaze Histogram Feature', function() {
-    describe('Get Histogram (Ratio, Equal Interval) from GeoRaster', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(urlSmallRaster).then(georaster => {
-          const results = histogram(georaster, null, ratioEIOptions)[0];
-          _.keys(ratioEIGeorasterResults).forEach(key => {
-            const value = results[key];
-            const expectedValue = ratioEIGeorasterResults[key];
-            expect(value).to.equal(expectedValue);
-          });
-        });
-      });
-    });
-    describe('Get Histogram (Ratio, Quantile) from Bounding Box', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const results = histogram(georaster, bbox, ratioQuantileOptions)[0];
-          _.keys(ratioQuantileBboxResults).forEach(key => {
-            const value = results[key];
-            const expectedValue = ratioQuantileBboxResults[key];
-            expect(value).to.equal(expectedValue);
-          });
-        });
-      });
-    });
-    describe('Get Histogram (Ratio, Quantile) from Polygon', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const results = histogram(georaster, polygon, ratioQuantileOptions)[0];
-          _.keys(ratioQuantilePolygonResults).forEach(key => {
-            const value = results[key];
-            const expectedValue = ratioQuantilePolygonResults[key];
-            expect(value).to.equal(expectedValue);
-          });
-        });
-      });
-    });
-    describe('Get Histogram (Ratio, Equal Interval) from Polygon (GeoJSON)', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const results = histogram(georaster, polygonGeojson, ratioEIOptions)[0];
-          _.keys(ratioEIPolygonResults).forEach(key => {
-            const value = results[key];
-            const expectedValue = ratioEIPolygonResults[key];
-            expect(value).to.equal(expectedValue);
-          });
+describe('Geoblaze Histogram Feature', () => {
+  describe('Get Histogram (Ratio, Equal Interval) from GeoRaster', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(urlSmallRaster).then(georaster => {
+        const results = histogram(georaster, null, ratioEIOptions)[0];
+        _.keys(ratioEIGeorasterResults).forEach(key => {
+          const value = results[key];
+          const expectedValue = ratioEIGeorasterResults[key];
+          expect(value).to.equal(expectedValue);
         });
       });
     });
   });
-}
-
-test();
-
-module.exports = test;
+  describe('Get Histogram (Ratio, Quantile) from Bounding Box', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const results = histogram(georaster, bbox, ratioQuantileOptions)[0];
+        _.keys(ratioQuantileBboxResults).forEach(key => {
+          const value = results[key];
+          const expectedValue = ratioQuantileBboxResults[key];
+          expect(value).to.equal(expectedValue);
+        });
+      });
+    });
+  });
+  describe('Get Histogram (Ratio, Quantile) from Polygon', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const results = histogram(georaster, polygon, ratioQuantileOptions)[0];
+        _.keys(ratioQuantilePolygonResults).forEach(key => {
+          const value = results[key];
+          const expectedValue = ratioQuantilePolygonResults[key];
+          expect(value).to.equal(expectedValue);
+        });
+      });
+    });
+  });
+  describe('Get Histogram (Ratio, Equal Interval) from Polygon (GeoJSON)', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const results = histogram(georaster, polygonGeojson, ratioEIOptions)[0];
+        _.keys(ratioEIPolygonResults).forEach(key => {
+          const value = results[key];
+          const expectedValue = ratioEIPolygonResults[key];
+          expect(value).to.equal(expectedValue);
+        });
+      });
+    });
+  });
+});

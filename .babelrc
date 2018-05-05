@@ -2,4 +2,9 @@
   "presets": [
     "stage-2",
   ],
+  "env": {
+    "test": {
+      "presets": ["es2015"]
+    }
+  }
 }

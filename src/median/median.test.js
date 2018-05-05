@@ -32,48 +32,41 @@ const polygon = [[
 ]];
 const expectedPolygonValue = 2750.5;
 
-const test = () => {
-  describe('Geoblaze Median Feature', function() {
-    describe('Get Median from Bounding Box', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(median(georaster, bbox)[0].toFixed(2));
-          expect(value).to.equal(expectedBboxValue);
-        });
+describe('Geoblaze Median Feature', () => {
+  describe('Get Median from Bounding Box', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(median(georaster, bbox)[0].toFixed(2));
+        expect(value).to.equal(expectedBboxValue);
       });
     });
-    describe('Get Median from Bounding Box (GeoJSON)', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(median(georaster, bboxGeojson)[0].toFixed(2));
-          expect(value).to.equal(expectedBboxGeojsonValue);
-        });
+  });
+  describe('Get Median from Bounding Box (GeoJSON)', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(median(georaster, bboxGeojson)[0].toFixed(2));
+        expect(value).to.equal(expectedBboxGeojsonValue);
       });
     });
-    describe('Get Median from Polygon', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = Number(median(georaster, polygon)[0].toFixed(2));
-          expect(value).to.equal(expectedPolygonValue);
-        });
+  });
+  describe('Get Median from Polygon', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(median(georaster, polygon)[0].toFixed(2));
+        expect(value).to.equal(expectedPolygonValue);
       });
     });
-    describe('Get Median from Whole Raster', function() {
-      this.timeout(1000000);
-      it('Got Correct Value', () => {
-        return load(url).then(georaster => {
-          const value = median(georaster)[0];
-          expect(value).to.equal(0);
-        });
+  });
+  describe('Get Median from Whole Raster', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = median(georaster)[0];
+        expect(value).to.equal(0);
       });
     });
-
-  })
-}
-
-test();
-
-module.exports = test;
+  });
+});
