@@ -15,6 +15,10 @@ module.exports = {
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
+  resolve: {
+    modules: ['node_modules', path.join(__dirname, 'src')],
+    extensions: ['.js', '.json']
+  },
   module: {
     rules: [
       {
@@ -34,11 +38,18 @@ module.exports = {
       }
     ]
     loaders: [
-      
+
     ]
   },
   stats: {
     colors: true,
     chunks: true,
   },
+  plugins: [
+    new CleanWebpackPlugin(['dist'], {
+      root: __dirname,
+      verbose: true,
+      dry: false
+    })
+  ]
 };
