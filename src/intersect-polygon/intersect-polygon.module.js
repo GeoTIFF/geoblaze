@@ -15,8 +15,6 @@ const {
   getSlopeOfLineSegment,
 } = utils;
 
-const logger = require('../../logger');
-
 const getEdgesForPolygon = polygon => {
   let edges = [];
   polygon.forEach(ring => {
@@ -33,30 +31,24 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
 
   let cellWidth = georaster.pixelWidth;
   let cellHeight = georaster.pixelHeight;
-  logger.debug("cellHeight:", cellHeight);
 
   let noDataValue = georaster.no_data_value;
   let imageHeight = georaster.height;
-  logger.debug("imageHeight: " + imageHeight);
 
   let imageWidth = georaster.width;
 
   // get values in a bounding box around the geometry
   let latlngBbox = utils.getBoundingBox(geom);
-  logger.debug("latlngBbox:", latlngBbox);
 
   let imageBands = get(georaster, latlngBbox)
 
   // set origin points of bbox of geometry in image space
   let lat0 = latlngBbox.ymax + ((georaster.ymax - latlngBbox.ymax) % cellHeight);
-  logger.debug("lat0:", lat0);
   let lng0 = latlngBbox.xmin - ((latlngBbox.xmin - georaster.xmin) % cellWidth);
-  logger.debug("lng0:", lng0);
 
   // calculate size of bbox in image coordinates
   // to derive out the row length
   let imageBbox = utils.convertCrsBboxToImageBbox(georaster, latlngBbox);
-  logger.debug("imageBbox:", imageBbox);
 
   let xmin = imageBbox.xmin,
     ymin = imageBbox.ymin,
@@ -64,7 +56,6 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
     ymax = imageBbox.ymax;
 
   let rowLength = xmax - xmin;
-  logger.debug("rowLength:", rowLength);
 
   // iterate through image rows and convert each one to a line
   // running through the middle of the row
@@ -73,7 +64,6 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
 
   if (numRows === 0) return;
 
-  logger.debug("numRows:", numRows);
   for (let y = 0; y < numRows; y++) {
 
     let lat = lat0 - cellHeight * y - cellHeight / 2;
@@ -85,40 +75,16 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
     let line = getLineFromPoints(point0, point1);
     imageLines.push(line);
   }
-  logger.debug("imageLines.length:", imageLines.length);
-  logger.debug("imageLines[0]:", imageLines[0]);
-
 
   // collapse geometry down to a list of edges
   // necessary for multi-part geometries
   let depth = utils.getDepth(geom);
-  logger.debug("depth:", depth);
   let polygonEdges = depth === 4  ? geom.map(getEdgesForPolygon) : [getEdgesForPolygon(geom)];
-  logger.debug("polygonEdges.length:", polygonEdges.length);
-
-  polygonEdges.forEach((edges, edgesIndex) => {
-
-    logger.debug(() => {
-      console.log("edges.length", edges.length);
-      let target = 41.76184321688703;
-      let overlaps = [];
-      edges.forEach((edge, index) => {
-        let [[x1, y1], [x2, y2]] = edge;
-        let ymin = Math.min(y1, y2);
-        let ymax = Math.max(y1, y2);
-        if (target >= ymin && target <= ymax) {
-          overlaps.push(JSON.stringify({ index, edge}));
-        }
-      });
-      console.log("overlaps:", overlaps);
-    });
 
     // iterate through the list of polygon vertices, convert them to
     // lines, and compute the intersections with each image row
     let intersectionsByRow = _.range(numRows).map(row => []);
-    logger.debug("intersectionsByRow.length:", intersectionsByRow.length);
     let numberOfEdges = edges.length;
-    logger.debug("numberOfEdges:", numberOfEdges);
     for (let i = 0; i < numberOfEdges; i++) {
 
 
@@ -140,13 +106,6 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
       let edgeYMin = Math.min(y1, y2);
       let edgeYMax = Math.max(y1, y2);
 
-      logger.debug("\nedge", i, ":", edge);
-      logger.debug("direction:", direction);
-      logger.debug("horizontal:", horizontal);
-      logger.debug("vertical:", vertical);
-      logger.debug("edgeYMin:", edgeYMin);
-      logger.debug("edgeYMax:", edgeYMax);
-
       let startLng, startLat, endLat, endLng;
       if (x1 < x2) {
         [ startLng, startLat ] = startPoint;
@@ -155,7 +114,6 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
         [ startLng, startLat ] = endPoint;
         [ endLng, endLat ]  = startPoint;
       }
-
 
       if (startLng === undefined) throw Error("startLng is " + startLng);
 
@@ -174,12 +132,8 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
         rowEnd = imageY1;
       }
 
-
       rowStart = forceWithin(rowStart, 0, numRows - 1);
       rowEnd = forceWithin(rowEnd, 0, numRows - 1);
-
-      logger.debug("rowStart:", rowStart);
-      logger.debug("rowEnd:", rowEnd);
 
       // iterate through image lines within the change in y of
       // the edge line and find all intersections
@@ -225,13 +179,6 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
           try {
             xminOnLine = xmaxOnLine = getIntersectionOfTwoLines(edgeLine, imageLine).x;
           } catch (error) {
-            logger.error('error getting intersection of two lines: ', error);
-            logger.info("j:", j);
-            logger.info("edge:", edge);
-            logger.info("imageLineY:", imageLineY);
-            logger.info("edgeLine:", edgeLine);
-            logger.info("imageLine:", imageLine);
-            logger.info("imageLines:", imageLines);
             throw error;
           }
         }
@@ -260,25 +207,14 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
       }
     }
 
-    logger.debug("intersectionsByRow.length:", intersectionsByRow.length);
-
-
     let lineStrings = [];
     intersectionsByRow.map((segmentsInRow, rowIndex) => {
-      logger.debug(rowIndex, "segmentsInRow.length:", segmentsInRow.length);
       if (segmentsInRow.length > 0) {
         let clusters = clusterLineSegments(segmentsInRow, numberOfEdges);
         let categorized = clusters.map(categorizeIntersection);
         let [ throughs, nonthroughs ] = _.partition(categorized, item => item.through);
 
         if (throughs.length % 2 === 1) {
-          logger.error('number of indexes for this row are incorrect, resolving as an odd number');
-          logger.info("rowIndex:", rowIndex);
-          logger.info("segmentsInRow.length:", segmentsInRow.length);
-          logger.info("segmentsInRow:", JSON.stringify(segmentsInRow));
-          logger.info("clusters.length:", clusters.length);
-          logger.info("clusters:", clusters);
-          logger.info("categorized:", categorized);
           throw Error("throughs.length for " + rowIndex + " is odd with " + throughs.length);
         }
 
@@ -298,15 +234,6 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
           For example, converts `[[0,10],[10,10]]` to `[[0,10]]`
         */
         insides = mergeRanges(insides);
-
-
-        logger.debug(() => {
-          insides.forEach(insidepair => {
-            let [x1, x2] = insidepair;
-            let y = segmentsInRow[0].imageLineY;
-            lineStrings.push(lineString([[x1, y], [x2, y]], {"stroke": "red", "stroke-width": 1,"stroke-opacity": 1}));
-          });
-        });
 
         insides.forEach(pair => {
 
@@ -330,11 +257,6 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
           }
         });
       }
-    });
-
-    logger.debug(() => {
-      let fc = featureCollection(lineStrings);
-      //fs.writeFileSync("/tmp/lns" + edgesIndex + ".geojson", JSON.stringify(fc));
     });
   });
 }
