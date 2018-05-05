@@ -1,0 +1,20 @@
+# source
+src/
+
+# data
+data/
+
+# webpack
+webpack.*.js
+
+# output of 'npm pack'
+*.tgz
+
+# .ds_store
+.DS_Store
+
+# dotenv variables file
+.env
+
+# dependencies
+node_modules/
