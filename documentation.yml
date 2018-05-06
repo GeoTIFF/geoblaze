@@ -1,15 +1,16 @@
 toc:
   - load
   - get
-  - name: Basic Zonal Statistics
-  - histogram
   - identify
-  - max
-  - median
   - mean
+  - median
   - mode
   - min
+  - max
   - sum
+  - histogram
+  - bandArithmetic
+  - rasterCalculator
 
 paths:
     GeoJSON: 'https://tools.ietf.org/html/rfc7946#section-3'
