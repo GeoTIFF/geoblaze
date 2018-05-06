@@ -3,7 +3,7 @@ import rasterCalculator from './raster-calculator.module';
 /**
  * The raster calculator function takes a raster and a javascript function as input.
  * The function is performed pixel-by-pixel on each cell in the raster. The arguments
- * to the function should reference bands in their order in the raster
+ * to the function should reference bands in the order in the raster
  * @name rasterCalculator
  * @param {Object} raster - a raster from the georaster library
  * @param {String} operation - a string representation of a arithmetic operation to perform

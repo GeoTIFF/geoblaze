@@ -3,7 +3,7 @@ import mean from './mean.module';
 /**
  * The mean function takes a raster as an input and an optional geometry.
  * If a geometry is included, the function returns the mean of all the pixels
- * in that area. If no geometry is included, the pixels returns the mean of
+ * in that area. If no geometry is included, the function returns the mean of
  * all the pixels for each band in the raster.
  * @name mean
  * @param {Object} raster - a raster from the georaster library
