@@ -3,7 +3,7 @@ import sum from './sum.module';
 /**
  * The sum function takes a raster as an input and an optional geometry.
  * If a geometry is included, the function returns the sum of all the pixels
- * in that area. If no geometry is included, the pixels returns the sum of
+ * in that area. If no geometry is included, the function returns the sum of
  * all the pixels for each band in the raster.
  * @name sum
  * @param {Object} georaster - a georaster from the georaster library
