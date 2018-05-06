@@ -3,7 +3,7 @@ import median from './median.module';
 /**
  * The median function takes a raster as an input and an optional geometry.
  * If a geometry is included, the function returns the median of all the pixels
- * in that area. If no geometry is included, the pixels returns the median of
+ * in that area. If no geometry is included, the function returns the median of
  * all the pixels for each band in the raster.
  * @name median
  * @param {Object} raster - a raster from the georaster library

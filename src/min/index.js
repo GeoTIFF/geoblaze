@@ -3,7 +3,7 @@ import min from './min.module';
 /**
  * The min function takes a raster as an input and an optional geometry.
  * If a geometry is included, the function returns the min of all the pixels
- * in that area for each band. If no geometry is included, the pixels returns the min of
+ * in that area for each band. If no geometry is included, the function returns the min of
  * all the pixels for each band in the raster.
  * @name min
  * @param {Object} georaster - a georaster from the georaster library

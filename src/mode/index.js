@@ -3,7 +3,7 @@ import mode from './mode.module';
 /**
  * The mode function takes a raster as an input and an optional geometry.
  * If a geometry is included, the function returns the mode of all the pixels
- * in that area. If no geometry is included, the pixels returns the mode of
+ * in that area. If no geometry is included, the function returns the mode of
  * all the pixels for each band in the raster.
  * @name mode
  * @param {Object} georaster - a georaster from the georaster library
