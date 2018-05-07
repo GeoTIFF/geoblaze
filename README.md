@@ -62,4 +62,36 @@ We squash and rebase all PRs. Please squash all of your commits into one and reb
 5. Once comments have been addressed, a reviewer will move the label to "can deploy". After a final check, the PR will be merged and deployed.
 
 ## Developer's Guide
-***The developer's guide is coming soon!***
+
+### Setup
+1. Fork the repository
+
+2. Clone your fork
+```
+  git clone git@github.com:[your-username]/geoblaze.git
+```
+
+3. Install dependencies
+```
+  cd geoblaze
+  npm install
+```
+
+### Linting
+Geoblaze uses [eslint](https://eslint.org/) for linting. We suggest using an eslint plugin for your text editor. Here are some common options:
+
+  - For Sublime: [SublimeLinter-eslint](https://github.com/SublimeLinter/SublimeLinter-eslint)
+  - For Atom: [linter-eslint](https://atom.io/packages/linter-eslint)
+
+Our style guide extends the `eslint:recommended` set of standards and is therefore relatively minimal. As the project expands in scope and number of contributors, we will start to consider more linting rules. Please feel free to suggest some in a PR!
+
+To test for linting errors:
+```
+  npm run lint
+```
+
+### Testing
+Geoblaze uses [mocha](https://mochajs.org/) as its testing framework. To learn more, see their [getting started guide](https://mochajs.org/#getting-started).
+
+
+***The developer's guide is still in progress, we will be adding more soon!***
