@@ -5,7 +5,7 @@ src/
 data/
 
 # webpack
-webpack.*.js
+webpack/
 
 # output of 'npm pack'
 *.tgz
