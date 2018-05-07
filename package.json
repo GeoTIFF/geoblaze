@@ -4,8 +4,8 @@
   "description": "process geotiffs",
   "main": "dist/geoblaze.js",
   "scripts": {
-    "build": "webpack --config webpack.prod.js",
-    "build-dev": "webpack --config webpack.dev.js",
+    "build": "webpack --config webpack/prod.js",
+    "build-dev": "webpack --config webpack/dev.js",
     "documentation": "./node_modules/.bin/documentation build src/** --config documentation.yml -f html -o docs && echo 'geoblaze.io' > docs/CNAME",
     "lint": "eslint src",
     "test": "BABEL_ENV=test ./node_modules/.bin/mocha src --recursive --compilers js:babel-core/register",
