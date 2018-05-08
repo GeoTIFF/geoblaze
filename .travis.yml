@@ -8,6 +8,10 @@ before_script:
     - npm run trim-gadm;
     - npm run setup-ghsl-for-travis-ci;
     - npm run setup-mapspam;
+script:
+    - npm run lint
+    - npm run server &
+    - npm run test
 cache:
   directories:
     - "node_modules"
