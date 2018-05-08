@@ -8,6 +8,7 @@
     "build-dev": "webpack --config webpack/dev.js",
     "documentation": "./node_modules/.bin/documentation build src/** --config documentation.yml -f html -o docs && echo 'geoblaze.io' > docs/CNAME",
     "lint": "eslint src",
+    "server": "node ./test-app",
     "test": "BABEL_ENV=test ./node_modules/.bin/mocha src --recursive --compilers js:babel-core/register",
     "setup-gadm": "cd data/gadm && bash download_gadm.sh && node extract_countries.js",
     "setup-ghsl": "cd data/ghsl && bash download_pop_data.sh && bash tile.sh && bash clip.sh",
