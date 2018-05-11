@@ -22,7 +22,8 @@ const getExpectedValue5 = (a, b, c) => 2 * (b + a * c) - 100;
 const calculation6 = '(a + b) / c';
 const getExpectedValue6 = (a, b, c) => (a + b) / c;
 
-function expectNoInfinityValues(georaster) {
+
+function expectNoInfinityValues (georaster) {
   georaster.values.forEach(band => {
     band.forEach(row => {
       row.forEach(pixel => {
