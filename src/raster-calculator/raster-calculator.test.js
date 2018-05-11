@@ -14,7 +14,7 @@ const calculation5 = (a, b, c) => {
 };
 const calculation6 = (a, b, c) => {
   return (a + b) / c;
-}
+};
 
 // binarizing on red
 const calculation7 = (a, b, c) => {
@@ -25,7 +25,7 @@ const calculation7 = (a, b, c) => {
   }
 };
 
-function expectNoInfinityValues(georaster) {
+function expectNoInfinityValues (georaster) {
   georaster.values.forEach(band => {
     band.forEach(row => {
       row.forEach(pixel => {
