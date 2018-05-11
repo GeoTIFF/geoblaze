@@ -100,7 +100,12 @@ const bandArithmetic = (georaster, arithmetic) => {
           if (containsNoDataValue(bandValues, noDataValue)) {
             row.push(noDataValue);
           } else {
-            row.push(arithmeticFunction(...bandValues));
+            const value = arithmeticFunction(...bandValues);
+            if (value === Infinity || value === -Infinity) {
+              row.push(noDataValue);
+            } else {
+              row.push(value);
+            }
           }
         }
         values.push(row);

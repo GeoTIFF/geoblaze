@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import load from '../load';
 import bandArithmetic from './band-arithmetic.module';
 
-const url = 'http://localhost:3000/data/rgb_raster.tif';
+const url = 'http://localhost:3000/data/rgb/wildfires.tiff';
 
 const calculation1 = 'a + b';
 const getExpectedValue1 = (a, b) => a + b;
@@ -18,6 +18,19 @@ const getExpectedValue4 = (a, b) => (a - b) / (a + b);
 
 const calculation5 = '2(b + a * c) - 100';
 const getExpectedValue5 = (a, b, c) => 2 * (b + a * c) - 100;
+
+const calculation6 = '(a + b) / c';
+const getExpectedValue6 = (a, b, c) => (a + b) / c;
+
+function expectNoInfinityValues(georaster) {
+  georaster.values.forEach(band => {
+    band.forEach(row => {
+      row.forEach(pixel => {
+        expect(pixel).to.not.equal(Infinity);
+      });
+    });
+  });
+}
 
 // left the time measuring code commented out in the tests to make
 // it easier to return and further optimize the code
@@ -35,6 +48,7 @@ describe('Geoblaze Band Arithmetic Feature', () => {
           const a = georaster.values[0][0][0];
           const b = georaster.values[1][0][0];
           expect(value).to.equal(getExpectedValue1(a, b));
+          expectNoInfinityValues(computedGeoraster);
         });
       });
     });
@@ -52,6 +66,7 @@ describe('Geoblaze Band Arithmetic Feature', () => {
           const a = georaster.values[0][0][0];
           const b = georaster.values[1][0][0];
           expect(value).to.equal(getExpectedValue2(a, b));
+          expectNoInfinityValues(computedGeoraster);
         });
       });
     });
@@ -69,6 +84,7 @@ describe('Geoblaze Band Arithmetic Feature', () => {
           const a = georaster.values[0][0][0];
           const c = georaster.values[2][0][0];
           expect(value).to.equal(getExpectedValue3(a, c));
+          expectNoInfinityValues(computedGeoraster);
         });
       });
     });
@@ -86,11 +102,11 @@ describe('Geoblaze Band Arithmetic Feature', () => {
           const a = georaster.values[0][0][0];
           const b = georaster.values[1][0][0];
           expect(value).to.equal(getExpectedValue4(a, b));
+          expectNoInfinityValues(computedGeoraster);
         });
       });
     });
   });
-
   describe('Run Calculation 5', function () {
     this.timeout(1000000);
     it('Got Correct Value', () => {
@@ -104,8 +120,25 @@ describe('Geoblaze Band Arithmetic Feature', () => {
           const b = georaster.values[1][0][0];
           const c = georaster.values[2][0][0];
           expect(value).to.equal(getExpectedValue5(a, b, c));
+          expectNoInfinityValues(computedGeoraster);
         });
       });
     });
   });
+  
+  describe('Run Calculation 6', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        return bandArithmetic(georaster, calculation6).then(computedGeoraster => {
+          const value = computedGeoraster.values[0][0][0];
+          const a = georaster.values[0][0][0];
+          const b = georaster.values[1][0][0];
+          const c = georaster.values[2][0][0];
+          expect(value).to.equal(getExpectedValue6(a, b, c));
+          expectNoInfinityValues(computedGeoraster);
+        });
+      });
+    });
+  });  
 });
