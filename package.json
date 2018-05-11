@@ -1,11 +1,11 @@
 {
   "name": "geoblaze",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "process geotiffs",
   "main": "dist/geoblaze.js",
   "scripts": {
-    "build": "webpack --config webpack/prod.js",
-    "build-dev": "webpack --config webpack/dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "build-dev": "webpack --config webpack.dev.js",
     "documentation": "./node_modules/.bin/documentation build src/** --config documentation.yml -f html -o docs && echo 'geoblaze.io' > docs/CNAME",
     "lint": "eslint src",
     "server": "node ./test-app",

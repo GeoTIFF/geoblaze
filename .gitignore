@@ -95,3 +95,6 @@ data/veneto/*.tif
 
 # build
 dist/
+
+# DS_Store
+DS_Store
