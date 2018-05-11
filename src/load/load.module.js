@@ -1,7 +1,9 @@
 import parseGeoraster from 'georaster';
 import nodeFetch from 'node-fetch';
 import nodeUrl from 'url';
+
 import { ERROR_LOAD_FILE_OUTSIDE_BROWSER, ERROR_BAD_URL, ERROR_PARSING_GEOTIFF } from '../error-constants';
+
 import cache from '../cache';
 
 const inBrowser = typeof window === 'object';
