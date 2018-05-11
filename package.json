@@ -14,6 +14,7 @@
     "setup-ghsl": "cd data/ghsl && bash download_pop_data.sh && bash tile.sh && bash clip.sh",
     "setup-ghsl-for-travis-ci": "cd data/ghsl && bash download_data_for_travis_ci.sh",
     "setup-mapspam": "cd data/mapspam && bash download_mapspam.sh && bash tile.sh",
+    "setup-rgb": "cd data/rgb && bash setup.sh",
     "setup-veneto": "cd data/veneto && bash setup.sh",
     "trim-gadm": "cd data/gadm && bash trim_gadm.sh",
     "trim-ghsl": "cd data/ghsl && bash trim_ghsl.sh"

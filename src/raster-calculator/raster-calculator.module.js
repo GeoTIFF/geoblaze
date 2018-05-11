@@ -49,7 +49,12 @@ const rasterCalculator = (georaster, func) => {
           if (containsNoDataValue(bandValues, noDataValue)) {
             row.push(noDataValue);
           } else {
-            row.push(func(...bandValues));
+            const value = func(...bandValues);
+            if (value === Infinity || value === -Infinity) {
+              row.push(noDataValue);
+            } else {
+              row.push(value);
+            }
           }
         }
         values.push(row);
