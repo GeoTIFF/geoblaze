@@ -50,7 +50,7 @@ const rasterCalculator = (georaster, func) => {
             row.push(noDataValue);
           } else {
             const value = func(...bandValues);
-            if (value === Infinity || value === -Infinity) {
+            if (value === Infinity || value === -Infinity || isNaN(value)) {
               row.push(noDataValue);
             } else {
               row.push(value);
