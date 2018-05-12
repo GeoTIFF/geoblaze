@@ -2,6 +2,9 @@ import _ from 'underscore';
 import parseGeoraster from 'georaster';
 import { parse } from 'mathjs';
 
+import utils from '../utils';
+const { listVariables } = utils;
+
 const regexMultiCharacter = /[A-z]{2}/g;
 
 const containsNoDataValue = (bandValues, noDataValue) => {
@@ -13,7 +16,6 @@ const containsNoDataValue = (bandValues, noDataValue) => {
 };
 
 const isLeafNode = node => !node.op;
-const listVariables = numVariables => [...Array(numVariables)].map((val, i) => String.fromCharCode(i + 65).toLowerCase());
 
 const parseAST = (ast, numBands) => {
   return new Function(...listVariables(numBands), `return ${parseNode(ast)}`);

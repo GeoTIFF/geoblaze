@@ -25,6 +25,8 @@ const calculation7 = (a, b, c) => {
   }
 };
 
+const calculation8 = 'return a > 200 ? 1 : 0;';
+
 function expectNoInfinityValues (georaster) {
   georaster.values.forEach(band => {
     band.forEach(row => {
@@ -161,5 +163,32 @@ describe('Geoblaze Raster Calculator Feature', () => {
         });
       });
     });
-  });    
+  });
+  
+  describe('Run Calculation 8', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        return rasterCalculator(georaster, calculation8).then(computedGeoraster => {
+          let numZeros = 0;
+          let numOnes = 0;
+          computedGeoraster.values.forEach(band => {
+            band.forEach(row => {
+              row.forEach(pixel => {
+                if (pixel === 0) {
+                  numZeros++;
+                } else if (pixel === 1) {
+                  numOnes++;
+                }
+              });
+            });
+          });
+          expect(numZeros).to.equal(823788);
+          expect(numOnes).to.equal(980);
+          expectNoInfinityValues(computedGeoraster);
+        });
+      });
+    });
+  });  
+  
 });
