@@ -42,7 +42,7 @@ const rasterCalculator = (georaster, func) => {
       const numBands = bands.length;
 
       if (typeof func === 'string') {
-        func = parseString(func, numBands);
+        func = parseString(func.toLowerCase(), numBands);
       }
       
       if (typeof func !== 'function') {
