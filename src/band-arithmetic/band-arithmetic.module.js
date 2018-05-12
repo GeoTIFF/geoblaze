@@ -103,7 +103,7 @@ const bandArithmetic = (georaster, arithmetic) => {
             row.push(noDataValue);
           } else {
             const value = arithmeticFunction(...bandValues);
-            if (value === Infinity || value === -Infinity) {
+            if (value === Infinity || value === -Infinity || isNaN(value)) {
               row.push(noDataValue);
             } else {
               row.push(value);

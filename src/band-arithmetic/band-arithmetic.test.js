@@ -22,6 +22,7 @@ const getExpectedValue5 = (a, b, c) => 2 * (b + a * c) - 100;
 const calculation6 = '(a + b) / c';
 const getExpectedValue6 = (a, b, c) => (a + b) / c;
 
+const calculation7 = '(a - a) / (b - b)';
 
 function expectNoInfinityValues (georaster) {
   georaster.values.forEach(band => {
@@ -33,6 +34,15 @@ function expectNoInfinityValues (georaster) {
   });
 }
 
+function expectNoNaNValues (georaster) {
+  georaster.values.forEach(band => {
+    band.forEach(row => {
+      row.forEach(pixel => {
+        expect(pixel).to.not.equal(NaN);
+      });
+    });
+  });
+}
 // left the time measuring code commented out in the tests to make
 // it easier to return and further optimize the code
 
@@ -126,7 +136,7 @@ describe('Geoblaze Band Arithmetic Feature', () => {
       });
     });
   });
-  
+
   describe('Run Calculation 6', function () {
     this.timeout(1000000);
     it('Got Correct Value', () => {
@@ -141,5 +151,16 @@ describe('Geoblaze Band Arithmetic Feature', () => {
         });
       });
     });
-  });  
+  });
+
+  describe('Run Calculation 7', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        return bandArithmetic(georaster, calculation7).then(computedGeoraster => {
+          expectNoNaNValues(computedGeoraster);
+        });
+      });
+    });
+  });
 });
