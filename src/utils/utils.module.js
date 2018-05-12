@@ -128,6 +128,11 @@ function clusterLineSegments (lineSegments, numberOfEdges, debug=false) {
 }
 
 const utils = {
+  
+  listVariables (numVariables) {
+    return [...Array(numVariables)].map((val, i) => String.fromCharCode(i + 65).toLowerCase());
+  },
+
 
   // This function takes in an array with an even number of elements and
   // returns an array that couples every two consecutive elements;

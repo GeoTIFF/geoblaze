@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import load from './load.module';
+
 import { ERROR_BAD_URL, ERROR_PARSING_GEOTIFF } from '../error-constants';
 
 const path = 'http://localhost:3000/data/test.tiff';
