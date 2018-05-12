@@ -25,11 +25,23 @@ const calculation7 = (a, b, c) => {
   }
 };
 
+const calculation8 = () => NaN;
+
 function expectNoInfinityValues (georaster) {
   georaster.values.forEach(band => {
     band.forEach(row => {
       row.forEach(pixel => {
         expect(pixel).to.not.equal(Infinity);
+      });
+    });
+  });
+}
+
+function expectNoNaNValues (georaster) {
+  georaster.values.forEach(band => {
+    band.forEach(row => {
+      row.forEach(pixel => {
+        expect(pixel).to.not.equal(NaN);
       });
     });
   });
@@ -127,7 +139,7 @@ describe('Geoblaze Raster Calculator Feature', () => {
       });
     });
   });
-  
+
   describe('Run Calculation 6', function () {
     this.timeout(1000000);
     it('Got Correct Value', () => {
@@ -146,7 +158,7 @@ describe('Geoblaze Raster Calculator Feature', () => {
       });
     });
   });
-  
+
   describe('Run Calculation 7', function () {
     this.timeout(1000000);
     it('Got Correct Value', () => {
@@ -161,5 +173,16 @@ describe('Geoblaze Raster Calculator Feature', () => {
         });
       });
     });
-  });    
+  });
+
+  describe('Run Calculation 8', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        return rasterCalculator(georaster, calculation8).then(computedGeoraster => {
+          expectNoNaNValues(computedGeoraster);
+        });
+      });
+    });
+  });
 });
