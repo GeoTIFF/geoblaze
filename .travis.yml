@@ -8,6 +8,7 @@ before_script:
     - npm run trim-gadm;
     - npm run setup-ghsl-for-travis-ci;
     - npm run setup-mapspam;
+    - npm run setup-rgb;
 script:
     - npm run lint
     - npm run server &
