@@ -49,7 +49,6 @@
     "request": "^2.81.0",
     "terraformer": "^1.0.8",
     "terraformer-arcgis-parser": "^1.0.5",
-    "turf": "^3.0.14",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
