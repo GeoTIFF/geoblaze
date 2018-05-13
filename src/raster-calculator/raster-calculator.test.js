@@ -188,7 +188,7 @@ describe('Geoblaze Raster Calculator Feature', () => {
         });
       });
     });
-   });
+  });
 
   describe('Run Calculation 9', function () {
     this.timeout(1000000);
@@ -215,7 +215,7 @@ describe('Geoblaze Raster Calculator Feature', () => {
       });
     });
   });
-  
+
   describe('Run Calculation 10', function () {
     this.timeout(1000000);
     it('Got Correct Value', () => {
@@ -240,5 +240,5 @@ describe('Geoblaze Raster Calculator Feature', () => {
         });
       });
     });
-  });  
+  });
 });

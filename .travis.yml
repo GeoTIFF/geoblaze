@@ -1,24 +1,29 @@
 addons:
   apt:
     packages:
-    - gdal-bin
-    - libgdal-dev
+      - gdal-bin
+      - libgdal-dev
 before_script:
-    - npm run setup-gadm;
-    - npm run trim-gadm;
-    - npm run setup-ghsl-for-travis-ci;
-    - npm run setup-mapspam;
-    - npm run setup-rgb;
+  - chmod +x setup.sh
+  - npm run setup
 script:
-    - npm run lint
-    - npm run server &
-    - npm run test
+  - ls data/ghsl/tiles
+  - npm run lint
+  - npm run server &
+  - npm run test
 cache:
   directories:
-    - "node_modules"
+    - node_modules
 git:
   depth: 3
 language: node_js
 node_js:
-  - "node"
-  - "lts/*"
+  - node
+  - lts/*
+deploy:
+  provider: npm
+  email: stephendpeyton@gmail.com
+  api_key:
+    secure: gf4RCDX4Qle2WAP7qUbeP09IGmGHthHD5uXMEoocWqvaAjUOXXNAW4/Hd9O/IjS8I4hYgVLAwurxD4fxauhFu5og8EHy5kjbkVSHv4RJTdwE9MVugQ+Owp5GRdm/bZ+EK6pCuI/jRdePOsSMpspdxDzxqW1/cg4aFT+u4oPQprKpooYRZGZ8/Ea8n8qHNgADmaKm7h3bGP48bdNuRGpWsZHPJFYI+XHumzNUGnpjDKvhtckCxDlN1wMSwkZNy8iLROQj3QPTAkPArdycQ44qzbT8fkFiZ0ySzSyURBoUhqTYPvUnKnCtEQyUqv6lH/GKyufPuz0fP+pPFQsuy7PPH2EnR4rv/onr8Yo8HvvB9lfvhGpQvChpWGHoD27qnc4ud7Jvlpatzt3JI5necpCtHOAMYexIziL/MXkIQqesif70wNGHHuuhSN/OvWMwV2S/jgAHZQZVMUBIxaCL/EunzvQLAhu5tdzbj/knGVIJieQkZzLX2e9TEl01iz+YLUN3vHNYqpcQgWPdnXJccjrij9ZV5TUXPe8Gl68dg0W6qX9FJvzrMZIr/REXhizUK3maChPklMVSwcJeJBCv8CkZ67EbgxfJszfUCcAbNqWO5AskHHvlAjSf5qYi/WqMRhQS9aqYaOZf2lb0r+30V2cFKcaiTZRDHo5aDIwcdHNb0AY=
+  on:
+    tags: true
