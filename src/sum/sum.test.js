@@ -1,10 +1,7 @@
-import _ from 'underscore';
 import utils from '../utils';
-import fs from 'fs';
 import { expect } from 'chai';
 import load from '../load';
 import sum from './sum.module';
-import turfBbox from '@turf/bbox';
 import helpers from '@turf/helpers';
 
 const turfPolygon = helpers.polygon;
@@ -316,10 +313,7 @@ describe('Geoblaze Sum Feature', () => {
     it('Got correct sum', () => {
       return load(url).then(georaster => {
         return utils.fetchJson(urlToGeojsons + 'Akrotiri and Dhekelia.geojson')
-          .then(country => {
-            const value = sum(georaster, country);
-            console.log('value:', value);
-          });
+          .then(country => sum(georaster, country));
       });
     });
   });
@@ -337,83 +331,76 @@ describe('Geoblaze Sum Feature', () => {
       return utils.fetchJson(urlToData + 'gadm/derived/super-simplified-albanian-polygon.geojson').then(feature => {
         return load(urlToData + 'ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif').then(georaster => {
           const result = sum(georaster, turfPolygon(polygon))[0];
-          console.log('result:', result);
           expect(result).to.equal(0);
         });
       });
     });
   });
-  describe('Get Populations', function () {
-    this.timeout(1000000);
-    it('Got Correct Populations for a Sample of Countries', () => {
-      const countries = [
-        { 'population': 790242.0, 'name': 'Cyprus' },
-        { 'population': 5066313.5, 'name': 'Nicaragua' },
-        { 'population': 5554059.5, 'name': 'Lebanon' },
-        { 'population': 2332581.75, 'name': 'Jamaica' },
-        { 'population': 4685367.5, 'name': 'Croatia' },
-        { 'population': 2234089.5, 'name': 'Macedonia' },
-        { 'population': 3303561.5, 'name': 'Uruguay' }
-      ];
-      const promises = countries.map(country => {
-        return fetchJson(urlToGeojsons + country.name + '.geojson').then(countryGeojson => {
-          const countryBbox = turfBbox(countryGeojson);
-          const [minX, minY, maxX, maxY] = countryBbox;
-          const left = Math.round((minX - 5) / 10) * 10;
-          const right = Math.round((maxX - 5) / 10) * 10;
-          const _bottom = 90 - 10 * Math.floor((90 - minY) / 10);
-          const _top = 90 - 10 * Math.floor((90 - maxY) / 10);
+  // describe('Get Populations', function () {
+  //   this.timeout(1000000);
+  //   it('Got Correct Populations for a Sample of Countries', () => {
+  //     const countries = [
+  //       { 'population': 790242.0, 'name': 'Cyprus' },
+  //       { 'population': 5066313.5, 'name': 'Nicaragua' },
+  //       { 'population': 5554059.5, 'name': 'Lebanon' },
+  //       { 'population': 2332581.75, 'name': 'Jamaica' },
+  //       { 'population': 4685367.5, 'name': 'Croatia' },
+  //       { 'population': 2234089.5, 'name': 'Macedonia' },
+  //       { 'population': 3303561.5, 'name': 'Uruguay' }
+  //     ];
+  //     const promises = countries.map(country => {
+  //       return fetchJson(urlToGeojsons + country.name + '.geojson').then(countryGeojson => {
+  //         const countryBbox = turfBbox(countryGeojson);
+  //         const [minX, minY, maxX, maxY] = countryBbox;
+  //         const left = Math.round((minX - 5) / 10) * 10;
+  //         const right = Math.round((maxX - 5) / 10) * 10;
+  //         const _bottom = 90 - 10 * Math.floor((90 - minY) / 10);
+  //         const _top = 90 - 10 * Math.floor((90 - maxY) / 10);
 
-          const latitudes = _.range(_top, _bottom -1, -10);
-          //console.log("latitudes:", latitudes);
-          const longitudes = _.range(left, right + 1, 10);
-          //console.log("longitudes:", longitudes);
-          const tiles = [];
-          latitudes.forEach(latitude => {
-            longitudes.forEach(longitude => {
-              tiles.push(load(urlToData + 'ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_' + longitude + '_' + latitude + '.tif'));
-            });
-          });
-          return Promise.all(tiles).then(georasters => {
-            //console.log("georaster tiles:", JSON.stringify(georasters.map(g => [g.xmin, g.ymax])));
-            //console.log("countryGeojson:", countryGeojson.type);
-            let totalSum = 0;
-            if (countryGeojson.geometry.type === 'MultiPolygon') {
-              //console.log("country is multipolygon");
-              countryGeojson.geometry.coordinates.map((polygon, polygonIndex) => {
+  //         const latitudes = _.range(_top, _bottom -1, -10);
+  //         const longitudes = _.range(left, right + 1, 10);
+  //         const tiles = [];
+  //         latitudes.forEach(latitude => {
+  //           longitudes.forEach(longitude => {
+  //             tiles.push(load(urlToData + 'ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_' + longitude + '_' + latitude + '.tif'));
+  //           });
+  //         });
+  //         return Promise.all(tiles).then(georasters => {
+  //           let totalSum = 0;
+  //           if (countryGeojson.geometry.type === 'MultiPolygon') {
+  //             countryGeojson.geometry.coordinates.map((polygon, polygonIndex) => {
 
-                if (polygonIndex === 129) {
-                  fs.writeFile('/tmp/poly' + polygonIndex + '.geojson', JSON.stringify(turfPolygon(polygon)));
-                }
-                try {
-                  georasters.forEach(georaster => {
-                    let partialSum = sum(georaster, turfPolygon(polygon));
-                    if (Array.isArray(partialSum)) partialSum = partialSum[0];
-                    if (partialSum > 0) {
-                      totalSum += partialSum;
-                    }
-                  });
-                } catch (error) {
-                  console.error('Caught error on polygonIndex:', polygonIndex);
-                  fs.writeFile('/tmp/poly' + polygonIndex + '.geojson', JSON.stringify(turfPolygon(polygon)));
-                  throw error;
-                }
-              });
-            } else {
-              georasters.forEach(georaster => {
-                let partialSum = sum(georaster, countryGeojson);
-                if (Array.isArray(partialSum)) partialSum = partialSum[0];
-                if (partialSum > 0) {
-                  totalSum += partialSum;
-                }
-              });
-            }
-            const percentOff = Math.abs(country.population - totalSum) / country.population;
-            expect(percentOff).to.be.below(0.05);
-          });
-        });
-      });
-      return Promise.all(promises);
-    });
-  });
+  //               if (polygonIndex === 129) {
+  //                 fs.writeFile('/tmp/poly' + polygonIndex + '.geojson', JSON.stringify(turfPolygon(polygon)));
+  //               }
+  //               try {
+  //                 georasters.forEach(georaster => {
+  //                   let partialSum = sum(georaster, turfPolygon(polygon));
+  //                   if (Array.isArray(partialSum)) partialSum = partialSum[0];
+  //                   if (partialSum > 0) {
+  //                     totalSum += partialSum;
+  //                   }
+  //                 });
+  //               } catch (error) {
+  //                 fs.writeFile('/tmp/poly' + polygonIndex + '.geojson', JSON.stringify(turfPolygon(polygon)));
+  //                 throw error;
+  //               }
+  //             });
+  //           } else {
+  //             georasters.forEach(georaster => {
+  //               let partialSum = sum(georaster, countryGeojson);
+  //               if (Array.isArray(partialSum)) partialSum = partialSum[0];
+  //               if (partialSum > 0) {
+  //                 totalSum += partialSum;
+  //               }
+  //             });
+  //           }
+  //           const percentOff = Math.abs(country.population - totalSum) / country.population;
+  //           expect(percentOff).to.be.below(0.05);
+  //         });
+  //       });
+  //     });
+  //     return Promise.all(promises);
+  //   });
+  // });
 });

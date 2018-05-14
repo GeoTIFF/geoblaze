@@ -1,6 +1,6 @@
 {
   "name": "geoblaze",
-  "version": "0.1.1",
+  "version": "0.1.8",
   "description": "process geotiffs",
   "main": "dist/geoblaze.js",
   "scripts": {
@@ -10,13 +10,7 @@
     "lint": "eslint src",
     "server": "node ./test-app",
     "test": "BABEL_ENV=test ./node_modules/.bin/mocha src --recursive --compilers js:babel-core/register",
-    "setup-gadm": "cd data/gadm && bash download_gadm.sh && node extract_countries.js",
-    "setup-ghsl": "cd data/ghsl && bash download_pop_data.sh && bash tile.sh && bash clip.sh",
-    "setup-ghsl-for-travis-ci": "cd data/ghsl && bash download_data_for_travis_ci.sh",
-    "setup-mapspam": "cd data/mapspam && bash download_mapspam.sh && bash tile.sh",
-    "setup-veneto": "cd data/veneto && bash setup.sh",
-    "trim-gadm": "cd data/gadm && bash trim_gadm.sh",
-    "trim-ghsl": "cd data/ghsl && bash trim_ghsl.sh"
+    "setup": "bash setup.sh"
   },
   "repository": {
     "type": "git",

@@ -18,9 +18,18 @@ module.exports = {
     rules: [
       {
         enforce: 'pre',
-        test: /\.jsx?$/,
+        test: /\.js$/,
         loader: 'eslint-loader',
         include: /src/,
+      },
+      {
+        test: /\.js/,
+        loader: 'babel-loader',
+        exclude: modulePath => (
+          /node_modules/.test(modulePath) &&
+          !/node_modules\/webpack-dev-server/.test(modulePath) &&
+          !/node_modules\/map-obj/.test(modulePath)
+        ),
       }
     ],
   },

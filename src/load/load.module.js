@@ -1,7 +1,7 @@
 import parseGeoraster from 'georaster';
 import nodeFetch from 'node-fetch';
 import nodeUrl from 'url';
-import { ERROR_LOAD_FILE_OUTSIDE_BROSWER, ERROR_BAD_URL, ERROR_PARSING_GEOTIFF } from 'error-constants';
+import { ERROR_LOAD_FILE_OUTSIDE_BROWSER, ERROR_BAD_URL, ERROR_PARSING_GEOTIFF } from '../error-constants';
 import cache from '../cache';
 
 const inBrowser = typeof window === 'object';
@@ -12,7 +12,7 @@ const URL = inBrowser ? window.URL : nodeUrl.parse;
 const load = urlOrFile => {
   return new Promise((resolve, reject) => {
     if (!inBrowser && typeof urlOrFile === 'object') {
-      reject(new Error(ERROR_LOAD_FILE_OUTSIDE_BROSWER));
+      reject(new Error(ERROR_LOAD_FILE_OUTSIDE_BROWSER));
     }
 
     const url = typeof urlOrFile === 'object' ? URL.createObjectURL(urlOrFile) : urlOrFile;

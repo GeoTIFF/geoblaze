@@ -1,12 +1,19 @@
 import _ from 'underscore';
 import parseGeoraster from 'georaster';
 
+import utils from '../utils';
+const { listVariables } = utils;
+
 const containsNoDataValue = (bandValues, noDataValue) => {
   const numBandValues = bandValues.length;
   for (let i = 0; i < numBandValues; i++) {
     if (bandValues[i] === noDataValue) return true;
   }
   return false;
+};
+
+const parseString = (string, numBands) => {
+  return new Function(...listVariables(numBands), string);
 };
 
 const getBandRows = (bands, index) => {
@@ -29,12 +36,19 @@ const getBandValues = (bandRows, index) => {
 
 const rasterCalculator = (georaster, func) => {
   return new Promise((resolve, reject) => {
-    if (typeof func !== 'function') {
-      return reject(new Error('Function is invalid. Please provide a valid function as the second argument.'));
-    }
-
+    
     try {
       const bands = georaster.values;
+      const numBands = bands.length;
+
+      if (typeof func === 'string') {
+        func = parseString(func.toLowerCase(), numBands);
+      }
+      
+      if (typeof func !== 'function') {
+        return reject(new Error('Function is invalid. Please provide a valid function as the second argument.'));
+      }
+
       const noDataValue = georaster.no_data_value;
       const values = [];
       const numRows = bands[0].length;
@@ -49,7 +63,12 @@ const rasterCalculator = (georaster, func) => {
           if (containsNoDataValue(bandValues, noDataValue)) {
             row.push(noDataValue);
           } else {
-            row.push(func(...bandValues));
+            const value = func(...bandValues);
+            if (value === Infinity || value === -Infinity || isNaN(value)) {
+              row.push(noDataValue);
+            } else {
+              row.push(value);
+            }
           }
         }
         values.push(row);
