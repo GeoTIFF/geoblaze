@@ -93,5 +93,19 @@ To test for linting errors:
 ### Testing
 Geoblaze uses [mocha](https://mochajs.org/) as its testing framework. To learn more, see their [getting started guide](https://mochajs.org/#getting-started).
 
+To run tests:
 
-***The developer's guide is still in progress, we will be adding more soon!***
+1. Run the setup script. This script will download all of the necessary test data from s3.
+```
+  npm run setup
+```
+
+2. Spin up the test node server
+```
+  npm run server
+```
+
+3. In a separate tab, run tests
+```
+  npm run test
+```
