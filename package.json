@@ -1,6 +1,6 @@
 {
   "name": "geoblaze",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "process geotiffs",
   "main": "dist/geoblaze.js",
   "scripts": {
