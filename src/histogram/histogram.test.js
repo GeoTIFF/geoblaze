@@ -94,6 +94,7 @@ describe('Geoblaze Histogram Feature', () => {
     it('Got Correct Value', () => {
       return load(urlSmallRaster).then(georaster => {
         const results = histogram(georaster, null, ratioEIOptions)[0];
+        console.log("results:", results)
         _.keys(ratioEIGeorasterResults).forEach(key => {
           const value = results[key];
           const expectedValue = ratioEIGeorasterResults[key];

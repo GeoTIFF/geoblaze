@@ -36,7 +36,7 @@ const getMedianForRaster = (georaster, geom) => {
 
       const values = get(georaster, geom);
 
-      const noDataValue = georaster.no_data_value;
+      const { noDataValue } = georaster;
 
       // median values
       const medians = [];

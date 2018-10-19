@@ -23,7 +23,7 @@ const getModesForRaster = (georaster, geom) => {
 
   try {
 
-    const noDataValue = georaster.no_data_value;
+    const { noDataValue } = georaster;
 
     if (geom === null || geom === undefined) {
 

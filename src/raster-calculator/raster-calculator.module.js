@@ -36,7 +36,7 @@ const getBandValues = (bandRows, index) => {
 
 const rasterCalculator = (georaster, func) => {
   return new Promise((resolve, reject) => {
-    
+
     try {
       const bands = georaster.values;
       const numBands = bands.length;
@@ -44,12 +44,12 @@ const rasterCalculator = (georaster, func) => {
       if (typeof func === 'string') {
         func = parseString(func.toLowerCase(), numBands);
       }
-      
+
       if (typeof func !== 'function') {
         return reject(new Error('Function is invalid. Please provide a valid function as the second argument.'));
       }
 
-      const noDataValue = georaster.no_data_value;
+      const { noDataValue } = georaster;
       const values = [];
       const numRows = bands[0].length;
 
@@ -75,7 +75,7 @@ const rasterCalculator = (georaster, func) => {
       }
 
       const metadata = _.pick(georaster, ...[
-        'no_data_value',
+        'noDataValue',
         'projection',
         'xmin',
         'ymax',

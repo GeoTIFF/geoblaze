@@ -146,7 +146,7 @@ const getHistogramsForRaster = (georaster, geom, options) => {
     if (geom === null || geom === undefined) {
       const flat = true;
       const values = get(georaster, null, flat);
-      const noDataValue = georaster.no_data_value;
+      const { noDataValue } = georaster;
 
       return values
         .map(band => band.filter(value => value !== noDataValue))
@@ -154,7 +154,7 @@ const getHistogramsForRaster = (georaster, geom, options) => {
 
     } else if (utils.isBbox(geom)) {
       geom = convertGeometry('bbox', geom);
-      const noDataValue = georaster.no_data_value;
+      const { noDataValue } = georaster;
 
       // grab array of values by band
       const flat = true;
@@ -167,7 +167,7 @@ const getHistogramsForRaster = (georaster, geom, options) => {
 
     } else if (utils.isPolygon(geom)) {
       geom = convertGeometry('polygon', geom);
-      const noDataValue = georaster.no_data_value;
+      const { noDataValue } = georaster;
 
       // grab array of values by band
       let values = [];
