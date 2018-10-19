@@ -9,7 +9,7 @@ const mean = (georaster, geom) => {
 
     if (utils.isBbox(geom)) { // if geometry is a bounding box
       geom = convertGeometry('bbox', geom);
-      const noDataValue = georaster.no_data_value;
+      const { noDataValue } = georaster;
 
       // grab array of values
       const values = get(georaster, geom);

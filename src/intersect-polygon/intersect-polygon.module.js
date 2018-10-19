@@ -29,7 +29,7 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
   const cellWidth = georaster.pixelWidth;
   const cellHeight = georaster.pixelHeight;
 
-  const noDataValue = georaster.no_data_value;
+  const { noDataValue } = georaster;
 
   const imageWidth = georaster.width;
 

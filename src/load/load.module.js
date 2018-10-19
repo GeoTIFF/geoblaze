@@ -36,10 +36,14 @@ const load = urlOrFile => {
               } else {
                 arrayBuffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
               }
-              parseGeoraster(arrayBuffer).then(georaster => {
-                cache[url] = georaster;
-                resolve(georaster);
-              }, error => reject(new Error(ERROR_PARSING_GEOTIFF)));
+              try {
+                parseGeoraster(arrayBuffer).then(georaster => {
+                  cache[url] = georaster;
+                  resolve(georaster);
+                }, error => reject(new Error(ERROR_PARSING_GEOTIFF)));
+              } catch (error) {
+                reject(error);
+              }
             }
           } catch (e) {
             reject(new Error(ERROR_PARSING_GEOTIFF));

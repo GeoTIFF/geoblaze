@@ -7,7 +7,7 @@ const sum = (georaster, geom, test, debug=false) => {
   try {
     if (geom === null || geom === undefined) {
 
-      const noDataValue = georaster.no_data_value;
+      const { noDataValue } = georaster;
       return georaster.values.map(band => { // iterate over each band which include rows of pixels
         return band.reduce((sumOfBand, row) => { // reduce all the rows into one sum
           return sumOfBand + row.reduce((sumOfRow, cellValue) => { // reduce each row to a sum of its pixel values
@@ -19,7 +19,7 @@ const sum = (georaster, geom, test, debug=false) => {
       geom = convertGeometry('bbox', geom);
 
       const values = get(georaster, geom);
-      const noDataValue = georaster.no_data_value;
+      const { noDataValue } = georaster;
 
       // sum values
       return values.map(band => { // iterate over each band which include rows of pixels

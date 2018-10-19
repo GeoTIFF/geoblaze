@@ -57,11 +57,15 @@ describe('Geoblaze Load Feature', () => {
   });
 
   describe('Error from an invalid file', function () {
-    this.timeout(1000000);
+    this.timeout(10);
     it('Loaded tiff file', () => {
-      return load(incorrectPath3).then(null, error => {
-        expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
-      });
+      try {
+        return load(incorrectPath3).then(null, error => {
+          expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
+        });
+      } catch(error) {
+          expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
+      }
     });
   });
 

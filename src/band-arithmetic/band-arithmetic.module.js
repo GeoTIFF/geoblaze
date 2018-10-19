@@ -85,7 +85,7 @@ const bandArithmetic = (georaster, arithmetic) => {
 
     try {
       const bands = georaster.values;
-      const noDataValue = georaster.no_data_value;
+      const noDataValue = georaster.noDataValue;
       const values = [];
       const numRows = bands[0].length;
 
@@ -114,7 +114,7 @@ const bandArithmetic = (georaster, arithmetic) => {
       }
 
       const metadata = _.pick(georaster, ...[
-        'no_data_value',
+        'noDataValue',
         'projection',
         'xmin',
         'ymax',

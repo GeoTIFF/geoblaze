@@ -25,7 +25,7 @@ describe('Testing intersection of simple geometries', () => {
         georaster.values.forEach(band => {
           band.forEach(row => {
             row.forEach(value => {
-              if (value != georaster.no_data_value) {
+              if (value != georaster.noDataValue) {
                 expectedNumberOfIntersectingPixels++;
               }
             });
