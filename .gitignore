@@ -78,6 +78,7 @@ data/gadm/*.zip
 data/gadm/derived/*
 data/gadm/arcgis/*.json
 data/gadm/geojsons/*.geojson
+data/gadm/shapefiles/*
 data/ghsl/*.zip
 data/ghsl/admins/*
 data/ghsl/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0/
