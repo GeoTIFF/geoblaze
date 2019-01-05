@@ -2,9 +2,8 @@ import utils from '../utils';
 import { expect } from 'chai';
 import load from '../load';
 import sum from './sum.module';
-import helpers from '@turf/helpers';
+import { polygon as turfPolygon } from '@turf/helpers';
 
-const turfPolygon = helpers.polygon;
 const { fetchJson, fetchJsons } = utils;
 
 const urlRwanda = 'http://localhost:3000/data/RWA_MNH_ANC.tif';
