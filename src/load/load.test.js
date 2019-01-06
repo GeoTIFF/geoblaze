@@ -1,12 +1,15 @@
 import { expect } from 'chai';
 import load from './load.module';
 
-import { ERROR_BAD_URL, ERROR_PARSING_GEOTIFF } from '../error-constants';
+import {
+  ERROR_BAD_URL
+  //ERROR_PARSING_GEOTIFF
+} from '../error-constants';
 
 const path = 'http://localhost:3000/data/test.tiff';
 const incorrectPath = 'http://localhost:3000/data/this-is-not-a-real-dataset.tiff';
 const incorrectPath2 = 'this-is-a-fake-path';
-const incorrectPath3 = 'http://localhost:3000/data/random-file';
+//const incorrectPath3 = 'http://localhost:3000/data/random-file';
 
 const properties = [
   'projection',

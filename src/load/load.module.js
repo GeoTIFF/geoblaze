@@ -9,16 +9,15 @@ const inBrowser = typeof window === 'object';
 const fetch = inBrowser ? window.fetch : nodeFetch;
 const URL = inBrowser ? window.URL : nodeUrl.parse;
 
-function toArrayBuffer(buffer) {
+function toArrayBuffer (buffer) {
   try {
     return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   } catch (error) {
-    console.log("buffer:", buffer);
     throw error;
   }
 }
 
-async function fetchWithErrorHandling(url) {
+async function fetchWithErrorHandling (url) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -30,7 +29,7 @@ async function fetchWithErrorHandling(url) {
   }
 }
 
-async function parseGeorasterWithErrorHandling(arrayBuffer) {
+async function parseGeorasterWithErrorHandling (arrayBuffer) {
   try {
     return await parseGeoraster(arrayBuffer);
   } catch (error) {
@@ -38,7 +37,7 @@ async function parseGeorasterWithErrorHandling(arrayBuffer) {
   }
 }
 
-export async function load(urlOrFile) {
+async function load (urlOrFile) {
 
   if (!inBrowser && typeof urlOrFile === 'object') {
     throw new Error(ERROR_LOAD_FILE_OUTSIDE_BROWSER);
@@ -58,6 +57,6 @@ export async function load(urlOrFile) {
     cache[url] = georaster;
     return georaster;
   }
-};
+}
 
 export default load;
