@@ -18,12 +18,12 @@ cd ..
 echo "---------- Finished Setting up GHSL Data ----------"
 
 # setup mapspam
-echo "---------- Setting up GHSL Data ----------"
+echo "---------- Setting up MapSpam Data ----------"
 cd mapspam
 bash download_mapspam.sh
 bash tile.sh
 cd ..
-echo "---------- Finished Setting up GADM Data ----------"
+echo "---------- Finished Setting up MapSpam Data ----------"
 
 # setup rgb
 echo "---------- Setting up RGB Raster ----------"
