@@ -22,7 +22,7 @@ const ratioEIGeorasterResults = {
   '>151.57 - 177.43': 140,
   '>177.43 - 203.29': 62,
   '>203.29 - 229.14': 49,
-  '>229.14 - 255': 78
+  '>229.14 - 255': 78,
 };
 
 const ratioQuantileBboxResults = {
@@ -94,7 +94,6 @@ describe('Geoblaze Histogram Feature', () => {
     it('Got Correct Value', () => {
       return load(urlSmallRaster).then(georaster => {
         const results = histogram(georaster, null, ratioEIOptions)[0];
-        console.log("results:", results)
         _.keys(ratioEIGeorasterResults).forEach(key => {
           const value = results[key];
           const expectedValue = ratioEIGeorasterResults[key];

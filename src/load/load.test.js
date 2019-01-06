@@ -64,7 +64,7 @@ describe('Geoblaze Load Feature', () => {
           expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
         });
       } catch(error) {
-          expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
+        expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
       }
     });
   });
