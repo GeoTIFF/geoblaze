@@ -11,8 +11,8 @@ script:
   - npm run lint
   - npm run build-dev
   - npm run build
-  - npm run test-loading-builds
   - npm run server &
+  - npm run test-loading-builds
   - npm run test
 cache:
   directories:
