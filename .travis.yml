@@ -9,6 +9,8 @@ before_script:
 script:
   - ls data/ghsl/tiles
   - npm run lint
+  - npm run build-dev
+  - npm run build
   - npm run server &
   - npm run test
 cache:
