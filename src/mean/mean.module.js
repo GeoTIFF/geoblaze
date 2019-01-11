@@ -7,12 +7,17 @@ const mean = (georaster, geom) => {
 
   try {
 
-    if (utils.isBbox(geom)) { // if geometry is a bounding box
-      geom = convertGeometry('bbox', geom);
-      const { noDataValue } = georaster;
+    const geomIsBbox = utils.isBbox(geom);
 
-      // grab array of values
+    if (geom === null || geom === undefined || geomIsBbox) {
+
+      if (geomIsBbox) {
+        geom = convertGeometry('bbox', geom);
+      }
+
       const values = get(georaster, geom);
+
+      const { noDataValue } = georaster;
 
       // sum values
       const sums = [];

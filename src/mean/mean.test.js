@@ -38,6 +38,15 @@ const polygonGeojson = `{
 const expectedPolygonGeojsonValue = 1826.74 ;
 
 describe('Geoblaze Mean Feature', () => {
+  describe('Get Mean from Whole Raster', function () {
+    this.timeout(1000000);
+    it('Got Correct Value', () => {
+      return load(url).then(georaster => {
+        const value = Number(mean(georaster)[0].toFixed(2));
+        expect(value).to.equal(132.04);
+      });
+    });
+  });
   describe('Get Mean from Bounding Box', function () {
     this.timeout(1000000);
     it('Got Correct Value', () => {

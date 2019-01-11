@@ -29,9 +29,7 @@ const getMedianForRaster = (georaster, geom) => {
     if (geom === null || geom === undefined || geomIsBbox) {
 
       if (geomIsBbox) {
-
         geom = convertGeometry('bbox', geom);
-
       }
 
       const values = get(georaster, geom);
