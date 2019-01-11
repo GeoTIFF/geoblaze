@@ -6,7 +6,7 @@ const base = require('./webpack.base.js');
 module.exports = merge(base, {
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'geoblaze.js',
+    filename: 'geoblaze.min.js',
     library: 'geoblaze',
     libraryTarget: 'umd',
     umdNamedDefine: true,
