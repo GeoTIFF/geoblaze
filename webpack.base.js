@@ -8,6 +8,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'geoblaze.js',
+    globalObject: `(typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : typeof global !== 'undefined' ? global : typeof this !== 'undefined' ? this : undefined)`
   },
   resolve: {
     modules: ['node_modules', path.join(__dirname, 'src')],
@@ -38,4 +39,7 @@ module.exports = {
   },
   plugins: [
   ],
+  externals: {
+    'node-fetch': 'node-fetch'
+  }
 };

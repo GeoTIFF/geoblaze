@@ -58,3 +58,5 @@ if (typeof self !== 'undefined') {
 if (typeof global !== 'undefined') {
   global['geoblaze'] = geoblaze;
 }
+
+module.exports = geoblaze;
