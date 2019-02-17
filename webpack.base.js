@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
   context: __dirname,
@@ -9,6 +8,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'geoblaze.js',
+    globalObject: `(typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : typeof global !== 'undefined' ? global : typeof this !== 'undefined' ? this : undefined)`
   },
   resolve: {
     modules: ['node_modules', path.join(__dirname, 'src')],
@@ -38,10 +38,8 @@ module.exports = {
     chunks: true,
   },
   plugins: [
-    new CleanWebpackPlugin(['dist'], {
-      root: __dirname,
-      verbose: true,
-      dry: false,
-    })
   ],
+  externals: {
+    'node-fetch': 'node-fetch'
+  }
 };

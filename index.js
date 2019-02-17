@@ -44,11 +44,19 @@ export {
 };
 
 
-/*
-  The following code allows you to use GeoRaster without requiring
-*/
+/* set window.geoblaze in the browser */
 if (typeof window !== 'undefined') {
   window['geoblaze'] = geoblaze;
-} else if (typeof self !== 'undefined') {
+}
+
+/* set self.geoblaze in a web worker */
+if (typeof self !== 'undefined') {
   self['geoblaze'] = geoblaze;
 }
+
+/* set global.geoblaze in node */
+if (typeof global !== 'undefined') {
+  global['geoblaze'] = geoblaze;
+}
+
+module.exports = geoblaze;

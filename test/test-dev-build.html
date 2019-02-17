@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <script src="/dist/geoblaze.js"></script>
+  </head>
+  <body>
+    <div id="result"></div>
+    <script>
+      const url = '/data/example_4326.tif';
+      window.promises = {};
+      window.promises.median = window.geoblaze.load(url).then(georaster => {
+        console.log("loaded georaster");
+        const result = window.geoblaze.median(georaster);
+        console.log("got rest");
+        document.getElementById('result').textContent = result;
+        return result;
+      });
+    </script>
+  </body>
+</html>
