@@ -26,15 +26,15 @@ function toArrayBuffer (response) {
 function fetchWithErrorHandling (url) {
   try {
     return fetch(url)
-    .then(response => {
-      if (!response.ok) {
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(ERROR_BAD_URL);
+        }
+        return response;
+      })
+      .catch(error => {
         throw new Error(ERROR_BAD_URL);
-      }
-      return response;
-    })
-    .catch(error => {
-      throw new Error(ERROR_BAD_URL);
-    });
+      });
   } catch (error) {
     throw new Error(ERROR_BAD_URL);
   }
@@ -58,8 +58,8 @@ function load (urlOrFile) {
 
   if (!cache[url]) {
     cache[url] = fetchWithErrorHandling(url)
-    .then(toArrayBuffer)
-    .then(parseGeorasterWithErrorHandling);
+      .then(toArrayBuffer)
+      .then(parseGeorasterWithErrorHandling);
   }
   return cache[url];
 }
