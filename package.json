@@ -11,7 +11,7 @@
     "fix": "eslint src --fix",
     "lint": "eslint src",
     "server": "node ./serve.js",
-    "test": "BABEL_ENV=test ./node_modules/.bin/mocha src --recursive --compilers js:babel-core/register",
+    "test": "./node_modules/.bin/mocha src --recursive --compilers js:babel-core/register",
     "test-loading-builds": "./node_modules/.bin/mocha test-loading-builds.js",
     "setup": "bash setup.sh"
   },
@@ -59,6 +59,7 @@
     "babel-core": "^6.26.0",
     "babel-eslint": "^8.2.3",
     "babel-loader": "^7.1.4",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-2": "^6.24.1",
     "chai": "^4.1.2",
