@@ -9,9 +9,14 @@ const inBrowser = typeof window === 'object';
 const fetch = inBrowser ? window.fetch : nodeFetch;
 const URL = inBrowser ? window.URL : nodeUrl.parse;
 
-function toArrayBuffer (buffer) {
+async function toArrayBuffer (response) {
   try {
-    return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    if (response.arrayBuffer) {
+      return response.arrayBuffer();
+    } else if (response.buffer) {
+      const buffer = await response.buffer();
+      return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    }
   } catch (error) {
     throw error;
   }
@@ -23,7 +28,7 @@ async function fetchWithErrorHandling (url) {
     if (!response.ok) {
       throw new Error(ERROR_BAD_URL);
     }
-    return response;
+    return await response;
   } catch (error) {
     throw new Error(ERROR_BAD_URL);
   }
@@ -45,18 +50,13 @@ async function load (urlOrFile) {
 
   const url = typeof urlOrFile === 'object' ? URL.createObjectURL(urlOrFile) : urlOrFile;
 
-  if (cache[url]) {
-    return cache[url];
-  } else {
-
+  if (!cache[url]) {
     const response = await fetchWithErrorHandling(url);
-
-    const arrayBuffer = inBrowser ? await response.arrayBuffer() : toArrayBuffer(await response.buffer());
-
+    const arrayBuffer = await toArrayBuffer(response);
     const georaster = await parseGeorasterWithErrorHandling(arrayBuffer);
     cache[url] = georaster;
-    return georaster;
   }
+  return cache[url];
 }
 
 export default load;
