@@ -77,7 +77,7 @@
     "eslint-plugin-standard": "^3.0.1",
     "express": "^4.16.4",
     "http-server": "^0.10.0",
-    "jsdoc": "^3.5.5",
+    "jsdoc": "^3.6.3",
     "memory-fs": "^0.4.1",
     "mocha": "^5.2.0",
     "puppeteer": "^1.11.0",
