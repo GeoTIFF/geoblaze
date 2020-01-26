@@ -111,3 +111,7 @@ To run tests:
 ```
   npm run test
 ```
+
+# Used By
+<a href="https://geotiff.io"><img src="https://github.com/GeoTIFF/geotiff.io/raw/master/assets/favicon.png" height="75px"></a>
+<a href="https://www.usda.gov/"><img src="https://www.usda.gov/themes/usda/img/usda-symbol.svg" height="75px"></a>
