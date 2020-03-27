@@ -35,7 +35,7 @@ echo "---------- Finished Setting up RGB Raster ----------"
 # setup veneto
 echo "---------- Setting up Veneto Raster ----------"
 cd veneto
-bash data/veneto/setup.sh
+bash setup.sh
 cd ..
 echo "---------- Finished Setting up Veneto Raster ----------"
 
