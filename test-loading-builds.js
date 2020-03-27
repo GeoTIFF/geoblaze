@@ -4,6 +4,7 @@ const puppeteer = require('puppeteer');
 const url2GeoTIFF = 'http://localhost:3000/data/example_4326.tif';
 
 describe('Loading Production Build', function() {
+  this.timeout(5000);
   it('Should Successfully Require Production Build in Node', async () => {
     const geoblaze = require('./dist/geoblaze.min.js');
     expect(geoblaze).to.be.ok;
@@ -24,6 +25,7 @@ describe('Loading Production Build', function() {
 });
 
 describe('Loading Development Build', function() {
+  this.timeout(5000);
   it('Should Successfully Require Development Build in Node', async () => {
     const geoblaze = require('./dist/geoblaze.js');
     expect(geoblaze).to.be.ok;
