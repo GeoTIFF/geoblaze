@@ -6,7 +6,7 @@ const url2GeoTIFF = 'http://localhost:3000/data/example_4326.tif';
 describe('Loading Production Build', function() {
   this.timeout(5000);
   it('Should Successfully Require Production Build in Node', async () => {
-    const geoblaze = require('./dist/geoblaze.min.js');
+    const geoblaze = require('./dist/geoblaze.node.min.js');
     expect(geoblaze).to.be.ok;
     const georaster = await geoblaze.load(url2GeoTIFF);
     const result = await geoblaze.median(georaster);
@@ -27,7 +27,7 @@ describe('Loading Production Build', function() {
 describe('Loading Development Build', function() {
   this.timeout(5000);
   it('Should Successfully Require Development Build in Node', async () => {
-    const geoblaze = require('./dist/geoblaze.js');
+    const geoblaze = require('./dist/geoblaze.node.js');
     expect(geoblaze).to.be.ok;
     const georaster = await geoblaze.load(url2GeoTIFF);
     const result = await geoblaze.median(georaster);
