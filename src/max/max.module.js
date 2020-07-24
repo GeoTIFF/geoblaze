@@ -33,7 +33,7 @@ const getMaxForRaster = (georaster, geom) => {
 
   try {
 
-    const noDataValue = georaster.no_date_value;
+    const { noDataValue } = georaster;
 
     if (geom === null || geom === undefined) {
 

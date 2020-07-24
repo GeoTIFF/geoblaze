@@ -1,19 +1,19 @@
 {
   "name": "geoblaze",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Blazing Fast JavaScript Raster Processing Engine",
   "main": "dist/geoblaze.node.min.js",
   "browser": {
     "./dist/geoblaze.web.min.js": "./dist/geoblaze.web.min.js"
   },
-  "unpkg": "./dist/geoblaze.web.min.js",  
+  "unpkg": "./dist/geoblaze.web.min.js",
   "scripts": {
     "analyze": "webpack --config webpack.analyze.js",
     "build": "npm run build:dev && npm run build:prod",
     "build:dev": "npm run build:dev:node && npm run build:dev:web",
     "build:dev:node": "webpack --mode development --target node",
     "build:dev:web": "webpack --mode development --target web",
-    "build:prod": "npm run build:prod:node && npm run build:prod:web",    
+    "build:prod": "npm run build:prod:node && npm run build:prod:web",
     "build:prod:node": "webpack --mode production --target node",
     "build:prod:web": "webpack --mode production --target web",
     "dev": "webpack --mode development --target node --watch",

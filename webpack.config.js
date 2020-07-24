@@ -48,6 +48,7 @@ module.exports = (env, argv) => {
     plugins: [
     ],
     externals: {
+      'fs': 'fs',
       'node-fetch': 'node-fetch'
     }
   };
