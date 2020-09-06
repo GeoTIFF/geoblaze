@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import getDepth from 'get-depth';
 import get from '../get';
 import utils from '../utils';
 
@@ -63,7 +64,7 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
 
   // collapse geometry down to a list of edges
   // necessary for multi-part geometries
-  const depth = utils.getDepth(geom);
+  const depth = getDepth(geom);
   const polygonEdges = depth === 4  ? geom.map(getEdgesForPolygon) : [getEdgesForPolygon(geom)];
 
   polygonEdges.forEach((edges, edgesIndex) => {

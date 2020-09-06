@@ -2,6 +2,7 @@ import _ from 'underscore';
 import combine from '@turf/combine';
 import nodeFetch from 'node-fetch';
 import ArcGIS from 'terraformer-arcgis-parser';
+import getDepth from 'get-depth';
 
 const inBrowser = typeof window === 'object';
 const fetch = inBrowser ? window.fetch : nodeFetch;
@@ -290,16 +291,6 @@ const utils = {
     return false;
   },
 
-  getDepth (geometry) {
-    let depth = 0;
-    let part = geometry;
-    while (Array.isArray(part)) {
-      depth++;
-      part = part[0];
-    }
-    return depth;
-  },
-
   // This function takes in an array of number pairs and combines where there's overlap
   mergeRanges (ranges) {
     const numberOfRanges = ranges.length;
@@ -371,7 +362,7 @@ const utils = {
       // iterate through each geometry and make sure first and
       // last point are the same
 
-      const depth = this.getDepth(coors);
+      const depth = getDepth(coors);
       if (debug) console.log('depth:', depth);
       if (depth === 4) {
         return coors.map(() => this.isPolygon).every(Boolean);
