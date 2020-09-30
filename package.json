@@ -3,9 +3,7 @@
   "version": "0.2.6",
   "description": "Blazing Fast JavaScript Raster Processing Engine",
   "main": "dist/geoblaze.node.min.js",
-  "browser": {
-    "./dist/geoblaze.web.min.js": "./dist/geoblaze.web.min.js"
-  },
+  "browser": "./dist/geoblaze.web.min.js",
   "unpkg": "./dist/geoblaze.web.min.js",
   "scripts": {
     "analyze": "webpack --config webpack.analyze.js",
