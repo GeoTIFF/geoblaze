@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import load from '../load';
 import utils from './utils.module';
+import getDepth from 'get-depth';
 
 const { fetchJson, fetchJsons } = utils;
 
@@ -77,7 +78,7 @@ describe('Test Get Depth', () => {
         const [country, depth] = countryDepth;
         return fetchJson(urlToGeojsons + country + '.geojson')
           .then(country => {
-            const actualDepth = utils.getDepth(country.geometry.coordinates);
+            const actualDepth = getDepth(country.geometry.coordinates);
             expect(actualDepth).to.equal(depth);
           });
       });
