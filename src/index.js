@@ -1,5 +1,6 @@
 import bandArithmetic from './band-arithmetic';
 import cache from './cache';
+import get from './get';
 import histogram from './histogram';
 import identify from './identify';
 import load from './load';
@@ -14,6 +15,7 @@ import sum from './sum';
 const geoblaze = {
   cache,
   bandArithmetic,
+  get,
   histogram,
   identify,
   load,
@@ -31,6 +33,7 @@ export default geoblaze;
 export {
   cache,
   bandArithmetic,
+  get,
   histogram,
   identify,
   load,
