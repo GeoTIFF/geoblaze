@@ -54,7 +54,7 @@
     "node-fetch": "^2.6.0",
     "proj4": "^2.6.0",
     "terraformer-arcgis-parser": "^1.0.5",
-    "underscore": "^1.8.3"
+    "underscore": "^1.12.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
