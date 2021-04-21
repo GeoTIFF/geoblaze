@@ -49,12 +49,13 @@ module.exports = (env, argv) => {
       colors: true,
       chunks: true,
     },
-    plugins: [
-    ],
-    externals: {
-      'fs': 'fs'
-    }
+    plugins: [],
+    node: {}
   };
+
+  if (target === "web") {
+    results.node['fs'] = 'empty';
+  }
 
   if (mode === "development") {
     results.devServer = {
