@@ -38,8 +38,12 @@ module.exports = (env, argv) => {
             !/node_modules\/webpack-dev-server/.test(modulePath) &&
             !/node_modules\/map-obj/.test(modulePath)
           ),
+        },
+        target === "web" && {
+          test: path.resolve(__dirname, 'node_modules/node-fetch/browser.js'),
+          use: 'null-loader'
         }
-      ],
+      ].filter(Boolean),
     },
     stats: {
       colors: true,
@@ -48,8 +52,7 @@ module.exports = (env, argv) => {
     plugins: [
     ],
     externals: {
-      'fs': 'fs',
-      'node-fetch': 'node-fetch'
+      'fs': 'fs'
     }
   };
 
