@@ -48,7 +48,7 @@
   "homepage": "https://github.com/GeoTIFF/geoblaze#readme",
   "dependencies": {
     "@turf/combine": "^4.7.3",
-    "georaster": "^1.0.3",
+    "georaster": "^1.5.1",
     "get-depth": "0.0.0",
     "mathjs": "^6.6.1",
     "node-fetch": "^2.6.0",
