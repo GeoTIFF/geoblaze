@@ -5,6 +5,7 @@
   "main": "dist/geoblaze.node.min.js",
   "browser": "./dist/geoblaze.web.min.js",
   "unpkg": "./dist/geoblaze.web.min.js",
+  "types": "src/index.d.ts",
   "scripts": {
     "analyze": "webpack --config webpack.analyze.js",
     "build": "npm run build:dev && npm run build:prod",
@@ -48,6 +49,7 @@
   "homepage": "https://github.com/GeoTIFF/geoblaze#readme",
   "dependencies": {
     "@turf/combine": "^4.7.3",
+    "@types/geojson": "^7946.0.7",
     "georaster": "^1.0.3",
     "get-depth": "0.0.0",
     "mathjs": "^6.6.1",
