@@ -100,7 +100,7 @@ export function mode(
 
 export function rasterCalculator(
   raster: Georaster,
-  operation: (() => unknown) | string
+  operation: ((...cellValuesPerBand: number[]) => number) | string
 ): Georaster;
 
 export function sum(
