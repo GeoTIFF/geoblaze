@@ -31,12 +31,12 @@ export type InputBBox = BBox | GeoblazeBBox;
 
 export function bandArithmetic(
   raster: GeoRaster,
-  arithmetic: any
+  operation: string
 ): Promise<GeoRaster>;
 
 export function get(
   raster: GeoRaster,
-  geom: any,
+  geom: InputBBox | null | undefined,
   flat: boolean
 ): Promise<GeoRaster>;
 
