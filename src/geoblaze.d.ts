@@ -65,7 +65,6 @@ export function get(
   flat: boolean
 ): Promise<Georaster>;
 
-// Done
 export function histogram(
   raster: Georaster,
   geom: string | InputPolygon | null | undefined,
@@ -74,34 +73,34 @@ export function histogram(
 
 export function identify(
   raster: Georaster,
-  geom?: string | InputPoint | null
+  geom: string | InputPoint | null | undefined
 ): number[];
 
 export function load(urlOrFile: object | string): Promise<Georaster>;
 
 export function max(
   raster: Georaster,
-  geom: string | InputPolygon | null
+  geom: string | InputPolygon | null | undefined
 ): Promise<Georaster>;
 
 export function mean(
   raster: Georaster,
-  geom: string | InputPolygon | null
+  geom: string | InputPolygon | null | undefined
 ): Promise<Georaster>;
 
 export function median(
   raster: Georaster,
-  geom: string | InputPolygon | null
+  geom: string | InputPolygon | null | undefined
 ): Promise<Georaster>;
 
 export function min(
   raster: Georaster,
-  geom: string | InputPolygon | null
+  geom: string | InputPolygon | null | undefined
 ): Promise<Georaster>;
 
 export function mode(
   raster: Georaster,
-  geom: string | InputPolygon | null
+  geom: string | InputPolygon | null | undefined
 ): Promise<Georaster>;
 
 export function rasterCalculator(
@@ -111,7 +110,7 @@ export function rasterCalculator(
 
 export function sum(
   raster: Georaster,
-  geom: string | InputPolygon | null,
+  geom: string | InputPolygon | null | undefined,
   test?: (cellValue: number) => boolean,
   debug?: boolean
 ): Promise<Array<number>>;
