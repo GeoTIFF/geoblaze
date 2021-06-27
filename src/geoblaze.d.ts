@@ -51,7 +51,7 @@ export function histogram(
 export function identify(
   raster: GeoRaster,
   geom?: string | InputPoint | null
-): unknown[];
+): number[];
 
 export function load(urlOrFile: object | string): Promise<GeoRaster>;
 
