@@ -112,6 +112,6 @@ export function rasterCalculator(
 export function sum(
   raster: Georaster,
   geom: string | InputPolygon | null,
-  test?: (cellValue: unknown) => boolean,
+  test?: (cellValue: number) => boolean,
   debug?: boolean
-): Promise<Array<unknown>>;
+): Promise<Array<number>>;
