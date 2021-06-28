@@ -1,7 +1,7 @@
 import { Point, Polygon, Feature, BBox } from "geojson";
 import { Georaster } from "georaster";
 
-// re-rexport so that downstream user doesn't need to track it down
+// re-rexport for easy access by downstream user
 export { Georaster } from "georaster"
 
 type GeoblazeBBox = {
@@ -21,6 +21,8 @@ interface Histogram {
   [binKey: string]: number[];
 }
 
+// Some geoblaze methods accept a geometry, and its accepted in a variety of
+// forms.  These types group them for easy reuse
 type InputPolygon = number[][][] | Polygon | Feature<Polygon>;
 type InputPoint = number[] | Point | Feature<Point>;
 type InputBBox = BBox | GeoblazeBBox;
