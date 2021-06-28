@@ -36,7 +36,7 @@ export const get: (
   raster: Georaster,
   geom: InputBBox | null | undefined,
   flat: boolean
-) => number[] | number[][][];
+) => number[][] | number[][][];
 
 export const histogram: (
   raster: Georaster,
