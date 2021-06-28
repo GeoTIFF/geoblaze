@@ -36,7 +36,7 @@ export const get: (
   raster: Georaster,
   geom: InputBBox | null | undefined,
   flat: boolean
-) => Promise<Georaster>;
+) => number[] | number[][];
 
 export const histogram: (
   raster: Georaster,
@@ -54,39 +54,39 @@ export const load: (urlOrFile: object | string) => Promise<Georaster>;
 export const max: (
   raster: Georaster,
   geom: string | InputPolygon | null | undefined
-) => Promise<Georaster>;
+) => number[];
 
 export const mean: (
   raster: Georaster,
   geom: string | InputPolygon | null | undefined
-) => Promise<Georaster>;
+) => number[];
 
 export const median: (
   raster: Georaster,
   geom: string | InputPolygon | null | undefined
-) => Promise<Georaster>;
+) => number[];
 
 export const min: (
   raster: Georaster,
   geom: string | InputPolygon | null | undefined
-) => Promise<Georaster>;
+) => number[];
 
 export const mode: (
   raster: Georaster,
   geom: string | InputPolygon | null | undefined
-) => Promise<Georaster>;
+) => number[];
 
 export const rasterCalculator: (
   raster: Georaster,
   operation: ((...cellValuesPerBand: number[]) => number) | string
-) => Georaster;
+) => Promise<Georaster>;
 
 export const sum: (
   raster: Georaster,
   geom: string | InputPolygon | null | undefined,
   test?: (cellValue: number) => boolean,
   debug?: boolean
-) => Promise<Array<number>>;
+) => number[];
 
 // Create typed object matching default export in index.js
 declare const defaultExports: {
