@@ -13,12 +13,14 @@ type GeoblazeBBox = {
 
 interface HistogramOptions {
   scaleType: "nominal" | "ratio";
-  numClasses: number;
-  classType: "equal-interval" | "quantile";
+  /** required for ratio scaleType */
+  numClasses?: number;
+  /** required for ratio scaleType */
+  classType?: "equal-interval" | "quantile";
 }
 
 interface Histogram {
-  [binKey: string]: number[];
+  [binKey: string]: number;
 }
 
 // Some geoblaze methods accept a geometry, and its accepted in a variety of
