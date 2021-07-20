@@ -15,7 +15,7 @@
     "build:prod": "npm run build:prod:node && npm run build:prod:web",
     "build:prod:node": "webpack --mode production --target node",
     "build:prod:web": "webpack --mode production --target web",
-    "build:types": "cp src/geoblaze.d.ts dist/geoblaze.d.ts",
+    "build:types": "cp src/index.d.ts dist/geoblaze.d.ts",
     "dev": "webpack --mode development --target node --watch",
     "documentation": "./node_modules/.bin/documentation build src/** --config documentation.yml -f html -o docs && echo 'geoblaze.io' > docs/CNAME",
     "fix": "eslint src --fix",
