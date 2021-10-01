@@ -1,9 +1,9 @@
 import utils from '../utils';
 import convertGeometry from '../convert-geometry';
+import load from "../load";
 
-const get = (georaster, geom, flat) => {
+const getSync = (georaster, geom, flat) => {
   let cropTop; let cropLeft; let cropRight; let cropBottom;
-
   if (geom === null || geom === undefined) {
     try {
       if (flat) {
@@ -12,7 +12,7 @@ const get = (georaster, geom, flat) => {
         cropRight = georaster.width;
         cropTop = 0;
       } else {
-        return georaster.values;
+        return georaster.values || georaster.getValues();
       }
     } catch (error) {
       console.error(error);
@@ -35,6 +35,7 @@ const get = (georaster, geom, flat) => {
       cropLeft = Math.max(bboxLeft, 0);
       cropRight = Math.min(bboxRight, georaster.width);
       cropBottom = Math.min(bboxBottom, georaster.height);
+      
     } catch (error) {
       console.error(error);
       throw error;
@@ -45,25 +46,61 @@ const get = (georaster, geom, flat) => {
 
   try {
     if (flat) {
-      return georaster.values.map(band => {
-        let values = [];
-        for (let rowIndex = cropTop; rowIndex < cropBottom; rowIndex++) {
-          values = values.concat(Array.prototype.slice.call(band[rowIndex].slice(cropLeft, cropRight)));
-        }
-        return values;
-      });
+      if (georaster.values) {
+        return georaster.values.map(band => {
+          let values = [];
+          for (let rowIndex = cropTop; rowIndex < cropBottom; rowIndex++) {
+            values = values.concat(Array.prototype.slice.call(band[rowIndex].slice(cropLeft, cropRight)));
+          }
+          return values;
+        });  
+      } else {
+        return georaster.getValues({
+          height: cropBottom - cropTop,
+          width: cropRight - cropLeft,
+          left: cropLeft,
+          top: cropTop,
+          right: cropRight,
+          bottom: cropBottom
+        }).then(bands => {
+          return bands.map(rows => {
+            return rows.reduce((acc, row) => acc.concat(Array.from(row)), []);
+          });
+        });
+      }
     } else {
-      return georaster.values.map(band => {
-        const table = [];
-        for (let rowIndex = cropTop; rowIndex < cropBottom; rowIndex++) {
-          table.push(band[rowIndex].slice(cropLeft, cropRight));
-        }
-        return table;
-      });
+      if (georaster.values) {
+        return georaster.values.map(band => {
+          const table = [];
+          for (let rowIndex = cropTop; rowIndex < cropBottom; rowIndex++) {
+            table.push(band[rowIndex].slice(cropLeft, cropRight));
+          }
+          return table;
+        });  
+      } else {
+        return georaster.getValues({
+          height: cropBottom - cropTop,
+          width: cropRight - cropLeft,
+          left: cropLeft,
+          top: cropTop,
+          right: cropRight,
+          bottom: cropBottom
+        });
+      }
     }
   } catch (e) {
     throw e;
   }
 };
+
+const get = (georaster, geom, flat) => {
+  if (typeof georaster === "string") {
+    return load(georaster).then(georasterLoaded => {
+      return getSync(georasterLoaded, geom, flat);
+    });
+  } else {
+    return getSync(georaster, geom, flat);
+  }
+}
 
 export default get;
