@@ -1,5 +1,5 @@
 import test from 'flug';
-import nodeFetch from 'node-fetch';
+import fetch from 'cross-fetch';
 import load from '../load';
 import utils from '../utils';
 import convertGeometry from '../convert-geometry';
@@ -7,9 +7,6 @@ import intersectPolygon from '../intersect-polygon';
 import bboxPolygon from '@turf/bbox-polygon';
 
 const urlToGeojson = 'http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson';
-
-const inBrowser = typeof window === 'object';
-const fetch = inBrowser ? window.fetch : nodeFetch;
 
 const urlToData = 'http://localhost:3000/data/';
 

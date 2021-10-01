@@ -1,11 +1,10 @@
 import _ from 'underscore';
 import combine from '@turf/combine';
-import nodeFetch from 'node-fetch';
+import fetch from 'cross-fetch';
 import ArcGIS from 'terraformer-arcgis-parser';
 import getDepth from 'get-depth';
 
 const inBrowser = typeof window === 'object';
-const fetch = inBrowser ? window.fetch : nodeFetch;
 
 function fetchJson (url) {
   return fetch(url).then(response => response.json());
