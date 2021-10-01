@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import getDepth from 'get-depth';
 import get from '../get';
+import load from '../load';
 import utils from '../utils';
 
 const {
@@ -25,19 +26,13 @@ const getEdgesForPolygon = polygon => {
   return edges;
 };
 
-const intersectPolygon = (georaster, geom, perPixelFunction) => {
-
+const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, imageBands }) => {
   const cellWidth = georaster.pixelWidth;
   const cellHeight = georaster.pixelHeight;
 
   const { noDataValue } = georaster;
 
   const imageWidth = georaster.width;
-
-  // get values in a bounding box around the geometry
-  const latlngBbox = utils.getBoundingBox(geom);
-
-  const imageBands = get(georaster, latlngBbox);
 
   // set origin points of bbox of geometry in image space
   const lat0 = latlngBbox.ymax + ((georaster.ymax - latlngBbox.ymax) % cellHeight);
@@ -244,6 +239,26 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
       }
     });
   });
+};
+
+const intersectPolygon = (georaster, geom, perPixelFunction) => {
+  // get values in a bounding box around the geometry
+  const latlngBbox = utils.getBoundingBox(geom);
+
+  if (typeof georaster === "string") {
+    return load(georaster).then(loaded => {
+      return get(georaster, latlngBbox).then(imageBands => (
+        intersectPolygonCore({ georaster: loaded, geom, perPixelFunction, latlngBbox, imageBands })
+      ));
+    });
+  } else if (!georaster.values) {
+    return get(georaster, latlngBbox).then(imageBands => (
+      intersectPolygonCore({ georaster, geom, perPixelFunction, latlngBbox, imageBands })
+    ));
+  } else {
+    const imageBands = get(georaster, latlngBbox);
+    return intersectPolygonCore({ georaster, geom, perPixelFunction, latlngBbox, imageBands });
+  }
 };
 
 export default intersectPolygon;

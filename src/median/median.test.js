@@ -1,4 +1,5 @@
 import test from 'flug';
+import fetch from 'cross-fetch';
 import load from '../load';
 import median from './median.module';
 
@@ -30,28 +31,53 @@ const polygon = [[
   [85.078125, 21.166483858206583], [86.044921875, 20.838277806058933], [86.98974609375, 22.49225722008518],
   [85.58349609375, 24.54712317973075], [84.6826171875, 23.36242859340884], [83.12255859375, 22.49225722008518]
 ]];
-const expectedPolygonValue = 2750.5;
+const expectedPolygonValue = 1573.3;
 
 test('Get Median from Bounding Box', async ({ eq }) => {
-  const georaster = await load(url);
+  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
   const value = Number(median(georaster, bbox)[0].toFixed(2));
   eq(value, expectedBboxValue);
 });
 
 test('Get Median from Bounding Box (GeoJSON)', async ({ eq }) => {
-  const georaster = await load(url);
+  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
   const value = Number(median(georaster, bboxGeojson)[0].toFixed(2));
   eq(value, expectedBboxGeojsonValue);
 });
 
 test('Get Median from Polygon', async ({ eq }) => {
-  const georaster = await load(url);
+  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
   const value = Number(median(georaster, polygon)[0].toFixed(2));
   eq(value, expectedPolygonValue);
 });
 
 test('Get Median from Whole Raster', async ({ eq }) => {
-  const georaster = await load(url);
+  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
   const value = median(georaster)[0];
+  eq(value, 0);
+});
+
+
+test('Get Median from Bounding Box from url', async ({ eq }) => {
+  const result = await median(url, bbox);
+  const value = Number(result[0].toFixed(2));
+  eq(value, expectedBboxValue);
+});
+
+test('Get Median from Bounding Box (GeoJSON) from url', async ({ eq }) => {
+  const result = await median(url, bboxGeojson);
+  const value = Number(result[0].toFixed(2));
+  eq(value, expectedBboxGeojsonValue);
+});
+
+test('Get Median from Polygon from url', async ({ eq }) => {
+  const result = await median(url, polygon);
+  const value = Number(result[0].toFixed(2));
+  eq(value, expectedPolygonValue);
+});
+
+test('Get Median from Whole Raster from url', async ({ eq }) => {
+  const result = await median(url);
+  const value = result[0];
   eq(value, 0);
 });
