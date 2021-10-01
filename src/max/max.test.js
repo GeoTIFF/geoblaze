@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import test from 'flug';
 import load from '../load';
 import max from './max.module';
 
@@ -15,32 +15,20 @@ const polygon = [[
 ]];
 const expectedPolygonValue = 7807.40;
 
-describe('Geoblaze Max Feature', () => {
-  describe('Get Max from Bounding Box', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = Number(max(georaster, bbox)[0].toFixed(2));
-        expect(value).to.equal(expectedBboxValue);
-      });
-    });
-  });
-  describe('Get Max from Polygon', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = Number(max(georaster, polygon)[0].toFixed(2));
-        expect(value).to.equal(expectedPolygonValue);
-      });
-    });
-  });
-  describe('Get Max from Raster without polygon', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = max(georaster)[0];
-        expect(value).to.equal(8131.2);
-      });
-    });
-  });
+test('Got Correct Get Max from Bounding Box', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = Number(max(georaster, bbox)[0].toFixed(2));
+  eq(value, expectedBboxValue);
+});
+
+test('Get Max from Polygon', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = Number(max(georaster, polygon)[0].toFixed(2));
+  eq(value, expectedPolygonValue);
+});
+
+test('Get Max from Raster without polygon', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = max(georaster)[0];
+  eq(value, 8131.2);
 });

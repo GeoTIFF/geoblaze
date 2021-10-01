@@ -1,12 +1,11 @@
 import parseGeoraster from 'georaster';
-import nodeFetch from 'node-fetch';
+import fetch from 'cross-fetch';
 import nodeUrl from 'url';
 import { ERROR_LOAD_FILE_OUTSIDE_BROWSER, ERROR_BAD_URL, ERROR_PARSING_GEOTIFF } from '../error-constants';
 import cache from '../cache';
 
 const inBrowser = typeof window === 'object';
 
-const fetch = inBrowser ? window.fetch : nodeFetch;
 const URL = inBrowser ? window.URL : nodeUrl.parse;
 
 async function toArrayBuffer (response) {
@@ -28,7 +27,7 @@ async function fetchWithErrorHandling (url) {
     if (!response.ok) {
       throw new Error(ERROR_BAD_URL);
     }
-    return await response;
+    return response;
   } catch (error) {
     throw new Error(ERROR_BAD_URL);
   }
@@ -43,7 +42,6 @@ async function parseGeorasterWithErrorHandling (arrayBuffer) {
 }
 
 async function load (urlOrFile) {
-
   if (!inBrowser && typeof urlOrFile === 'object') {
     throw new Error(ERROR_LOAD_FILE_OUTSIDE_BROWSER);
   }

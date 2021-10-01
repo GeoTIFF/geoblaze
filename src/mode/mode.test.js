@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import test from 'flug';
 import load from '../load';
 import mode from './mode.module';
 
@@ -15,32 +15,20 @@ const polygon = [[
 ]];
 const expectedPolygonValue = 0;
 
-describe('Geoblaze Mode Feature', () => {
-  describe('Get Mode from Bounding Box', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = mode(georaster, bbox)[0];
-        expect(value).to.equal(expectedBboxValue);
-      });
-    });
-  });
-  describe('Get Mode from Polygon', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = mode(georaster, polygon)[0];
-        expect(value).to.equal(expectedPolygonValue);
-      });
-    });
-  });
-  describe('Get Mode for whole raster', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = mode(georaster);
-        expect(value).to.equal(expectedPolygonValue);
-      });
-    });
-  });
+test('Get Mode from Bounding Box', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = mode(georaster, bbox)[0];
+  eq(value, expectedBboxValue);
+});
+
+test('Get Mode from Polygon', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = mode(georaster, polygon)[0];
+  eq(value, expectedPolygonValue);
+});
+
+test('Get Mode for whole raster', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = mode(georaster);
+  eq(value, expectedPolygonValue);
 });

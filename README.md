@@ -3,19 +3,19 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/maintainability)](https://codeclimate.com/github/codeclimate/codeclimate/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a99a88d28ad37a79dbf6/test_coverage)](https://codeclimate.com/github/codeclimate/codeclimate/test_coverage)
 
-# Geoblaze
+# GeoBlaze
 
 ***A blazing fast javascript raster processing engine***
 
 ---
 
-Geoblaze is a geospatial raster processing engine written purely in javascript. Powered by [geotiffjs](https://github.com/geotiffjs/geotiff.js), it provides tools to analyze [GeoTIFFs](https://en.wikipedia.org/wiki/GeoTIFF). Using geoblaze, you can run computations ranging from basic statistics (min, max, mean, mode) to band arithmetic and histogram generation in either a web browser or a node application.
+GeoBlaze is a geospatial raster processing engine written purely in javascript. Powered by [geotiffjs](https://github.com/geotiffjs/geotiff.js), it provides tools to analyze [GeoTIFFs](https://en.wikipedia.org/wiki/GeoTIFF). Using geoblaze, you can run computations ranging from basic statistics (min, max, mean, mode) to band arithmetic and histogram generation in either a web browser or a node application.
 
 Learn more by [reading our documentation](https://geoblaze.io)
 
 ## Getting Started
 
-1. Add Geoblaze to your project
+1. Add GeoBlaze to your project
 ```
   npm install geoblaze
 ```
@@ -80,7 +80,7 @@ We squash and rebase all PRs. Please squash all of your commits into one and reb
 ```
 
 ### Linting
-Geoblaze uses [eslint](https://eslint.org/) for linting. We suggest using an eslint plugin for your text editor. Here are some common options:
+GeoBlaze uses [eslint](https://eslint.org/) for linting. We suggest using an eslint plugin for your text editor. Here are some common options:
 
   - For Sublime: [SublimeLinter-eslint](https://github.com/SublimeLinter/SublimeLinter-eslint)
   - For Atom: [linter-eslint](https://atom.io/packages/linter-eslint)
@@ -93,7 +93,7 @@ To test for linting errors:
 ```
 
 ### Testing
-Geoblaze uses [mocha](https://mochajs.org/) as its testing framework. To learn more, see their [getting started guide](https://mochajs.org/#getting-started).
+GeoBlaze uses [flug](https://github.com/DanielJDufour/flug) as its testing framework.
 
 To run tests:
 

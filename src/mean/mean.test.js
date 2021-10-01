@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import test from 'flug';
 import load from '../load';
 import mean from './mean.module';
 
@@ -37,41 +37,26 @@ const polygonGeojson = `{
 }`;
 const expectedPolygonGeojsonValue = 1826.74 ;
 
-describe('Geoblaze Mean Feature', () => {
-  describe('Get Mean from Whole Raster', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = Number(mean(georaster)[0].toFixed(2));
-        expect(value).to.equal(132.04);
-      });
-    });
-  });
-  describe('Get Mean from Bounding Box', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = Number(mean(georaster, bbox)[0].toFixed(2));
-        expect(value).to.equal(expectedBboxValue);
-      });
-    });
-  });
-  describe('Get Mean from Polygon', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = Number(mean(georaster, polygon)[0].toFixed(2));
-        expect(value).to.equal(expectedPolygonValue);
-      });
-    });
-  });
-  describe('Get Mean from Polygon (GeoJSON)', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = Number(mean(georaster, polygonGeojson)[0].toFixed(2));
-        expect(value).to.equal(expectedPolygonGeojsonValue);
-      });
-    });
-  });
+test('Mean: Get Mean from Whole Raster', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = Number(mean(georaster)[0].toFixed(2));
+  eq(value, 132.04);
+});
+
+test('Get Mean from Bounding Box', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = Number(mean(georaster, bbox)[0].toFixed(2));
+  eq(value, expectedBboxValue);
+});
+
+test('Get Mean from Polygon', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = Number(mean(georaster, polygon)[0].toFixed(2));
+  eq(value, expectedPolygonValue);
+});
+
+test('Get Mean from Polygon (GeoJSON)', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = Number(mean(georaster, polygonGeojson)[0].toFixed(2));
+  eq(value, expectedPolygonGeojsonValue);
 });

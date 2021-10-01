@@ -1,5 +1,4 @@
-import { expect } from 'chai';
-import _ from 'underscore';
+import test from 'flug';
 import load from '../load';
 import histogram from './histogram.module';
 
@@ -88,57 +87,42 @@ const polygonGeojson = `{
   ]
 }`;
 
-describe('Geoblaze Histogram Feature', () => {
-  describe('Get Histogram (Ratio, Equal Interval) from GeoRaster', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(urlSmallRaster).then(georaster => {
-        const results = histogram(georaster, null, ratioEIOptions)[0];
-        _.keys(ratioEIGeorasterResults).forEach(key => {
-          const value = results[key];
-          const expectedValue = ratioEIGeorasterResults[key];
-          expect(value).to.equal(expectedValue);
-        });
-      });
-    });
+test('Get Histogram (Ratio, Equal Interval) from GeoRaster', async ({ eq }) => {
+  const georaster = await load(urlSmallRaster);
+  const results = histogram(georaster, null, ratioEIOptions)[0];
+  Object.keys(ratioEIGeorasterResults).forEach(key => {
+    const value = results[key];
+    const expectedValue = ratioEIGeorasterResults[key];
+    eq(value, expectedValue);
   });
-  describe('Get Histogram (Ratio, Quantile) from Bounding Box', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const results = histogram(georaster, bbox, ratioQuantileOptions)[0];
-        _.keys(ratioQuantileBboxResults).forEach(key => {
-          const value = results[key];
-          const expectedValue = ratioQuantileBboxResults[key];
-          expect(value).to.equal(expectedValue);
-        });
-      });
-    });
+});
+
+test('Get Histogram (Ratio, Quantile) from Bounding Box', async ({ eq }) => {
+  const georaster = await load(url);
+  const results = histogram(georaster, bbox, ratioQuantileOptions)[0];
+  Object.keys(ratioQuantileBboxResults).forEach(key => {
+    const value = results[key];
+    const expectedValue = ratioQuantileBboxResults[key];
+    eq(value, expectedValue);
   });
-  describe('Get Histogram (Ratio, Quantile) from Polygon', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const results = histogram(georaster, polygon, ratioQuantileOptions)[0];
-        _.keys(ratioQuantilePolygonResults).forEach(key => {
-          const value = results[key];
-          const expectedValue = ratioQuantilePolygonResults[key];
-          expect(value).to.equal(expectedValue);
-        });
-      });
-    });
+});
+
+test('Get Histogram (Ratio, Quantile) from Polygon', async ({ eq }) => {
+  const georaster = await load(url);
+  const results = histogram(georaster, polygon, ratioQuantileOptions)[0];
+  Object.keys(ratioQuantilePolygonResults).forEach(key => {
+    const value = results[key];
+    const expectedValue = ratioQuantilePolygonResults[key];
+    eq(value, expectedValue);
   });
-  describe('Get Histogram (Ratio, Equal Interval) from Polygon (GeoJSON)', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const results = histogram(georaster, polygonGeojson, ratioEIOptions)[0];
-        _.keys(ratioEIPolygonResults).forEach(key => {
-          const value = results[key];
-          const expectedValue = ratioEIPolygonResults[key];
-          expect(value).to.equal(expectedValue);
-        });
-      });
-    });
+});
+
+test('Get Histogram (Ratio, Equal Interval) from Polygon (GeoJSON)', async ({ eq }) => {
+  const georaster = await load(url);
+  const results = histogram(georaster, polygonGeojson, ratioEIOptions)[0];
+  Object.keys(ratioEIPolygonResults).forEach(key => {
+    const value = results[key];
+    const expectedValue = ratioEIPolygonResults[key];
+    eq(value, expectedValue);
   });
 });

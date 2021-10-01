@@ -1,5 +1,6 @@
-import { expect } from 'chai';
+import test from 'flug';
 import convertGeometry from './convert-geometry.module';
+import getDepth from 'get-depth';
 
 const arrayPoint = [102, 0.5];
 
@@ -48,64 +49,59 @@ const geojsonPolygonStr2 = `{
 const geojsonPolygon1 = JSON.parse(geojsonPolygonStr1);
 const geojsonPolygon2 = JSON.parse(geojsonPolygonStr2);
 
-const testPointLoad = feature => {
+const testPointLoad = (feature, eq) => {
   const point = convertGeometry('point', feature);
-  expect(point[0]).to.equal(102);
-  expect(point[1]).to.equal(0.5);
+  eq(point[0], 102);
+  eq(point[1], 0.5);
 };
 
-const testBboxLoad = feature => {
+const testBboxLoad = (feature, eq) => {
   const bbox = convertGeometry('bbox', feature);
-  expect(bbox.xmin).to.equal(100);
-  expect(bbox.ymin).to.equal(0);
-  expect(bbox.xmax).to.equal(101);
-  expect(bbox.ymax).to.equal(1);
+  eq(bbox.xmin, 100);
+  eq(bbox.ymin, 0);
+  eq(bbox.xmax, 101);
+  eq(bbox.ymax, 1);
 };
 
-const testPolygonLoad = feature => {
-  return convertGeometry('polygon', feature);
+const testPolygonLoad = (feature, eq) => {
+  const poly = convertGeometry('polygon', feature);
+  const depth = getDepth(poly);
+  eq(depth, 3);
 };
 
-describe('Gio Convert Geometry Feature', () => {
-  describe('Load point geometry', () => {
-    it('Loaded from array', () => {
-      testPointLoad(arrayPoint);
-    });
-    it('Loaded from geojson string', () => {
-      testPointLoad(geojsonPointStr);
-    });
-    it('Loaded from geojson obj', () => {
-      testPointLoad(geojsonPoint);
-    });
-  });
+test('Load Point from array', ({ eq }) => {
+  testPointLoad(arrayPoint, eq);
+});
+test('Load Point from geojson string', ({ eq }) => {
+  testPointLoad(geojsonPointStr, eq);
+});
+test('Load Point from geojson obj', ({ eq }) => {
+  testPointLoad(geojsonPoint, eq);
+});
 
-  describe('Load bbox geometry', () => {
-    it('Loaded from array', () => {
-      testBboxLoad(arrayBbox);
-    });
-    it('Loaded from geojson string', () => {
-      testBboxLoad(geojsonBboxStr);
-    });
-    it('Loaded from geojson obj', () => {
-      testBboxLoad(geojsonBbox);
-    });
-  });
 
-  describe('Load polygon geometry', () => {
-    it('Loaded from array', () => {
-      testPolygonLoad(arrayPolygon);
-    });
-    it('Loaded from geojson string (simple)', () => {
-      testPolygonLoad(geojsonPolygonStr1);
-    });
-    it('Loaded from geojson string (complex)', () => {
-      testPolygonLoad(geojsonPolygonStr2);
-    });
-    it('Loaded from geojson obj (simple)', () => {
-      testPolygonLoad(geojsonPolygon1);
-    });
-    it('Loaded from geojson obj (complex)', () => {
-      testPolygonLoad(geojsonPolygon2);
-    });
-  });
+test('Load bbox from array', ({ eq }) => {
+  testBboxLoad(arrayBbox, eq);
+});
+test('Load bbox from geojson string', ({ eq }) => {
+  testBboxLoad(geojsonBboxStr, eq);
+});
+test('Load bbox from geojson obj', ({ eq }) => {
+  testBboxLoad(geojsonBbox, eq);
+});
+
+test('Load Polygon from array', ({ eq }) => {
+  testPolygonLoad(arrayPolygon, eq);
+});
+test('Load Polygon from geojson string (simple)', ({ eq }) => {
+  testPolygonLoad(geojsonPolygonStr1, eq);
+});
+test('Load Polygon from geojson string (complex)', ({ eq }) => {
+  testPolygonLoad(geojsonPolygonStr2, eq);
+});
+test('Load Polygon from geojson obj (simple)', ({ eq }) => {
+  testPolygonLoad(geojsonPolygon1, eq);
+});
+test('Load Polygon from geojson obj (complex)', ({ eq }) => {
+  testPolygonLoad(geojsonPolygon2, eq);
 });

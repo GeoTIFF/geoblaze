@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import test from 'flug';
 import load from '../load';
 import min from './min.module';
 
@@ -14,32 +14,20 @@ const polygon = [[
 ]];
 const expectedPolygonValue = 0;
 
-describe('Geoblaze Min Feature', () => {
-  describe('Get Min from Bounding Box', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = Number(min(georaster, bbox)[0].toFixed(2));
-        expect(value).to.equal(expectedBboxValue);
-      });
-    });
-  });
-  describe('Get Min from Polygon', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = Number(min(georaster, polygon)[0].toFixed(2));
-        expect(value).to.equal(expectedPolygonValue);
-      });
-    });
-  });
-  describe('Get Min from whole Raster', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        const value = min(georaster)[0];
-        expect(value).to.equal(expectedPolygonValue);
-      });
-    });
-  });
+test('Get Min from Bounding Box', async ({ eq }) => {
+    const georaster = await load(url);
+    const value = Number(min(georaster, bbox)[0].toFixed(2));
+    eq(value, expectedBboxValue);
+});
+
+test('Get Min from Polygon', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = Number(min(georaster, polygon)[0].toFixed(2));
+  eq(value, expectedPolygonValue);
+});
+
+test('Get Min from whole Raster', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = min(georaster)[0];
+  eq(value, expectedPolygonValue);
 });

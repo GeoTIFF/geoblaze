@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import test from 'flug';
 import load from '../load';
 import rasterCalculator from './raster-calculator.module';
 
@@ -31,214 +31,144 @@ const calculation9 = 'return a > 200 ? 1 : 0;';
 
 const calculation10 = 'return A > 200 ? 1 : 0;';
 
-function expectNoInfinityValues (georaster) {
+function expectNoInfinityValues (georaster, eq) {
   georaster.values.forEach(band => {
     band.forEach(row => {
       row.forEach(pixel => {
-        expect(pixel).to.not.equal(Infinity);
+        eq(pixel === Infinity, false);
       });
     });
   });
 }
 
-function expectNoNaNValues (georaster) {
+function expectNoNaNValues (georaster, eq) {
   georaster.values.forEach(band => {
     band.forEach(row => {
       row.forEach(pixel => {
-        expect(pixel).to.not.equal(NaN);
+        eq(pixel === NaN, false);
       });
     });
   });
 }
 
-describe('Geoblaze Raster Calculator Feature', () => {
-  describe('Run Calculation 1', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        // const then = new Date().getTime();
-        return rasterCalculator(georaster, calculation1).then(computedGeoraster => {
-          // const now = new Date().getTime();
-          // console.error('time: ', (now - then) / 1000);
-          const value = computedGeoraster.values[0][0][0];
-          const a = georaster.values[0][0][0];
-          const b = georaster.values[1][0][0];
-          expect(value).to.equal(calculation1(a, b));
-          expectNoInfinityValues(computedGeoraster);
-        });
-      });
-    });
-  });
+test('Run Calculation 1', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation1);
+  const value = computedGeoraster.values[0][0][0];
+  const a = georaster.values[0][0][0];
+  const b = georaster.values[1][0][0];
+  eq(value, calculation1(a, b));
+  expectNoInfinityValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 2', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        // const then = new Date().getTime();
-        return rasterCalculator(georaster, calculation2).then(computedGeoraster => {
-          // const now = new Date().getTime();
-          // console.error('time: ', (now - then) / 1000);
-          const value = computedGeoraster.values[0][0][0];
-          const a = georaster.values[0][0][0];
-          const b = georaster.values[1][0][0];
-          expect(value).to.equal(calculation2(a, b));
-          expectNoInfinityValues(computedGeoraster);
-        });
-      });
-    });
-  });
+test('Run Calculation 2', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation2);      
+  const value = computedGeoraster.values[0][0][0];
+  const a = georaster.values[0][0][0];
+  const b = georaster.values[1][0][0];
+  eq(value, calculation2(a, b));
+  expectNoInfinityValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 3', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        // const then = new Date().getTime();
-        return rasterCalculator(georaster, calculation3).then(computedGeoraster => {
-          // const now = new Date().getTime();
-          // console.error('time: ', (now - then) / 1000);
-          const value = computedGeoraster.values[0][0][0];
-          const a = georaster.values[0][0][0];
-          const b = georaster.values[1][0][0];
-          const c = georaster.values[2][0][0];
-          expect(value).to.equal(calculation3(a, b, c));
-          expectNoInfinityValues(computedGeoraster);
-        });
-      });
-    });
-  });
+test('Run Calculation 3', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation3);      
+  const value = computedGeoraster.values[0][0][0];
+  const a = georaster.values[0][0][0];
+  const b = georaster.values[1][0][0];
+  const c = georaster.values[2][0][0];
+  eq(value, calculation3(a, b, c));
+  expectNoInfinityValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 4', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        // const then = new Date().getTime();
-        return rasterCalculator(georaster, calculation4).then(computedGeoraster => {
-          // const now = new Date().getTime();
-          // console.error('time: ', (now - then) / 1000);
-          const value = computedGeoraster.values[0][0][0];
-          const a = georaster.values[0][0][0];
-          const b = georaster.values[1][0][0];
-          expect(value).to.equal(calculation4(a, b));
-          expectNoInfinityValues(computedGeoraster);
-        });
-      });
-    });
-  });
+test('Run Calculation 4', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation4);      
+  const value = computedGeoraster.values[0][0][0];
+  const a = georaster.values[0][0][0];
+  const b = georaster.values[1][0][0];
+  eq(value, calculation4(a, b));
+  expectNoInfinityValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 5', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        // const then = new Date().getTime();
-        return rasterCalculator(georaster, calculation5).then(computedGeoraster => {
-          // const now = new Date().getTime();
-          // console.error('time: ', (now - then) / 1000);
-          const value = computedGeoraster.values[0][0][0];
-          const a = georaster.values[0][0][0];
-          const b = georaster.values[1][0][0];
-          const c = georaster.values[2][0][0];
-          expect(value).to.equal(calculation5(a, b, c));
-          expectNoInfinityValues(computedGeoraster);
-        });
-      });
-    });
-  });
+test('Run Calculation 5', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation5);    
+  const value = computedGeoraster.values[0][0][0];
+  const a = georaster.values[0][0][0];
+  const b = georaster.values[1][0][0];
+  const c = georaster.values[2][0][0];
+  eq(value, calculation5(a, b, c));
+  expectNoInfinityValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 6', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        // const then = new Date().getTime();
-        return rasterCalculator(georaster, calculation6).then(computedGeoraster => {
-          // const now = new Date().getTime();
-          // console.error('time: ', (now - then) / 1000);
-          const value = computedGeoraster.values[0][0][0];
-          const a = georaster.values[0][0][0];
-          const b = georaster.values[1][0][0];
-          const c = georaster.values[2][0][0];
-          expect(value).to.equal(calculation6(a, b, c));
-          expectNoInfinityValues(computedGeoraster);
-        });
-      });
-    });
-  });
+test('Run Calculation 6', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation6);  
+  const value = computedGeoraster.values[0][0][0];
+  const a = georaster.values[0][0][0];
+  const b = georaster.values[1][0][0];
+  const c = georaster.values[2][0][0];
+  eq(value, calculation6(a, b, c));
+  expectNoInfinityValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 7', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        return rasterCalculator(georaster, calculation7).then(computedGeoraster => {
-          const value = computedGeoraster.values[0][0][0];
-          const a = georaster.values[0][0][0];
-          const b = georaster.values[1][0][0];
-          const c = georaster.values[2][0][0];
-          expect(value).to.equal(calculation7(a, b, c));
-          expectNoInfinityValues(computedGeoraster);
-        });
-      });
-    });
-  });
+test('Run Calculation 7', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation7);  
+  const value = computedGeoraster.values[0][0][0];
+  const a = georaster.values[0][0][0];
+  const b = georaster.values[1][0][0];
+  const c = georaster.values[2][0][0];
+  eq(value, calculation7(a, b, c));
+  expectNoInfinityValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 8', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        return rasterCalculator(georaster, calculation8).then(computedGeoraster => {
-          expectNoNaNValues(computedGeoraster);
-        });
-      });
-    });
-  });
+test('Run Calculation 8', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation8);  
+  expectNoNaNValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 9', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        return rasterCalculator(georaster, calculation9).then(computedGeoraster => {
-          let numZeros = 0;
-          let numOnes = 0;
-          computedGeoraster.values.forEach(band => {
-            band.forEach(row => {
-              row.forEach(pixel => {
-                if (pixel === 0) {
-                  numZeros++;
-                } else if (pixel === 1) {
-                  numOnes++;
-                }
-              });
-            });
-          });
-          expect(numZeros).to.equal(823788);
-          expect(numOnes).to.equal(980);
-          expectNoInfinityValues(computedGeoraster);
-        });
+test('Run Calculation 9', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation9);  
+  let numZeros = 0;
+  let numOnes = 0;
+  computedGeoraster.values.forEach(band => {
+    band.forEach(row => {
+      row.forEach(pixel => {
+        if (pixel === 0) {
+          numZeros++;
+        } else if (pixel === 1) {
+          numOnes++;
+        }
       });
     });
   });
+  eq(numZeros, 823788);
+  eq(numOnes, 980);
+  expectNoInfinityValues(computedGeoraster, eq);
+});
 
-  describe('Run Calculation 10', function () {
-    this.timeout(1000000);
-    it('Got Correct Value', () => {
-      return load(url).then(georaster => {
-        return rasterCalculator(georaster, calculation10).then(computedGeoraster => {
-          let numZeros = 0;
-          let numOnes = 0;
-          computedGeoraster.values.forEach(band => {
-            band.forEach(row => {
-              row.forEach(pixel => {
-                if (pixel === 0) {
-                  numZeros++;
-                } else if (pixel === 1) {
-                  numOnes++;
-                }
-              });
-            });
-          });
-          expect(numZeros).to.equal(823788);
-          expect(numOnes).to.equal(980);
-          expectNoInfinityValues(computedGeoraster);
-        });
+test('Run Calculation 10', async ({ eq }) => {
+  const georaster = await load(url);
+  const computedGeoraster = await rasterCalculator(georaster, calculation10);  
+  let numZeros = 0;
+  let numOnes = 0;
+  computedGeoraster.values.forEach(band => {
+    band.forEach(row => {
+      row.forEach(pixel => {
+        if (pixel === 0) {
+          numZeros++;
+        } else if (pixel === 1) {
+          numOnes++;
+        }
       });
     });
   });
+  eq(numZeros, 823788);
+  eq(numOnes, 980);
+  expectNoInfinityValues(computedGeoraster, eq);
 });

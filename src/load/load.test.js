@@ -1,4 +1,5 @@
-import { expect } from 'chai';
+import test from 'flug';
+import fetch from 'cross-fetch';
 import load from './load.module';
 
 import {
@@ -17,77 +18,64 @@ const properties = [
   'values'
 ];
 
-describe('Geoblaze Load Feature', () => {
 
-  describe('Load GeoNode Export', function () {
-    this.timeout(1000000);
-    it('Loaded tiff from geonode', () => {
-      const url = 'https://s3.amazonaws.com/georaster/geonode_atlanteil.tif';
-      return load(url).then(georaster => {
-        properties.forEach(property => {
-          expect(georaster).to.have.property(property);
-        });
-      });
-    });
+test('Loaded tiff export from geonode', async ({ eq }) => {
+  const url = 'https://s3.amazonaws.com/georaster/geonode_atlanteil.tif';
+  const georaster = await load(url);
+  properties.forEach(property => {
+    eq(property in georaster, true);
   });
-
-  describe('Load from URL', function () {
-    this.timeout(1000000);
-    it('Loaded tiff file', () => {
-      return load(path).then(georaster => {
-        properties.forEach(property => {
-          expect(georaster).to.have.property(property);
-        });
-      });
-    });
-  });
-
-  describe('Error from invalid URL', function () {
-    this.timeout(1000000);
-    it('Loaded tiff file', () => {
-      return load(incorrectPath).then(null, error => {
-        expect(error.message).to.equal(ERROR_BAD_URL);
-      });
-    });
-  });
-
-  describe('Error from another invalid URL', function () {
-    this.timeout(1000000);
-    it('Loaded tiff file', () => {
-      return load(incorrectPath2).then(null, error => {
-        expect(error.message).to.equal(ERROR_BAD_URL);
-      });
-    });
-  });
-
-  /*
-  // commenting out this test because failing because Unhandled Promise Rejection
-  // in georaster
-  describe('Error from an invalid file', function () {
-    this.timeout(10);
-    it('Loaded tiff file', () => {
-      try {
-        return load(incorrectPath3).then(null, error => {
-          expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
-        });
-      } catch(error) {
-        expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
-      }
-    });
-  });
-  */
-
-  // describe('Load from File', function() {
-  //  this.timeout(1000000);
-  //  it('Loaded tiff file', () => {
-  //    return fetch(path).then(image => {
-  //      return load(blob).then(tiff => {
-  //        let image = tiff.getImage();
-  //        properties.forEach(property => {
-  //          expect(image).to.have.property(property);
-  //        })
-  //      });
-  //    });
-  //  })
-  // })
 });
+
+test('Loaded tiff file', async ({ eq }) => {
+  const georaster = await load(path);
+  properties.forEach(property => {
+    eq(property in georaster, true);
+  });
+});
+
+test('Error from invalid URL', async ({ eq }) => {
+  let message;
+  try {
+    await load(incorrectPath);
+  } catch (error) {
+    ({ message } = error);
+  }
+  eq(message, ERROR_BAD_URL);
+});
+
+test('Load: Error from another invalid URL tiff file', async ({ eq }) => {
+  let message;
+  try {
+    await load(incorrectPath2);
+  } catch (error) {
+    ({ message } = error);
+  }
+  eq(message, ERROR_BAD_URL);
+});
+
+/*
+// commenting out this test because failing because Unhandled Promise Rejection
+// in georaster
+describe('Error from an invalid file', function () {
+  this.timeout(10);
+  it('Loaded tiff file', () => {
+    try {
+      return load(incorrectPath3).then(null, error => {
+        expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
+      });
+    } catch(error) {
+      expect(error.message).to.equal(ERROR_PARSING_GEOTIFF);
+    }
+  });
+});
+*/
+
+// test('Loaded from tiff file', async ({ eq }) => {
+//   const blob = await fetch(path);
+//   const tiff = await load(blob);
+//   let image = tiff.getImage();
+//   properties.forEach(property => {
+//     eq(property in image);
+//   })
+// });
