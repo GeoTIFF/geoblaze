@@ -1,4 +1,5 @@
 import test from 'flug';
+import fetch from 'cross-fetch';
 import load from '../load';
 import max from './max.module';
 
@@ -16,19 +17,45 @@ const polygon = [[
 const expectedPolygonValue = 7807.40;
 
 test('Got Correct Get Max from Bounding Box', async ({ eq }) => {
-  const georaster = await load(url);
+  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
   const value = Number(max(georaster, bbox)[0].toFixed(2));
   eq(value, expectedBboxValue);
 });
 
 test('Get Max from Polygon', async ({ eq }) => {
-  const georaster = await load(url);
+  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
   const value = Number(max(georaster, polygon)[0].toFixed(2));
   eq(value, expectedPolygonValue);
 });
 
 test('Get Max from Raster without polygon', async ({ eq }) => {
-  const georaster = await load(url);
+  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
   const value = max(georaster)[0];
   eq(value, 8131.2);
+});
+
+
+// async
+test('Got Correct Get Max from Bounding Box', async ({ eq }) => {
+  const georaster = await load(url);
+  const result = await max(georaster, bbox);
+  const value = Number(result[0].toFixed(2));
+  eq(value, expectedBboxValue);
+});
+
+test('Get Max from Polygon', async ({ eq }) => {
+  const result = await max(url, polygon);
+  const value = Number(result[0].toFixed(2));
+  eq(value, expectedPolygonValue);
+});
+
+test('Get Max from Raster without polygon from async obj', async ({ eq }) => {
+  const georaster = await load(url);
+  const value = await max(georaster);
+  eq(value[0], 8131.2);
+});
+
+test('Get Max from Raster without polygon directly from url', async ({ eq }) => {
+  const value = await max(url);
+  eq(value[0], 8131.2);
 });
