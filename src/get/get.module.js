@@ -1,9 +1,15 @@
-import utils from '../utils';
-import convertGeometry from '../convert-geometry';
-import load from "../load";
+/**
+ * @prettier
+ */
+import utils from "../utils";
+import convertGeometry from "../convert-geometry";
+import wrap from "../wrap-func";
 
-const getSync = (georaster, geom, flat) => {
-  let cropTop; let cropLeft; let cropRight; let cropBottom;
+const get = (georaster, geom, flat) => {
+  let cropTop;
+  let cropLeft;
+  let cropRight;
+  let cropBottom;
   if (geom === null || geom === undefined) {
     try {
       if (flat) {
@@ -12,15 +18,19 @@ const getSync = (georaster, geom, flat) => {
         cropRight = georaster.width;
         cropTop = 0;
       } else {
-        return georaster.values || georaster.getValues();
+        return (
+          georaster.values ||
+          georaster.getValues({ height: georaster.height, left: 0, right: georaster.width, bottom: georaster.height, top: 0, width: georaster.width })
+        );
       }
     } catch (error) {
       console.error(error);
       throw error;
     }
-  } else if (utils.isBbox(geom)) { // bounding box
+  } else if (utils.isBbox(geom)) {
+    // bounding box
     try {
-      const geometry = convertGeometry('bbox', geom);
+      const geometry = convertGeometry("bbox", geom);
 
       // use a utility function that converts from the lat/long coordinate
       // space to the image coordinate space
@@ -35,13 +45,12 @@ const getSync = (georaster, geom, flat) => {
       cropLeft = Math.max(bboxLeft, 0);
       cropRight = Math.min(bboxRight, georaster.width);
       cropBottom = Math.min(bboxBottom, georaster.height);
-      
     } catch (error) {
       console.error(error);
       throw error;
     }
   } else {
-    throw 'Geometry is not a bounding box - please make sure to send a bounding box when using geoblaze.get';
+    throw "Geometry is not a bounding box - please make sure to send a bounding box when using geoblaze.get";
   }
 
   try {
@@ -53,20 +62,22 @@ const getSync = (georaster, geom, flat) => {
             values = values.concat(Array.prototype.slice.call(band[rowIndex].slice(cropLeft, cropRight)));
           }
           return values;
-        });  
-      } else {
-        return georaster.getValues({
-          height: cropBottom - cropTop,
-          width: cropRight - cropLeft,
-          left: cropLeft,
-          top: cropTop,
-          right: cropRight,
-          bottom: cropBottom
-        }).then(bands => {
-          return bands.map(rows => {
-            return rows.reduce((acc, row) => acc.concat(Array.from(row)), []);
-          });
         });
+      } else {
+        return georaster
+          .getValues({
+            height: cropBottom - cropTop,
+            width: cropRight - cropLeft,
+            left: cropLeft,
+            top: cropTop,
+            right: cropRight,
+            bottom: cropBottom
+          })
+          .then(bands => {
+            return bands.map(rows => {
+              return rows.reduce((acc, row) => acc.concat(Array.from(row)), []);
+            });
+          });
       }
     } else {
       if (georaster.values) {
@@ -76,7 +87,7 @@ const getSync = (georaster, geom, flat) => {
             table.push(band[rowIndex].slice(cropLeft, cropRight));
           }
           return table;
-        });  
+        });
       } else {
         return georaster.getValues({
           height: cropBottom - cropTop,
@@ -93,14 +104,4 @@ const getSync = (georaster, geom, flat) => {
   }
 };
 
-const get = (georaster, geom, flat) => {
-  if (typeof georaster === "string") {
-    return load(georaster).then(georasterLoaded => {
-      return getSync(georasterLoaded, geom, flat);
-    });
-  } else {
-    return getSync(georaster, geom, flat);
-  }
-}
-
-export default get;
+export default wrap(get);

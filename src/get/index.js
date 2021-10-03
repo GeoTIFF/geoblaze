@@ -1,4 +1,7 @@
-import get from './get.module';
+/**
+ * @prettier
+ */
+import get from "./get.module";
 
 /**
  * The get function takes a raster and a bounding box as input. It returns
@@ -11,6 +14,6 @@ import get from './get.module';
  * @param {Boolean} flat - whether or not the resulting output should be flattened into a single array
  * @returns {Object} array of pixel values
  * @example
- * const pixels = geoblaze.get(georaster, geometry);
+ * const pixels = await geoblaze.get(georaster, geometry);
  */
 export default get;
