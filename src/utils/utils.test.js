@@ -12,6 +12,7 @@ const urlToGeojson = urlToGeojsons + 'Akrotiri and Dhekelia.geojson';
 const urlToArcgisJsons = urlToData + 'gadm/arcgis/';
 
 test('Get Bounding when Bounding Box when Bigger Than Raster and with Negative Values', async ({ eq }) => {
+  console.log("url:", url);
   const georaster = await load(url);
   const bboxWithBuffer = {
     xmin: georaster.xmin - 1,
@@ -172,3 +173,7 @@ test('Test Categorization of Intersections', ({ eq }) => {
   eq(actual.xmin, -140);
   eq(actual.xmax, -140);
 });
+
+test("get constructor names", ({ eq }) => {
+  eq(utils.getConstructorName(new ArrayBuffer()), "ArrayBuffer");
+})

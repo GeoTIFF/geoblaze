@@ -1,16 +1,18 @@
-import _ from 'underscore';
-import combine from '@turf/combine';
-import fetch from 'cross-fetch';
-import ArcGIS from 'terraformer-arcgis-parser';
-import getDepth from 'get-depth';
+/**
+ * @prettier
+ */
 
-const inBrowser = typeof window === 'object';
+import _ from "underscore";
+import combine from "@turf/combine";
+import fetch from "cross-fetch";
+import ArcGIS from "terraformer-arcgis-parser";
+import getDepth from "get-depth";
 
-function fetchJson (url) {
+function fetchJson(url) {
   return fetch(url).then(response => response.json());
 }
 
-function fetchJsons (urls) {
+function fetchJsons(urls) {
   try {
     return Promise.all(urls.map(fetchJson));
   } catch (error) {
@@ -22,7 +24,7 @@ function fetchJsons (urls) {
   Runs on each value in a table,
   represented by an array of rows.
 */
-function runOnTableOfValues (table, noDataValue, runOnValues) {
+function runOnTableOfValues(table, noDataValue, runOnValues) {
   const numberOfRows = table.length;
   for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
     const row = table[rowIndex];
@@ -36,11 +38,10 @@ function runOnTableOfValues (table, noDataValue, runOnValues) {
   }
 }
 
-function getBoundingBox (geometry) {
-
+function getBoundingBox(geometry) {
   let xmin, ymin, xmax, ymax;
 
-  if (typeof(geometry[0][0]) === 'number') {
+  if (typeof geometry[0][0] === "number") {
     const numberOfPoints = geometry.length;
     xmin = xmax = geometry[0][0];
     ymin = ymax = geometry[0][1];
@@ -71,7 +72,7 @@ function getBoundingBox (geometry) {
   return { xmax, xmin, ymax, ymin };
 }
 
-function cluster (items, newClusterTest) {
+function cluster(items, newClusterTest) {
   try {
     const numberOfItems = items.length;
     const clusters = [];
@@ -89,63 +90,46 @@ function cluster (items, newClusterTest) {
 
     return clusters;
   } catch (error) {
-    console.error('[cluster]:', error);
+    console.error("[cluster]:", error);
   }
 }
 
-function clusterLineSegments (lineSegments, numberOfEdges, debug=false) {
-
+function clusterLineSegments(lineSegments, numberOfEdges, debug = false) {
   try {
-
     const clusters = cluster(lineSegments, s => s.endsOffLine);
 
     const numberOfClusters = clusters.length;
 
-
     if (numberOfClusters >= 2) {
-
       const firstCluster = clusters[0];
       const firstSegment = firstCluster[0];
       const lastCluster = _.last(clusters);
       const lastSegment = _.last(lastCluster);
 
-      if (
-        lastSegment.index === numberOfEdges - 1
-        && firstSegment.index === 0
-        && lastSegment.endsOnLine
-      ) {
+      if (lastSegment.index === numberOfEdges - 1 && firstSegment.index === 0 && lastSegment.endsOnLine) {
         clusters[0] = clusters.pop().concat(firstCluster);
       }
-
     }
 
     return clusters;
-
   } catch (error) {
-    console.error('[clusterLineSegments]', error);
+    console.error("[clusterLineSegments]", error);
   }
-
 }
 
 const utils = {
-  
-  listVariables (numVariables) {
-    return [...Array(numVariables)].map((val, i) => String.fromCharCode(i + 65).toLowerCase());
-  },
-
-
   // This function takes in an array with an even number of elements and
   // returns an array that couples every two consecutive elements;
-  couple (array) {
+  couple(array) {
     const couples = [];
     const lengthOfArray = array.length;
-    for (let i = 0; i < lengthOfArray; i+=2) {
-      couples.push([ array[i], array[i+1] ]);
+    for (let i = 0; i < lengthOfArray; i += 2) {
+      couples.push([array[i], array[i + 1]]);
     }
     return couples;
   },
 
-  forceWithin (n, min, max) {
+  forceWithin(n, min, max) {
     if (n < min) n = min;
     else if (n > max) n = max;
     return n;
@@ -153,9 +137,8 @@ const utils = {
 
   runOnTableOfValues,
 
-  categorizeIntersection (segments) {
+  categorizeIntersection(segments) {
     try {
-
       let through, xmin, xmax;
 
       const n = segments.length;
@@ -166,7 +149,7 @@ const utils = {
         through = true;
         xmin = first.xmin;
         xmax = first.xmax;
-      } else /* n > 1 */ {
+      } /* n > 1 */ else {
         const last = segments[n - 1];
         through = first.direction === last.direction;
         xmin = Math.min(first.xmin, last.xmin);
@@ -174,19 +157,18 @@ const utils = {
       }
 
       if (xmin === undefined || xmax === undefined || through === undefined || isNaN(xmin) || isNaN(xmax)) {
-        throw Error('categorizeIntersection failed with xmin', xmin, 'and xmax', xmax);
+        throw Error("categorizeIntersection failed with xmin", xmin, "and xmax", xmax);
       }
 
       return { xmin, xmax, through };
     } catch (error) {
-      console.error('[categorizeIntersection] segments:', segments);
-      console.error('[categorizeIntersection]', error);
+      console.error("[categorizeIntersection] segments:", segments);
+      console.error("[categorizeIntersection]", error);
       throw error;
     }
-
   },
 
-  convertToGeojsonIfNecessary (input, debug=false) {
+  convertToGeojsonIfNecessary(input, debug = false) {
     if (this.isEsriJson(input, debug)) {
       return this.toGeoJSON(input, debug);
     } else {
@@ -194,7 +176,7 @@ const utils = {
     }
   },
 
-  countValuesInTable (table, noDataValue) {
+  countValuesInTable(table, noDataValue) {
     const counts = {};
     runOnTableOfValues(table, noDataValue, value => {
       if (value in counts) counts[value]++;
@@ -203,9 +185,9 @@ const utils = {
     return counts;
   },
 
-  convertCrsBboxToImageBbox (georaster, crsBbox) {
+  convertCrsBboxToImageBbox(georaster, crsBbox) {
     let crsXMin, crsYMin, crsXMax, crsYMax;
-    if (typeof crsBbox.xmin !== 'undefined') {
+    if (typeof crsBbox.xmin !== "undefined") {
       crsXMin = crsBbox.xmin;
       crsYMin = crsBbox.ymin;
       crsXMax = crsBbox.xmax;
@@ -226,31 +208,32 @@ const utils = {
       xmin: Math.floor((crsXMin - georaster.xmin) / georaster.pixelWidth),
       ymin: Math.floor((georaster.ymax - crsYMax) / georaster.pixelHeight),
       xmax: Math.ceil((crsXMax - georaster.xmin) / georaster.pixelWidth),
-      ymax: Math.ceil((georaster.ymax - crsYMin) / georaster.pixelHeight),
+      ymax: Math.ceil((georaster.ymax - crsYMin) / georaster.pixelHeight)
     };
   },
 
-  getGeojsonCoors (geojson, debug=false) {
+  getGeojsonCoors(geojson, debug = false) {
     let result;
-    if (geojson.features) { // for feature collections
+    if (geojson.features) {
+      // for feature collections
 
       // make sure that if any polygons are overlapping, we get the union of them
       geojson = combine(geojson);
 
       // turf adds extra arrays when running combine, so we need to remove them
       // as we return the coordinates
-      result = geojson.features[0].geometry.coordinates
-        .map(coors => coors[0]);
-    } else if (geojson.geometry) { // for individual feature
+      result = geojson.features[0].geometry.coordinates.map(coors => coors[0]);
+    } else if (geojson.geometry) {
+      // for individual feature
       result = geojson.geometry.coordinates;
-    } else if (geojson.coordinates) { // for just the geometry
+    } else if (geojson.coordinates) {
+      // for just the geometry
       result = geojson.coordinates;
     }
     return result;
   },
 
-  isBbox (geometry) {
-
+  isBbox(geometry) {
     if (geometry === undefined || geometry === null) {
       return false;
     }
@@ -260,19 +243,22 @@ const utils = {
       return true;
     }
 
-    if ((Array.isArray(geometry) && geometry.length === 4)) { // array
+    if (Array.isArray(geometry) && geometry.length === 4) {
+      // array
       return true;
     }
 
     // convert possible inputs to a list of coordinates
     let coors;
-    if (typeof geometry === 'string') { // stringified geojson
+    if (typeof geometry === "string") {
+      // stringified geojson
       const geojson = JSON.parse(geometry);
       const geojsonCoors = this.getGeojsonCoors(geojson);
       if (geojsonCoors.length === 1 && geojsonCoors[0].length === 5) {
         coors = geojsonCoors[0];
       }
-    } else if (typeof geometry === 'object') { // geojson
+    } else if (typeof geometry === "object") {
+      // geojson
       const geojsonCoors = this.getGeojsonCoors(geometry);
       if (geojsonCoors) coors = geojsonCoors[0];
     } else {
@@ -291,7 +277,7 @@ const utils = {
   },
 
   // This function takes in an array of number pairs and combines where there's overlap
-  mergeRanges (ranges) {
+  mergeRanges(ranges) {
     const numberOfRanges = ranges.length;
     if (numberOfRanges > 0) {
       const firstRange = ranges[0];
@@ -311,15 +297,15 @@ const utils = {
     }
   },
 
-  isEsriJson (input, debug=false) {
-    if (debug) console.log('starting isEsriJson with', input);
+  isEsriJson(input, debug = false) {
+    if (debug) console.log("starting isEsriJson with", input);
     const inputType = typeof input;
-    const obj = inputType === 'string' ? JSON.parse(input) : inputType === 'object' ? input : null;
+    const obj = inputType === "string" ? JSON.parse(input) : inputType === "object" ? input : null;
     const geometry = obj.geometry ? obj.geometry : obj;
     if (geometry) {
       if (geometry.rings || (geometry.x && geometry.y)) {
         try {
-          if(ArcGIS.parse(obj)) {
+          if (ArcGIS.parse(obj)) {
             return true;
           } else {
             return false;
@@ -336,33 +322,31 @@ const utils = {
     }
   },
 
-  toGeoJSON (input, debug=false) {
+  toGeoJSON(input, debug = false) {
     const parsed = ArcGIS.toGeoJSON(input);
     return Array.isArray(parsed) ? parsed[0] : parsed;
   },
 
-  isPolygon (geometry, debug=false) {
-
+  isPolygon(geometry, debug = false) {
     // convert to a geometry
     let coors;
     if (Array.isArray(geometry)) {
       coors = geometry;
-    } else if (typeof geometry === 'string') {
+    } else if (typeof geometry === "string") {
       const parsed = JSON.parse(geometry);
       const geojson = this.convertToGeojsonIfNecessary(parsed, debug);
       coors = this.getGeojsonCoors(geojson, debug);
-    } else if (typeof geometry === 'object') {
+    } else if (typeof geometry === "object") {
       const geojson = this.convertToGeojsonIfNecessary(geometry, debug);
       coors = this.getGeojsonCoors(geojson, debug);
     }
 
     if (coors) {
-
       // iterate through each geometry and make sure first and
       // last point are the same
 
       const depth = getDepth(coors);
-      if (debug) console.log('depth:', depth);
+      if (debug) console.log("depth:", depth);
       if (depth === 4) {
         return coors.map(() => this.isPolygon).every(Boolean);
       } else if (depth === 3) {
@@ -389,8 +373,7 @@ const utils = {
 
   // function to convert two points into a
   // representation of a line
-  getLineFromPoints (startPoint, endPoint) {
-
+  getLineFromPoints(startPoint, endPoint) {
     // get a, b, and c from line equation ax + by = c
     const [x1, y1] = startPoint;
     const [x2, y2] = endPoint;
@@ -406,26 +389,26 @@ const utils = {
   // function to get the point at which two lines intersect
   // the input uses the line representations from the
   // getLineFromPoints function
-  getIntersectionOfTwoLines (line1, line2) {
-
+  getIntersectionOfTwoLines(line1, line2) {
     // calculate the determinant, ad - cb in a square matrix |a b|
     const det = line1.a * line2.b - line2.a * line1.b; /*  |c d| */
 
-    if (det) { // this makes sure the lines aren't parallel, if they are, det will equal 0
+    if (det) {
+      // this makes sure the lines aren't parallel, if they are, det will equal 0
       const x = (line2.b * line1.c - line1.b * line2.c) / det;
       const y = (line1.a * line2.c - line2.a * line1.c) / det;
       return { x, y };
     }
   },
 
-  getSlopeOfLine (line) {
+  getSlopeOfLine(line) {
     // assuming ax + by = c
     // http://www.purplemath.com/modules/solvelit2.htm
-    return -1 * line.a / line.b;
+    return (-1 * line.a) / line.b;
   },
 
-  getSlopeOfLineSegment (lineSegment) {
-    const [ [x1, y1], [x2, y2] ] = lineSegment;
+  getSlopeOfLineSegment(lineSegment) {
+    const [[x1, y1], [x2, y2]] = lineSegment;
     // make sure slope goes from left most to right most, so order of points doesn't matter
     if (x2 > x1) {
       return y2 - y1 / x2 - x1;
@@ -434,13 +417,47 @@ const utils = {
     }
   },
 
+  getConstructorName(obj) {
+    try {
+      if (typeof obj === "object" && typeof obj.constructor === "function" && typeof obj.constructor.name === "string") {
+        return obj.constructor.name;
+      }
+    } catch (error) {
+      return undefined;
+    }
+  },
+
   cluster,
 
   clusterLineSegments,
 
-  sum (values) {
+  sum(values) {
     return values.reduce((a, b) => a + b);
   },
+
+  isPromise(it) {
+    return typeof it === "object" && typeof it.then === "function";
+  },
+
+  isSync(it) {
+    return !this.isPromise(it);
+  },
+
+  listVariables(numVariables) {
+    return [...Array(numVariables)].map((val, i) => String.fromCharCode(i + 65).toLowerCase());
+  },
+
+  round(n) {
+    return Number(n.toFixed(2));
+  },
+
+  runAsSyncOrAsync(func, ...rest) {
+    if (rest.some(this.isPromise)) {
+      return Promise.all(rest).then(vals => func(...vals));
+    } else {
+      return func(...rest);
+    }
+  }
 };
 
 export default utils;
