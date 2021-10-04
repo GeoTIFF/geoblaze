@@ -1,4 +1,7 @@
-import mean from './mean.module';
+/**
+ * @prettier
+ */
+import mean from "./mean.module";
 
 /**
  * The mean function takes a raster as an input and an optional geometry.
@@ -10,6 +13,6 @@ import mean from './mean.module';
  * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of means for each band
  * @example
- * const means = geoblaze.mean(georaster, geometry);
+ * const means = await geoblaze.mean(georaster, geometry);
  */
 export default mean;

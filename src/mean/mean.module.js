@@ -1,23 +1,24 @@
-import get from '../get';
-import utils from '../utils';
-import convertGeometry from '../convert-geometry';
-import intersectPolygon from '../intersect-polygon';
+/**
+ * @prettier
+ */
+import get from "../get";
+import utils from "../utils";
+import wrap from "../wrap-func";
+import convertGeometry from "../convert-geometry";
+import intersectPolygon from "../intersect-polygon";
 
 const mean = (georaster, geom) => {
-
   try {
-
     const geomIsBbox = utils.isBbox(geom);
 
     if (geom === null || geom === undefined || geomIsBbox) {
-
       if (geomIsBbox) {
-        geom = convertGeometry('bbox', geom);
+        geom = convertGeometry("bbox", geom);
       }
 
-      const values = get(georaster, geom);
-
       const { noDataValue } = georaster;
+
+      const values = get(georaster, geom);
 
       // sum values
       const sums = [];
@@ -40,8 +41,9 @@ const mean = (georaster, geom) => {
         sums.push(sumForBand / cellsWithValues);
       }
       return sums;
-    } else if (utils.isPolygon(geom)) { // if geometry is a polygon
-      geom = convertGeometry('polygon', geom);
+    } else if (utils.isPolygon(geom)) {
+      // if geometry is a polygon
+      geom = convertGeometry("polygon", geom);
       const sums = [];
       const numValues = [];
 
@@ -67,15 +69,14 @@ const mean = (georaster, geom) => {
       });
 
       if (results) return results;
-      else throw 'No Values were found in the given geometry';
-
+      else throw "No Values were found in the given geometry";
     } else {
-      throw 'Only Bounding Box and Polygon geometries are currently supported.';
+      throw "Only Bounding Box and Polygon geometries are currently supported.";
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     throw e;
   }
 };
 
-export default mean;
+export default wrap(mean);
