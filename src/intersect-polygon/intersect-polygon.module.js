@@ -1,18 +1,13 @@
-import _ from 'underscore';
-import getDepth from 'get-depth';
-import get from '../get';
-import load from '../load';
-import utils from '../utils';
+/**
+ * @prettier
+ */
+import _ from "underscore";
+import getDepth from "get-depth";
+import get from "../get";
+import wrap from "../wrap-func";
+import utils from "../utils";
 
-const {
-  categorizeIntersection,
-  clusterLineSegments,
-  couple,
-  forceWithin,
-  mergeRanges,
-  getLineFromPoints,
-  getIntersectionOfTwoLines,
-} = utils;
+const { categorizeIntersection, clusterLineSegments, couple, forceWithin, mergeRanges, getLineFromPoints, getIntersectionOfTwoLines } = utils;
 
 const getEdgesForPolygon = polygon => {
   const edges = [];
@@ -46,7 +41,6 @@ const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, i
   if (numRows === 0) return;
 
   for (let y = 0; y < numRows; y++) {
-
     const lat = lat0 - cellHeight * y - cellHeight / 2;
 
     // use that point, plus another point along the same latitude to
@@ -60,7 +54,7 @@ const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, i
   // collapse geometry down to a list of edges
   // necessary for multi-part geometries
   const depth = getDepth(geom);
-  const polygonEdges = depth === 4  ? geom.map(getEdgesForPolygon) : [getEdgesForPolygon(geom)];
+  const polygonEdges = depth === 4 ? geom.map(getEdgesForPolygon) : [getEdgesForPolygon(geom)];
 
   polygonEdges.forEach((edges, edgesIndex) => {
     // iterate through the list of polygon vertices, convert them to
@@ -68,14 +62,12 @@ const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, i
     const intersectionsByRow = _.range(numRows).map(row => []);
     const numberOfEdges = edges.length;
     for (let i = 0; i < numberOfEdges; i++) {
-
-
       // get vertices that make up an edge and convert that to a line
       const edge = edges[i];
 
       const [startPoint, endPoint] = edge;
-      const [ x1, y1 ] = startPoint;
-      const [ x2, y2 ] = endPoint;
+      const [x1, y1] = startPoint;
+      const [x2, y2] = endPoint;
 
       const direction = Math.sign(y2 - y1);
       const horizontal = y1 === y2;
@@ -90,18 +82,18 @@ const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, i
 
       let startLng, startLat, endLat, endLng;
       if (x1 < x2) {
-        [ startLng, startLat ] = startPoint;
-        [ endLng, endLat ] = endPoint;
+        [startLng, startLat] = startPoint;
+        [endLng, endLat] = endPoint;
       } else {
-        [ startLng, startLat ] = endPoint;
-        [ endLng, endLat ]  = startPoint;
+        [startLng, startLat] = endPoint;
+        [endLng, endLat] = startPoint;
       }
 
-      if (startLng === undefined) throw Error('startLng is ' + startLng);
+      if (startLng === undefined) throw Error("startLng is " + startLng);
 
       // find the y values in the image coordinate space
-      const imageY1 = Math.round((lat0 - .5*cellHeight - startLat ) / cellHeight);
-      const imageY2 = Math.round((lat0 - .5*cellHeight - endLat) / cellHeight);
+      const imageY1 = Math.round((lat0 - 0.5 * cellHeight - startLat) / cellHeight);
+      const imageY2 = Math.round((lat0 - 0.5 * cellHeight - endLat) / cellHeight);
 
       // make sure to set the start and end points so that we are
       // incrementing upwards through rows
@@ -122,11 +114,10 @@ const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, i
       for (let j = rowStart; j < rowEnd + 1; j++) {
         const imageLine = imageLines[j];
 
-
         if (imageLine === undefined) {
-          console.error('j:', j);
-          console.error('imageLines:', imageLines);
-          throw Error('imageLines');
+          console.error("j:", j);
+          console.error("imageLines:", imageLines);
+          throw Error("imageLines");
         }
 
         // because you know x is zero in ax + by = c, so by = c and b = -1, so -1 * y = c or y = -1 * c
@@ -183,7 +174,7 @@ const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, i
             vertical,
             xmin: xminOnLine,
             xmax: xmaxOnLine,
-            imageLineY,
+            imageLineY
           });
         }
       }
@@ -193,15 +184,15 @@ const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, i
       if (segmentsInRow.length > 0) {
         const clusters = clusterLineSegments(segmentsInRow, numberOfEdges);
         const categorized = clusters.map(categorizeIntersection);
-        const [ throughs, nonthroughs ] = _.partition(categorized, item => item.through);
+        const [throughs, nonthroughs] = _.partition(categorized, item => item.through);
 
         if (throughs.length % 2 === 1) {
-          throw Error('throughs.length for ' + rowIndex + ' is odd with ' + throughs.length);
+          throw Error("throughs.length for " + rowIndex + " is odd with " + throughs.length);
         }
 
         let insides = nonthroughs.map(intersection => [intersection.xmin, intersection.xmax]);
 
-        const sortedThroughs = _.sortBy(throughs, 'xmin');
+        const sortedThroughs = _.sortBy(throughs, "xmin");
 
         const couples = couple(sortedThroughs).map(couple => {
           const [left, right] = couple;
@@ -217,12 +208,11 @@ const intersectPolygonCore = ({ georaster, geom, perPixelFunction, latlngBbox, i
         insides = mergeRanges(insides);
 
         insides.forEach(pair => {
-
           const [xmin, xmax] = pair;
 
           //convert left and right to image pixels
-          const left = Math.round((xmin - (lng0 + .5*cellWidth)) / cellWidth);
-          const right = Math.round((xmax - (lng0 + .5*cellWidth)) / cellWidth);
+          const left = Math.round((xmin - (lng0 + 0.5 * cellWidth)) / cellWidth);
+          const right = Math.round((xmax - (lng0 + 0.5 * cellWidth)) / cellWidth);
 
           const startColumnIndex = Math.max(left, 0);
           const endColumnIndex = Math.min(right, imageWidth);
@@ -245,20 +235,9 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
   // get values in a bounding box around the geometry
   const latlngBbox = utils.getBoundingBox(geom);
 
-  if (typeof georaster === "string") {
-    return load(georaster).then(loaded => {
-      return get(georaster, latlngBbox).then(imageBands => (
-        intersectPolygonCore({ georaster: loaded, geom, perPixelFunction, latlngBbox, imageBands })
-      ));
-    });
-  } else if (!georaster.values) {
-    return get(georaster, latlngBbox).then(imageBands => (
-      intersectPolygonCore({ georaster, geom, perPixelFunction, latlngBbox, imageBands })
-    ));
-  } else {
-    const imageBands = get(georaster, latlngBbox);
-    return intersectPolygonCore({ georaster, geom, perPixelFunction, latlngBbox, imageBands });
-  }
+  const values = get(georaster, latlngBbox);
+
+  return utils.callAfterResolveArgs(imageBands => intersectPolygonCore({ georaster, geom, perPixelFunction, latlngBbox, imageBands }), values);
 };
 
-export default intersectPolygon;
+export default wrap(intersectPolygon);

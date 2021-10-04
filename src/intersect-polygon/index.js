@@ -1,3 +1,6 @@
-import intersectPolygon from './intersect-polygon.module';
+/**
+ * @prettier
+ */
+import intersectPolygon from "./intersect-polygon.module";
 
 export default intersectPolygon;
