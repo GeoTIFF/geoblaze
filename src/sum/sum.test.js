@@ -1,30 +1,47 @@
-import utils from '../utils';
-import test from 'flug';
-import load from '../load';
-import sum from './sum.module';
-import { polygon as turfPolygon } from '@turf/helpers';
+/**
+ * @prettier
+ */
+import test from "flug";
+import { serve } from "srvd";
+
+import utils from "../utils";
+import load from "../load";
+import parse from "../parse";
+import sum from "./sum.module";
+import { polygon as turfPolygon } from "@turf/helpers";
 
 const { fetchJson, fetchJsons } = utils;
 
-const urlRwanda = 'http://localhost:3000/data/RWA_MNH_ANC.tif';
-const bboxRwanda = require('../../data/RwandaBufferedBoundingBox.json');
+if (require.main === module) serve({ debug: true, port: 3000, wait: 60 });
 
-const urlToData = 'http://localhost:3000/data/';
-const urlToGeojsons =  urlToData + 'gadm/geojsons/';
-const urlToArcgisJsons = urlToData + 'gadm/arcgis/';
+const urlRwanda = "http://localhost:3000/data/RWA_MNH_ANC.tif";
+const bboxRwanda = require("../../data/RwandaBufferedBoundingBox.json");
 
-const url = 'http://localhost:3000/data/test.tiff';
-const bbox = [80.63, 7.42, 84.21, 10.10];
-const expectedBboxValue = 262516.50;
+const urlToData = "http://localhost:3000/data/";
+const urlToGeojsons = urlToData + "gadm/geojsons/";
+const urlToArcgisJsons = urlToData + "gadm/arcgis/";
 
-const polygon = [[
-  [83.12255859375, 22.49225722008518], [82.96875, 21.57571893245848], [81.58447265624999,  1.207458730482642],
-  [83.07861328125, 20.34462694382967], [83.8037109375,  19.497664168139053], [84.814453125, 19.766703551716976],
-  [85.078125, 21.166483858206583], [86.044921875, 20.838277806058933], [86.98974609375, 22.49225722008518],
-  [85.58349609375, 24.54712317973075], [84.6826171875, 23.36242859340884], [83.12255859375, 22.49225722008518]
-]];
+const url = "http://localhost:3000/data/test.tiff";
+const bbox = [80.63, 7.42, 84.21, 10.1];
+const expectedBboxValue = 262516.5;
+
+const polygon = [
+  [
+    [83.12255859375, 22.49225722008518],
+    [82.96875, 21.57571893245848],
+    [81.58447265624999, 1.207458730482642],
+    [83.07861328125, 20.34462694382967],
+    [83.8037109375, 19.497664168139053],
+    [84.814453125, 19.766703551716976],
+    [85.078125, 21.166483858206583],
+    [86.044921875, 20.838277806058933],
+    [86.98974609375, 22.49225722008518],
+    [85.58349609375, 24.54712317973075],
+    [84.6826171875, 23.36242859340884],
+    [83.12255859375, 22.49225722008518]
+  ]
+];
 const expectedPolygonValue = 3165731.9;
-
 
 const polygonGeojson1 = `{
   "type": "FeatureCollection",
@@ -204,46 +221,47 @@ const polygonGeojsonCollection = `{
 
 const expectedPolygonGeojsonCollectionValue = expectedPolygonGeojsonValue1 + expectedPolygonGeojsonValue2;
 
-test('Get Sum from Veneto Geonode', async ({ eq }) => {
-  const values = [
-    await load('https://s3.amazonaws.com/geoblaze/geonode_atlanteil.tif'),
-    await fetchJson('https://s3.amazonaws.com/geoblaze/veneto.geojson')
-  ];
+test("(Legacy) Get Sum from Veneto Geonode", async ({ eq }) => {
+  const values = [await load("http://localhost:3000/data/veneto/geonode_atlanteil.tif"), await fetchJson("http://localhost:3000/data/veneto/veneto.geojson")];
   const [georaster, geojson] = values;
-  const actualValue = Number(sum(georaster, geojson)[0].toFixed(2));
+  const results = sum(georaster, geojson);
+  const actualValue = Number(results[0].toFixed(2));
   const expectedValue = 25323.11;
   eq(actualValue, expectedValue);
 });
 
-test('Get Sum', async ({ eq }) => {
+test("(Legacy) Get Sum", async ({ eq }) => {
   const georaster = await load(url);
-  const actualValue = Number(sum(georaster)[0].toFixed(2));
+  const results = sum(georaster);
+  const actualValue = Number(results[0].toFixed(2));
   const expectedValue = 108343045.4;
   eq(actualValue, expectedValue);
 });
 
-test('Get Sum from Bounding Box', async ({ eq }) => {
+test("(Legacy) Get Sum from Bounding Box", async ({ eq }) => {
   const georaster = await load(url);
-  const value = Number(sum(georaster, bbox)[0].toFixed(2));
+  const results = sum(georaster, bbox);
+  const value = Number(results[0].toFixed(2));
   eq(value, expectedBboxValue);
 });
 
-test('Get Sum from Bounding Box Greater Then Raster', async ({ eq }) => {
+test("(Legacy) Get Sum from Bounding Box Greater Then Raster", async ({ eq }) => {
   const georaster = await load(urlRwanda);
-  const valueWithBufferedBbox = Number(sum(georaster, bboxRwanda)[0].toFixed(2));
+  const results = sum(georaster, bboxRwanda);
+  const valueWithBufferedBbox = Number(results[0].toFixed(2));
   const valueWithoutBbox = Number(sum(georaster)[0].toFixed(2));
   eq(valueWithBufferedBbox, 104848.45);
   eq(valueWithoutBbox, 104848.45);
   eq(valueWithBufferedBbox, valueWithoutBbox);
 });
 
-test('Get Same Sum from GeoJSON and ESRI JSON', async ({ eq }) => {
-  const urlToRaster = urlToData + 'mapspam/spam2005v3r2_harvested-area_wheat_total.tiff';
+test("(Legacy) Get Same Sum from GeoJSON and ESRI JSON", async ({ eq }) => {
+  const urlToRaster = urlToData + "mapspam/spam2005v3r2_harvested-area_wheat_total.tiff";
   const georaster = await load(urlToRaster);
-  const countryNames = ['Afghanistan', 'Ukraine'];
+  const countryNames = ["Afghanistan", "Ukraine"];
   for (let i = 0; i < countryNames.length; i++) {
     const name = countryNames[i];
-    const jsons = await fetchJsons([urlToGeojsons + name + '.geojson', urlToArcgisJsons + name + '.json'], true);
+    const jsons = await fetchJsons([urlToGeojsons + name + ".geojson", urlToArcgisJsons + name + ".json"], true);
     const [geojson, arcgisJson] = jsons;
     const valueViaGeojson = Number(sum(georaster, geojson)[0].toFixed(2));
     const valueViaArcgisJson = Number(sum(georaster, arcgisJson)[0].toFixed(2));
@@ -253,51 +271,48 @@ test('Get Same Sum from GeoJSON and ESRI JSON', async ({ eq }) => {
   }
 });
 
-test('Get Sum from Polygon', async ({ eq }) => {
+test("(Legacy) Get Sum from Polygon", async ({ eq }) => {
   const georaster = await load(url);
   const value = Number(sum(georaster, polygon)[0].toFixed(2));
   eq(value, expectedPolygonValue);
 });
 
-
-test('Get Sum from Polygon (GeoJSON) 1', async ({ eq }) => {
+test("(Legacy) Get Sum from Polygon (GeoJSON) 1", async ({ eq }) => {
   const georaster = await load(url);
   const value = Number(sum(georaster, polygonGeojson1)[0].toFixed(2));
   eq(value, expectedPolygonGeojsonValue1);
 });
 
-test('Get Sum from Polygon (GeoJSON) 2', async ({ eq }) => {
+test("(Legacy) Get Sum from Polygon (GeoJSON) 2", async ({ eq }) => {
   const georaster = await load(url);
   const value = Number(sum(georaster, polygonGeojson2)[0].toFixed(2));
   eq(value, expectedPolygonGeojsonValue2);
 });
 
-test('Get Sum from Polygon (Multi-Polygon GeoJSON, 1 + 2)', async ({ eq }) => {
+test("(Legacy) Get Sum from Polygon (Multi-Polygon GeoJSON, 1 + 2)", async ({ eq }) => {
   const georaster = await load(url);
   const value = Number(sum(georaster, polygonGeojsonCollection)[0].toFixed(2));
   eq(value, expectedPolygonGeojsonCollectionValue);
 });
 
-test('Test sum for Country with Multiple Rings', async ({ eq }) => {
+test("(Legacy) Test sum for Country with Multiple Rings", async ({ eq }) => {
   const georaster = await load(url);
-  const country = await utils.fetchJson(urlToGeojsons + 'Akrotiri and Dhekelia.geojson');
+  const country = await utils.fetchJson(urlToGeojsons + "Akrotiri and Dhekelia.geojson");
   const result = sum(georaster, country);
   // eq(result, [123]);
 });
 
-test('Get Sum from Polygon Above X Value', async ({ eq }) => {
+test("(Legacy) Get Sum from Polygon Above X Value", async ({ eq }) => {
   const georaster = await load(url);
   const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
   eq(value, 1501820.8);
 });
 
-
-
-test('Test Super Simplified Albanian Polygon', async ({ eq }) => {
-  const feature = await utils.fetchJson(urlToData + 'gadm/derived/super-simplified-albanian-polygon.geojson');
-  const georaster = await load(urlToData + 'ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif');
-  const result = sum(georaster, turfPolygon(polygon))[0];
-  eq(result, 0);
+test("(Legacy) Test Super Simplified Albanian Polygon", async ({ eq }) => {
+  const feature = await utils.fetchJson(urlToData + "gadm/derived/super-simplified-albanian-polygon.geojson");
+  const georaster = await load(urlToData + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif");
+  const result = sum(georaster, turfPolygon(polygon));
+  eq(result, [0]);
 });
 
 // describe('Get Populations', function () {
@@ -367,3 +382,99 @@ test('Test Super Simplified Albanian Polygon', async ({ eq }) => {
 //     return Promise.all(promises);
 //   });
 // });
+
+// modern
+
+test("(Modern) Get Sum from Veneto Geonode", async ({ eq }) => {
+  const values = [await load("http://localhost:3000/data/veneto/geonode_atlanteil.tif"), await fetchJson("http://localhost:3000/data/veneto/veneto.geojson")];
+  const [georaster, geojson] = values;
+  const results = await sum(georaster, geojson);
+  const actualValue = Number(results[0].toFixed(2));
+  const expectedValue = 25323.11;
+  eq(actualValue, expectedValue);
+});
+
+test("(Modern) Get Sum", async ({ eq }) => {
+  const georaster = await parse(url);
+  const results = await sum(georaster);
+  const actualValue = Number(results[0].toFixed(2));
+  const expectedValue = 108343045.4;
+  eq(actualValue, expectedValue);
+});
+
+test("(Modern) Get Sum from Bounding Box", async ({ eq }) => {
+  const georaster = await parse(url);
+  const results = await sum(georaster, bbox);
+  const value = Number(results[0].toFixed(2));
+  eq(value, expectedBboxValue);
+});
+
+test("(Modern) Get Sum from Bounding Box Greater Then Raster", async ({ eq }) => {
+  const georaster = await parse(urlRwanda);
+  const results = await sum(georaster, bboxRwanda);
+  const valueWithBufferedBbox = Number(results[0].toFixed(2));
+  const valueWithoutBbox = Number(sum(georaster)[0].toFixed(2));
+  eq(valueWithBufferedBbox, 104848.45);
+  eq(valueWithoutBbox, 104848.45);
+  eq(valueWithBufferedBbox, valueWithoutBbox);
+});
+
+test("(Modern) Get Same Sum from GeoJSON and ESRI JSON", async ({ eq }) => {
+  const urlToRaster = urlToData + "mapspam/spam2005v3r2_harvested-area_wheat_total.tiff";
+  const georaster = await parse(urlToRaster);
+  const countryNames = ["Afghanistan", "Ukraine"];
+  for (let i = 0; i < countryNames.length; i++) {
+    const name = countryNames[i];
+    const jsons = await fetchJsons([urlToGeojsons + name + ".geojson", urlToArcgisJsons + name + ".json"], true);
+    const [geojson, arcgisJson] = jsons;
+    const valueViaGeojson = Number(sum(georaster, geojson)[0].toFixed(2));
+    const valueViaArcgisJson = Number(sum(georaster, arcgisJson)[0].toFixed(2));
+    const valueViaArcgisJsonPolygon = Number(sum(georaster, arcgisJson.geometry)[0].toFixed(2));
+    eq(valueViaGeojson, valueViaArcgisJson);
+    eq(valueViaGeojson, valueViaArcgisJsonPolygon);
+  }
+});
+
+test("(Modern) Get Sum from Polygon", async ({ eq }) => {
+  const georaster = await parse(url);
+  const value = Number(sum(georaster, polygon)[0].toFixed(2));
+  eq(value, expectedPolygonValue);
+});
+
+test("(Modern) Get Sum from Polygon (GeoJSON) 1", async ({ eq }) => {
+  const georaster = await parse(url);
+  const value = Number(sum(georaster, polygonGeojson1)[0].toFixed(2));
+  eq(value, expectedPolygonGeojsonValue1);
+});
+
+test("(Modern) Get Sum from Polygon (GeoJSON) 2", async ({ eq }) => {
+  const georaster = await parse(url);
+  const value = Number(sum(georaster, polygonGeojson2)[0].toFixed(2));
+  eq(value, expectedPolygonGeojsonValue2);
+});
+
+test("(Modern) Get Sum from Polygon (Multi-Polygon GeoJSON, 1 + 2)", async ({ eq }) => {
+  const georaster = await parse(url);
+  const value = Number(sum(georaster, polygonGeojsonCollection)[0].toFixed(2));
+  eq(value, expectedPolygonGeojsonCollectionValue);
+});
+
+test("(Modern) Test sum for Country with Multiple Rings", async ({ eq }) => {
+  const georaster = await parse(url);
+  const country = await utils.fetchJson(urlToGeojsons + "Akrotiri and Dhekelia.geojson");
+  const result = await sum(georaster, country);
+  // eq(result, [123]);
+});
+
+test("(Modern) Get Sum from Polygon Above X Value", async ({ eq }) => {
+  const georaster = await parse(url);
+  const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
+  eq(value, 1501820.8);
+});
+
+test("(Modern) Test Super Simplified Albanian Polygon", async ({ eq }) => {
+  const feature = await utils.fetchJson(urlToData + "gadm/derived/super-simplified-albanian-polygon.geojson");
+  const georaster = await parse(urlToData + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif");
+  const result = await sum(georaster, turfPolygon(polygon));
+  eq(result, [0]);
+});

@@ -1,4 +1,7 @@
-import sum from './sum.module';
+/**
+ * @prettier
+ */
+import sum from "./sum.module";
 
 /**
  * The sum function takes a raster as an input and an optional geometry.
@@ -10,7 +13,7 @@ import sum from './sum.module';
  * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of sums for each band
  * @example
- * const sums = geoblaze.sum(georaster, geometry);
+ * const sums = await geoblaze.sum(georaster, geometry);
  */
 
 export default sum;
