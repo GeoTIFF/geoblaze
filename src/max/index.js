@@ -1,4 +1,7 @@
-import max from './max.module';
+/**
+ * @prettier
+ */
+import max from "./max.module";
 
 /**
  * The max function takes a raster as an input and an optional geometry.
@@ -10,6 +13,6 @@ import max from './max.module';
  * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of maxs for each band
  * @example
- * const maxs = geoblaze.max(georaster, geometry);
+ * const maxs = await geoblaze.max(georaster, geometry);
  */
 export default max;
