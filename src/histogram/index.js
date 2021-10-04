@@ -1,4 +1,7 @@
-import histogram from './histogram.module';
+/**
+ * @prettier
+ */
+import histogram from "./histogram.module";
 
 /**
  * The histogram function takes a raster as an input and an optional geometry.
@@ -10,6 +13,6 @@ import histogram from './histogram.module';
  * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
  * @returns {Object} array of histograms for each band
  * @example
- * var histograms = geoblaze.histogram(georaster, geometry);
+ * var histograms = await geoblaze.histogram(georaster, geometry);
  */
 export default histogram;

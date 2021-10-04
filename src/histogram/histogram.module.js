@@ -1,14 +1,20 @@
-import _ from 'underscore';
-import get from '../get';
-import utils from '../utils';
-import convertGeometry from '../convert-geometry';
-import intersectPolygon from '../intersect-polygon';
+/**
+ * @prettier
+ */
+import _ from "underscore";
+import fastMin from "fast-min";
+import fastMax from "fast-max";
+
+import get from "../get";
+import utils from "../utils";
+import wrap from "../wrap-func";
+import convertGeometry from "../convert-geometry";
+import intersectPolygon from "../intersect-polygon";
 
 const getEqualIntervalBins = (values, numClasses) => {
-
   // get min and max values
-  const minValue = _.min(values);
-  const maxValue = _.max(values);
+  const minValue = fastMin(values);
+  const maxValue = fastMax(values);
 
   // specify bins, bins represented as a list of [min, max] values
   // and are divided up based on number of classes
@@ -28,7 +34,8 @@ const getEqualIntervalBins = (values, numClasses) => {
   let binKey = `${bin[0]} - ${bin[1]}`;
   const firstValue = values[0];
 
-  while (firstValue > bin[1]) { // this is in case the first value isn't in the first bin
+  while (firstValue > bin[1]) {
+    // this is in case the first value isn't in the first bin
     binIndex += 1;
     bin = bins[binKey];
     binKey = `>${bin[0]} - ${bin[1]}`;
@@ -38,9 +45,11 @@ const getEqualIntervalBins = (values, numClasses) => {
   // add to results based on bins
   for (let i = 1; i < values.length; i++) {
     const value = values[i];
-    if (value <= bin[1]) { // add to existing bin if its in the correct range
+    if (value <= bin[1]) {
+      // add to existing bin if its in the correct range
       results[binKey] += 1;
-    } else { // otherwise keep searching for an appropriate bin until one is found
+    } else {
+      // otherwise keep searching for an appropriate bin until one is found
       while (value > bin[1]) {
         binIndex += 1;
         bin = bins[binIndex];
@@ -55,7 +64,6 @@ const getEqualIntervalBins = (values, numClasses) => {
 };
 
 const getQuantileBins = (values, numClasses) => {
-
   // get the number of values in each bin
   const valuesPerBin = values.length / numClasses;
 
@@ -68,7 +76,8 @@ const getQuantileBins = (values, numClasses) => {
   for (let i = 1; i < values.length; i++) {
     if (numValuesInCurrentBin + 1 < valuesPerBin) {
       numValuesInCurrentBin += 1;
-    } else { // if it is the last value, add it to the bin and start setting up for the next one
+    } else {
+      // if it is the last value, add it to the bin and start setting up for the next one
       const value = values[i];
       const binMax = value;
       numValuesInCurrentBin += 1;
@@ -89,7 +98,6 @@ const getQuantileBins = (values, numClasses) => {
 };
 
 const getHistogram = (values, options = {}) => {
-
   // pull out options, possible options are:
   // scaleType: measurement scale, options are: nominal, ratio
   // numClasses: number of classes/bins, only available for ratio data
@@ -108,14 +116,14 @@ const getHistogram = (values, options = {}) => {
 
   // when working with nominal data, we simply create a new object attribute
   // for every new value, and increment for each additional value.
-  if (scaleType === 'nominal') {
+  if (scaleType === "nominal") {
     results = {};
     for (let i = 0; i < values.length; i++) {
       const value = values[i];
       if (results[value]) results[value] += 1;
       else results[value] = 1;
     }
-  } else if (scaleType === 'ratio') {
+  } else if (scaleType === "ratio") {
     results = {};
 
     if (!numClasses) {
@@ -127,46 +135,41 @@ const getHistogram = (values, options = {}) => {
     // sort values to make binning more efficient
     values = values.sort((a, b) => a - b);
 
-    if (classType === 'equal-interval') {
+    if (classType === "equal-interval") {
       results = getEqualIntervalBins(values, numClasses);
-    } else if (classType === 'quantile') {
+    } else if (classType === "quantile") {
       results = getQuantileBins(values, numClasses);
     } else {
-      throw 'The classType provided is either not supported or incorrectly specified.';
+      throw "The classType provided is either not supported or incorrectly specified.";
     }
   }
 
   if (results) return results;
-  else throw 'An unexpected error occurred while running the getHistogram function.';
+  else throw "An unexpected error occurred while running the getHistogram function.";
 };
 
 const getHistogramsForRaster = (georaster, geom, options) => {
+  const { noDataValue } = georaster;
 
   try {
+    const calc = values => {
+      return values.map(band => band.filter(value => value !== noDataValue)).map(band => getHistogram(band, options));
+    };
+
     if (geom === null || geom === undefined) {
       const flat = true;
       const values = get(georaster, null, flat);
-      const { noDataValue } = georaster;
-
-      return values
-        .map(band => band.filter(value => value !== noDataValue))
-        .map(band => getHistogram(band, options));
-
+      return utils.callAfterResolveArgs(calc, values);
     } else if (utils.isBbox(geom)) {
-      geom = convertGeometry('bbox', geom);
-      const { noDataValue } = georaster;
+      geom = convertGeometry("bbox", geom);
 
       // grab array of values by band
       const flat = true;
       const values = get(georaster, geom, flat);
 
-      // run through histogram function
-      return values
-        .map(band => band.filter(value => value !== noDataValue))
-        .map(band => getHistogram(band, options));
-
+      return utils.callAfterResolveArgs(calc, values);
     } else if (utils.isPolygon(geom)) {
-      geom = convertGeometry('polygon', geom);
+      geom = convertGeometry("polygon", geom);
       const { noDataValue } = georaster;
 
       // grab array of values by band
@@ -183,14 +186,13 @@ const getHistogramsForRaster = (georaster, geom, options) => {
 
       // run through histogram function
       return values.map(band => getHistogram(band, options));
-
     } else {
-      throw 'Only Bounding Box and Polygon geometries are currently supported.';
+      throw "Only Bounding Box and Polygon geometries are currently supported.";
     }
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     throw e;
   }
 };
 
-export default getHistogramsForRaster;
+export default wrap(getHistogramsForRaster);
