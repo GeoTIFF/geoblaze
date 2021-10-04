@@ -1,11 +1,13 @@
-import convertGeometry from '../convert-geometry';
-import load from "../load";
+/**
+ * @prettier
+ */
+import convertGeometry from "../convert-geometry";
+import wrap from "../wrap-func";
 
-const identifySync = (georaster, geometry) => {
-
+const identify = (georaster, geometry) => {
   // The convertGeometry function takes the input
   // geometry and converts it to a standard format.
-  const [xInCrs, yInCrs] = convertGeometry('point', geometry);
+  const [xInCrs, yInCrs] = convertGeometry("point", geometry);
 
   // By normalizing the difference in latitude and longitude between the image
   // origin and the point geometry by the cell height and width respectively,
@@ -17,7 +19,6 @@ const identifySync = (georaster, geometry) => {
   const y = Math.floor((georaster.ymax - yInCrs) / georaster.pixelHeight);
 
   try {
-
     // iterate through the bands
     // get the row and then the column of the pixel that you want
     if (x > 0 && x < georaster.width && y > 0 && y < georaster.height) {
@@ -30,19 +31,10 @@ const identifySync = (georaster, geometry) => {
     } else {
       return null;
     }
-
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     throw e;
   }
 };
 
-function identify (georaster, geometry) {
-  if (typeof georaster === "string") {
-    return load(georaster).then(georasterLoaded => identifySync(georasterLoaded, geometry));
-  } else {
-    return identifySync(georaster, geometry);
-  }
-}
-
-export default identify;
+export default wrap(identify);

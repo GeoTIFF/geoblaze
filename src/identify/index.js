@@ -1,4 +1,7 @@
-import identify from './identify.module';
+/**
+ * @prettier
+ */
+import identify from "./identify.module";
 
 /**
   Given a raster and a point geometry,
