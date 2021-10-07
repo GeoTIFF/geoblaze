@@ -98,4 +98,5 @@ data/veneto/*.tif
 dist/
 
 # DS_Store
-DS_Store
+.DS_Store
+*/*/.DS_Store

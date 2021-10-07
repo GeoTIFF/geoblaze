@@ -8,20 +8,23 @@ import utils from "../utils";
 import load from "../load";
 import parse from "../parse";
 import sum from "./sum.module";
+import turfBbox from "@turf/bbox";
 import { polygon as turfPolygon } from "@turf/helpers";
 
 const { fetchJson, fetchJsons } = utils;
 
-if (require.main === module) serve({ debug: true, port: 3000, wait: 60 });
+const port = 8888;
 
-const urlRwanda = "http://localhost:3000/data/RWA_MNH_ANC.tif";
+serve({ debug: true, max: 100, port, wait: 120 });
+
+const urlRwanda = `http://localhost:${port}/data/RWA_MNH_ANC.tif`;
 const bboxRwanda = require("../../data/RwandaBufferedBoundingBox.json");
 
-const urlToData = "http://localhost:3000/data/";
+const urlToData = `http://localhost:${port}/data/`;
 const urlToGeojsons = urlToData + "gadm/geojsons/";
 const urlToArcgisJsons = urlToData + "gadm/arcgis/";
 
-const url = "http://localhost:3000/data/test.tiff";
+const url = `http://localhost:${port}/data/test.tiff`;
 const bbox = [80.63, 7.42, 84.21, 10.1];
 const expectedBboxValue = 262516.5;
 
@@ -222,7 +225,10 @@ const polygonGeojsonCollection = `{
 const expectedPolygonGeojsonCollectionValue = expectedPolygonGeojsonValue1 + expectedPolygonGeojsonValue2;
 
 test("(Legacy) Get Sum from Veneto Geonode", async ({ eq }) => {
-  const values = [await load("http://localhost:3000/data/veneto/geonode_atlanteil.tif"), await fetchJson("http://localhost:3000/data/veneto/veneto.geojson")];
+  const values = [
+    await load(`http://localhost:${port}/data/veneto/geonode_atlanteil.tif`),
+    await fetchJson(`http://localhost:${port}/data/veneto/veneto.geojson`)
+  ];
   const [georaster, geojson] = values;
   const results = sum(georaster, geojson);
   const actualValue = Number(results[0].toFixed(2));
@@ -308,85 +314,79 @@ test("(Legacy) Get Sum from Polygon Above X Value", async ({ eq }) => {
   eq(value, 1501820.8);
 });
 
-test("(Legacy) Test Super Simplified Albanian Polygon", async ({ eq }) => {
-  const feature = await utils.fetchJson(urlToData + "gadm/derived/super-simplified-albanian-polygon.geojson");
-  const georaster = await load(urlToData + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif");
-  const result = sum(georaster, turfPolygon(polygon));
-  eq(result, [0]);
-});
+// test getting correct populations for countries
+const countries = [
+  { population: 790242.0, name: "Cyprus" },
+  { population: 5066313.5, name: "Nicaragua" },
+  { population: 5554059.5, name: "Lebanon" },
+  { population: 2332581.75, name: "Jamaica" },
+  { population: 4685367.5, name: "Croatia" },
+  { population: 2234089.5, name: "Macedonia" },
+  { population: 3303561.5, name: "Uruguay" }
+];
+for (let i = 0; i < countries.length; i++) {
+  const { population, name } = countries[i];
+  test("(Sum) Population for " + name, async ({ eq }) => {
+    const countryGeojson = await fetchJson(urlToGeojsons + name + ".geojson");
+    const countryBbox = turfBbox(countryGeojson);
+    const [minX, minY, maxX, maxY] = countryBbox;
+    const left = Math.round((minX - 5) / 10) * 10;
+    const right = Math.round((maxX - 5) / 10) * 10;
+    const _bottom = 90 - 10 * Math.floor((90 - minY) / 10);
+    const _top = 90 - 10 * Math.floor((90 - maxY) / 10);
 
-// describe('Get Populations', function () {
-//   this.timeout(1000000);
-//   it('Got Correct Populations for a Sample of Countries', () => {
-//     const countries = [
-//       { 'population': 790242.0, 'name': 'Cyprus' },
-//       { 'population': 5066313.5, 'name': 'Nicaragua' },
-//       { 'population': 5554059.5, 'name': 'Lebanon' },
-//       { 'population': 2332581.75, 'name': 'Jamaica' },
-//       { 'population': 4685367.5, 'name': 'Croatia' },
-//       { 'population': 2234089.5, 'name': 'Macedonia' },
-//       { 'population': 3303561.5, 'name': 'Uruguay' }
-//     ];
-//     const promises = countries.map(country => {
-//       return fetchJson(urlToGeojsons + country.name + '.geojson').then(countryGeojson => {
-//         const countryBbox = turfBbox(countryGeojson);
-//         const [minX, minY, maxX, maxY] = countryBbox;
-//         const left = Math.round((minX - 5) / 10) * 10;
-//         const right = Math.round((maxX - 5) / 10) * 10;
-//         const _bottom = 90 - 10 * Math.floor((90 - minY) / 10);
-//         const _top = 90 - 10 * Math.floor((90 - maxY) / 10);
+    const latitudes = utils.range(_top, _bottom - 1, -10);
+    const longitudes = utils.range(left, right + 1, 10);
+    const tiles = [];
+    latitudes.forEach(latitude => {
+      longitudes.forEach(longitude => {
+        tiles.push(load(urlToData + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_" + longitude + "_" + latitude + ".tif"));
+      });
+    });
 
-//         const latitudes = _.range(_top, _bottom -1, -10);
-//         const longitudes = _.range(left, right + 1, 10);
-//         const tiles = [];
-//         latitudes.forEach(latitude => {
-//           longitudes.forEach(longitude => {
-//             tiles.push(load(urlToData + 'ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_' + longitude + '_' + latitude + '.tif'));
-//           });
-//         });
-//         return Promise.all(tiles).then(georasters => {
-//           let totalSum = 0;
-//           if (countryGeojson.geometry.type === 'MultiPolygon') {
-//             countryGeojson.geometry.coordinates.map((polygon, polygonIndex) => {
+    // wait for all georaster tiles to load
+    const georasters = await Promise.all(tiles);
 
-//               if (polygonIndex === 129) {
-//                 fs.writeFile('/tmp/poly' + polygonIndex + '.geojson', JSON.stringify(turfPolygon(polygon)));
-//               }
-//               try {
-//                 georasters.forEach(georaster => {
-//                   let partialSum = sum(georaster, turfPolygon(polygon));
-//                   if (Array.isArray(partialSum)) partialSum = partialSum[0];
-//                   if (partialSum > 0) {
-//                     totalSum += partialSum;
-//                   }
-//                 });
-//               } catch (error) {
-//                 fs.writeFile('/tmp/poly' + polygonIndex + '.geojson', JSON.stringify(turfPolygon(polygon)));
-//                 throw error;
-//               }
-//             });
-//           } else {
-//             georasters.forEach(georaster => {
-//               let partialSum = sum(georaster, countryGeojson);
-//               if (Array.isArray(partialSum)) partialSum = partialSum[0];
-//               if (partialSum > 0) {
-//                 totalSum += partialSum;
-//               }
-//             });
-//           }
-//           const percentOff = Math.abs(country.population - totalSum) / country.population;
-//           expect(percentOff).to.be.below(0.05);
-//         });
-//       });
-//     });
-//     return Promise.all(promises);
-//   });
-// });
+    let totalSum = 0;
+    if (countryGeojson.geometry.type === "MultiPolygon") {
+      countryGeojson.geometry.coordinates.map(polygon => {
+        georasters.forEach(georaster => {
+          try {
+            let partialSum = sum(georaster, turfPolygon(polygon));
+            if (Array.isArray(partialSum)) partialSum = partialSum[0];
+            if (partialSum > 0) {
+              totalSum += partialSum;
+            }
+          } catch (error) {
+            // pass
+          }
+        });
+      });
+    } else if (countryGeojson.geometry.type === "Polygon") {
+      georasters.forEach(georaster => {
+        try {
+          let partialSum = sum(georaster, countryGeojson);
+          if (Array.isArray(partialSum)) partialSum = partialSum[0];
+          if (partialSum > 0) {
+            totalSum += partialSum;
+          }
+        } catch (error) {
+          // pass
+        }
+      });
+    }
+    const percentOff = Math.abs(population - totalSum) / population;
+    eq(percentOff < 0.05, true);
+  });
+}
 
 // modern
 
 test("(Modern) Get Sum from Veneto Geonode", async ({ eq }) => {
-  const values = [await load("http://localhost:3000/data/veneto/geonode_atlanteil.tif"), await fetchJson("http://localhost:3000/data/veneto/veneto.geojson")];
+  const values = [
+    await load(`http://localhost:${port}/data/veneto/geonode_atlanteil.tif`),
+    await fetchJson(`http://localhost:${port}/data/veneto/veneto.geojson`)
+  ];
   const [georaster, geojson] = values;
   const results = await sum(georaster, geojson);
   const actualValue = Number(results[0].toFixed(2));
@@ -470,11 +470,4 @@ test("(Modern) Get Sum from Polygon Above X Value", async ({ eq }) => {
   const georaster = await parse(url);
   const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
   eq(value, 1501820.8);
-});
-
-test("(Modern) Test Super Simplified Albanian Polygon", async ({ eq }) => {
-  const feature = await utils.fetchJson(urlToData + "gadm/derived/super-simplified-albanian-polygon.geojson");
-  const georaster = await parse(urlToData + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_60_40.tif");
-  const result = await sum(georaster, turfPolygon(polygon));
-  eq(result, [0]);
 });

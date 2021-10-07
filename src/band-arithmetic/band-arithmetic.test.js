@@ -1,6 +1,12 @@
 import test from "flug";
+import { serve } from "srvd";
+import get from '../get';
 import load from '../load';
+import parse from '../parse';
 import bandArithmetic from './band-arithmetic.module';
+
+// url is cached so only need 1 request
+serve({ debug: true, max: 1, port: 3000 });
 
 const url = 'http://localhost:3000/data/rgb/wildfires.tiff';
 
@@ -43,73 +49,153 @@ function expectNoNaNValues ({ georaster, eq }) {
     });
   });
 }
-// left the time measuring code commented out in the tests to make
-// it easier to return and further optimize the code
 
-test('Band Arithmetic: Run Calculation 1', async function ({ eq }) {
+
+test('(Legacy) Band Arithmetic: Run Calculation 1', async function ({ eq }) {
   const georaster = await load(url);
   const computedGeoraster = await bandArithmetic(georaster, calculation1);
   const value = computedGeoraster.values[0][0][0];
-  const a = georaster.values[0][0][0];
-  const b = georaster.values[1][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
   eq(value, getExpectedValue1(a, b));
   expectNoInfinityValues({ georaster: computedGeoraster, eq });
 });
 
-test('Band Arithmetic: Run Calculation 2', async ({ eq }) => {
+test('(Legacy) Band Arithmetic: Run Calculation 2', async ({ eq }) => {
   const georaster = await load(url);
   const computedGeoraster = await bandArithmetic(georaster, calculation2);
   const value = computedGeoraster.values[0][0][0];
-  const a = georaster.values[0][0][0];
-  const b = georaster.values[1][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
   eq(value, getExpectedValue2(a, b));
   expectNoInfinityValues({ georaster: computedGeoraster, eq });
 });
 
-test('Band Arithmetic: Run Calculation 3', async ({ eq }) => {
+test('(Legacy) Band Arithmetic: Run Calculation 3', async ({ eq }) => {
   const georaster = await load(url);
   const computedGeoraster = await bandArithmetic(georaster, calculation3);
   const value = computedGeoraster.values[0][0][0];
-  const a = georaster.values[0][0][0];
-  const c = georaster.values[2][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const c = originalValues[2][0][0];
   eq(value, getExpectedValue3(a, c));
   expectNoInfinityValues({ georaster: computedGeoraster, eq });
 });
 
-test('Band Arithmetic: Run Calculation 3', async ({ eq }) => {
+test('(Legacy) Band Arithmetic: Run Calculation 4', async ({ eq }) => {
   const georaster = await load(url);
   const computedGeoraster = await bandArithmetic(georaster, calculation4);
   const value = computedGeoraster.values[0][0][0];
-  const a = georaster.values[0][0][0];
-  const b = georaster.values[1][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
   eq(value, getExpectedValue4(a, b));
   expectNoInfinityValues({ georaster: computedGeoraster, eq });
 });
 
-test('Band Arithmetic: Run Calculation 3', async ({ eq }) => {
+test('(Legacy) Band Arithmetic: Run Calculation 5', async ({ eq }) => {
   const georaster = await load(url);
   const computedGeoraster = await bandArithmetic(georaster, calculation5);
   const value = computedGeoraster.values[0][0][0];
-  const a = georaster.values[0][0][0];
-  const b = georaster.values[1][0][0];
-  const c = georaster.values[2][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
+  const c = originalValues[2][0][0];
   eq(value, getExpectedValue5(a, b, c));
   expectNoInfinityValues({ georaster: computedGeoraster, eq });
 });
 
-test('Band Arithmetic: Run Calculation 6', async ({ eq }) => {
+test('(Legacy) Band Arithmetic: Run Calculation 6', async ({ eq }) => {
   const georaster = await load(url);
   const computedGeoraster = await bandArithmetic(georaster, calculation6);
   const value = computedGeoraster.values[0][0][0];
-  const a = georaster.values[0][0][0];
-  const b = georaster.values[1][0][0];
-  const c = georaster.values[2][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
+  const c = originalValues[2][0][0];
   eq(value, getExpectedValue6(a, b, c));
   expectNoInfinityValues({ georaster: computedGeoraster, eq });
 });
 
-test('Band Arithmetic: Run Calculation 7', async ({ eq }) => {
+test('(Legacy) Band Arithmetic: Run Calculation 7', async ({ eq }) => {
   const georaster = await load(url);
   const computedGeoraster = await bandArithmetic(georaster, calculation7);
+  expectNoNaNValues({ georaster: computedGeoraster, eq });
+});
+
+
+// MODERN
+test('(Modern) Band Arithmetic: Run Calculation 1', async function ({ eq }) {
+  const georaster = await parse(url);
+  const computedGeoraster = await bandArithmetic(url, calculation1);
+  const value = computedGeoraster.values[0][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
+  eq(value, getExpectedValue1(a, b));
+  expectNoInfinityValues({ georaster: computedGeoraster, eq });
+});
+
+test('(Modern) Band Arithmetic: Run Calculation 2', async ({ eq }) => {
+  const georaster = await parse(url);
+  const computedGeoraster = await bandArithmetic(url, calculation2);
+  const value = computedGeoraster.values[0][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
+  eq(value, getExpectedValue2(a, b));
+  expectNoInfinityValues({ georaster: computedGeoraster, eq });
+});
+
+test('(Modern) Band Arithmetic: Run Calculation 3', async ({ eq }) => {
+  const georaster = await parse(url);
+  const computedGeoraster = await bandArithmetic(url, calculation3);
+  const value = computedGeoraster.values[0][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const c = originalValues[2][0][0];
+  eq(value, getExpectedValue3(a, c));
+  expectNoInfinityValues({ georaster: computedGeoraster, eq });
+});
+
+test('(Modern) Band Arithmetic: Run Calculation 4', async ({ eq }) => {
+  const georaster = await parse(url);
+  const computedGeoraster = await bandArithmetic(url, calculation4);
+  const value = computedGeoraster.values[0][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
+  eq(value, getExpectedValue4(a, b));
+  expectNoInfinityValues({ georaster: computedGeoraster, eq });
+});
+
+test('(Modern) Band Arithmetic: Run Calculation 5', async ({ eq }) => {
+  const georaster = await parse(url);
+  const computedGeoraster = await bandArithmetic(url, calculation5);
+  const value = computedGeoraster.values[0][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
+  const c = originalValues[2][0][0];
+  eq(value, getExpectedValue5(a, b, c));
+  expectNoInfinityValues({ georaster: computedGeoraster, eq });
+});
+
+test('(Modern) Band Arithmetic: Run Calculation 6', async ({ eq }) => {
+  const georaster = await parse(url);
+  const computedGeoraster = await bandArithmetic(url, calculation6);
+  const value = computedGeoraster.values[0][0][0];
+  const originalValues = await get(georaster);
+  const a = originalValues[0][0][0];
+  const b = originalValues[1][0][0];
+  const c = originalValues[2][0][0];
+  eq(value, getExpectedValue6(a, b, c));
+  expectNoInfinityValues({ georaster: computedGeoraster, eq });
+});
+
+test('(Modern) Band Arithmetic: Run Calculation 7', async ({ eq }) => {
+  const computedGeoraster = await bandArithmetic(url, calculation7);
   expectNoNaNValues({ georaster: computedGeoraster, eq });
 });

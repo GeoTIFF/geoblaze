@@ -102,16 +102,10 @@ To run tests:
   npm run setup
 ```
 
-2. Spin up the test node server
-```
-  npm run server
-```
-
-3. In a separate tab, run tests
+2. Run tests.  Each test file will automatically spin up a server using [srvd](https://github.com/danieljdufour/srvd).
 ```
   npm run test
 ```
 
 # Used By
 <a href="https://geotiff.io"><img src="https://github.com/GeoTIFF/geotiff.io/raw/master/assets/favicon.png" height="75px"></a>
-<a href="https://www.usda.gov/"><img src="https://www.usda.gov/themes/usda/img/usda-symbol.svg" height="75px"></a>

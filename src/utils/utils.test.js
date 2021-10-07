@@ -1,7 +1,10 @@
 import test from 'flug';
+import { serve } from 'srvd';
 import load from '../load';
 import utils from './utils.module';
 import getDepth from 'get-depth';
+
+serve({ debug: true, max: 10, port: 3000 });
 
 const { fetchJson, fetchJsons } = utils;
 
@@ -12,7 +15,6 @@ const urlToGeojson = urlToGeojsons + 'Akrotiri and Dhekelia.geojson';
 const urlToArcgisJsons = urlToData + 'gadm/arcgis/';
 
 test('Get Bounding when Bounding Box when Bigger Than Raster and with Negative Values', async ({ eq }) => {
-  console.log("url:", url);
   const georaster = await load(url);
   const bboxWithBuffer = {
     xmin: georaster.xmin - 1,

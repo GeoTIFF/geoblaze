@@ -10,7 +10,7 @@ const url = "http://localhost:3000/data/test.tiff";
 const point = [80.63, 7.42];
 const expectedValue = 350.7;
 
-if (require.main === module) serve({ debug: true, port: 3000, wait: 3 });
+serve({ debug: true, max: 1, port: 3000 });
 
 test("(Legacy) Identified Point Correctly from file", async ({ eq }) => {
   const georaster = await load(url);

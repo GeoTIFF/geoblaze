@@ -1,11 +1,13 @@
 import test from 'flug';
-import fetch from 'cross-fetch';
+import { serve } from "srvd";
 import load from './load.module';
 
 import {
   ERROR_BAD_URL
   //ERROR_PARSING_GEOTIFF
 } from '../error-constants';
+
+serve({ debug: true, max: 2, port: 3000});
 
 const path = 'http://localhost:3000/data/test.tiff';
 const incorrectPath = 'http://localhost:3000/data/this-is-not-a-real-dataset.tiff';

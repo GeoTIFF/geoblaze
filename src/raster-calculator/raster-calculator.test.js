@@ -1,6 +1,9 @@
 import test from 'flug';
+import { serve } from 'srvd';
 import load from '../load';
 import rasterCalculator from './raster-calculator.module';
+
+serve({ debug: true, max: 1, port: 3000});
 
 const url = 'http://localhost:3000/data/rgb/wildfires.tiff';
 

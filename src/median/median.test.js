@@ -1,7 +1,9 @@
 import test from 'flug';
-import fetch from 'cross-fetch';
+import { serve } from "srvd";
 import load from '../load';
 import median from './median.module';
+
+serve({ debug: true, max: 1, port: 3000 });
 
 const url = 'http://localhost:3000/data/test.tiff';
 
@@ -34,25 +36,25 @@ const polygon = [[
 const expectedPolygonValue = 1573.3;
 
 test('Get Median from Bounding Box', async ({ eq }) => {
-  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
+  const georaster = await load(url);
   const value = Number(median(georaster, bbox)[0].toFixed(2));
   eq(value, expectedBboxValue);
 });
 
 test('Get Median from Bounding Box (GeoJSON)', async ({ eq }) => {
-  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
+  const georaster = await load(url);
   const value = Number(median(georaster, bboxGeojson)[0].toFixed(2));
   eq(value, expectedBboxGeojsonValue);
 });
 
 test('Get Median from Polygon', async ({ eq }) => {
-  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
+  const georaster = await load(url);
   const value = Number(median(georaster, polygon)[0].toFixed(2));
   eq(value, expectedPolygonValue);
 });
 
 test('Get Median from Whole Raster', async ({ eq }) => {
-  const georaster = await fetch(url).then(r => r.arrayBuffer()).then(load);
+  const georaster = await load(url);
   const value = median(georaster)[0];
   eq(value, 0);
 });

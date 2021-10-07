@@ -6,6 +6,8 @@ import { serve } from "srvd";
 import load from "../load";
 import histogram from "./histogram.module";
 
+serve({ debug: true, max: 2, port: 3000 });
+
 const ratioQuantileOptions = {
   scaleType: "ratio",
   numClasses: 7,
@@ -100,8 +102,6 @@ const polygonGeojson = `{
      }
   ]
 }`;
-
-if (require.main === module) serve({ debug: true, port: 3000, wait: 15 });
 
 test("(Legacy) Get Histogram (Ratio, Equal Interval) from GeoRaster", async ({ eq }) => {
   const georaster = await load(urlSmallRaster);

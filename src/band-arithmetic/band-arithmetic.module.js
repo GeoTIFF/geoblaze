@@ -2,8 +2,9 @@ import _ from 'underscore';
 import parseGeoraster from 'georaster';
 import { parse } from 'mathjs';
 
+import get from '../get';
+import wrap from '../wrap-func';
 import utils from '../utils';
-const { listVariables } = utils;
 
 const regexMultiCharacter = /[A-z]{2}/g;
 
@@ -18,7 +19,7 @@ const containsNoDataValue = (bandValues, noDataValue) => {
 const isLeafNode = node => !node.op;
 
 const parseAST = (ast, numBands) => {
-  return new Function(...listVariables(numBands), `return ${parseNode(ast)}`);
+  return new Function(...utils.listVariables(numBands), `return ${parseNode(ast)}`);
 };
 
 const parseNode = node => {
@@ -74,60 +75,55 @@ const arithmeticError = arithmetic => {
   }
 };
 
-const bandArithmetic = (georaster, arithmetic) => {
-  return new Promise((resolve, reject) => {
-    if (georaster.values.length < 2) {
-      return reject(new Error('Band arithmetic is not available for this raster. Please make sure you are using a multi-band raster.'));
-    }
+const bandArithmetic = async (georaster, arithmetic) => {
+  const { noDataValue } = georaster;
 
-    const parseError = arithmeticError(arithmetic);
-    if (parseError) return reject(new Error(parseError));
+  const bands = await get(georaster, undefined, false);
 
-    try {
-      const bands = georaster.values;
-      const noDataValue = georaster.noDataValue;
-      const values = [];
-      const numRows = bands[0].length;
+  if (bands.length < 2) {
+    return reject(new Error('Band arithmetic is not available for this raster. Please make sure you are using a multi-band raster.'));
+  }
 
-      const ast = parse(arithmetic.toLowerCase());
-      const arithmeticFunction = parseAST(ast, bands.length);
+  const parseError = arithmeticError(arithmetic);
+  if (parseError) throw new Error(parseError);
 
-      for (let i = 0; i < numRows; i++) {
-        const bandRows = getBandRows(bands, i);
-        const row = [];
-        const numValues = bandRows[0].length;
+  const values = [];
+  const numRows = bands[0].length;
 
-        for (let j = 0; j < numValues; j++) {
-          const bandValues = getBandValues(bandRows, j);
-          if (containsNoDataValue(bandValues, noDataValue)) {
-            row.push(noDataValue);
-          } else {
-            const value = arithmeticFunction(...bandValues);
-            if (value === Infinity || value === -Infinity || isNaN(value)) {
-              row.push(noDataValue);
-            } else {
-              row.push(value);
-            }
-          }
+  const ast = parse(arithmetic.toLowerCase());
+  const arithmeticFunction = parseAST(ast, bands.length);
+
+  for (let i = 0; i < numRows; i++) {
+    const bandRows = getBandRows(bands, i);
+    const row = [];
+    const numValues = bandRows[0].length;
+
+    for (let j = 0; j < numValues; j++) {
+      const bandValues = getBandValues(bandRows, j);
+      if (containsNoDataValue(bandValues, noDataValue)) {
+        row.push(noDataValue);
+      } else {
+        const value = arithmeticFunction(...bandValues);
+        if (value === Infinity || value === -Infinity || isNaN(value)) {
+          row.push(noDataValue);
+        } else {
+          row.push(value);
         }
-        values.push(row);
       }
-
-      const metadata = _.pick(georaster, ...[
-        'noDataValue',
-        'projection',
-        'xmin',
-        'ymax',
-        'pixelWidth',
-        'pixelHeight'
-      ]);
-      return parseGeoraster([values], metadata).then(georaster => resolve(georaster));
-
-    } catch(e) {
-      console.error(e);
-      return reject(e);
     }
-  });
+    values.push(row);
+  }
+
+  const metadata = _.pick(georaster, ...[
+    'noDataValue',
+    'projection',
+    'xmin',
+    'ymax',
+    'pixelWidth',
+    'pixelHeight'
+  ]);
+  const newGeoRaster = await parseGeoraster([values], metadata);
+  return newGeoRaster;
 };
 
-export default bandArithmetic;
+export default wrap(bandArithmetic);

@@ -14,7 +14,7 @@ const EXPECTED_HEIGHT = 712;
 const EXPECTED_WIDTH = 995;
 const EXPECTED_AREA = 708440;
 
-if (require.main === module) serve({ debug: true, port: 3000, wait: 15 });
+serve({ debug: true, max: 1, port: 3000 });
 
 test("(Legacy) Got Correct Flat Values when Geom bigger than Raster", async ({ eq }) => {
   const georaster = await load(urlRwanda);

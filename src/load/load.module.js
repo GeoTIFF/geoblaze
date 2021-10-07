@@ -29,6 +29,7 @@ async function fetchWithErrorHandling (url) {
     }
     return response;
   } catch (error) {
+    console.error(error);
     throw new Error(ERROR_BAD_URL);
   }
 }

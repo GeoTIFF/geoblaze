@@ -1,4 +1,7 @@
-import min from './min.module';
+/**
+ * @prettier
+ */
+import min from "./min.module";
 
 /**
  * The min function takes a raster as an input and an optional geometry.
@@ -10,6 +13,6 @@ import min from './min.module';
  * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Object} array of mins for each band
  * @example
- * const mins = geoblaze.min(georaster, geometry);
+ * const mins = await geoblaze.min(georaster, geometry);
  */
 export default min;

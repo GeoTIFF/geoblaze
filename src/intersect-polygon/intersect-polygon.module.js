@@ -7,6 +7,8 @@ import get from "../get";
 import wrap from "../wrap-func";
 import utils from "../utils";
 
+const { resolve } = utils;
+
 const { categorizeIntersection, clusterLineSegments, couple, forceWithin, mergeRanges, getLineFromPoints, getIntersectionOfTwoLines } = utils;
 
 const getEdgesForPolygon = polygon => {
@@ -237,7 +239,7 @@ const intersectPolygon = (georaster, geom, perPixelFunction) => {
 
   const values = get(georaster, latlngBbox);
 
-  return utils.callAfterResolveArgs(imageBands => intersectPolygonCore({ georaster, geom, perPixelFunction, latlngBbox, imageBands }), values);
+  return resolve(values).then(imageBands => intersectPolygonCore({ georaster, geom, perPixelFunction, latlngBbox, imageBands }));
 };
 
 export default wrap(intersectPolygon);

@@ -12,7 +12,7 @@ import convertGeometry from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 import bboxPolygon from "@turf/bbox-polygon";
 
-if (require.main === module) serve({ debug: true, port: 3000, wait: 3 });
+serve({ debug: true, max: 4, port: 3000 });
 
 const urlToGeojson = "http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson";
 

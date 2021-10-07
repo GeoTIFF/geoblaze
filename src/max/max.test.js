@@ -6,7 +6,7 @@ import { serve } from "srvd";
 import load from "../load";
 import max from "./max.module";
 
-if (require.main === module) serve({ debug: true, port: 3000, wait: 60 });
+serve({ debug: true, max: 1, port: 3000 });
 
 const url = "http://localhost:3000/data/test.tiff";
 

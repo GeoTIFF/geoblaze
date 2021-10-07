@@ -11,6 +11,8 @@ import wrap from "../wrap-func";
 import convertGeometry from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
+const { resolve } = utils;
+
 const getEqualIntervalBins = (values, numClasses) => {
   // get min and max values
   const minValue = fastMin(values);
@@ -159,22 +161,21 @@ const getHistogramsForRaster = (georaster, geom, options) => {
     if (geom === null || geom === undefined) {
       const flat = true;
       const values = get(georaster, null, flat);
-      return utils.callAfterResolveArgs(calc, values);
+      return resolve(values).then(calc);
     } else if (utils.isBbox(geom)) {
       geom = convertGeometry("bbox", geom);
 
       // grab array of values by band
       const flat = true;
       const values = get(georaster, geom, flat);
-
-      return utils.callAfterResolveArgs(calc, values);
+      return resolve(values).then(calc);
     } else if (utils.isPolygon(geom)) {
       geom = convertGeometry("polygon", geom);
       const { noDataValue } = georaster;
 
       // grab array of values by band
       let values = [];
-      intersectPolygon(georaster, geom, (value, bandIndex) => {
+      let done = intersectPolygon(georaster, geom, (value, bandIndex) => {
         if (values[bandIndex]) {
           values[bandIndex].push(value);
         } else {
@@ -182,10 +183,7 @@ const getHistogramsForRaster = (georaster, geom, options) => {
         }
       });
 
-      values = values.map(band => band.filter(value => value !== noDataValue));
-
-      // run through histogram function
-      return values.map(band => getHistogram(band, options));
+      return resolve(done).then(() => values.map(band => band.filter(value => value !== noDataValue)).map(band => getHistogram(band, options)));
     } else {
       throw "Only Bounding Box and Polygon geometries are currently supported.";
     }

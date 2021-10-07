@@ -2,9 +2,8 @@
  * @prettier
  */
 import test from "flug";
-import fetch from "cross-fetch";
-import parse from "./index";
 import { serve } from "srvd";
+import parse from "./index";
 
 import {
   // ERROR_BAD_URL
@@ -22,7 +21,7 @@ const properties = [
   // 'values'
 ];
 
-if (require.main === module) serve({ debug: true, port: 3000, wait: 15 });
+serve({ debug: true, max: 4, port: 3000 });
 
 test("Loaded tiff export from geonode", async ({ eq }) => {
   const url = "https://s3.amazonaws.com/georaster/geonode_atlanteil.tif";
