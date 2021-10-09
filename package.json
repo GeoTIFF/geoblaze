@@ -5,6 +5,9 @@
   "main": "dist/geoblaze.node.min.js",
   "browser": "./dist/geoblaze.web.min.js",
   "unpkg": "./dist/geoblaze.web.min.js",
+  "files": [
+    "src"
+  ],
   "scripts": {
     "analyze": "webpack --config webpack.analyze.js",
     "build": "npm run build:dev && npm run build:prod",
