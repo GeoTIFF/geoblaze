@@ -17,11 +17,11 @@
     "dev": "webpack --mode development --target node --watch",
     "documentation": "./node_modules/.bin/documentation build src/** --config documentation.yml -f html -o docs && echo 'geoblaze.io' > docs/CNAME",
     "fix": "eslint src --fix",
-    "format": "npx prettier --arrow-parens=avoid --print-width=160 --trailing-comma=none --require-pragma --write src/*.js src/*/*.js",
+    "format": "npx prettier --arrow-parens=avoid --print-width=160 --trailing-comma=none --insert-pragma --write src/*.js src/*/*.js",
     "lint": "eslint src",
     "serve": "npx srvd --debug --port=3000 --wait=120",
     "test": "for f in src/*/*test*.js; do echo \"\nrunning $f\" && node -r esm $f; done",
-    "test-loading-builds": "npm run serve && sleep 2 && node test-loading-builds.js",
+    "test-loading-builds": "node test-loading-builds.js",
     "setup": "bash setup.sh"
   },
   "repository": {

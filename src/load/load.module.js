@@ -1,14 +1,16 @@
-import parseGeoraster from 'georaster';
-import fetch from 'cross-fetch';
-import nodeUrl from 'url';
-import { ERROR_LOAD_FILE_OUTSIDE_BROWSER, ERROR_BAD_URL, ERROR_PARSING_GEOTIFF } from '../error-constants';
-import cache from '../cache';
+/** @format */
 
-const inBrowser = typeof window === 'object';
+import parseGeoraster from "georaster";
+import fetch from "cross-fetch";
+import nodeUrl from "url";
+import { ERROR_LOAD_FILE_OUTSIDE_BROWSER, ERROR_BAD_URL, ERROR_PARSING_GEOTIFF } from "../error-constants";
+import cache from "../cache";
+
+const inBrowser = typeof window === "object";
 
 const URL = inBrowser ? window.URL : nodeUrl.parse;
 
-async function toArrayBuffer (response) {
+async function toArrayBuffer(response) {
   try {
     if (response.arrayBuffer) {
       return response.arrayBuffer();
@@ -21,7 +23,7 @@ async function toArrayBuffer (response) {
   }
 }
 
-async function fetchWithErrorHandling (url) {
+async function fetchWithErrorHandling(url) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -34,7 +36,7 @@ async function fetchWithErrorHandling (url) {
   }
 }
 
-async function parseGeorasterWithErrorHandling (arrayBuffer) {
+async function parseGeorasterWithErrorHandling(arrayBuffer) {
   try {
     return await parseGeoraster(arrayBuffer);
   } catch (error) {
@@ -42,12 +44,12 @@ async function parseGeorasterWithErrorHandling (arrayBuffer) {
   }
 }
 
-async function load (urlOrFile) {
-  if (!inBrowser && typeof urlOrFile === 'object') {
+async function load(urlOrFile) {
+  if (!inBrowser && typeof urlOrFile === "object") {
     throw new Error(ERROR_LOAD_FILE_OUTSIDE_BROWSER);
   }
 
-  const url = typeof urlOrFile === 'object' ? URL.createObjectURL(urlOrFile) : urlOrFile;
+  const url = typeof urlOrFile === "object" ? URL.createObjectURL(urlOrFile) : urlOrFile;
 
   if (!cache[url]) {
     const response = await fetchWithErrorHandling(url);

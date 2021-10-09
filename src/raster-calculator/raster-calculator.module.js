@@ -1,9 +1,11 @@
-import _ from 'underscore';
-import parseGeoraster from 'georaster';
+/** @format */
 
-import get from '../get';
-import wrap from '../wrap-func';
-import utils from '../utils';
+import _ from "underscore";
+import parseGeoraster from "georaster";
+
+import get from "../get";
+import wrap from "../wrap-func";
+import utils from "../utils";
 
 const containsNoDataValue = (bandValues, noDataValue) => {
   const numBandValues = bandValues.length;
@@ -39,12 +41,12 @@ const rasterCalculator = async (georaster, func) => {
   const bands = await get(georaster);
   const numBands = bands.length;
 
-  if (typeof func === 'string') {
+  if (typeof func === "string") {
     func = parseString(func.toLowerCase(), numBands);
   }
 
-  if (typeof func !== 'function') {
-    return reject(new Error('Function is invalid. Please provide a valid function as the second argument.'));
+  if (typeof func !== "function") {
+    throw new Error("Function is invalid. Please provide a valid function as the second argument.");
   }
 
   const { noDataValue } = georaster;
@@ -72,14 +74,7 @@ const rasterCalculator = async (georaster, func) => {
     values.push(row);
   }
 
-  const metadata = _.pick(georaster, ...[
-    'noDataValue',
-    'projection',
-    'xmin',
-    'ymax',
-    'pixelWidth',
-    'pixelHeight'
-  ]);
+  const metadata = _.pick(georaster, ...["noDataValue", "projection", "xmin", "ymax", "pixelWidth", "pixelHeight"]);
   return await parseGeoraster([values], metadata);
 };
 

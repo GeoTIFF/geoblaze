@@ -1,4 +1,6 @@
-import median from './median.module';
+/** @format */
+
+import median from "./median.module";
 
 /**
  * The median function takes a raster as an input and an optional geometry.

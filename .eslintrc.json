@@ -6,13 +6,13 @@
   },
   "extends": "eslint:recommended",
   "parserOptions": {
-    "ecmaVersion": 2017,
+    "ecmaVersion": 2018,
     "sourceType": "module"
   },
   "rules": {
     "arrow-parens": ["error", "as-needed"],
     "camelcase": "error",
-    "comma-dangle": ["error", { "objects": "always-multiline" }],
+    "comma-dangle": ["error", "never"],
     "indent": ["error", 2],
     "linebreak-style": ["error", "unix"],
     "no-console": "off",
@@ -24,8 +24,12 @@
     "prefer-const": "error",
     "prefer-rest-params": "error",
     "prefer-spread": "error",
-    "quotes": ["error", "single"],
+    "quotes": ["error", "double", { "avoidEscape": true }],
     "semi": ["error", "always"],
-    "space-before-function-paren": ["error", "always"]
+    "space-before-function-paren": ["error", {
+      "anonymous": "always",
+      "named": "never",
+      "asyncArrow": "always"
+  }]
   }
 }

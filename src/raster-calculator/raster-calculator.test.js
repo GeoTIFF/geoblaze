@@ -1,16 +1,18 @@
-import test from 'flug';
-import { serve } from 'srvd';
-import load from '../load';
-import rasterCalculator from './raster-calculator.module';
+/** @format */
 
-serve({ debug: true, max: 1, port: 3000});
+import test from "flug";
+import { serve } from "srvd";
+import load from "../load";
+import rasterCalculator from "./raster-calculator.module";
 
-const url = 'http://localhost:3000/data/rgb/wildfires.tiff';
+serve({ debug: true, max: 1, port: 3000 });
+
+const url = "http://localhost:3000/data/rgb/wildfires.tiff";
 
 const calculation1 = (a, b) => a + b;
 const calculation2 = (a, b) => b - a * 2;
 const calculation3 = (a, b, c) => 2 * a * c + 10;
-const calculation4 = (a, b) => a > b ? 1 : 0;
+const calculation4 = (a, b) => (a > b ? 1 : 0);
 const calculation5 = (a, b, c) => {
   if (a + b > c) return null;
   return a + b;
@@ -30,11 +32,11 @@ const calculation7 = (a, b, c) => {
 
 const calculation8 = () => NaN;
 
-const calculation9 = 'return a > 200 ? 1 : 0;';
+const calculation9 = "return a > 200 ? 1 : 0;";
 
-const calculation10 = 'return A > 200 ? 1 : 0;';
+const calculation10 = "return A > 200 ? 1 : 0;";
 
-function expectNoInfinityValues (georaster, eq) {
+function expectNoInfinityValues(georaster, eq) {
   georaster.values.forEach(band => {
     band.forEach(row => {
       row.forEach(pixel => {
@@ -44,17 +46,17 @@ function expectNoInfinityValues (georaster, eq) {
   });
 }
 
-function expectNoNaNValues (georaster, eq) {
+function expectNoNaNValues(georaster, eq) {
   georaster.values.forEach(band => {
     band.forEach(row => {
       row.forEach(pixel => {
-        eq(pixel === NaN, false);
+        eq(isNaN(pixel), false);
       });
     });
   });
 }
 
-test('Run Calculation 1', async ({ eq }) => {
+test("Run Calculation 1", async ({ eq }) => {
   const georaster = await load(url);
   const computedGeoraster = await rasterCalculator(georaster, calculation1);
   const value = computedGeoraster.values[0][0][0];
@@ -64,9 +66,9 @@ test('Run Calculation 1', async ({ eq }) => {
   expectNoInfinityValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 2', async ({ eq }) => {
+test("Run Calculation 2", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation2);      
+  const computedGeoraster = await rasterCalculator(georaster, calculation2);
   const value = computedGeoraster.values[0][0][0];
   const a = georaster.values[0][0][0];
   const b = georaster.values[1][0][0];
@@ -74,9 +76,9 @@ test('Run Calculation 2', async ({ eq }) => {
   expectNoInfinityValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 3', async ({ eq }) => {
+test("Run Calculation 3", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation3);      
+  const computedGeoraster = await rasterCalculator(georaster, calculation3);
   const value = computedGeoraster.values[0][0][0];
   const a = georaster.values[0][0][0];
   const b = georaster.values[1][0][0];
@@ -85,9 +87,9 @@ test('Run Calculation 3', async ({ eq }) => {
   expectNoInfinityValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 4', async ({ eq }) => {
+test("Run Calculation 4", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation4);      
+  const computedGeoraster = await rasterCalculator(georaster, calculation4);
   const value = computedGeoraster.values[0][0][0];
   const a = georaster.values[0][0][0];
   const b = georaster.values[1][0][0];
@@ -95,9 +97,9 @@ test('Run Calculation 4', async ({ eq }) => {
   expectNoInfinityValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 5', async ({ eq }) => {
+test("Run Calculation 5", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation5);    
+  const computedGeoraster = await rasterCalculator(georaster, calculation5);
   const value = computedGeoraster.values[0][0][0];
   const a = georaster.values[0][0][0];
   const b = georaster.values[1][0][0];
@@ -106,9 +108,9 @@ test('Run Calculation 5', async ({ eq }) => {
   expectNoInfinityValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 6', async ({ eq }) => {
+test("Run Calculation 6", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation6);  
+  const computedGeoraster = await rasterCalculator(georaster, calculation6);
   const value = computedGeoraster.values[0][0][0];
   const a = georaster.values[0][0][0];
   const b = georaster.values[1][0][0];
@@ -117,9 +119,9 @@ test('Run Calculation 6', async ({ eq }) => {
   expectNoInfinityValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 7', async ({ eq }) => {
+test("Run Calculation 7", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation7);  
+  const computedGeoraster = await rasterCalculator(georaster, calculation7);
   const value = computedGeoraster.values[0][0][0];
   const a = georaster.values[0][0][0];
   const b = georaster.values[1][0][0];
@@ -128,15 +130,15 @@ test('Run Calculation 7', async ({ eq }) => {
   expectNoInfinityValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 8', async ({ eq }) => {
+test("Run Calculation 8", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation8);  
+  const computedGeoraster = await rasterCalculator(georaster, calculation8);
   expectNoNaNValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 9', async ({ eq }) => {
+test("Run Calculation 9", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation9);  
+  const computedGeoraster = await rasterCalculator(georaster, calculation9);
   let numZeros = 0;
   let numOnes = 0;
   computedGeoraster.values.forEach(band => {
@@ -155,9 +157,9 @@ test('Run Calculation 9', async ({ eq }) => {
   expectNoInfinityValues(computedGeoraster, eq);
 });
 
-test('Run Calculation 10', async ({ eq }) => {
+test("Run Calculation 10", async ({ eq }) => {
   const georaster = await load(url);
-  const computedGeoraster = await rasterCalculator(georaster, calculation10);  
+  const computedGeoraster = await rasterCalculator(georaster, calculation10);
   let numZeros = 0;
   let numOnes = 0;
   computedGeoraster.values.forEach(band => {

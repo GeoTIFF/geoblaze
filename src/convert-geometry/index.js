@@ -1,3 +1,5 @@
-import convertGeometry from './convert-geometry.module';
+/** @format */
+
+import convertGeometry from "./convert-geometry.module";
 
 export default convertGeometry;

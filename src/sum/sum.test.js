@@ -305,7 +305,7 @@ test("(Legacy) Test sum for Country with Multiple Rings", async ({ eq }) => {
   const georaster = await load(url);
   const country = await utils.fetchJson(urlToGeojsons + "Akrotiri and Dhekelia.geojson");
   const result = sum(georaster, country);
-  // eq(result, [123]);
+  eq(result, [0]);
 });
 
 test("(Legacy) Get Sum from Polygon Above X Value", async ({ eq }) => {
@@ -463,7 +463,7 @@ test("(Modern) Test sum for Country with Multiple Rings", async ({ eq }) => {
   const georaster = await parse(url);
   const country = await utils.fetchJson(urlToGeojsons + "Akrotiri and Dhekelia.geojson");
   const result = await sum(georaster, country);
-  // eq(result, [123]);
+  eq(result, [0]);
 });
 
 test("(Modern) Get Sum from Polygon Above X Value", async ({ eq }) => {

@@ -1,3 +1,5 @@
-import utils from './utils.module';
+/** @format */
+
+import utils from "./utils.module";
 
 export default utils;

@@ -1,10 +1,12 @@
-import _ from 'underscore';
-import parseGeoraster from 'georaster';
-import { parse } from 'mathjs';
+/** @format */
 
-import get from '../get';
-import wrap from '../wrap-func';
-import utils from '../utils';
+import _ from "underscore";
+import parseGeoraster from "georaster";
+import { parse } from "mathjs";
+
+import get from "../get";
+import wrap from "../wrap-func";
+import utils from "../utils";
 
 const regexMultiCharacter = /[A-z]{2}/g;
 
@@ -29,7 +31,8 @@ const parseNode = node => {
   const operation = node.op;
 
   let leftHandSide;
-  if (leftNode.content) { // if the node represents parentheses, it will be an object with a single property "content" which contains a node
+  if (leftNode.content) {
+    // if the node represents parentheses, it will be an object with a single property "content" which contains a node
     leftHandSide = `(${parseNode(leftNode.content)}`;
   } else if (isLeafNode(leftNode)) {
     leftHandSide = `(${leftNode.value || leftNode.name}`;
@@ -38,7 +41,8 @@ const parseNode = node => {
   }
 
   let rightHandSide;
-  if (rightNode.content) { // if the node represents parentheses, it will be an object with a single property "content" which contains a node
+  if (rightNode.content) {
+    // if the node represents parentheses, it will be an object with a single property "content" which contains a node
     rightHandSide = `${parseNode(rightNode.content)})`;
   } else if (isLeafNode(rightNode)) {
     rightHandSide = `${rightNode.value || rightNode.name})`;
@@ -71,7 +75,7 @@ const getBandValues = (bandRows, index) => {
 // before attempting to compute
 const arithmeticError = arithmetic => {
   if (arithmetic.match(regexMultiCharacter)) {
-    return ('Geoblaze does not currently support implicit multiplication between variables. Please use the multiplication (*) symbol for these operations.');
+    return "Geoblaze does not currently support implicit multiplication between variables. Please use the multiplication (*) symbol for these operations.";
   }
 };
 
@@ -81,7 +85,7 @@ const bandArithmetic = async (georaster, arithmetic) => {
   const bands = await get(georaster, undefined, false);
 
   if (bands.length < 2) {
-    return reject(new Error('Band arithmetic is not available for this raster. Please make sure you are using a multi-band raster.'));
+    throw new Error("Band arithmetic is not available for this raster. Please make sure you are using a multi-band raster.");
   }
 
   const parseError = arithmeticError(arithmetic);
@@ -114,14 +118,7 @@ const bandArithmetic = async (georaster, arithmetic) => {
     values.push(row);
   }
 
-  const metadata = _.pick(georaster, ...[
-    'noDataValue',
-    'projection',
-    'xmin',
-    'ymax',
-    'pixelWidth',
-    'pixelHeight'
-  ]);
+  const metadata = _.pick(georaster, ...["noDataValue", "projection", "xmin", "ymax", "pixelWidth", "pixelHeight"]);
   const newGeoRaster = await parseGeoraster([values], metadata);
   return newGeoRaster;
 };

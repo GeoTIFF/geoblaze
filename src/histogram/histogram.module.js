@@ -174,8 +174,8 @@ const getHistogramsForRaster = (georaster, geom, options) => {
       const { noDataValue } = georaster;
 
       // grab array of values by band
-      let values = [];
-      let done = intersectPolygon(georaster, geom, (value, bandIndex) => {
+      const values = [];
+      const done = intersectPolygon(georaster, geom, (value, bandIndex) => {
         if (values[bandIndex]) {
           values[bandIndex].push(value);
         } else {

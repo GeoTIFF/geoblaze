@@ -1,7 +1,10 @@
 const test = require('flug');
+const { serve } = require('srvd');
 const puppeteer = require('puppeteer');
 
-const url2GeoTIFF = 'http://localhost:3000/data/example_4326.tif';
+const { port } = serve({ debug: true, max: 6, port: 3000 });
+
+const url2GeoTIFF = `http://localhost:${port}/data/example_4326.tif`;
 
 
 test('Should Successfully Require Production Build in Node', async ({ eq }) => {

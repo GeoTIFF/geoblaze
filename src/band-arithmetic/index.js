@@ -1,4 +1,6 @@
-import bandArithmetic from './band-arithmetic.module';
+/** @format */
+
+import bandArithmetic from "./band-arithmetic.module";
 
 /**
  * The band arithmetic function takes a raster and an arithmetic operation written as

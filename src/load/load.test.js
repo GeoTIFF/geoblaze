@@ -1,42 +1,39 @@
-import test from 'flug';
+/** @format */
+
+import test from "flug";
 import { serve } from "srvd";
-import load from './load.module';
+import load from "./load.module";
 
 import {
   ERROR_BAD_URL
   //ERROR_PARSING_GEOTIFF
-} from '../error-constants';
+} from "../error-constants";
 
-serve({ debug: true, max: 2, port: 3000});
+serve({ debug: true, max: 2, port: 3000 });
 
-const path = 'http://localhost:3000/data/test.tiff';
-const incorrectPath = 'http://localhost:3000/data/this-is-not-a-real-dataset.tiff';
-const incorrectPath2 = 'this-is-a-fake-path';
+const path = "http://localhost:3000/data/test.tiff";
+const incorrectPath = "http://localhost:3000/data/this-is-not-a-real-dataset.tiff";
+const incorrectPath2 = "this-is-a-fake-path";
 //const incorrectPath3 = 'http://localhost:3000/data/random-file';
 
-const properties = [
-  'projection',
-  'xmin',
-  'values'
-];
+const properties = ["projection", "xmin", "values"];
 
-
-test('Loaded tiff export from geonode', async ({ eq }) => {
-  const url = 'https://s3.amazonaws.com/georaster/geonode_atlanteil.tif';
+test("Loaded tiff export from geonode", async ({ eq }) => {
+  const url = "https://s3.amazonaws.com/georaster/geonode_atlanteil.tif";
   const georaster = await load(url);
   properties.forEach(property => {
     eq(property in georaster, true);
   });
 });
 
-test('Loaded tiff file', async ({ eq }) => {
+test("Loaded tiff file", async ({ eq }) => {
   const georaster = await load(path);
   properties.forEach(property => {
     eq(property in georaster, true);
   });
 });
 
-test('Error from invalid URL', async ({ eq }) => {
+test("Error from invalid URL", async ({ eq }) => {
   let message;
   try {
     await load(incorrectPath);
@@ -46,7 +43,7 @@ test('Error from invalid URL', async ({ eq }) => {
   eq(message, ERROR_BAD_URL);
 });
 
-test('Load: Error from another invalid URL tiff file', async ({ eq }) => {
+test("Load: Error from another invalid URL tiff file", async ({ eq }) => {
   let message;
   try {
     await load(incorrectPath2);

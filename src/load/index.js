@@ -1,4 +1,6 @@
-import load from './load.module';
+/** @format */
+
+import load from "./load.module";
 
 /**
  * This function is deprecated and you should try to migrate to using parse.

@@ -1,4 +1,6 @@
-import rasterCalculator from './raster-calculator.module';
+/** @format */
+
+import rasterCalculator from "./raster-calculator.module";
 
 /**
  * The raster calculator function takes a raster and a javascript function as input.
