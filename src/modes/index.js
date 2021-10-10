@@ -1,18 +1,22 @@
-/**
- * @prettier
- */
 import modes from "./modes.module";
 
 /**
- * The modes function takes a raster as an input and an optional geometry.
- * If a geometry is included, the function returns all of the most common pixels
- * in that area. If no geometry is included, the function returns all the most common pixels of
- * all the pixels for each band in the raster.
- * @name mode
- * @param {Object} georaster - a georaster from the georaster library
+ * The modes function takes a georaster (or url) as an input and an optional geometry.
+ * If a geometry is included, the function returns the modes of all the pixels
+ * in that area. If no geometry is included, the function returns the modes of
+ * all the pixels for each band in the georaster.  Unlike the mode function, it will
+ * not compute the mean, but return all the most common values for each band.
+ * @name modes
+ * @param {GeoRaster|string} georaster - a georaster or a url to a georaster (e.g. geotiff)
  * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
- * @returns {Object} array of modes for each band
+ * @returns {Array<Array<Number>>} array of modes for each band
  * @example
- * const modes = await geoblaze.modes(georaster, geometry);
+ * // naip.tif has 4-bands: red, green, blue and near-infrared (nir)
+ * const url = "https://example.org/naif.tif";
+ *
+ * const results = await geoblaze.mode(url, geometry);
+ * // results is [ [red], [green], [blue], [nir] ]
+ * [[ 42, 43] , [83, 82, 84], [92], [94]]
  */
+
 export default modes;

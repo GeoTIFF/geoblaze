@@ -4,7 +4,7 @@
 import _ from "underscore";
 import getDepth from "get-depth";
 import get from "../get";
-import wrap from "../wrap-func";
+import wrap from "../wrap-parse";
 import utils from "../utils";
 
 const { resolve } = utils;

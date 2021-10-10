@@ -1,6 +1,3 @@
-/**
- * @prettier
- */
 import parseGeoRaster from "georaster";
 import nodeUrl from "url";
 import { ERROR_PARSING_GEOTIFF } from "../error-constants";
@@ -11,7 +8,7 @@ const inBrowser = typeof window === "object";
 
 const URL = inBrowser ? window.URL : nodeUrl.parse;
 
-async function parseGeorasterWithErrorHandling(it, { logErrors }) {
+async function parseGeorasterWithErrorHandling(it, { logErrors = true } = { logErrors: true }) {
   try {
     return await parseGeoRaster(it);
   } catch (error) {
@@ -20,10 +17,10 @@ async function parseGeorasterWithErrorHandling(it, { logErrors }) {
   }
 }
 
-export default async function parse(it, { logErrors = true } = { logErrors: true }) {
+export default async function parse(it, { logErrors = true, useCache = true } = { logErrors: true, useCache: true }) {
   if (["Blob", "File"].includes(utils.getConstructorName(it))) it = URL.createObjectURL(it);
 
-  if (typeof it === "string") {
+  if (useCache && typeof it === "string") {
     if (!cache[it]) cache[it] = parseGeorasterWithErrorHandling(it, { logErrors });
     return await cache[it];
   } else {

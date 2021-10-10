@@ -1,10 +1,8 @@
-/** @format */
-
 import _ from "underscore";
 import parseGeoraster from "georaster";
 
 import get from "../get";
-import wrap from "../wrap-func";
+import wrap from "../wrap-load";
 import utils from "../utils";
 
 const containsNoDataValue = (bandValues, noDataValue) => {

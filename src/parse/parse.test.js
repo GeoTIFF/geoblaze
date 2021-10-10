@@ -1,6 +1,4 @@
-/**
- * @prettier
- */
+import findAndRead from "find-and-read";
 import test from "flug";
 import { serve } from "srvd";
 import parse from "./index";
@@ -23,9 +21,26 @@ const properties = [
 
 serve({ debug: true, max: 4, port: 3000 });
 
-test("Loaded tiff export from geonode", async ({ eq }) => {
+test("Loaded geonode tiff export from url", async ({ eq }) => {
   const url = "https://s3.amazonaws.com/georaster/geonode_atlanteil.tif";
   const georaster = await parse(url, { logErrors: false });
+  properties.forEach(property => {
+    eq(property in georaster, true);
+  });
+});
+
+test("Loaded geonode tiff export from buffer", async ({ eq }) => {
+  const buffer = await findAndRead("geonode_atlanteil.tif");
+  const georaster = await parse(buffer);
+  properties.forEach(property => {
+    eq(property in georaster, true);
+  });
+});
+
+test("Loaded geonode tiff export from array buffer", async ({ eq }) => {
+  const buffer = await findAndRead("geonode_atlanteil.tif");
+  const arrayBuffer = buffer.buffer;
+  const georaster = await parse(arrayBuffer);
   properties.forEach(property => {
     eq(property in georaster, true);
   });

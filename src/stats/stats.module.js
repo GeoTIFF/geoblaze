@@ -1,10 +1,7 @@
-/**
- * @prettier
- */
 import calcStats from "calc-stats";
 import get from "../get";
 import utils from "../utils";
-import wrap from "../wrap-func";
+import wrap from "../wrap-parse";
 import convertGeometry from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 

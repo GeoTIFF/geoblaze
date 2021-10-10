@@ -1,6 +1,3 @@
-/**
- * @prettier
- */
 import bandArithmetic from "./band-arithmetic";
 import cache from "./cache";
 import get from "./get";

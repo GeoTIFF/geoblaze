@@ -1,5 +1,3 @@
-/** @format */
-
 import test from "flug";
 import { serve } from "srvd";
 import load from "./load.module";

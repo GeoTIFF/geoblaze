@@ -1,5 +1,3 @@
-/** @format */
-
 import test from "flug";
 import convertGeometry from "./convert-geometry.module";
 import getDepth from "get-depth";

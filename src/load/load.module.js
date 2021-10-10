@@ -1,5 +1,3 @@
-/** @format */
-
 import parseGeoraster from "georaster";
 import fetch from "cross-fetch";
 import nodeUrl from "url";
@@ -44,20 +42,26 @@ async function parseGeorasterWithErrorHandling(arrayBuffer) {
   }
 }
 
-async function load(urlOrFile) {
+async function load(urlOrFile, { useCache = true } = { useCache: true }) {
   if (!inBrowser && typeof urlOrFile === "object") {
     throw new Error(ERROR_LOAD_FILE_OUTSIDE_BROWSER);
   }
 
   const url = typeof urlOrFile === "object" ? URL.createObjectURL(urlOrFile) : urlOrFile;
 
-  if (!cache[url]) {
+  const loadGeoRaster = async () => {
     const response = await fetchWithErrorHandling(url);
     const arrayBuffer = await toArrayBuffer(response);
     const georaster = await parseGeorasterWithErrorHandling(arrayBuffer);
-    cache[url] = georaster;
+    return georaster;
+  };
+
+  if (useCache) {
+    if (!cache[url]) cache[url] = loadGeoRaster();
+    return cache[url];
+  } else {
+    return loadGeoRaster();
   }
-  return cache[url];
 }
 
 export default load;

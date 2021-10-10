@@ -1,6 +1,3 @@
-/**
- * @prettier
- */
 import parse from "./parse";
 
 // this function basically allows you to pass a URL into a geoblaze function

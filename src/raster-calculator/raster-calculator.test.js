@@ -1,11 +1,9 @@
-/** @format */
-
 import test from "flug";
 import { serve } from "srvd";
 import load from "../load";
 import rasterCalculator from "./raster-calculator.module";
 
-serve({ debug: true, max: 1, port: 3000 });
+serve({ debug: true, max: 3, port: 3000 });
 
 const url = "http://localhost:3000/data/rgb/wildfires.tiff";
 
@@ -57,8 +55,18 @@ function expectNoNaNValues(georaster, eq) {
 }
 
 test("Run Calculation 1", async ({ eq }) => {
-  const georaster = await load(url);
+  const georaster = await load(url, { useCache: false });
   const computedGeoraster = await rasterCalculator(georaster, calculation1);
+  const value = computedGeoraster.values[0][0][0];
+  const a = georaster.values[0][0][0];
+  const b = georaster.values[1][0][0];
+  eq(value, calculation1(a, b));
+  expectNoInfinityValues(computedGeoraster, eq);
+});
+
+test("Run Calculation 1 (Async)", async ({ eq }) => {
+  const georaster = await load(url, { useCache: false });
+  const computedGeoraster = await rasterCalculator(url, calculation1);
   const value = computedGeoraster.values[0][0][0];
   const a = georaster.values[0][0][0];
   const b = georaster.values[1][0][0];

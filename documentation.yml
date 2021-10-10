@@ -1,18 +1,20 @@
 toc:
-  - load
-  - get
+  - bandArithmetic
+  - histogram
   - identify
+  - load
   - mean
   - median
   - mode
+  - modes
   - min
   - max
-  - sum
-  - histogram
-  - bandArithmetic
+  - parse
   - rasterCalculator
+  - sum
 
 paths:
+    GeoRaster: https://github.com/geotiff/georaster
     GeoJSON: 'https://tools.ietf.org/html/rfc7946#section-3'
     GeometryCollection: 'https://tools.ietf.org/html/rfc7946#section-3.1.8'
     Point: 'https://tools.ietf.org/html/rfc7946#section-3.1.2'
@@ -47,3 +49,4 @@ paths:
     BBox: 'https://tools.ietf.org/html/rfc7946#section-5'
     BoundingBox: 'https://tools.ietf.org/html/rfc7946#section-5'
     Coord: 'https://tools.ietf.org/html/rfc7946#section-3.1.1'
+    File: 'https://developer.mozilla.org/en-US/docs/Web/API/File'

@@ -1,13 +1,10 @@
-/**
- * @prettier
- */
 import _ from "underscore";
 import fastMin from "fast-min";
 import fastMax from "fast-max";
 
 import get from "../get";
 import utils from "../utils";
-import wrap from "../wrap-func";
+import wrap from "../wrap-parse";
 import convertGeometry from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
@@ -100,12 +97,6 @@ const getQuantileBins = (values, numClasses) => {
 };
 
 const getHistogram = (values, options = {}) => {
-  // pull out options, possible options are:
-  // scaleType: measurement scale, options are: nominal, ratio
-  // numClasses: number of classes/bins, only available for ratio data
-  // classType: method of breaking data into classes, only available
-  //       for ratio data, options are: equal-interval, quantile
-  //
   const scaleType = options.scaleType;
   const numClasses = options.numClasses;
   const classType = options.classType;

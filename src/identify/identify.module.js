@@ -1,8 +1,5 @@
-/**
- * @prettier
- */
 import convertGeometry from "../convert-geometry";
-import wrap from "../wrap-func";
+import wrap from "../wrap-parse";
 
 const identify = (georaster, geometry) => {
   // The convertGeometry function takes the input

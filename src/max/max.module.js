@@ -1,6 +1,3 @@
-/**
- * @prettier
- */
 import stats from "../stats";
 import utils from "../utils";
 

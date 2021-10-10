@@ -1,11 +1,9 @@
-/**
- * @prettier
- */
 import utils from "../utils";
 import convertGeometry from "../convert-geometry";
-import wrap from "../wrap-func";
+import wrap from "../wrap-parse";
 
 const get = (georaster, geom, flat) => {
+  if (!georaster) throw new Error("[georaster] can't get values without a georaster!");
   let cropTop;
   let cropLeft;
   let cropRight;
