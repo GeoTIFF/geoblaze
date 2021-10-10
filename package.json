@@ -18,7 +18,7 @@
     "build:prod:node": "webpack --mode production --target node",
     "build:prod:web": "webpack --mode production --target web",
     "dev": "webpack --mode development --target node --watch",
-    "document": "npx documentation build src/** --config documentation.yml -f html -o docs && echo 'geoblaze.io' > docs/CNAME",
+    "document": "npx documentation build src/** --config documentation.yml -f html -o docs && echo 'docs.geoblaze.io' > docs/CNAME",
     "fix": "eslint src --fix",
     "format": "npx prettier --arrow-parens=avoid --print-width=160 --trailing-comma=none --write src/*.js src/*/*.js",
     "lint": "eslint src",
