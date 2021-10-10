@@ -6,7 +6,8 @@
   "browser": "./dist/geoblaze.web.min.js",
   "unpkg": "./dist/geoblaze.web.min.js",
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
   "scripts": {
     "analyze": "webpack --config webpack.analyze.js",
