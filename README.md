@@ -28,7 +28,7 @@ import geoblaze from 'geoblaze';
 const url = 'http://url-to-geotiff';
 
 async function getMean () {
-  const georaster = await geoblaze.load(url);
+  const georaster = await geoblaze.parse(url);
   const mean = await geoblaze.mean(georaster);
   return mean;
 }
