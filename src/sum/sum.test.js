@@ -1,6 +1,3 @@
-/**
- * @prettier
- */
 import test from "flug";
 import { serve } from "srvd";
 
@@ -13,9 +10,7 @@ import { polygon as turfPolygon } from "@turf/helpers";
 
 const { fetchJson, fetchJsons } = utils;
 
-const port = 8888;
-
-serve({ debug: true, max: 100, port, wait: 120 });
+const { port } = serve({ debug: true, max: 100, port: 8888, wait: 120 });
 
 const urlRwanda = `http://localhost:${port}/data/RWA_MNH_ANC.tif`;
 const bboxRwanda = require("../../data/RwandaBufferedBoundingBox.json");

@@ -1,7 +1,3 @@
-/**
- * @prettier
- */
-
 import _ from "underscore";
 import combine from "@turf/combine";
 import fetch from "cross-fetch";

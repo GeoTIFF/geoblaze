@@ -1,16 +1,18 @@
 toc:
   - bandArithmetic
+  - get
   - histogram
   - identify
   - load
+  - max
+  - min
   - mean
   - median
   - mode
   - modes
-  - min
-  - max
   - parse
   - rasterCalculator
+  - stats
   - sum
 
 paths:

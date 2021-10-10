@@ -2,19 +2,20 @@
 <html>
 <head>
   <meta charset='utf-8' />
-  <title>geoblaze 0.0.67 | Documentation</title>
+  <title>geoblaze 0.3.2 | Documentation</title>
+  <meta name='description' content='Blazing Fast JavaScript Raster Processing Engine'>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
-  <link href='assets/bass.css' type='text/css' rel='stylesheet' />
-  <link href='assets/style.css' type='text/css' rel='stylesheet' />
-  <link href='assets/github.css' type='text/css' rel='stylesheet' />
-  <link href='assets/split.css' type='text/css' rel='stylesheet' />
+  <link href='assets/bass.css' rel='stylesheet' />
+  <link href='assets/style.css' rel='stylesheet' />
+  <link href='assets/github.css' rel='stylesheet' />
+  <link href='assets/split.css' rel='stylesheet' />
 </head>
 <body class='documentation m0'>
     <div class='flex'>
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
           <h3 class='mb0 no-anchor'>geoblaze</h3>
-          <div class='mb1'><code>0.0.67</code></div>
+          <div class='mb1'><code>0.3.2</code></div>
           <input
             placeholder='Filter'
             id='filter-input'
@@ -25,9 +26,9 @@
               
                 
                 <li><a
-                  href='#load'
+                  href='#bandarithmetic'
                   class="">
-                  load
+                  bandArithmetic
                   
                 </a>
                 
@@ -45,9 +46,49 @@
               
                 
                 <li><a
+                  href='#histogram'
+                  class="">
+                  histogram
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#identify'
                   class="">
                   identify
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#load'
+                  class="">
+                  load
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#max'
+                  class="">
+                  max
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#min'
+                  class="">
+                  min
                   
                 </a>
                 
@@ -85,9 +126,9 @@
               
                 
                 <li><a
-                  href='#min'
+                  href='#modes'
                   class="">
-                  min
+                  modes
                   
                 </a>
                 
@@ -95,39 +136,9 @@
               
                 
                 <li><a
-                  href='#max'
+                  href='#parse'
                   class="">
-                  max
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#sum'
-                  class="">
-                  sum
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#histogram'
-                  class="">
-                  histogram
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#bandarithmetic'
-                  class="">
-                  bandArithmetic
+                  parse
                   
                 </a>
                 
@@ -143,36 +154,54 @@
                 
                 </li>
               
+                
+                <li><a
+                  href='#stats'
+                  class="">
+                  stats
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#sum'
+                  class="">
+                  sum
+                  
+                </a>
+                
+                </li>
+              
             </ul>
           </div>
           <div class='mt1 h6 quiet'>
-            <a href='http://documentation.js.org/reading-documentation.html'>Need help reading this?</a>
+            <a href='https://documentation.js.org/reading-documentation.html'>Need help reading this?</a>
           </div>
         </div>
       </div>
       <div id='split-right' class='relative overflow-auto height-viewport-100'>
         
           
-            <section class='p2 mb2 clearfix bg-white minishadow'>
+          <section class='p2 mb2 clearfix bg-white minishadow'>
 
   
   <div class='clearfix'>
     
-    <h3 class='fl m0' id='load'>
-      load
+    <h3 class='fl m0' id='bandarithmetic'>
+      bandArithmetic
     </h3>
     
     
   </div>
   
 
-  <p>The load function takes a url to a geotiff or geotiff file as an input
-and returns a promise. The promise resolves as a georaster, which
-can be used as input in other geoblaze methods, such as identify, sum,
-or histogram.</p>
+  <p>The band arithmetic function takes a georaster and an arithmetic operation. The function performs pixel-by-pixel calculation according to the
+arithmetic operation provided. This is only possible for a multiband raster and not
+for single band rasters. The output is a computed single band raster.</p>
 
-
-  <div class='pre p1 fill-light mt0'>load</div>
+    <div class='pre p1 fill-light mt0'>bandArithmetic</div>
   
   
 
@@ -189,8 +218,17 @@ or histogram.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>urlOrFile</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>))</code>
-	    a string representation of a url or a geotiff file
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>operation</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>)</code>
+	    a string representation of an arithmetic operation to perform
 
           </div>
           
@@ -202,6 +240,14 @@ or histogram.</p>
   
 
   
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://github.com/geotiff/georaster">GeoRaster</a></code>:
+        the computed georaster
+
+      
+    
+  
 
   
 
@@ -209,8 +255,15 @@ or histogram.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> sums = geoblaze.load(urlOrFile).then(<span class="hljs-function"><span class="hljs-params">georaster</span> =&gt;</span> sum(georaster, geometry));</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red (a), green (b), blue (c) and near-infrared (d)</span>
+<span class="hljs-keyword">const</span> ndvi = <span class="hljs-keyword">await</span> geoblaze.bandArithmetic(<span class="hljs-string">"https://example.org/naip.tif"</span>, <span class="hljs-string">'(d - a)/(d + a)'</span>)
+
+<span class="hljs-comment">// or if you want to preload the georaster, so you can use it later, too</span>
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> geoblaze.load(<span class="hljs-string">"https://example.org/naip.tif"</span>);
+<span class="hljs-keyword">const</span> ndvi = <span class="hljs-keyword">await</span> geoblaze.bandArithmetic(georaster, <span class="hljs-string">'(c - b)/(c + b)'</span>);</pre>
     
+  
+
   
 
   
@@ -223,7 +276,7 @@ or histogram.</p>
           
         
           
-            <section class='p2 mb2 clearfix bg-white minishadow'>
+          <section class='p2 mb2 clearfix bg-white minishadow'>
 
   
   <div class='clearfix'>
@@ -236,13 +289,12 @@ or histogram.</p>
   </div>
   
 
-  <p>The get function takes a raster and a bounding box as input. It returns
-the subset of pixels in the raster found within the bounding box. It also
+  <p>The get function takes a georaster and a bounding box as input. It returns
+the subset of pixels in the georaster found within the bounding box. It also
 takes an optional parameter "flat" which will flatten the returning pixel
-matrix across bands instead of retaining a nested array structure.</p>
+matrix across bands, so that for each band all the rows will be combined into one long array.</p>
 
-
-  <div class='pre p1 fill-light mt0'>get</div>
+    <div class='pre p1 fill-light mt0'>get</div>
   
   
 
@@ -259,8 +311,8 @@ matrix across bands instead of retaining a nested array structure.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a raster from the georaster library
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
 
           </div>
           
@@ -270,21 +322,13 @@ matrix across bands instead of retaining a nested array structure.</p>
           <div>
             <span class='code bold'>boundingBox</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
 	    can be an 
-[
-xmin, ymin, xmax, ymax
-]
+[xmin, ymin, xmax, ymax]
  array, a [[
-[
-x00,y00
-]
+[x00,y00]
 ,...,
-[
-x0n,y0n
-]
+[x0n,y0n]
 ,
-[
-x00,y00
-]
+[x00,y00]
 ]...] GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
@@ -294,7 +338,7 @@ x00,y00
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>flat</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a>)</code>
-	    whether or not the resulting output should be flattened into a single array
+	    whether or not the resulting output should be flattened into a single array for each band
 
           </div>
           
@@ -321,82 +365,8 @@ x00,y00
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> pixels = geoblaze.get(georaster, geometry);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> pixels = <span class="hljs-keyword">await</span> geoblaze.get(georaster, geometry);</pre>
     
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='identify'>
-      identify
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>Given a raster and a point geometry,
-the identify function returns the pixel
-value of the raster at the given point.</p>
-
-
-  <div class='pre p1 fill-light mt0'>identify</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>)</code>
-	    a raster from the georaster library
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>geometry</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a>))</code>
-	    geometry can be an 
-[
-x,y
-]
- array, a GeoJSON point object, or a string representation of a GeoJSON point object.
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-
   
 
   
@@ -411,625 +381,7 @@ x,y
           
         
           
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='mean'>
-      mean
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>The mean function takes a raster as an input and an optional geometry.
-If a geometry is included, the function returns the mean of all the pixels
-in that area. If no geometry is included, the function returns the mean of
-all the pixels for each band in the raster.</p>
-
-
-  <div class='pre p1 fill-light mt0'>mean</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a raster from the georaster library
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[
-xmin, ymin, xmax, ymax
-]
- array for a bounding box, [[
-[
-x00,y00
-]
-,...,
-[
-x0n,y0n
-]
-,
-[
-x00,y00
-]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        array of means for each band
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Example</div>
-    
-      
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> means = geoblaze.mean(georaster, geometry);</pre>
-    
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='median'>
-      median
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>The median function takes a raster as an input and an optional geometry.
-If a geometry is included, the function returns the median of all the pixels
-in that area. If no geometry is included, the function returns the median of
-all the pixels for each band in the raster.</p>
-
-
-  <div class='pre p1 fill-light mt0'>median</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a raster from the georaster library
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[
-xmin, ymin, xmax, ymax
-]
- array for a bounding box, [[
-[
-x00,y00
-]
-,...,
-[
-x0n,y0n
-]
-,
-[
-x00,y00
-]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        array of medians for each band
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Example</div>
-    
-      
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> medians = geoblaze.median(georaster, geometry);</pre>
-    
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='mode'>
-      mode
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>The mode function takes a raster as an input and an optional geometry.
-If a geometry is included, the function returns the mode of all the pixels
-in that area. If no geometry is included, the function returns the mode of
-all the pixels for each band in the raster.</p>
-
-
-  <div class='pre p1 fill-light mt0'>mode</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>georaster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a georaster from the georaster library
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[
-xmin, ymin, xmax, ymax
-]
- array for a bounding box, [[
-[
-x00,y00
-]
-,...,
-[
-x0n,y0n
-]
-,
-[
-x00,y00
-]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        array of modes for each band
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Example</div>
-    
-      
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> modes = geoblaze.mode(georaster, geometry);</pre>
-    
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='min'>
-      min
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>The min function takes a raster as an input and an optional geometry.
-If a geometry is included, the function returns the min of all the pixels
-in that area for each band. If no geometry is included, the function returns the min of
-all the pixels for each band in the raster.</p>
-
-
-  <div class='pre p1 fill-light mt0'>min</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>georaster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a georaster from the georaster library
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[
-xmin, ymin, xmax, ymax
-]
- array for a bounding box, [[
-[
-x00,y00
-]
-,...,
-[
-x0n,y0n
-]
-,
-[
-x00,y00
-]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        array of mins for each band
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Example</div>
-    
-      
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> mins = geoblaze.min(georaster, geometry);</pre>
-    
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='max'>
-      max
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>The max function takes a raster as an input and an optional geometry.
-If a geometry is included, the function returns the max of all the pixels
-in that area. If no geometry is included, the function returns the max of
-all the pixels for each band in the raster.</p>
-
-
-  <div class='pre p1 fill-light mt0'>max</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a raster from the georaster library
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[
-xmin, ymin, xmax, ymax
-]
- array for a bounding box, [[
-[
-x00,y00
-]
-,...,
-[
-x0n,y0n
-]
-,
-[
-x00,y00
-]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        array of maxs for each band
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Example</div>
-    
-      
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> maxs = geoblaze.max(georaster, geometry);</pre>
-    
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='sum'>
-      sum
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>The sum function takes a raster as an input and an optional geometry.
-If a geometry is included, the function returns the sum of all the pixels
-in that area. If no geometry is included, the function returns the sum of
-all the pixels for each band in the raster.</p>
-
-
-  <div class='pre p1 fill-light mt0'>sum</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>georaster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a georaster from the georaster library
-
-          </div>
-          
-        </div>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[
-xmin, ymin, xmax, ymax
-]
- array for a bounding box, [[
-[
-x00,y00
-]
-,...,
-[
-x0n,y0n
-]
-,
-[
-x00,y00
-]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        array of sums for each band
-
-      
-    
-  
-
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Example</div>
-    
-      
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> sums = geoblaze.sum(georaster, geometry);</pre>
-    
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-            <section class='p2 mb2 clearfix bg-white minishadow'>
+          <section class='p2 mb2 clearfix bg-white minishadow'>
 
   
   <div class='clearfix'>
@@ -1042,13 +394,12 @@ x00,y00
   </div>
   
 
-  <p>The histogram function takes a raster as an input and an optional geometry.
+  <p>The histogram function takes a georaster as an input and an optional geometry.
 If a geometry is included, the function returns the histogram of all the pixels
 in that area. If no geometry is included, the function returns the histogram of
-all the pixels for each band in the raster.</p>
+all the pixels for each band in the georaster.</p>
 
-
-  <div class='pre p1 fill-light mt0'>histogram</div>
+    <div class='pre p1 fill-light mt0'>histogram</div>
   
   
 
@@ -1065,8 +416,8 @@ all the pixels for each band in the raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>a</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    georaster from georaster library
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
 
           </div>
           
@@ -1079,6 +430,57 @@ all the pixels for each band in the raster.</p>
 	    a geometry, which we'll use for clipping result
 
           </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>options</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.scaleType</span> <code class='quiet'>(<code>"nominal"</code> | <code>"ratio"</code>)</code>
+  </td>
+  <td class='break-word'><span>measurement scale
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.numClasses</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></code>
+  </td>
+  <td class='break-word'><span>number of classes/bins, only available for ratio data
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>options.classType</span> <code class='quiet'>(<code>"equal-interval"</code> | <code>"quantile"</code>)</code>
+  </td>
+  <td class='break-word'><span>method of breaking data into classes, only available for ratio data
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
           
         </div>
       
@@ -1103,8 +505,17 @@ all the pixels for each band in the raster.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">var</span> histograms = geoblaze.histogram(georaster, geometry);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-comment">// calculate the raw histogram pixel values</span>
+<span class="hljs-keyword">const</span> histograms = <span class="hljs-keyword">await</span> geoblaze.histogram(url, geometry, { <span class="hljs-attr">scaleType</span>: <span class="hljs-string">"nominal"</span> });
+
+<span class="hljs-comment">// break histograms into 10 bins for each band</span>
+<span class="hljs-keyword">const</span> histograms = <span class="hljs-keyword">await</span> geoblaze.histogram(url, geometry, { <span class="hljs-attr">scaleType</span>: <span class="hljs-string">"ratio"</span>, <span class="hljs-attr">numClasses</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">classType</span>: <span class="hljs-string">"equal-interval"</span> });</pre>
     
+  
+
   
 
   
@@ -1117,26 +528,24 @@ all the pixels for each band in the raster.</p>
           
         
           
-            <section class='p2 mb2 clearfix bg-white minishadow'>
+          <section class='p2 mb2 clearfix bg-white minishadow'>
 
   
   <div class='clearfix'>
     
-    <h3 class='fl m0' id='bandarithmetic'>
-      bandArithmetic
+    <h3 class='fl m0' id='identify'>
+      identify
     </h3>
     
     
   </div>
   
 
-  <p>The band arithmetic function takes a raster and an arithmetic operation written as
-a string as input. The function performs pixel-by-pixel calculation according to the
-arithmetic operation provided. This is only possible for a multiband raster and not
-for single band rasters. The output is a computed single band raster.</p>
+  <p>Given a raster and a point geometry, the identify function returns the pixel
+value of the raster at the given point.  The raster and point must share the same
+<a href="https://en.wikipedia.org/wiki/Spatial_reference_system">Spatial Reference System</a>.</p>
 
-
-  <div class='pre p1 fill-light mt0'>bandArithmetic</div>
+    <div class='pre p1 fill-light mt0'>identify</div>
   
   
 
@@ -1153,8 +562,8 @@ for single band rasters. The output is a computed single band raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a raster from the georaster library
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
 
           </div>
           
@@ -1162,8 +571,187 @@ for single band rasters. The output is a computed single band raster.</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>operation</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>)</code>
-	    a string representation of a arithmetic operation to perform
+            <span class='code bold'>geometry</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a> | <a href="https://tools.ietf.org/html/rfc7946#section-3.1.2">Point</a>))</code>
+	    geometry can be an 
+[x,y]
+ array, a GeoJSON point object, or a string representation of a GeoJSON point object.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// based on https://observablehq.com/@danieljdufour/identify-single-pixel-value-in-geotiff</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://s3.amazonaws.com/geoblaze/wildfires.tiff"</span>;
+
+<span class="hljs-comment">// point as [longitude, latitude]</span>
+<span class="hljs-keyword">const</span> cityOfRedding = [<span class="hljs-number">-122.366667</span>, <span class="hljs-number">40.583333</span>];
+
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.identify(url, cityOfRedding);
+
+<span class="hljs-comment">// results are [red, green, blue]</span>
+[<span class="hljs-number">76</span>, <span class="hljs-number">76</span>, <span class="hljs-number">68</span>]</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='load'>
+      load
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>This function loads a whole file into memory as a georaster.  If you pass in a url,
+it will fetch the whole file.  It is the heavy-weight alternative to <a href="#parse">geoblaze.parse</a>
+and should only be used if your file is relatively small or you have a really good reason
+for loading the whole file into memory, like running band arithmetic to create a new file.
+In general, use <a href="#parse">geoblaze.parse</a> instead of geoblaze.load.</p>
+
+    <div class='pre p1 fill-light mt0'>load</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> geoblaze.load(url);
+
+<span class="hljs-keyword">const</span> mins = geoblaze.min(georaster);
+<span class="hljs-keyword">const</span> maxs = geoblaze.max(georaster);
+
+<span class="hljs-keyword">const</span> ndvi = geoblaze.bandArithmetic(georaster, <span class="hljs-string">"(d - a) / (d + a)"</span>);</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='max'>
+      max
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The max function takes a georaster and an optional geometry.
+If a geometry is included, the function returns the max of all the pixels
+in that area. If no geometry is included, the function returns the max of
+all the pixels for each band in the raster.</p>
+
+    <div class='pre p1 fill-light mt0'>max</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[xmin, ymin, xmax, ymax]
+ array for a bounding box, [[
+[x00,y00]
+,...,
+[x0n,y0n]
+,
+[x00,y00]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
           
@@ -1177,8 +765,8 @@ for single band rasters. The output is a computed single band raster.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        raster - the computed georaster
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a>></code>:
+        array of maxs for each band
 
       
     
@@ -1190,8 +778,15 @@ for single band rasters. The output is a computed single band raster.</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> ndvi = geoblaze.bandArithmetic(georaster, <span class="hljs-string">'(c - b)/(c + b)'</span>);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-keyword">const</span> maxs = <span class="hljs-keyword">await</span> geoblaze.max(url, geometry);
+<span class="hljs-comment">// maxs is [red, green, blue, nir]</span>
+[<span class="hljs-number">231</span>, <span class="hljs-number">242</span>, <span class="hljs-number">254</span>, <span class="hljs-number">255</span>]</pre>
     
+  
+
   
 
   
@@ -1204,7 +799,598 @@ for single band rasters. The output is a computed single band raster.</p>
           
         
           
-            <section class='p2 mb2 clearfix bg-white minishadow'>
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='min'>
+      min
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The min function takes a georaster as an input and an optional geometry.
+If a geometry is included, the function returns the min of all the pixels
+in that area for each band. If no geometry is included, the function returns the min of
+all the pixels for each band in the raster.</p>
+
+    <div class='pre p1 fill-light mt0'>min</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[xmin, ymin, xmax, ymax]
+ array for a bounding box, [[
+[x00,y00]
+,...,
+[x0n,y0n]
+,
+[x00,y00]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a>></code>:
+        array of mins for each band
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-keyword">const</span> mins = <span class="hljs-keyword">await</span> geoblaze.min(url, geometry);
+<span class="hljs-comment">// mins is [red, green, blue, nir]</span>
+[<span class="hljs-number">1</span>, <span class="hljs-number">4</span>, <span class="hljs-number">9</span>, <span class="hljs-number">4</span>]</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='mean'>
+      mean
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The mean function takes a georaster and an optional geometry.
+If a geometry is included, the function returns the mean of all the pixels
+in that area. If no geometry is included, the function returns the mean of
+all the pixels for each band in the raster.</p>
+
+    <div class='pre p1 fill-light mt0'>mean</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[xmin, ymin, xmax, ymax]
+ array for a bounding box, [[
+[x00,y00]
+,...,
+[x0n,y0n]
+,
+[x00,y00]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a>></code>:
+        array of means for each band
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-keyword">const</span> means = <span class="hljs-keyword">await</span> geoblaze.mean(url, geometry);
+<span class="hljs-comment">// means is [red, green, blue, nir]</span>
+[<span class="hljs-number">42</span>, <span class="hljs-number">84</span>, <span class="hljs-number">92</span>, <span class="hljs-number">94</span>]</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='median'>
+      median
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The median function takes a raster and an optional geometry.
+If a geometry is included, the function returns the median of all the pixels
+in that area. If no geometry is included, the function returns the median of
+all the pixels for each band in the raster.</p>
+
+    <div class='pre p1 fill-light mt0'>median</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[xmin, ymin, xmax, ymax]
+ array for a bounding box, [[
+[x00,y00]
+,...,
+[x0n,y0n]
+,
+[x00,y00]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a>></code>:
+        array of medians for each band
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-keyword">const</span> medians = <span class="hljs-keyword">await</span> geoblaze.median(url, geometry);
+<span class="hljs-comment">// medians is [red, green, blue, nir]</span>
+[<span class="hljs-number">42</span>, <span class="hljs-number">84</span>, <span class="hljs-number">92</span>, <span class="hljs-number">94</span>]</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='mode'>
+      mode
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The mode function takes a georaster and an optional geometry.
+If a geometry is included, the function returns the mode of all the pixels
+in that area. If no geometry is included, the function returns the mode of
+all the pixels for each band in the georaster.  If there is more than one mode for a band,
+it computes the mean among those modes.</p>
+
+    <div class='pre p1 fill-light mt0'>mode</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[xmin, ymin, xmax, ymax]
+ array for a bounding box, [[
+[x00,y00]
+,...,
+[x0n,y0n]
+,
+[x00,y00]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a>></code>:
+        array of modes for each band
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.mode(url, geometry);
+<span class="hljs-comment">// results is [red, green, blue, nir]</span>
+[<span class="hljs-number">42</span>, <span class="hljs-number">84</span>, <span class="hljs-number">92</span>, <span class="hljs-number">94</span>]</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='modes'>
+      modes
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The modes function takes a georaster and an optional geometry.
+If a geometry is included, the function returns the modes of all the pixels
+in that area. If no geometry is included, the function returns the modes of
+all the pixels for each band in the georaster.  Unlike the mode function, it will
+not compute the mean, but return all the most common values for each band.</p>
+
+    <div class='pre p1 fill-light mt0'>modes</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[xmin, ymin, xmax, ymax]
+ array for a bounding box, [[
+[x00,y00]
+,...,
+[x0n,y0n]
+,
+[x00,y00]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a>>></code>:
+        array of modes for each band
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.mode(url, geometry);
+<span class="hljs-comment">// results is [ [red], [green], [blue], [nir] ]</span>
+[[ <span class="hljs-number">42</span>, <span class="hljs-number">43</span>] , [<span class="hljs-number">83</span>, <span class="hljs-number">82</span>, <span class="hljs-number">84</span>], [<span class="hljs-number">92</span>], [<span class="hljs-number">94</span>]]</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='parse'>
+      parse
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The parse function takes a georaster (as an object, array buffer, blob, buffer, file or url)
+and returns a promise. The promise resolves to a georaster, which
+can be used as input in other geoblaze methods, such as identify, sum,
+or histogram. This function essentially call's <a href="https://github.com/geotiff/georaster" target="_blank">georaster</a>'s parseGeoRaster function.</p>
+
+    <div class='pre p1 fill-light mt0'>parse</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { parse } <span class="hljs-keyword">from</span> <span class="hljs-string">"geoblaze"</span>;
+
+<span class="hljs-comment">// parse url</span>
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> parse(<span class="hljs-string">"https://example.org/naif.tif"</span>);
+
+<span class="hljs-comment">// parse array buffer</span>
+<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">"https://example.org/naif.tif"</span>);
+<span class="hljs-keyword">const</span> arrayBuffer = <span class="hljs-keyword">await</span> response.arrayBuffer();
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> parse(arrayBuffer);
+
+<span class="hljs-comment">// parse buffer (in NodeJS)</span>
+<span class="hljs-keyword">import</span> { readFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">"fs"</span>;
+<span class="hljs-keyword">const</span> buffer = readFileSync(<span class="hljs-string">"naip.tif"</span>);
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> parse(buffer);</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
 
   
   <div class='clearfix'>
@@ -1217,12 +1403,11 @@ for single band rasters. The output is a computed single band raster.</p>
   </div>
   
 
-  <p>The raster calculator function takes a raster and a javascript function as input.
+  <p>The raster calculator function takes a georaster and a javascript function as input.
 The function is performed pixel-by-pixel on each cell in the raster. The arguments
 to the function should reference bands in the order in the raster</p>
 
-
-  <div class='pre p1 fill-light mt0'>rasterCalculator</div>
+    <div class='pre p1 fill-light mt0'>rasterCalculator</div>
   
   
 
@@ -1239,8 +1424,8 @@ to the function should reference bands in the order in the raster</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>raster</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    a raster from the georaster library
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
 
           </div>
           
@@ -1248,8 +1433,105 @@ to the function should reference bands in the order in the raster</p>
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>operation</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>)</code>
-	    a string representation of a arithmetic operation to perform
+            <span class='code bold'>function</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a JavaScript function representing an arithmetic operation to perform
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://github.com/geotiff/georaster">GeoRaster</a></code>:
+        georaster - the computed georaster
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// 3-band GeoTIFF with bands (a) red, (b) green, and (c) blue</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/rgb.tif"</span>
+<span class="hljs-keyword">const</span> filteredRaster = geoblaze.rasterCalculator(url, (a, b, c) =&gt; a + b === c ? <span class="hljs-number">1</span> : <span class="hljs-number">0</span>);</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='stats'>
+      stats
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The stats function takes a georaster and an optional geometry.
+It then uses the <a href="https://github.com/DanielJDufour/calc-stats" target="_blank">calc-stats</a> library
+to calculate statistics for each band.</p>
+
+    <div class='pre p1 fill-light mt0'>stats</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[xmin, ymin, xmax, ymax]
+ array for a bounding box, [[
+[x00,y00]
+,...,
+[x0n,y0n]
+,
+[x00,y00]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
           
@@ -1264,7 +1546,7 @@ to the function should reference bands in the order in the raster</p>
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
-        raster - the computed georaster
+        array of stats for each band
 
       
     
@@ -1276,8 +1558,112 @@ to the function should reference bands in the order in the raster</p>
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> filteredRaster = geoblaze.rasterCalculator(georaster, (a, b, c) =&gt; a + b === c ? <span class="hljs-number">1</span> : <span class="hljs-number">0</span>);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> stats = <span class="hljs-keyword">await</span> geoblaze.stats(<span class="hljs-string">"https://example.org/imagery.tif"</span>, geometry);
+[{ <span class="hljs-attr">median</span>: <span class="hljs-number">906.7</span>, <span class="hljs-attr">min</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">max</span>: <span class="hljs-number">5166.7</span>, <span class="hljs-attr">sum</span>: <span class="hljs-number">262516.5</span>, <span class="hljs-attr">mean</span>: <span class="hljs-number">1232.4718309859154</span>, <span class="hljs-attr">modes</span>: [<span class="hljs-number">0</span>], <span class="hljs-attr">mode</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">histogram</span>: { <span class="hljs-number">0</span>: <span class="hljs-number">12</span>, <span class="hljs-number">1</span>: <span class="hljs-number">74</span>, <span class="hljs-number">2</span>: <span class="hljs-number">573</span>, ... } }]</pre>
     
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='sum'>
+      sum
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The sum function takes a georaster and an optional geometry.
+If a geometry is included, the function returns the sum of all the pixels
+in that area. If no geometry is included, the function returns the sum of
+all the pixels for each band in the georaster.</p>
+
+    <div class='pre p1 fill-light mt0'>sum</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an 
+[xmin, ymin, xmax, ymax]
+ array for a bounding box, [[
+[x00,y00]
+,...,
+[x0n,y0n]
+,
+[x00,y00]
+]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a>></code>:
+        array of sums for each band
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.sum(url, geometry);
+<span class="hljs-comment">// results is [red, green, blue, nir]</span>
+[<span class="hljs-number">217461</span>, <span class="hljs-number">21375</span>, <span class="hljs-number">57312</span>, <span class="hljs-number">457125</span>]</pre>
+    
+  
+
   
 
   

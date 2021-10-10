@@ -1,12 +1,10 @@
-import histogram from "./histogram.module";
-
 /**
  * The histogram function takes a georaster as an input and an optional geometry.
  * If a geometry is included, the function returns the histogram of all the pixels
  * in that area. If no geometry is included, the function returns the histogram of
  * all the pixels for each band in the georaster.
  * @name histogram
- * @param {(GeoRaster|string)} georaster - a georaster or a url to a georaster (e.g. geotiff)
+ * @param {GeoRaster|ArrayBuffer|Blob|Buffer|File|String} georaster - geospatial gridded raster data
  * @param {Object} [input=undefined] a geometry, which we'll use for clipping result
  * @param {Object} options
  * @param {("nominal" | "ratio")} options.scaleType - measurement scale
@@ -23,4 +21,4 @@ import histogram from "./histogram.module";
  * // break histograms into 10 bins for each band
  * const histograms = await geoblaze.histogram(url, geometry, { scaleType: "ratio", numClasses: 10, classType: "equal-interval" });
  */
-export default histogram;
+export { default } from "./histogram.module";

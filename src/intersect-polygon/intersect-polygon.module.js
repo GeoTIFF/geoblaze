@@ -1,6 +1,3 @@
-/**
- * @prettier
- */
 import _ from "underscore";
 import getDepth from "get-depth";
 import get from "../get";

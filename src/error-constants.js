@@ -1,7 +1,3 @@
-/**
- * @prettier
- */
-
 export const ERROR_LOAD_FILE_OUTSIDE_BROWSER =
   "Direct raster loading is currently not supported outside of the browser due to dependency limitations. Please use either a url or run the code in the browser.";
 

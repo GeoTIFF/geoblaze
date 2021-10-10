@@ -1,3 +1,1 @@
-import utils from "./utils.module";
-
-export default utils;
+export { default } from "./utils.module";

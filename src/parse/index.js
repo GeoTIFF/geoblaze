@@ -1,12 +1,10 @@
-import parse from "./parse.module";
-
 /**
- * The parse function takes a url to a geotiff, geotiff file, or array buffer as an input
- * and returns a promise. The promise resolves as a georaster, which
+ * The parse function takes a georaster (as an object, array buffer, blob, buffer, file or url)
+ * and returns a promise. The promise resolves to a georaster, which
  * can be used as input in other geoblaze methods, such as identify, sum,
  * or histogram. This function essentially call's <a href="https://github.com/geotiff/georaster" target="_blank">georaster</a>'s parseGeoRaster function.
  * @name parse
- * @param {ArrayBuffer|Buffer|File|string} urlOrFile - a string representation of a url, array buffer, buffer, or file
+ * @param {GeoRaster|ArrayBuffer|Blob|Buffer|File|String} georaster - geospatial gridded raster data
  * @example
  * import { parse } from "geoblaze";
  *
@@ -23,4 +21,4 @@ import parse from "./parse.module";
  * const buffer = readFileSync("naip.tif");
  * const georaster = await parse(buffer);
  */
-export default parse;
+export { default } from "./parse.module";

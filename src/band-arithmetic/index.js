@@ -1,12 +1,9 @@
-import bandArithmetic from "./band-arithmetic.module";
-
 /**
- * The band arithmetic function takes a georaster and an arithmetic operation written as
- * a string as input. The function performs pixel-by-pixel calculation according to the
+ * The band arithmetic function takes a georaster and an arithmetic operation. The function performs pixel-by-pixel calculation according to the
  * arithmetic operation provided. This is only possible for a multiband raster and not
  * for single band rasters. The output is a computed single band raster.
  * @name bandArithmetic
- * @param {GeoRaster|string} georaster - georaster or a url to a georaster (e.g. geotiff)
+ * @param {GeoRaster|ArrayBuffer|Blob|Buffer|File|String} georaster - geospatial gridded raster data
  * @param {String} operation - a string representation of an arithmetic operation to perform
  * @returns {GeoRaster} the computed georaster
  * @example
@@ -17,4 +14,4 @@ import bandArithmetic from "./band-arithmetic.module";
  * const georaster = await geoblaze.load("https://example.org/naip.tif");
  * const ndvi = await geoblaze.bandArithmetic(georaster, '(c - b)/(c + b)');
  */
-export default bandArithmetic;
+export { default } from "./band-arithmetic.module";

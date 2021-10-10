@@ -1,20 +1,18 @@
-import median from "./median.module";
-
 /**
- * The median function takes a raster as an input and an optional geometry.
+ * The median function takes a raster and an optional geometry.
  * If a geometry is included, the function returns the median of all the pixels
  * in that area. If no geometry is included, the function returns the median of
  * all the pixels for each band in the raster.
  * @name median
- * @param {GeoRaster|string} georaster - a georaster or a url to a georaster (e.g. geotiff)
+ * @param {GeoRaster|ArrayBuffer|Blob|Buffer|File|String} georaster - geospatial gridded raster data
  * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
  * @returns {Number[]} array of medians for each band
  * @example
  * // naip.tif has 4-bands: red, green, blue and near-infrared (nir)
  * const url = "https://example.org/naif.tif";
  *
- * const means = await geoblaze.mean(url, geometry);
- * // means is [red, green, blue, nir]
+ * const medians = await geoblaze.median(url, geometry);
+ * // medians is [red, green, blue, nir]
  * [42, 84, 92, 94]
  */
-export default median;
+export { default } from "./median.module";
