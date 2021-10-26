@@ -96,7 +96,7 @@
     "memory-fs": "^0.4.1",
     "null-loader": "^4.0.1",
     "path": "^0.12.7",
-    "puppeteer": "^1.11.0",
+    "puppeteer": "^10.4.0",
     "shapefile": "^0.6.6",
     "srvd": "^0.2.1",
     "webpack": "^4.42.1",

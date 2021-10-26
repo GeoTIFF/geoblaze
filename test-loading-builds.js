@@ -13,6 +13,7 @@ test('Should Successfully Require Production Build in Node', async ({ eq }) => {
   const georaster = await geoblaze.load(url2GeoTIFF);
   const result = await geoblaze.median(georaster);
   eq(result[0], 132);
+  eq(typeof geoblaze.stats, "function");
 });
 
 test('Should Successfully Load Production Build in the Browser', async ({ eq }) => {
@@ -31,6 +32,7 @@ test('Should Successfully Require Development Build in Node', async ({ eq }) => 
   const georaster = await geoblaze.load(url2GeoTIFF);
   const result = await geoblaze.median(georaster);
   eq(result[0], 132);
+  eq(typeof geoblaze.stats, "function");
 });
 
 test('Should Successfully Load Development Build in the Browser', async ({ eq }) => {
