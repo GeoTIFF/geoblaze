@@ -12,6 +12,7 @@ import mode from "./mode";
 import parse from "./parse";
 import rasterCalculator from "./raster-calculator";
 import sum from "./sum";
+import stats from "./stats";
 
 const geoblaze = {
   cache,
@@ -27,12 +28,13 @@ const geoblaze = {
   mode,
   parse,
   rasterCalculator,
-  sum
+  sum,
+  stats
 };
 
 export default geoblaze;
 
-export { cache, bandArithmetic, get, histogram, identify, load, max, mean, median, min, mode, parse, rasterCalculator, sum };
+export { cache, bandArithmetic, get, histogram, identify, load, max, mean, median, min, mode, parse, rasterCalculator, sum, stats };
 
 /* set window.geoblaze in the browser */
 if (typeof window !== "undefined") {
