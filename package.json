@@ -63,6 +63,7 @@
     "mathjs": "^6.6.1",
     "proj4": "^2.6.0",
     "proj4-fully-loaded": "^0.0.4",
+    "quick-resolve": "^0.0.1",
     "terraformer-arcgis-parser": "^1.0.5",
     "underscore": "^1.8.3",
     "xdim": "^1.2.1"

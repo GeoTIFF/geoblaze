@@ -1,11 +1,10 @@
 import calcStats from "calc-stats";
+import resolve from "quick-resolve";
 import get from "../get";
 import utils from "../utils";
 import wrap from "../wrap-parse";
 import convertGeometry from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
-
-const { resolve } = utils;
 
 const DEFAULT_CALC_STATS_OPTIONS = {
   calcHistogram: false,

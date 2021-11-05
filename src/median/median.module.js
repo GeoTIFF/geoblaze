@@ -1,6 +1,6 @@
+import resolve from "quick-resolve";
 import stats from "../stats";
-import utils from "../utils";
 
 export default function median(georaster, geometry) {
-  return utils.resolve(stats(georaster, geometry, { calcMedian: true })).then(stats => stats.map(({ median }) => median));
+  return resolve(stats(georaster, geometry, { calcMedian: true })).then(stats => stats.map(({ median }) => median));
 }
