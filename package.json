@@ -91,6 +91,7 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-react": "^7.7.0",
     "eslint-plugin-standard": "^3.0.1",
+    "esm": "^3.2.25",
     "find-and-read": "^1.0.0",
     "flug": "^2.1.0",
     "jsdoc": "^3.6.3",
