@@ -58,7 +58,7 @@
     "fast-max": "^0.3.0",
     "fast-min": "^0.2.0",
     "faster-median": "^0.2.1",
-    "georaster": "^1.5.4",
+    "georaster": "^1.5.6",
     "get-depth": "^0.0.0",
     "mathjs": "^6.6.1",
     "proj4": "^2.6.0",
