@@ -38,6 +38,23 @@ module.exports = (env, argv) => {
             !/node_modules\/webpack-dev-server/.test(modulePath) &&
             !/node_modules\/map-obj/.test(modulePath)
           ),
+          options: {
+            presets: [
+              [
+                "@babel/preset-env",
+                {
+                  targets: {
+                    ie: 11
+                  }
+                }
+              ]
+            ],
+            plugins: [
+              "@babel/plugin-transform-runtime",
+              "@babel/plugin-proposal-nullish-coalescing-operator",
+              "@babel/plugin-proposal-optional-chaining"
+            ]
+          }
         },
         target === "web" && {
           test: path.resolve(__dirname, 'node_modules/node-fetch/browser.js'),
