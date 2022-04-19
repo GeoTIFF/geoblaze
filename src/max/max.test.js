@@ -1,13 +1,15 @@
 import test from "flug";
+import reprojectBoundingBox from "reproject-bbox";
 import { serve } from "srvd";
 import load from "../load";
-import max from "./max.module";
+import max from "./max.core";
 
 serve({ debug: true, max: 1, port: 3000 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
 const bbox = [80.63, 7.42, 84.21, 10.1];
+const bbox3857 = reprojectBoundingBox({ bbox, from: 4326, to: 3857 });
 const expectedBboxValue = 5166.7;
 
 const polygon = [
@@ -60,4 +62,16 @@ test("(Modern) Get Max from Polygon", async ({ eq }) => {
   const result = await max(url, polygon);
   const value = Number(result[0].toFixed(2));
   eq(value, expectedPolygonValue);
+});
+
+test("Max with Web Mercator Bounding Box and GeoRaster Object", async ({ eq }) => {
+  const georaster = await load(url);
+  const value = Number(max(georaster, { srs: 3857, geometry: bbox3857 })[0].toFixed(2));
+  eq(value, expectedBboxValue);
+});
+
+test("Max with Web Mercator Bounding Box and GeoRaster URL", async ({ eq }) => {
+  const result = await max(url, { srs: 3857, geometry: bbox3857 });
+  const value = Number(result[0].toFixed(2));
+  eq(value, expectedBboxValue);
 });

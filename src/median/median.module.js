@@ -1,6 +1,7 @@
-import resolve from "quick-resolve";
-import stats from "../stats";
+import wrapGeom from "../wrap-geom";
+import wrapParse from "../wrap-parse";
+import medianCore from "./median.core";
 
-export default function median(georaster, geometry) {
-  return resolve(stats(georaster, geometry, { calcMedian: true })).then(stats => stats.map(({ median }) => median));
+export default function median(...rest) {
+  return wrapParse(wrapGeom(medianCore))(...rest);
 }

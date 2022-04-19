@@ -43,7 +43,7 @@ const polygon = [
     [83.12255859375, 22.49225722008518]
   ]
 ];
-const expectedPolygonValue = 1573.3;
+const expectedPolygonValue = 1537.2;
 
 test("Get Median from Bounding Box", async ({ eq }) => {
   const georaster = await load(url);

@@ -15,8 +15,8 @@ import sum from "./sum";
 import stats from "./stats";
 
 const geoblaze = {
-  cache,
   bandArithmetic,
+  cache,
   get,
   histogram,
   identify,
@@ -34,12 +34,7 @@ const geoblaze = {
 
 export default geoblaze;
 
-export { cache, bandArithmetic, get, histogram, identify, load, max, mean, median, min, mode, parse, rasterCalculator, sum, stats };
-
-/* require geoblaze in AMD environment */
-if (typeof define === "function" && define.amd) {  // eslint-disable-line no-undef
-  define(() => { return geoblaze; }); // eslint-disable-line no-undef
-}
+export { bandArithmetic, cache, get, histogram, identify, load, max, mean, median, min, mode, parse, rasterCalculator, sum, stats };
 
 /* set window.geoblaze in the browser */
 if (typeof window !== "undefined") {

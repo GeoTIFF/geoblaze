@@ -1,5 +1,6 @@
 import test from "flug";
 import { serve } from "srvd";
+import reprojectGeoJSON from "reproject-geojson";
 import load from "../load";
 import identify from "./identify.module";
 
@@ -52,4 +53,11 @@ test("(Modern) Identified Point Correctly from URL", async ({ eq }) => {
 test("(Modern) Try to identify point outside raster and correctly returned null from URL", async ({ eq }) => {
   const values = await identify(url, [-200, 7.42]);
   eq(values, null);
+});
+
+test("(Modern) Identified Point Correctly from file", async ({ eq }) => {
+  const srs = 32617;
+  const geom = await reprojectGeoJSON(point, { to: srs });
+  const values = await identify(url, { srs, geometry: geom });
+  eq(values, [expectedValue]);
 });

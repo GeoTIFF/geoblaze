@@ -1,6 +1,7 @@
-import resolve from "quick-resolve";
-import stats from "../stats";
+import wrapGeom from "../wrap-geom";
+import wrapParse from "../wrap-parse";
+import modesCore from "./modes.core";
 
-export default function modes(georaster, geometry) {
-  return resolve(stats(georaster, geometry, { calcModes: true })).then(stats => stats.map(({ modes }) => modes));
+export default function modes(...rest) {
+  return wrapParse(wrapGeom(modesCore))(...rest);
 }

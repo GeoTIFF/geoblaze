@@ -1,6 +1,7 @@
-import stats from "../stats";
-import utils from "../utils";
+import wrapGeom from "../wrap-geom";
+import wrapParse from "../wrap-parse";
+import minCore from "./min.core";
 
-export default function min(georaster, geometry) {
-  return utils.resolve(stats(georaster, geometry, { calcMin: true })).then(stats => stats.map(({ min }) => min));
+export default function min(...rest) {
+  return wrapParse(wrapGeom(minCore))(...rest);
 }

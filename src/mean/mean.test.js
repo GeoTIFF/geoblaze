@@ -29,7 +29,7 @@ const polygon = [
     [83.12255859375, 22.49225722008518]
   ]
 ];
-const expectedPolygonValue = 1826.74;
+const expectedPolygonValue = 1801.47;
 
 const polygonGeojson = `{
   "type": "FeatureCollection",
@@ -51,7 +51,7 @@ const polygonGeojson = `{
      }
   ]
 }`;
-const expectedPolygonGeojsonValue = 1826.74;
+const expectedPolygonGeojsonValue = 1801.47;
 
 test("(Legacy) Mean without Geometry", async ({ eq }) => {
   const georaster = await load(url);

@@ -11,7 +11,6 @@
   },
   "rules": {
     "arrow-parens": ["error", "as-needed"],
-    "camelcase": "error",
     "comma-dangle": ["error", "never"],
     "indent": ["error", 2],
     "linebreak-style": ["error", "unix"],

@@ -1,19 +1,20 @@
+const envisage = require("envisage");
 const path = require('path');
 
-module.exports = (env, argv) => {
+const config = (env, argv) => {
 
   const {mode, target} = argv;
 
-  const filename = `geoblaze.${target}${mode === 'production' ? '.min' : ''}.js`;
+  // const filename = `geoblaze.${target}${mode === 'production' ? '.min' : ''}.js`;
 
   const results = {
     mode,
     devtool: 'source-map',
-    entry: './src/index.js',
+    // entry: './src/index.js',
     output: {
       library: 'geoblaze',
       path: path.resolve(__dirname, 'dist'),
-      filename,
+      // filename,
       globalObject: `(typeof window !== 'undefined' ? window : typeof self !== 'undefined' ? self : typeof global !== 'undefined' ? global : typeof this !== 'undefined' ? this : undefined)`,
       libraryTarget: 'umd',
       umdNamedDefine: true  
@@ -81,5 +82,13 @@ module.exports = (env, argv) => {
     };
   }
 
+  // inject environmental variables
+  envisage.assign({ prefix: "GEOBLAZE_WEBPACK", target: results });
+
+  if (!results.entry) throw new Error("no GEOBLAZE_WEBPACK_ENTRY");
+  if (!results.output.filename) throw new Error("no GEOBLAZE_WEBPACK_OUTPUT_FILENAME");
+
   return results;
 };
+
+module.exports = config;

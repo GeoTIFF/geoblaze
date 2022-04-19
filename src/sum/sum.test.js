@@ -39,7 +39,7 @@ const polygon = [
     [83.12255859375, 22.49225722008518]
   ]
 ];
-const expectedPolygonValue = 3165731.9;
+const expectedPolygonValue = 3125542.2;
 
 const polygonGeojson1 = `{
   "type": "FeatureCollection",
@@ -85,7 +85,7 @@ const polygonGeojson1 = `{
   }]
 }`;
 
-const expectedPolygonGeojsonValue1 = 320113.1;
+const expectedPolygonGeojsonValue1 = 292256.3;
 
 const polygonGeojson2 = `{
   "type": "FeatureCollection",
@@ -131,7 +131,7 @@ const polygonGeojson2 = `{
   }]
 }`;
 
-const expectedPolygonGeojsonValue2 = 141335.5;
+const expectedPolygonGeojsonValue2 = 137973.3;
 
 const polygonGeojsonCollection = `{
   "type": "FeatureCollection",
@@ -227,7 +227,7 @@ test("(Legacy) Get Sum from Veneto Geonode", async ({ eq }) => {
   const [georaster, geojson] = values;
   const results = sum(georaster, geojson);
   const actualValue = Number(results[0].toFixed(2));
-  const expectedValue = 25323.11;
+  const expectedValue = 25057.69;
   eq(actualValue, expectedValue);
 });
 
@@ -306,7 +306,7 @@ test("(Legacy) Test sum for Country with Multiple Rings", async ({ eq }) => {
 test("(Legacy) Get Sum from Polygon Above X Value", async ({ eq }) => {
   const georaster = await load(url);
   const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
-  eq(value, 1501820.8);
+  eq(value, 1453380.1);
 });
 
 // test getting correct populations for countries
@@ -385,7 +385,7 @@ test("(Modern) Get Sum from Veneto Geonode", async ({ eq }) => {
   const [georaster, geojson] = values;
   const results = await sum(georaster, geojson);
   const actualValue = Number(results[0].toFixed(2));
-  const expectedValue = 25323.11;
+  const expectedValue = 25057.69;
   eq(actualValue, expectedValue);
 });
 
@@ -464,5 +464,5 @@ test("(Modern) Test sum for Country with Multiple Rings", async ({ eq }) => {
 test("(Modern) Get Sum from Polygon Above X Value", async ({ eq }) => {
   const georaster = await parse(url);
   const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
-  eq(value, 1501820.8);
+  eq(value, 1453380.1);
 });
