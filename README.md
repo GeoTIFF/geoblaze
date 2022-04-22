@@ -108,5 +108,8 @@ To run tests:
   npm run test
 ```
 
+# Resources:
+- GeoBlaze: Cloud-Optimized Raster Analysis: https://www.youtube.com/watch?v=v3e2ODCK9Co&t=6135s
+
 # Used By
 <a href="https://geotiff.io"><img src="https://github.com/GeoTIFF/geotiff.io/raw/master/assets/favicon.png" height="75px"></a>
