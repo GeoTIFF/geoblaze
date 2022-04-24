@@ -71,7 +71,7 @@
     "quick-resolve": "^0.0.1",
     "reproject-bbox": "^0.3.0",
     "reproject-geojson": "^0.2.0",
-    "snap-bbox": "^0.2.0",
+    "snap-bbox": "^0.3.0",
     "terraformer-arcgis-parser": "^1.1.0",
     "underscore": "^1.13.1",
     "xdim": "^1.2.1"
