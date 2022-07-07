@@ -91,7 +91,7 @@
     "babel-loader": "^8.2.3",
     "concurrently": "^6.3.0",
     "copy-webpack-plugin": "^5.1.2",
-	"cross-env": "^7.0.0",
+	"cross-env": "^7.0.3",
     "documentation": "^9.3.1",
     "envisage": "^0.0.1",
     "eslint": "^4.19.1",
