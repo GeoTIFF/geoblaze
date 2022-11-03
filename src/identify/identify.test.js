@@ -61,3 +61,11 @@ test("(Modern) Identified Point Correctly from file", async ({ eq }) => {
   const values = await identify(url, { srs, geometry: geom });
   eq(values, [expectedValue]);
 });
+
+test("(Modern) Identified Same-SRS Point Correctly from file", async ({ eq }) => {
+  const georaster = await load(url);
+  const srs = georaster.projection;
+  const geom = await reprojectGeoJSON(point, { to: srs });
+  const values = identify(georaster, { srs, geometry: geom });
+  eq(values, [expectedValue]);
+});
