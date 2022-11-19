@@ -17,6 +17,7 @@ async function toArrayBuffer(response) {
       return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
     }
   } catch (error) {
+    console.error("[geoblaze] toArrayBuffer failed because of the following error", error);
     throw error;
   }
 }

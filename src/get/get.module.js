@@ -98,6 +98,7 @@ const get = (georaster, geom, flat) => {
       }
     }
   } catch (e) {
+    console.error("[geoblaze] error in get.module.js");
     throw e;
   }
 };

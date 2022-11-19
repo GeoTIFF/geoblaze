@@ -12,6 +12,7 @@ function fetchJsons(urls) {
   try {
     return Promise.all(urls.map(fetchJson));
   } catch (error) {
+    console.log("[geoblaze] fetchJsons failed because of the following error:", error);
     throw error;
   }
 }
