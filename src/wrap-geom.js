@@ -13,6 +13,8 @@ export default function wrapGeom(func) {
         } else {
           geom = reprojectGeoJSON(geometry, { from: srs, to: georaster.projection });
         }
+      } else {
+        geom = geom.geometry;
       }
     }
     return func(georaster, geom, ...rest);
