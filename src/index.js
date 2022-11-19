@@ -38,10 +38,10 @@ export { cache, bandArithmetic, get, histogram, identify, load, max, mean, media
 
 /* require geoblaze in AMD environment */
 if (typeof define === "function" && define.amd) {
-  // eslint-disable-line no-undef
+  /* global define */
   define(() => {
     return geoblaze;
-  }); // eslint-disable-line no-undef
+  });
 }
 
 /* set window.geoblaze in the browser */
