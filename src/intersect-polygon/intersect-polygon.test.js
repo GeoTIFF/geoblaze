@@ -55,7 +55,7 @@ test("(Legacy) Test intersection/sum calculations for Country with Multiple Ring
   let numberOfIntersectingPixels = 0;
   const geom = convertGeometry("polygon", country);
   intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
-  eq(numberOfIntersectingPixels, 281);
+  eq(numberOfIntersectingPixels, 280);
 });
 
 // MODERN
@@ -98,5 +98,5 @@ test("(Modern) Test intersection/sum calculations for Country with Multiple Ring
   let numberOfIntersectingPixels = 0;
   const geom = convertGeometry("polygon", country);
   await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
-  eq(numberOfIntersectingPixels, 281);
+  eq(numberOfIntersectingPixels, 280);
 });

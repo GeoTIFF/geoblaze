@@ -28,65 +28,111 @@ const polygon = [
 
 const EXPECTED_RASTER_STATS = [
   {
+    count: 820517,
+    invalid: 0,
+    max: 8131.2,
+    mean: 132.04241399017369,
     median: 0,
     min: 0,
-    max: 8131.2,
-    sum: 108343045.39997534,
-    mean: 132.04241399017369,
+    mode: 0,
     modes: [0],
-    mode: 0
+    range: 8131.2,
+    std: 562.8169687364914,
+    sum: 108343045.39997534,
+    valid: 820517,
+    variance: 316762.94029773277
   }
 ];
 
 const EXPECTED_BBOX_STATS = [
   {
+    count: 213,
+    invalid: 0,
+    max: 5166.7,
+    mean: 1232.4718309859154,
     median: 906.7,
     min: 0,
-    max: 5166.7,
-    sum: 262516.5,
-    mean: 1232.4718309859154,
+    mode: 0,
     modes: [0],
-    mode: 0
+    range: 5166.7,
+    std: 1195.3529916721104,
+    sum: 262516.5,
+    valid: 213,
+    variance: 1428868.7746994647
   }
 ];
 
-const EXPECTED_POLYGON_STATS = [{ median: 1537.2, min: 0, max: 7807.4, sum: 3125542.199999998, mean: 1801.4652449567711, modes: [0], mode: 0 }];
+const EXPECTED_POLYGON_STATS = [
+  {
+    count: 1735,
+    invalid: 0,
+    max: 7807.4,
+    mean: 1801.4652449567711,
+    median: 1537.2,
+    min: 0,
+    mode: 0,
+    modes: [0],
+    range: 7807.4,
+    std: 1514.9715674097968,
+    sum: 3125542.199999998,
+    valid: 1735,
+    variance: 2295138.8500600965
+  }
+];
 
 test("(Sync) Stats without Geometry", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, undefined);
-  results.forEach(band => delete band.histogram);
+  results.forEach(band => {
+    delete band.uniques;
+    delete band.histogram;
+  });
   eq(results, EXPECTED_RASTER_STATS);
 });
 
 test("(Async) Stats without Geometry", async ({ eq }) => {
   const results = await stats(url, undefined);
-  results.forEach(band => delete band.histogram);
+  results.forEach(band => {
+    delete band.histogram;
+    delete band.uniques;
+  });
   eq(results, EXPECTED_RASTER_STATS);
 });
 
 test("(Sync) Stats with Bounding Box", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, bbox);
-  results.forEach(band => delete band.histogram);
+  results.forEach(band => {
+    delete band.histogram;
+    delete band.uniques;
+  });
   eq(results, EXPECTED_BBOX_STATS);
 });
 
 test("(Async) Stats with Bounding Box", async ({ eq }) => {
   const results = await stats(url, bbox);
-  results.forEach(band => delete band.histogram);
+  results.forEach(band => {
+    delete band.histogram;
+    delete band.uniques;
+  });
   eq(results, EXPECTED_BBOX_STATS);
 });
 
 test("(Sync) Stats with Polygon", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, polygon);
-  results.forEach(band => delete band.histogram);
+  results.forEach(band => {
+    delete band.histogram;
+    delete band.uniques;
+  });
   eq(results, EXPECTED_POLYGON_STATS);
 });
 
 test("(Async) Stats with Polygon", async ({ eq }) => {
   const results = await stats(url, polygon);
-  results.forEach(band => delete band.histogram);
+  results.forEach(band => {
+    delete band.histogram;
+    delete band.uniques;
+  });
   eq(results, EXPECTED_POLYGON_STATS);
 });
