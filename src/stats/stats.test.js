@@ -50,7 +50,7 @@ const EXPECTED_BBOX_STATS = [
   }
 ];
 
-const EXPECTED_POLYGON_STATS = [{ "median":1537.2,"min":0,"max":7807.4,"sum":3125542.199999998,"mean":1801.4652449567711,"modes":[0],"mode":0 }];
+const EXPECTED_POLYGON_STATS = [{ median: 1537.2, min: 0, max: 7807.4, sum: 3125542.199999998, mean: 1801.4652449567711, modes: [0], mode: 0 }];
 
 test("(Sync) Stats without Geometry", async ({ eq }) => {
   const georaster = await load(url);

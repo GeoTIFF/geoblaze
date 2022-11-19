@@ -37,8 +37,11 @@ export default geoblaze;
 export { cache, bandArithmetic, get, histogram, identify, load, max, mean, median, min, mode, parse, rasterCalculator, sum, stats };
 
 /* require geoblaze in AMD environment */
-if (typeof define === "function" && define.amd) {  // eslint-disable-line no-undef
-  define(() => { return geoblaze; }); // eslint-disable-line no-undef
+if (typeof define === "function" && define.amd) {
+  // eslint-disable-line no-undef
+  define(() => {
+    return geoblaze;
+  }); // eslint-disable-line no-undef
 }
 
 /* set window.geoblaze in the browser */

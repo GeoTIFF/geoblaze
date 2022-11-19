@@ -16,5 +16,5 @@ export default function wrapGeom(func) {
       }
     }
     return func(georaster, geom, ...rest);
-  };  
+  };
 }

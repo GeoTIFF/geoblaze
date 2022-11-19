@@ -27,7 +27,6 @@ const ratioEIGeorasterResults = {
   ">229.14 - 255": 78
 };
 
-
 const ratioQuantileBboxResults = {
   "0 - 93.2": 31,
   ">93.2 - 272": 31,
