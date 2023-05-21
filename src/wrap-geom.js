@@ -9,7 +9,7 @@ export default function wrapGeom(func) {
       if (geom.srs !== georaster.projection) {
         const { geometry, srs } = geom;
         if (Array.isArray(geometry) && geometry.length === 4 && geometry.every(n => typeof n === "number")) {
-          geom = reprojectBoundingBox({ bbox: geometry, from: srs, to: georaster.projection });
+          geom = reprojectBoundingBox({ bbox: geometry, density: 10, from: srs, to: georaster.projection });
         } else {
           geom = reprojectGeoJSON(geometry, { from: srs, to: georaster.projection });
         }
