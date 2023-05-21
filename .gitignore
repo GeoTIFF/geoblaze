@@ -103,3 +103,6 @@ dist/
 pnpm-lock.yaml
 .pnpm-store/
 .dvm
+out
+data/geotiff-test-data/*.cog
+data/geotiff-test-data/*.tif*

@@ -1,0 +1,19 @@
+name: test-main
+run-name: test-main
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: run all tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install
+      - run: npm run lint
+      - run: npm run setup
+      - run: npm run test
+      # see https://github.com/webpack/webpack/issues/14532
+      - run: NODE_OPTIONS=--openssl-legacy-provider npm run build
+      - run: npm run test-loading-builds

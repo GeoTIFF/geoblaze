@@ -1,6 +1,13 @@
 # start in data directory
 cd data
 
+# setup test-data
+echo "---------- Setting up GeoTIFF Test Data ----------"
+cd geotiff-test-data
+bash setup.sh
+cd ..
+echo "---------- Finished Setting up GeoTIFF Data ----------"
+
 # setup gadm
 echo "---------- Setting up GADM Data ----------"
 cd gadm
