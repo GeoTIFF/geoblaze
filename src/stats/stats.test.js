@@ -3,7 +3,7 @@ import { serve } from "srvd";
 import load from "../load";
 import stats from "./stats.module";
 
-serve({ debug: true, max: 1, port: 3000 });
+serve({ debug: true, max: 7, port: 3000, wait: 240 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -13,7 +13,7 @@ const polygon = [
   [
     [83.12255859375, 22.49225722008518],
     [82.96875, 21.57571893245848],
-    [81.58447265624999, 1.207458730482642],
+    [81.58447265624999, 21.207458730482642],
     [83.07861328125, 20.34462694382967],
     [83.8037109375, 19.497664168139053],
     [84.814453125, 19.766703551716976],
@@ -64,19 +64,19 @@ const EXPECTED_BBOX_STATS = [
 
 const EXPECTED_POLYGON_STATS = [
   {
-    count: 1735,
+    count: 1727,
     invalid: 0,
     max: 7807.4,
-    mean: 1801.4652449567711,
-    median: 1537.2,
+    mean: 1827.7067168500275,
+    median: 1612,
     min: 0,
     mode: 0,
     modes: [0],
     range: 7807.4,
-    std: 1514.9715674097968,
-    sum: 3125542.199999998,
-    valid: 1735,
-    variance: 2295138.8500600965
+    std: 1494.08480216611,
+    sum: 3156449.4999999977,
+    valid: 1727,
+    variance: 2232289.3960637436
   }
 ];
 
@@ -135,4 +135,13 @@ test("(Async) Stats with Polygon", async ({ eq }) => {
     delete band.uniques;
   });
   eq(results, EXPECTED_POLYGON_STATS);
+});
+
+test("hole", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/gadas-4326.tif";
+  const url_to_geometry = "http://localhost:3000/data/hole.geojson";
+  const geometry = await fetch(url_to_geometry).then(r => r.json());
+  const results = await stats(url, geometry);
+  const mode = results.map(stats => stats.mode);
+  eq(mode, [61, 133, 170, 255]); // #3d85aad9
 });
