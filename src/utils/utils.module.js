@@ -3,6 +3,11 @@ import combine from "@turf/combine";
 import fetch from "cross-fetch";
 import ArcGIS from "terraformer-arcgis-parser";
 import getDepth from "get-depth";
+import calcBoundingBox from "bbox-fns/calc.js";
+
+const FEATURE = "FEATURE";
+const POLYGON = "POLYGON";
+const MULTIPOLYGON = "MULTIPOLYGON";
 
 function fetchJson(url) {
   return fetch(url).then(response => response.json());
@@ -36,37 +41,8 @@ function runOnTableOfValues(table, noDataValue, runOnValues) {
 }
 
 function getBoundingBox(geometry) {
-  let xmin, ymin, xmax, ymax;
-
-  if (typeof geometry[0][0] === "number") {
-    const numberOfPoints = geometry.length;
-    xmin = xmax = geometry[0][0];
-    ymin = ymax = geometry[0][1];
-    for (let i = 1; i < numberOfPoints; i++) {
-      const [x, y] = geometry[i];
-      if (x < xmin) xmin = x;
-      else if (x > xmax) xmax = x;
-      if (y < ymin) ymin = y;
-      else if (y > ymax) ymax = y;
-    }
-  } else {
-    geometry.forEach((part, index) => {
-      const bbox = getBoundingBox(part);
-      if (index == 0) {
-        xmin = bbox.xmin;
-        xmax = bbox.xmax;
-        ymin = bbox.ymin;
-        ymax = bbox.ymax;
-      } else {
-        if (bbox.xmin < xmin) xmin = bbox.xmin;
-        else if (bbox.xmax > xmax) xmax = bbox.xmax;
-        if (bbox.ymin < ymin) ymin = bbox.ymin;
-        else if (bbox.ymax > ymax) ymax = bbox.ymax;
-      }
-    });
-  }
-
-  return { xmax, xmin, ymax, ymin };
+  const [xmin, ymin, xmax, ymax] = calcBoundingBox(geometry);
+  return { xmin, ymin, xmax, ymax };
 }
 
 function cluster(items, newClusterTest) {
