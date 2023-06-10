@@ -46,7 +46,7 @@ const stats = (georaster, geometry, calcStatsOptions, test) => {
       // runs for every pixel in the polygon. Here we add them to
       // an array to run through the getMode function
       const done = intersectPolygon(georaster, geometry, (value, bandIndex) => {
-        if (test === undefined || test(value)) {
+        if ((value !== noDataValue && test === undefined) || test(value)) {
           if (values[bandIndex]) {
             values[bandIndex].push(value);
           } else {
