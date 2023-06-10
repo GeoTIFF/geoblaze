@@ -32,17 +32,12 @@ const get = (georaster, geom, flat) => {
 
       // use a utility function that converts from the lat/long coordinate
       // space to the image coordinate space
-      // // left, top, right, bottom
       const bbox = utils.convertCrsBboxToImageBbox(georaster, geometry);
-      const bboxLeft = bbox.xmin;
-      const bboxTop = bbox.ymin;
-      const bboxRight = bbox.xmax;
-      const bboxBottom = bbox.ymax;
 
-      cropTop = Math.max(bboxTop, 0);
-      cropLeft = Math.max(bboxLeft, 0);
-      cropRight = Math.min(bboxRight, georaster.width);
-      cropBottom = Math.min(bboxBottom, georaster.height);
+      cropTop = Math.max(bbox.ymin, 0);
+      cropLeft = Math.max(bbox.xmin, 0);
+      cropRight = Math.min(bbox.xmax, georaster.width);
+      cropBottom = Math.min(bbox.ymax, georaster.height);
     } catch (error) {
       console.error(error);
       throw error;
@@ -69,7 +64,10 @@ const get = (georaster, geom, flat) => {
             left: cropLeft,
             top: cropTop,
             right: cropRight,
-            bottom: cropBottom
+            bottom: cropBottom,
+
+            // shouldn't resample, but specifying resampleMethod just in case
+            resampleMethod: "near"
           })
           .then(bands => {
             return bands.map(rows => {
