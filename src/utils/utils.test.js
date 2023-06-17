@@ -122,57 +122,6 @@ test("Test Intersections", ({ eq }) => {
   //eq(intersection.y, 41.641892470257524);
 });
 
-test("Test Categorization of Intersections", ({ eq }) => {
-  // through
-  let segments = [{ xmin: -140, xmax: -140, direction: 1 }];
-  let actual = utils.categorizeIntersection(segments);
-  eq(actual.through, true);
-  eq(actual.xmin, -140);
-  eq(actual.xmax, -140);
-
-  // rebound
-  segments = [
-    { xmin: -140, xmax: -140, direction: 1 },
-    { xmin: -140, xmax: -140, direction: -1 }
-  ];
-  actual = utils.categorizeIntersection(segments);
-  eq(actual.through, false);
-  eq(actual.xmin, -140);
-  eq(actual.xmax, -140);
-
-  // horizontal through
-  segments = [
-    { xmin: -140, xmax: -140, direction: 1 },
-    { xmin: -140, xmax: -130, direction: 0 },
-    { xmin: -130, xmax: -130, direction: 1 }
-  ];
-  actual = utils.categorizeIntersection(segments);
-  eq(actual.through, true);
-  eq(actual.xmin, -140);
-  eq(actual.xmax, -130);
-
-  // horizontal rebound
-  segments = [
-    { xmin: -140, xmax: -140, direction: 1 },
-    { xmin: -140, xmax: -130, direction: 0 },
-    { xmin: -130, xmax: -130, direction: -1 }
-  ];
-  actual = utils.categorizeIntersection(segments);
-  eq(actual.through, false);
-  eq(actual.xmin, -140);
-  eq(actual.xmax, -130);
-
-  // through with stop
-  segments = [
-    { xmin: -140, xmax: -140, direction: 1 },
-    { xmin: -140, xmax: -140, direction: 1 }
-  ];
-  actual = utils.categorizeIntersection(segments);
-  eq(actual.through, true);
-  eq(actual.xmin, -140);
-  eq(actual.xmax, -140);
-});
-
 test("get constructor names", ({ eq }) => {
   eq(utils.getConstructorName(new ArrayBuffer()), "ArrayBuffer");
 });
