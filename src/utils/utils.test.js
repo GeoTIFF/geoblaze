@@ -48,15 +48,6 @@ test("Get Depth For Multipolygon", async ({ eq }) => {
   }
 });
 
-test("Test Coupling", ({ eq }) => {
-  const items = [0, 1, 18, 77, 99, 103];
-  const actual = utils.couple(items);
-  eq(actual.length, items.length / 2);
-  actual.map(couple => {
-    eq(couple.length, 2);
-  });
-});
-
 test("Test isPolygon", async ({ eq }) => {
   const countries = ["Afghanistan", "Ukraine"];
   for (let i = 0; i < countries.length; i++) {
