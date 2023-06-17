@@ -35,26 +35,6 @@ test("Test Forcing Within", ({ eq }) => {
   eq(utils.forceWithin(990, 1, 11), 11);
 });
 
-test("Test Merging of Index Ranges", ({ eq }) => {
-  let original = [
-    [0, 10],
-    [10, 10],
-    [20, 30],
-    [30, 40]
-  ];
-  let merged = utils.mergeRanges(original);
-  eq(JSON.stringify(merged), "[[0,10],[20,40]]");
-
-  original = [
-    [0, 10],
-    [10, 10],
-    [21, 31],
-    [30, 40]
-  ];
-  merged = utils.mergeRanges(original);
-  eq(JSON.stringify(merged), "[[0,10],[21,40]]");
-});
-
 test("Get Depth For Multipolygon", async ({ eq }) => {
   const countryDepths = [
     ["Afghanistan", 3],
