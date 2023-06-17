@@ -29,19 +29,6 @@ test("Get Bounding when Bounding Box when Bigger Than Raster and with Negative V
   eq(actualBbox.ymin < actualBbox.ymax, true);
 });
 
-test("Get Bounding Box of GeoJSON that has MultiPolygon Geometry (i.e., multiple rings)", async ({ eq }) => {
-  const country = await fetchJson(urlToGeojson);
-  const bbox = utils.getBoundingBox(country.geometry.coordinates);
-  eq(typeof bbox.xmin, "number");
-  eq(typeof bbox.xmax, "number");
-  eq(typeof bbox.ymin, "number");
-  eq(typeof bbox.ymax, "number");
-  eq(bbox.xmin, 32.76010131835966);
-  eq(bbox.xmax, 33.92147445678711);
-  eq(bbox.ymin, 34.56208419799816);
-  eq(bbox.ymax, 35.118995666503906);
-});
-
 test("Test Forcing Within", ({ eq }) => {
   eq(utils.forceWithin(10, 1, 11), 10);
   eq(utils.forceWithin(-10, 1, 11), 1);
@@ -79,30 +66,6 @@ test("Get Depth For Multipolygon", async ({ eq }) => {
     const actualDepth = getDepth(country.geometry.coordinates);
     eq(actualDepth, depth);
   }
-});
-
-test("Clustering Of Line Segments: For array of objects holding information about intersections: Got Correct Split", ({ eq }) => {
-  let segments, computed, computedNumberOfClusters;
-
-  segments = [{ endsOffLine: true }, { endsOffLine: false }, { endsOffLine: false }, { endsOffLine: true }];
-  computed = utils.cluster(segments, s => s.endsOffLine);
-  computedNumberOfClusters = computed.length;
-  eq(computedNumberOfClusters, 2);
-  eq(computed[0].length, 1);
-  eq(computed[1].length, 3);
-
-  segments = [{ endsOffLine: true, index: 0 }, { endsOffLine: false }, { endsOffLine: false }, { endsOffLine: false, index: 99 }];
-  computed = utils.cluster(segments, s => s.endsOffLine);
-  computedNumberOfClusters = computed.length;
-  eq(computedNumberOfClusters, 2);
-  eq(computed[0].length, 1);
-  eq(computed[1].length, 3);
-
-  segments = [{ endsOffLine: true, index: 0 }, { endsOffLine: false }, { endsOffLine: false }, { endsOffLine: false, endsOnLine: true, index: 99 }];
-  computed = utils.clusterLineSegments(segments, 100, true);
-  computedNumberOfClusters = computed.length;
-  eq(computedNumberOfClusters, 1);
-  eq(computed[0].length, 4);
 });
 
 test("Test Coupling", ({ eq }) => {

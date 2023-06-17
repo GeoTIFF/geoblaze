@@ -67,29 +67,6 @@ function cluster(items, newClusterTest) {
   }
 }
 
-function clusterLineSegments(lineSegments, numberOfEdges, debug = false) {
-  try {
-    const clusters = cluster(lineSegments, s => s.endsOffLine);
-
-    const numberOfClusters = clusters.length;
-
-    if (numberOfClusters >= 2) {
-      const firstCluster = clusters[0];
-      const firstSegment = firstCluster[0];
-      const lastCluster = _.last(clusters);
-      const lastSegment = _.last(lastCluster);
-
-      if (lastSegment.index === numberOfEdges - 1 && firstSegment.index === 0 && lastSegment.endsOnLine) {
-        clusters[0] = clusters.pop().concat(firstCluster);
-      }
-    }
-
-    return clusters;
-  } catch (error) {
-    console.error("[clusterLineSegments]", error);
-  }
-}
-
 const utils = {
   // This function takes in an array with an even number of elements and
   // returns an array that couples every two consecutive elements;
@@ -401,8 +378,6 @@ const utils = {
   },
 
   cluster,
-
-  clusterLineSegments,
 
   sum(values) {
     return values.reduce((a, b) => a + b);
