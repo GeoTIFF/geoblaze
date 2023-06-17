@@ -40,33 +40,6 @@ function runOnTableOfValues(table, noDataValue, runOnValues) {
   }
 }
 
-function getBoundingBox(geometry) {
-  const [xmin, ymin, xmax, ymax] = calcBoundingBox(geometry);
-  return { xmin, ymin, xmax, ymax };
-}
-
-function cluster(items, newClusterTest) {
-  try {
-    const numberOfItems = items.length;
-    const clusters = [];
-    let cluster = [];
-    for (let i = 0; i < numberOfItems; i++) {
-      const item = items[i];
-      cluster.push(item);
-      if (newClusterTest(item)) {
-        clusters.push(cluster);
-        cluster = [];
-      }
-    }
-
-    if (cluster.length > 0) clusters.push(cluster);
-
-    return clusters;
-  } catch (error) {
-    console.error("[cluster]:", error);
-  }
-}
-
 const utils = {
   // This function takes in an array with an even number of elements and
   // returns an array that couples every two consecutive elements;
@@ -319,8 +292,6 @@ const utils = {
 
   fetchJsons,
 
-  getBoundingBox,
-
   // function to convert two points into a
   // representation of a line
   getLineFromPoints(startPoint, endPoint) {
@@ -376,8 +347,6 @@ const utils = {
       return undefined;
     }
   },
-
-  cluster,
 
   sum(values) {
     return values.reduce((a, b) => a + b);
