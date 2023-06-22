@@ -76,9 +76,9 @@ const testBboxLoad = (feature, eq) => {
 };
 
 const testPolygonLoad = (feature, eq) => {
-  const poly = convertGeometry("polygon", feature);
-  const depth = getDepth(poly);
-  eq(depth, 3);
+  const multipoly = convertGeometry("multi-polygon", feature);
+  const depth = getDepth(multipoly);
+  eq(depth, 4);
 };
 
 test("Load Point from array", ({ eq }) => {

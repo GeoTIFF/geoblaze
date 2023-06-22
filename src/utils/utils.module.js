@@ -1,13 +1,8 @@
-import _ from "underscore";
-import combine from "@turf/combine";
 import fetch from "cross-fetch";
+import mpoly from "mpoly";
 import ArcGIS from "terraformer-arcgis-parser";
-import getDepth from "get-depth";
-import calcBoundingBox from "bbox-fns/calc.js";
-
-const FEATURE = "FEATURE";
-const POLYGON = "POLYGON";
-const MULTIPOLYGON = "MULTIPOLYGON";
+import booleanRectangle from "bbox-fns/boolean-rectangle.js";
+import validate from "bbox-fns/validate.js";
 
 function fetchJson(url) {
   return fetch(url).then(response => response.json());
@@ -21,49 +16,13 @@ function fetchJsons(urls) {
     throw error;
   }
 }
-
-/*
-  Runs on each value in a table,
-  represented by an array of rows.
-*/
-function runOnTableOfValues(table, noDataValue, runOnValues) {
-  const numberOfRows = table.length;
-  for (let rowIndex = 0; rowIndex < numberOfRows; rowIndex++) {
-    const row = table[rowIndex];
-    const numberOfCells = row.length;
-    for (let columnIndex = 0; columnIndex < numberOfCells; columnIndex++) {
-      const value = row[columnIndex];
-      if (value !== noDataValue) {
-        runOnValues(value);
-      }
-    }
-  }
-}
-
 const utils = {
-  forceWithin(n, min, max) {
-    if (n < min) n = min;
-    else if (n > max) n = max;
-    return n;
-  },
-
-  runOnTableOfValues,
-
   convertToGeojsonIfNecessary(input, debug = false) {
     if (this.isEsriJson(input, debug)) {
       return this.toGeoJSON(input, debug);
     } else {
       return input;
     }
-  },
-
-  countValuesInTable(table, noDataValue) {
-    const counts = {};
-    runOnTableOfValues(table, noDataValue, value => {
-      if (value in counts) counts[value]++;
-      else counts[value] = 1;
-    });
-    return counts;
   },
 
   convertCrsBboxToImageBbox(georaster, crsBbox) {
@@ -93,67 +52,30 @@ const utils = {
     };
   },
 
-  getGeojsonCoors(geojson, debug = false) {
-    let result;
-    if (geojson.features) {
-      // for feature collections
+  isBbox(geom, debug = false) {
+    if (typeof geom === "string") geom = JSON.parse(geom);
 
-      // make sure that if any polygons are overlapping, we get the union of them
-      geojson = combine(geojson);
-
-      // turf adds extra arrays when running combine, so we need to remove them
-      // as we return the coordinates
-      result = geojson.features[0].geometry.coordinates.map(coors => coors[0]);
-    } else if (geojson.geometry) {
-      // for individual feature
-      result = geojson.geometry.coordinates;
-    } else if (geojson.coordinates) {
-      // for just the geometry
-      result = geojson.coordinates;
-    }
-    return result;
-  },
-
-  isBbox(geometry) {
-    if (geometry === undefined || geometry === null) {
+    if (geom === undefined || geom === null) {
+      if (debug) console.log("[geoblaze/src/utils/isBbox] geom is undefined or null");
       return false;
     }
 
     // check if we are using the geoblaze format and return true right away if so
-    if (geometry.xmin !== undefined && geometry.xmax !== undefined && geometry.ymax !== undefined && geometry.ymin !== undefined) {
+    if (geom.xmin !== undefined && geom.xmax !== undefined && geom.ymax !== undefined && geom.ymin !== undefined) {
+      if (debug) console.log("[geoblaze/src/utils/isBbox] geom is bbox object");
       return true;
     }
 
-    if (Array.isArray(geometry) && geometry.length === 4) {
-      // array
+    // bbox in form [xmin, ymin, xmax, ymax]
+    if (Array.isArray(geom) && validate(geom)) {
+      if (debug) console.log("[geoblaze/src/utils/isBbox] geom is valid bbox");
       return true;
     }
 
-    // convert possible inputs to a list of coordinates
-    let coors;
-    if (typeof geometry === "string") {
-      // stringified geojson
-      const geojson = JSON.parse(geometry);
-      const geojsonCoors = this.getGeojsonCoors(geojson);
-      if (geojsonCoors.length === 1 && geojsonCoors[0].length === 5) {
-        coors = geojsonCoors[0];
-      }
-    } else if (typeof geometry === "object") {
-      // geojson
-      const geojsonCoors = this.getGeojsonCoors(geometry);
-      if (geojsonCoors) coors = geojsonCoors[0];
-    } else {
-      return false;
-    }
+    const coords = mpoly.get(geom);
 
-    // check to make sure coordinates make up a bounding box
-    if (coors && coors.length === 5 && _.isEqual(coors[0], coors[4])) {
-      const lngs = coors.map(coor => coor[0]);
-      const lats = coors.map(coor => coor[1]);
-      if (lngs[0] === lngs[3] && lats[0] === lats[1] && lngs[1] === lngs[2]) {
-        return true;
-      }
-    }
+    if (booleanRectangle(coords)) return true;
+
     return false;
   },
 
@@ -187,93 +109,30 @@ const utils = {
     return Array.isArray(parsed) ? parsed[0] : parsed;
   },
 
-  isPolygon(geometry, debug = false) {
-    // convert to a geometry
-    let coors;
-    if (Array.isArray(geometry)) {
-      coors = geometry;
-    } else if (typeof geometry === "string") {
-      const parsed = JSON.parse(geometry);
-      const geojson = this.convertToGeojsonIfNecessary(parsed, debug);
-      coors = this.getGeojsonCoors(geojson, debug);
-    } else if (typeof geometry === "object") {
-      const geojson = this.convertToGeojsonIfNecessary(geometry, debug);
-      coors = this.getGeojsonCoors(geojson, debug);
-    }
+  isPolygonal(geometry) {
+    const polys = mpoly.get(geometry);
 
-    if (coors) {
-      // iterate through each geometry and make sure first and
-      // last point are the same
+    if (polys.length === 0) return false;
 
-      const depth = getDepth(coors);
-      if (debug) console.log("depth:", depth);
-      if (depth === 4) {
-        return coors.map(() => this.isPolygon).every(Boolean);
-      } else if (depth === 3) {
-        let isPolygonArray = true;
-        coors.forEach(part => {
-          const firstVertex = part[0];
-          const lastVertex = part[part.length - 1];
-          if (firstVertex[0] !== lastVertex[0] || firstVertex[1] !== lastVertex[1]) {
-            isPolygonArray = false;
-          }
-        });
-        return isPolygonArray;
+    // make sure first and last point are the same on each ring
+    for (let p = 0; p < polys.length; p++) {
+      const poly = polys[p];
+      for (let r = 0; r < poly.length; r++) {
+        const ring = poly[r];
+        const [xStart, yStart] = ring[0];
+        const [xEnd, yEnd] = ring[ring.length - 1];
+        if (xStart !== xEnd || yStart !== yEnd) {
+          return false;
+        }
       }
-    } else {
-      return false;
     }
+
+    return true;
   },
 
   fetchJson,
 
   fetchJsons,
-
-  // function to convert two points into a
-  // representation of a line
-  getLineFromPoints(startPoint, endPoint) {
-    // get a, b, and c from line equation ax + by = c
-    const [x1, y1] = startPoint;
-    const [x2, y2] = endPoint;
-    const a = y2 - y1;
-    const b = x1 - x2;
-    const c = a * x1 + b * y1;
-
-    // return just a b and c since that is all we need
-    // to compute the intersection
-    return { a, b, c };
-  },
-
-  // function to get the point at which two lines intersect
-  // the input uses the line representations from the
-  // getLineFromPoints function
-  getIntersectionOfTwoLines(line1, line2) {
-    // calculate the determinant, ad - cb in a square matrix |a b|
-    const det = line1.a * line2.b - line2.a * line1.b; /*  |c d| */
-
-    if (det) {
-      // this makes sure the lines aren't parallel, if they are, det will equal 0
-      const x = (line2.b * line1.c - line1.b * line2.c) / det;
-      const y = (line1.a * line2.c - line2.a * line1.c) / det;
-      return { x, y };
-    }
-  },
-
-  getSlopeOfLine(line) {
-    // assuming ax + by = c
-    // http://www.purplemath.com/modules/solvelit2.htm
-    return (-1 * line.a) / line.b;
-  },
-
-  getSlopeOfLineSegment(lineSegment) {
-    const [[x1, y1], [x2, y2]] = lineSegment;
-    // make sure slope goes from left most to right most, so order of points doesn't matter
-    if (x2 > x1) {
-      return y2 - y1 / x2 - x1;
-    } else {
-      return y1 - y2 / x1 - x2;
-    }
-  },
 
   getConstructorName(obj) {
     try {

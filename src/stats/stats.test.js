@@ -1,30 +1,19 @@
 import test from "flug";
+import { readFileSync } from "fs";
 import { serve } from "srvd";
+import parseGeoraster from "georaster";
+import fetch from "cross-fetch";
+
 import load from "../load";
 import stats from "./stats.module";
 
-serve({ debug: true, max: 7, port: 3000, wait: 240 });
+serve({ debug: true, max: 8, port: 3000, wait: 240 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
 const bbox = [80.63, 7.42, 84.21, 10.1];
 
-const polygon = [
-  [
-    [83.12255859375, 22.49225722008518],
-    [82.96875, 21.57571893245848],
-    [81.58447265624999, 21.207458730482642],
-    [83.07861328125, 20.34462694382967],
-    [83.8037109375, 19.497664168139053],
-    [84.814453125, 19.766703551716976],
-    [85.078125, 21.166483858206583],
-    [86.044921875, 20.838277806058933],
-    [86.98974609375, 22.49225722008518],
-    [85.58349609375, 24.54712317973075],
-    [84.6826171875, 23.36242859340884],
-    [83.12255859375, 22.49225722008518]
-  ]
-];
+const polygon = JSON.parse(readFileSync("./data/part-of-india.geojson", "utf-8"));
 
 const EXPECTED_RASTER_STATS = [
   {
@@ -64,19 +53,19 @@ const EXPECTED_BBOX_STATS = [
 
 const EXPECTED_POLYGON_STATS = [
   {
-    count: 1727,
-    invalid: 0,
+    count: 1672, // rasterstats says 1672
+    invalid: 0, // expected because geoblaze ignores no data values (but maybe this isn't ideal?)
     max: 7807.4,
-    mean: 1827.7067168500275,
-    median: 1612,
+    mean: 1853.7104066985623,
+    median: 1637.35,
     min: 0,
     mode: 0,
     modes: [0],
     range: 7807.4,
-    std: 1494.08480216611,
-    sum: 3156449.4999999977,
-    valid: 1727,
-    variance: 2232289.3960637436
+    std: 1507.3255322956486,
+    sum: 3_099_403.799999996, // rasterstats says 3,099,403.8
+    valid: 1672,
+    variance: 2_272_030.2603103607
   }
 ];
 
@@ -139,9 +128,35 @@ test("(Async) Stats with Polygon", async ({ eq }) => {
 
 test("hole", async ({ eq }) => {
   const url = "http://localhost:3000/data/geotiff-test-data/gadas-4326.tif";
-  const url_to_geometry = "http://localhost:3000/data/hole.geojson";
+  const url_to_geometry = "http://localhost:3000/data/holes/hole.geojson";
   const geometry = await fetch(url_to_geometry).then(r => r.json());
   const results = await stats(url, geometry);
   const mode = results.map(stats => stats.mode);
   eq(mode, [61, 133, 170, 255]); // #3d85aad9
+});
+
+test("Hole Test", async ({ eq }) => {
+  const georaster = await parseGeoraster(
+    [
+      [
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1]
+      ]
+    ],
+    {
+      noDataValue: 0,
+      projection: 4326,
+      xmin: 0, // left
+      ymax: 20, // top
+      pixelWidth: 5,
+      pixelHeight: 5
+    }
+  );
+  const url = "http://localhost:3000/data/holes/hole-2.geojson";
+  const geojson = await fetch(url).then(res => res.json());
+  const results = await stats(georaster, geojson);
+  eq(results[0].count, 12);
+  eq(results[0].sum, 12);
 });

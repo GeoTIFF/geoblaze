@@ -1,10 +1,11 @@
 import test from "flug";
 import { serve } from "srvd";
 import load from "../load";
+import mpoly from "mpoly";
 import utils from "./utils.module";
 import getDepth from "get-depth";
 
-serve({ debug: true, max: 10, port: 3000 });
+serve({ debug: true, max: 12, port: 3000 });
 
 const { fetchJson, fetchJsons } = utils;
 
@@ -29,12 +30,6 @@ test("Get Bounding when Bounding Box when Bigger Than Raster and with Negative V
   eq(actualBbox.ymin < actualBbox.ymax, true);
 });
 
-test("Test Forcing Within", ({ eq }) => {
-  eq(utils.forceWithin(10, 1, 11), 10);
-  eq(utils.forceWithin(-10, 1, 11), 1);
-  eq(utils.forceWithin(990, 1, 11), 11);
-});
-
 test("Get Depth For Multipolygon", async ({ eq }) => {
   const countryDepths = [
     ["Afghanistan", 3],
@@ -48,51 +43,42 @@ test("Get Depth For Multipolygon", async ({ eq }) => {
   }
 });
 
-test("Test isPolygon", async ({ eq }) => {
+test("Test isPolygonal", async ({ eq }) => {
   const countries = ["Afghanistan", "Ukraine"];
   for (let i = 0; i < countries.length; i++) {
     const name = countries[i];
     const jsons = await fetchJsons([urlToGeojsons + name + ".geojson", urlToArcgisJsons + name + ".json"]);
     const [geojson, arcgisjson] = jsons;
-    // console.log('geojson:', JSON.stringify(geojson).substring(0, 100) + '...');
-    // console.log('arcgisjson:', JSON.stringify(arcgisjson).substring(0, 100) + '...');
-    eq(utils.isPolygon(geojson), true);
-    eq(utils.isPolygon(arcgisjson), true);
-    eq(utils.isPolygon(arcgisjson.geometry), true);
+    eq(utils.isPolygonal(geojson), true);
+    eq(utils.isPolygonal(arcgisjson), true);
+    eq(utils.isPolygonal(arcgisjson.geometry), true);
   }
-});
-
-test("Test Intersections", ({ eq }) => {
-  const edge1 = [
-    [32.87069320678728, 34.66652679443354],
-    [32.87069320678728, 34.66680526733393]
-  ]; // vertical
-  const edge2 = [
-    [30, 34.70833333333334],
-    [40, 34.70833333333334]
-  ];
-  const line1 = utils.getLineFromPoints(edge1[0], edge1[1]);
-  const line2 = utils.getLineFromPoints(edge2[0], edge2[1]);
-  let intersection = utils.getIntersectionOfTwoLines(line1, line2);
-  eq(intersection.x, 32.87069320678728);
-  eq(intersection.y, 34.70833333333334);
-
-  // this test fails because of floating point arithmetic
-  const verticalEdge = [
-    [19.59097290039091, 29.76190948486328],
-    [19.59097290039091, 41.76180648803728]
-  ];
-  const horizontalEdge = [
-    [15, 41.641892470257524],
-    [25, 41.641892470257524]
-  ];
-  const verticalLine = utils.getLineFromPoints(verticalEdge[0], verticalEdge[1]);
-  const horizontalLine = utils.getLineFromPoints(horizontalEdge[0], horizontalEdge[1]);
-  intersection = utils.getIntersectionOfTwoLines(verticalLine, horizontalLine);
-  //eq(intersection.x, 19.59097290039091);
-  //eq(intersection.y, 41.641892470257524);
 });
 
 test("get constructor names", ({ eq }) => {
   eq(utils.getConstructorName(new ArrayBuffer()), "ArrayBuffer");
+});
+
+test("get multi-polygon", async ({ eq }) => {
+  const geojson = await fetchJson(urlToGeojson);
+  const result = mpoly.get(geojson);
+  eq(getDepth(result), 4);
+  eq(result.length, 2);
+  eq(
+    result.map(poly => poly.length),
+    [1, 1]
+  ); // no holes
+
+  const countries = ["Afghanistan", "Ukraine"];
+  for (let i = 0; i < countries.length; i++) {
+    const name = countries[i];
+    const jsons = await fetchJsons([urlToGeojsons + name + ".geojson", urlToArcgisJsons + name + ".json"]);
+    const [geojson, arcgisjson] = jsons;
+
+    const multipolygon_from_geojson = mpoly.get(geojson);
+    const multipolygon_from_arcgis = mpoly.get(arcgisjson);
+
+    eq(getDepth(multipolygon_from_geojson), getDepth(multipolygon_from_arcgis));
+    eq(multipolygon_from_geojson, multipolygon_from_arcgis);
+  }
 });

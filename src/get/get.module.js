@@ -1,5 +1,5 @@
 import utils from "../utils";
-import convertGeometry from "../convert-geometry";
+import { convertBbox } from "../convert-geometry";
 import wrap from "../wrap-parse";
 
 const get = (georaster, geom, flat) => {
@@ -28,7 +28,7 @@ const get = (georaster, geom, flat) => {
   } else if (utils.isBbox(geom)) {
     // bounding box
     try {
-      const geometry = convertGeometry("bbox", geom);
+      const geometry = convertBbox(geom);
 
       // use a utility function that converts from the lat/long coordinate
       // space to the image coordinate space
@@ -42,7 +42,10 @@ const get = (georaster, geom, flat) => {
       console.error(error);
       throw error;
     }
+  } else if (["bottom", "left", "right", "top"].every(k => k in geom)) {
+    ({ bottom: cropBottom, left: cropLeft, right: cropRight, top: cropTop } = geom);
   } else {
+    console.error(geom);
     throw "Geometry is not a bounding box - please make sure to send a bounding box when using geoblaze.get";
   }
 
