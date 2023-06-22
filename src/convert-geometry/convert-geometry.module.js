@@ -17,7 +17,7 @@ export function convertPoint(geom) {
   }
 
   if (!point) {
-    throw `Invalid point object was used. Please use either a [lng, lat] array or GeoJSON point.`;
+    throw "Invalid point object was used. Please use either a [lng, lat] array or GeoJSON point.";
   }
 
   return point;
@@ -46,15 +46,14 @@ export function convertBbox(geom) {
   }
 
   if (!bbox) {
-    throw `Invalid bounding box object was used.
-      Please use either a [xmin, ymin, xmax, ymax] array or GeoJSON polygon.`;
+    throw "Invalid bounding box object was used. Please use either a [xmin, ymin, xmax, ymax] array or GeoJSON polygon.";
   }
 
   return bbox;
 }
 
 export function convertMultiPolygon(geom) {
-  const ERROR_MESSAGE = `Invalild polygonal object was used.  Please use a GeoJSON polygon.`;
+  const ERROR_MESSAGE = "Invalild polygonal object was used.  Please use a GeoJSON polygon.";
 
   const polys = mpoly.get(geom);
 

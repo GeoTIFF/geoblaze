@@ -1,14 +1,12 @@
 import test from "flug";
 import { serve } from "srvd";
 import fetch from "cross-fetch";
-import mpoly from "mpoly";
 import parseGeoraster from "georaster";
 import bboxPolygon from "@turf/bbox-polygon";
 
 import get from "../get";
 import load from "../load";
 import parse from "../parse";
-import utils from "../utils";
 import { convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
