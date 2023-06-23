@@ -34,11 +34,15 @@ const config = (env, argv) => {
         {
           test: /\.js/,
           loader: 'babel-loader',
-          exclude: modulePath => (
-            /node_modules/.test(modulePath) &&
+          exclude: modulePath => {
+            // need to compile these
+            if (["/node_modules/mpoly/mpoly.js", "/node_modules/geowarp/geowarp.js"].some(fp => modulePath.endsWith(fp))) {
+              return false;
+            }
+            return /node_modules/.test(modulePath) &&
             !/node_modules\/webpack-dev-server/.test(modulePath) &&
             !/node_modules\/map-obj/.test(modulePath)
-          ),
+          },
           options: {
             presets: [
               [
