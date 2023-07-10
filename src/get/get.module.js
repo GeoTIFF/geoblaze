@@ -1,5 +1,5 @@
 import utils from "../utils";
-import convertGeometry from "../convert-geometry";
+import { convertBbox } from "../convert-geometry";
 import wrap from "../wrap-parse";
 
 const get = (georaster, geom, flat) => {
@@ -28,26 +28,24 @@ const get = (georaster, geom, flat) => {
   } else if (utils.isBbox(geom)) {
     // bounding box
     try {
-      const geometry = convertGeometry("bbox", geom);
+      const geometry = convertBbox(geom);
 
       // use a utility function that converts from the lat/long coordinate
       // space to the image coordinate space
-      // // left, top, right, bottom
       const bbox = utils.convertCrsBboxToImageBbox(georaster, geometry);
-      const bboxLeft = bbox.xmin;
-      const bboxTop = bbox.ymin;
-      const bboxRight = bbox.xmax;
-      const bboxBottom = bbox.ymax;
 
-      cropTop = Math.max(bboxTop, 0);
-      cropLeft = Math.max(bboxLeft, 0);
-      cropRight = Math.min(bboxRight, georaster.width);
-      cropBottom = Math.min(bboxBottom, georaster.height);
+      cropTop = Math.max(bbox.ymin, 0);
+      cropLeft = Math.max(bbox.xmin, 0);
+      cropRight = Math.min(bbox.xmax, georaster.width);
+      cropBottom = Math.min(bbox.ymax, georaster.height);
     } catch (error) {
       console.error(error);
       throw error;
     }
+  } else if (["bottom", "left", "right", "top"].every(k => k in geom)) {
+    ({ bottom: cropBottom, left: cropLeft, right: cropRight, top: cropTop } = geom);
   } else {
+    console.error(geom);
     throw "Geometry is not a bounding box - please make sure to send a bounding box when using geoblaze.get";
   }
 
@@ -69,7 +67,10 @@ const get = (georaster, geom, flat) => {
             left: cropLeft,
             top: cropTop,
             right: cropRight,
-            bottom: cropBottom
+            bottom: cropBottom,
+
+            // shouldn't resample, but specifying resampleMethod just in case
+            resampleMethod: "near"
           })
           .then(bands => {
             return bands.map(rows => {

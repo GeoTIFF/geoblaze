@@ -1,51 +1,81 @@
+import calcBoundingBox from "bbox-fns/calc.js";
 import dufour_peyton_intersection from "dufour-peyton-intersection";
 import snap from "snap-bbox";
-import divide from "preciso/divide.js";
-import subtract from "preciso/subtract.js";
-import get from "../get";
 import wrapParse from "../wrap-parse";
 import utils from "../utils";
+// import writePng from "@danieljdufour/write-png";
 
 const { resolve } = utils;
 
 const intersectPolygon = (georaster, geometry, perPixelFunction) => {
-  const { noDataValue, pixelHeight, pixelWidth } = georaster;
+  const { noDataValue } = georaster;
 
-  const geomBoundingBox = utils.getBoundingBox(geometry);
+  const precisePixelHeight = georaster.pixelHeight.toString();
+  const precisePixelWidth = georaster.pixelWidth.toString();
 
-  const precisePixelHeight = pixelHeight.toString();
-  const precisePixelWidth = pixelWidth.toString();
+  let sample;
+  let sample_height;
+  let sample_width;
+  let intersections;
 
-  // snap geometry bounding box to georaster grid system
-  const snapResult = snap({
-    bbox: [geomBoundingBox.xmin.toString(), geomBoundingBox.ymin.toString(), geomBoundingBox.xmax.toString(), geomBoundingBox.ymax.toString()],
-    origin: [georaster.xmin.toString(), georaster.ymax.toString()],
-    scale: [precisePixelWidth, "-" + precisePixelHeight],
-    precise: true
-  });
+  if (georaster.values) {
+    // if we have already loaded all the values into memory,
+    // just pass those along and avoid using up more memory
+    sample = georaster.values;
+    sample_height = georaster.height;
+    sample_width = georaster.width;
 
-  const preciseSampleBox = snapResult.bbox_in_coordinate_system;
-  const sampleBox = preciseSampleBox.map(str => Number(str));
+    // intersections are calculated in time mostly relative to geometry,
+    // so using the whole georaster bbox, shouldn't significantly more operations
+    intersections = dufour_peyton_intersection.calculate({
+      debug: false,
+      raster_bbox: [georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax],
+      raster_height: georaster.height,
+      raster_width: georaster.width,
+      pixel_height: georaster.pixelHeight,
+      pixel_width: georaster.pixelWidth,
+      geometry
+    });
+  } else if (georaster.getValues) {
+    const [xmin, ymin, xmax, ymax] = calcBoundingBox(geometry);
 
-  const sample = get(georaster, preciseSampleBox);
+    // snap geometry bounding box to georaster grid system
+    const snapResult = snap({
+      bbox: [xmin.toString(), ymin.toString(), xmax.toString(), ymax.toString()],
+      container: [georaster.xmin.toString(), georaster.ymin.toString(), georaster.xmax.toString(), georaster.ymax.toString()],
+      origin: [georaster.xmin.toString(), georaster.ymax.toString()],
+      scale: [precisePixelWidth, "-" + precisePixelHeight],
+      precise: true
+    });
 
-  const preciseSampleHeightInPixels = divide(subtract(preciseSampleBox[3], preciseSampleBox[1]), precisePixelHeight);
-  const preciseSampleWidthInPixels = divide(subtract(preciseSampleBox[2], preciseSampleBox[0]), precisePixelWidth);
+    const preciseSampleBox = snapResult.bbox_in_coordinate_system;
+    const sample_bbox = preciseSampleBox.map(str => Number(str));
 
-  // should not need Math.round because preciso is super precise
-  // but we leave it in just in case
-  const sampleHeightInPixels = Math.round(Number(preciseSampleHeightInPixels));
-  const sampleWidthInPixels = Math.round(Number(preciseSampleWidthInPixels));
+    const [left, bottom, right, top] = snapResult.bbox_in_grid_cells.map(n => Number(n));
 
-  const intersections = dufour_peyton_intersection.calculate({
-    debug: false,
-    raster_bbox: sampleBox,
-    raster_height: sampleHeightInPixels,
-    raster_width: sampleWidthInPixels,
-    pixel_height: pixelHeight,
-    pixel_width: pixelWidth,
-    geometry
-  });
+    sample_height = bottom - top;
+    sample_width = right - left;
+
+    sample = georaster.getValues({
+      left,
+      bottom,
+      right,
+      top,
+      width: sample_width,
+      height: sample_height,
+      resampleMethod: "near"
+    });
+
+    intersections = dufour_peyton_intersection.calculate({
+      debug: false,
+      raster_bbox: sample_bbox,
+      raster_height: sample_height,
+      raster_width: sample_width,
+      pixel_height: georaster.pixelHeight,
+      pixel_width: georaster.pixelWidth,
+      geometry
+    });
+  }
 
   return resolve(sample).then(imageBands => {
     intersections.rows.forEach((row, irow) => {

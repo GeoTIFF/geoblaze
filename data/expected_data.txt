@@ -1,0 +1,110 @@
+
+
+case: 1
+  vector: part-of-india.geojson
+  raster: test.tiff
+  result:
+        count: 1,672
+        min: 0.0
+        max: 7,807.4
+        sum: 3,099,403.8
+
+
+case: 2
+  vector: part-of-india-2.geojson
+  raster: test.tiff
+  result:
+        count: 109
+        min: 0.0
+        max: 6,624.4
+        sum: 291,490.5
+
+
+case: 3
+  vector: part-of-india-3.geojson
+  raster: test.tiff
+  result:
+        count: 67
+        min: 0.0
+        max: 4,124.6
+        sum: 129,465.70000000001
+
+
+case: 4
+  vector: ./gadm/geojsons/Akrotiri and Dhekelia.geojson
+  raster: test.tiff
+  result:
+        count: 1
+        min: 0.0
+        max: 0.0
+        sum: 0.0
+
+
+case: 5
+  vector: ./gadm/geojsons/Afghanistan.geojson
+  raster: ./mapspam/spam2005v3r2_harvested-area_wheat_total.tiff
+  result:
+        count: 7,112
+        min: 0.0
+        max: 5,012.60009765625
+        sum: 2,227,296.0
+
+
+case: 6
+  vector: ./gadm/geojsons/Akrotiri and Dhekelia.geojson
+  raster: ./ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_30_40.tif
+  result:
+        count: 229
+        min: 0.0
+        max: 3,256.270263671875
+        sum: 23,469.134765625
+
+
+case: 7
+  vector: ./gadm/geojsons/Ukraine.geojson
+  raster: ./mapspam/spam2005v3r2_harvested-area_wheat_total.tiff
+  result:
+        count: 8,596
+        min: 0.0
+        max: 3,476.800048828125
+        sum: 5,877,552.0
+
+
+case: 8
+  vector: ./veneto/veneto.geojson
+  raster: ./veneto/geonode_atlanteil.tif
+  result:
+        count: 59,409
+        min: 0.0
+        max: 1.3135790824890137
+        sum: 24,963.465454101562
+
+
+sum
+test.tiff
+108343045.40000004
+
+
+sum
+./mapspam/spam2005v3r2_harvested-area_wheat_total.tiff
+215356768.0
+
+
+sum
+./ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_30_40.tif
+120669560.0
+
+
+sum
+./veneto/geonode_atlanteil.tif
+27953.119140625
+Lebanon:  5,554,060.0
+Uruguay:  3,303,090.0
+Macedonia:  2,239,499.25
+Ukraine:  12,697,956.0
+Nicaragua:  5,066,313.5
+Afghanistan:  27,024,636.0
+Akrotiri and Dhekelia:  23,469.134765625
+Cyprus:  790,242.0625
+Croatia:  4,685,367.0
+Jamaica:  2,332,581.75

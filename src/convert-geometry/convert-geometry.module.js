@@ -1,104 +1,80 @@
+import calc from "bbox-fns/calc.js";
+import mpoly from "mpoly";
+import validate from "bbox-fns/validate.js";
 import utils from "../utils";
 
-const convertPoint = geometry => {
+export function convertPoint(geom) {
+  if (typeof geom === "string") geom = JSON.parse(geom);
+
   let point;
-  if (Array.isArray(geometry) && geometry.length === 2) {
-    // array
-    point = geometry;
-  } else if (typeof geometry === "string") {
-    // stringified geojson
-    const geojson = JSON.parse(geometry);
-    if (geojson.type === "Point") {
-      point = geojson.coordinates;
-    }
-  } else if (typeof geometry === "object") {
-    // geojson
-    if (geometry.type === "Point") {
-      point = geometry.coordinates;
+  if (Array.isArray(geom) && geom.length === 2 && typeof geom[0] === "number" && typeof geom[1] === "number") {
+    // [x, y] point
+    point = geom;
+  } else if (typeof geom === "object") {
+    if (/Point/i.test(geom.type)) {
+      point = geom.coordinates;
     }
   }
 
   if (!point) {
-    throw `Invalid point object was used.
-      Please use either a [lng, lat] array or GeoJSON point.`;
+    throw "Invalid point object was used. Please use either a [lng, lat] array or GeoJSON point.";
   }
 
   return point;
-};
+}
 
-const convertBbox = geometry => {
+/**
+ *
+ * @param {convertBbox} geom
+ * @returns {Object} bbox in form { xmin, ymin, xmax, ymax }
+ */
+export function convertBbox(geom) {
+  if (typeof geom === "string") geom = JSON.parse(geom);
+
   let bbox;
-  if (utils.isBbox(geometry)) {
-    if (typeof geometry.xmin !== "undefined" && typeof geometry.ymax !== "undefined") {
-      bbox = geometry;
-    } else if (Array.isArray(geometry) && geometry.length === 4) {
-      // array
-      bbox = { xmin: geometry[0], ymin: geometry[1], xmax: geometry[2], ymax: geometry[3] };
-    } else if (typeof geometry === "string") {
-      // stringified geojson
-      const geojson = JSON.parse(geometry);
-      const coors = utils.getGeojsonCoors(geojson)[0];
-      const lngs = coors.map(coor => coor[0]);
-      const lats = coors.map(coor => coor[1]);
-      bbox = { xmin: Math.min(...lngs), ymin: Math.min(...lats), xmax: Math.max(...lngs), ymax: Math.max(...lats) };
-    } else if (typeof geometry === "object") {
-      // geojson
-      const coors = utils.getGeojsonCoors(geometry)[0];
-      const lngs = coors.map(coor => coor[0]);
-      const lats = coors.map(coor => coor[1]);
-      bbox = { xmin: Math.min(...lngs), ymin: Math.min(...lats), xmax: Math.max(...lngs), ymax: Math.max(...lats) };
+
+  if (utils.isBbox(geom)) {
+    if (typeof geom.xmin !== "undefined" && typeof geom.ymax !== "undefined") {
+      bbox = geom;
+    } else if (validate(geom)) {
+      const [xmin, ymin, xmax, ymax] = geom;
+      bbox = { xmin, ymin, xmax, ymax };
+    } else if (typeof geom === "object") {
+      const [xmin, ymin, xmax, ymax] = calc(geom);
+      bbox = { xmin, ymin, xmax, ymax };
     }
   }
 
   if (!bbox) {
-    throw `Invalid bounding box object was used.
-      Please use either a [xmin, ymin, xmax, ymax] array or GeoJSON polygon.`;
+    throw "Invalid bounding box object was used. Please use either a [xmin, ymin, xmax, ymax] array or GeoJSON polygon.";
   }
 
   return bbox;
-};
+}
 
-const convertPolygon = geometry => {
-  let polygon;
-  if (utils.isPolygon(geometry)) {
-    if (Array.isArray(geometry)) {
-      // array
-      polygon = geometry;
-    } else if (typeof geometry === "string") {
-      // stringified geojson
-      const parsed = JSON.parse(geometry);
-      const geojson = utils.convertToGeojsonIfNecessary(parsed);
-      polygon = utils.getGeojsonCoors(geojson);
-    } else if (typeof geometry === "object") {
-      // geojson
-      const geojson = utils.convertToGeojsonIfNecessary(geometry);
-      polygon = utils.getGeojsonCoors(geojson);
-    }
-  }
+export function convertMultiPolygon(geom) {
+  const ERROR_MESSAGE = "Invalild polygonal object was used.  Please use a GeoJSON polygon.";
 
-  if (!polygon) {
-    throw `Invalild polygon object was used.
-      Please use either a [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] array or GeoJSON polygon.`;
-  }
+  const polys = mpoly.get(geom);
 
-  return polygon;
-};
+  if (polys.length === 0) throw new Error(ERROR_MESSAGE);
 
-const convertGeometry = (typeOfGeometry, geometry) => {
+  return polys;
+}
+
+export default function convertGeometry(typeOfGeometry, geometry) {
   try {
     if (typeOfGeometry === "point") {
       return convertPoint(geometry);
     } else if (typeOfGeometry === "bbox") {
       return convertBbox(geometry);
-    } else if (typeOfGeometry === "polygon") {
-      return convertPolygon(geometry);
+    } else if (typeOfGeometry === "multi-polygon") {
+      return convertMultiPolygon(geometry);
     } else {
-      throw 'Invalid geometry type was specified. Please use either "point" or "polygon"';
+      throw 'Invalid geometry type was specified. Please use either "bbox", "multi-polygon", or "point".';
     }
   } catch (e) {
     console.error(e);
     throw e;
   }
-};
-
-export default convertGeometry;
+}

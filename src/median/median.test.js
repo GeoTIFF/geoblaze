@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import test from "flug";
 import { serve } from "srvd";
 import load from "../load";
@@ -27,23 +28,8 @@ const bboxGeojson = `{
 }`;
 const expectedBboxGeojsonValue = 1849.4;
 
-const polygon = [
-  [
-    [83.12255859375, 22.49225722008518],
-    [82.96875, 21.57571893245848],
-    [81.58447265624999, 1.207458730482642],
-    [83.07861328125, 20.34462694382967],
-    [83.8037109375, 19.497664168139053],
-    [84.814453125, 19.766703551716976],
-    [85.078125, 21.166483858206583],
-    [86.044921875, 20.838277806058933],
-    [86.98974609375, 22.49225722008518],
-    [85.58349609375, 24.54712317973075],
-    [84.6826171875, 23.36242859340884],
-    [83.12255859375, 22.49225722008518]
-  ]
-];
-const expectedPolygonValue = 1537.2;
+const polygon = JSON.parse(readFileSync("./data/part-of-india.geojson", "utf-8"));
+const expectedPolygonValue = 1637.35;
 
 test("Get Median from Bounding Box", async ({ eq }) => {
   const georaster = await load(url);

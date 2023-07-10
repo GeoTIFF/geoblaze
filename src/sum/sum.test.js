@@ -1,12 +1,13 @@
+import { readFileSync } from "fs";
 import test from "flug";
 import { serve } from "srvd";
+import turfBbox from "@turf/bbox";
+import { polygon as turfPolygon } from "@turf/helpers";
 
 import utils from "../utils";
 import load from "../load";
 import parse from "../parse";
 import sum from "./sum.module";
-import turfBbox from "@turf/bbox";
-import { polygon as turfPolygon } from "@turf/helpers";
 
 const { fetchJson, fetchJsons } = utils;
 
@@ -21,201 +22,31 @@ const urlToArcgisJsons = urlToData + "gadm/arcgis/";
 
 const url = `http://localhost:${port}/data/test.tiff`;
 const bbox = [80.63, 7.42, 84.21, 10.1];
-const expectedBboxValue = 262516.5;
 
-const polygon = [
-  [
-    [83.12255859375, 22.49225722008518],
-    [82.96875, 21.57571893245848],
-    [81.58447265624999, 1.207458730482642],
-    [83.07861328125, 20.34462694382967],
-    [83.8037109375, 19.497664168139053],
-    [84.814453125, 19.766703551716976],
-    [85.078125, 21.166483858206583],
-    [86.044921875, 20.838277806058933],
-    [86.98974609375, 22.49225722008518],
-    [85.58349609375, 24.54712317973075],
-    [84.6826171875, 23.36242859340884],
-    [83.12255859375, 22.49225722008518]
-  ]
-];
-const expectedPolygonValue = 3125542.2;
+// import rasterio
+// from rasterio.windows import from_bounds
+// with rasterio.open("./data/test.tiff") as src:
+//   arr = src.read(1, window=from_bounds(80.63, 7.42, 84.21, 10.1, src.transform))
+//   arr[arr > 0].sum()
+// 236_435.40000000002
+const expectedBboxValue = 262_516.5;
 
-const polygonGeojson1 = `{
-  "type": "FeatureCollection",
-  "features": [
-  {
-    "type": "Feature",
-    "properties": {},
-    "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-      [
-      [
-        86.220703125,
-        22.156883186860703
-      ],
-      [
-        86.341552734375,
-        21.43261686447735
-      ],
-      [
-        86.912841796875,
-        21.70847301324597
-      ],
-      [
-        87.000732421875,
-        22.39071391683855
-      ],
-      [
-        85.968017578125,
-        22.49225722008518
-      ],
-      [
-        85.726318359375,
-        21.912470952680266
-      ],
-      [
-        86.220703125,
-        22.156883186860703
-      ]
-      ]
-    ]
-    }
-  }]
-}`;
+const polygon = JSON.parse(readFileSync("./data/part-of-india.geojson", "utf-8"));
 
-const expectedPolygonGeojsonValue1 = 292256.3;
+const expectedPolygonValue = 3_099_403.8; // same as rasterstats
 
-const polygonGeojson2 = `{
-  "type": "FeatureCollection",
-  "features": [
-  {
-    "type": "Feature",
-    "properties": {},
-    "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-      [
-      [
-        85.869140625,
-        20.64306554672647
-      ],
-      [
-        86.12182617187499,
-        21.022982546427425
-      ],
-      [
-        85.330810546875,
-        21.361013117950915
-      ],
-      [
-        84.44091796875,
-        21.3303150734318
-      ],
-      [
-        85.594482421875,
-        21.074248926792812
-      ],
-      [
-        85.067138671875,
-        20.715015145512087
-      ],
-      [
-        85.869140625,
-        20.64306554672647
-      ]
-      ]
-    ]
-    }
-  }]
-}`;
+const polygonGeojson1 = JSON.parse(readFileSync("./data/part-of-india-2.geojson", "utf-8"));
 
-const expectedPolygonGeojsonValue2 = 137973.3;
+const expectedPolygonGeojsonValue1 = 291_490.5; // same as rasterstats
 
-const polygonGeojsonCollection = `{
-  "type": "FeatureCollection",
-  "features": [
-  {
-    "type": "Feature",
-    "properties": {},
-    "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-      [
-      [
-        86.220703125,
-        22.156883186860703
-      ],
-      [
-        86.341552734375,
-        21.43261686447735
-      ],
-      [
-        86.912841796875,
-        21.70847301324597
-      ],
-      [
-        87.000732421875,
-        22.39071391683855
-      ],
-      [
-        85.968017578125,
-        22.49225722008518
-      ],
-      [
-        85.726318359375,
-        21.912470952680266
-      ],
-      [
-        86.220703125,
-        22.156883186860703
-      ]
-      ]
-    ]
-    }
-  },
-  {
-    "type": "Feature",
-    "properties": {},
-    "geometry": {
-    "type": "Polygon",
-    "coordinates": [
-      [
-      [
-        85.869140625,
-        20.64306554672647
-      ],
-      [
-        86.12182617187499,
-        21.022982546427425
-      ],
-      [
-        85.330810546875,
-        21.361013117950915
-      ],
-      [
-        84.44091796875,
-        21.3303150734318
-      ],
-      [
-        85.594482421875,
-        21.074248926792812
-      ],
-      [
-        85.067138671875,
-        20.715015145512087
-      ],
-      [
-        85.869140625,
-        20.64306554672647
-      ]
-      ]
-    ]
-    }
-  }
-  ]
-}`;
+const polygonGeojson2 = JSON.parse(readFileSync("./data/part-of-india-3.geojson", "utf-8"));
+
+const expectedPolygonGeojsonValue2 = 129_465.7; // same as rasterstats
+
+const polygonGeojsonCollection = {
+  type: "FeatureCollection",
+  features: [polygonGeojson1, polygonGeojson2]
+};
 
 const expectedPolygonGeojsonCollectionValue = expectedPolygonGeojsonValue1 + expectedPolygonGeojsonValue2;
 
@@ -227,7 +58,7 @@ test("(Legacy) Get Sum from Veneto Geonode", async ({ eq }) => {
   const [georaster, geojson] = values;
   const results = sum(georaster, geojson);
   const actualValue = Number(results[0].toFixed(2));
-  const expectedValue = 25057.69;
+  const expectedValue = 24_943.31; // rasterstats says 24,963.465454101562
   eq(actualValue, expectedValue);
 });
 
@@ -235,7 +66,7 @@ test("(Legacy) Get Sum", async ({ eq }) => {
   const georaster = await load(url);
   const results = sum(georaster);
   const actualValue = Number(results[0].toFixed(2));
-  const expectedValue = 108343045.4;
+  const expectedValue = 108_343_045.4; // rasterio says 108,343,045.40000004
   eq(actualValue, expectedValue);
 });
 
@@ -306,18 +137,18 @@ test("(Legacy) Test sum for Country with Multiple Rings", async ({ eq }) => {
 test("(Legacy) Get Sum from Polygon Above X Value", async ({ eq }) => {
   const georaster = await load(url);
   const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
-  eq(value, 1453380.1);
+  eq(value, 1_454_066);
 });
 
 // test getting correct populations for countries
 const countries = [
-  { population: 790242.0, name: "Cyprus" },
-  { population: 5066313.5, name: "Nicaragua" },
-  { population: 5554059.5, name: "Lebanon" },
-  { population: 2332581.75, name: "Jamaica" },
-  { population: 4685367.5, name: "Croatia" },
-  { population: 2234089.5, name: "Macedonia" },
-  { population: 3303561.5, name: "Uruguay" }
+  { population: 790_242.0, name: "Cyprus" }, // rasterstats says 790,242.0625
+  { population: 5_066_313.5, name: "Nicaragua" }, // same as rasterstats
+  { population: 5_554_059.5, name: "Lebanon" }, // rasterstats says 5,554,060.0
+  { population: 2_332_581.75, name: "Jamaica" }, // same as rasterstats
+  { population: 4_685_367.5, name: "Croatia" }, // rasterstats says 4,685,367.0
+  { population: 2_234_089.5, name: "Macedonia" }, // rasterstats says 2,239,499.25
+  { population: 3_303_561.5, name: "Uruguay" } // rasterstats says 3,303,090.0
 ];
 for (let i = 0; i < countries.length; i++) {
   const { population, name } = countries[i];
@@ -385,7 +216,7 @@ test("(Modern) Get Sum from Veneto Geonode", async ({ eq }) => {
   const [georaster, geojson] = values;
   const results = await sum(georaster, geojson);
   const actualValue = Number(results[0].toFixed(2));
-  const expectedValue = 25057.69;
+  const expectedValue = 24_943.31; // rasterstats says 24,963.465454101562
   eq(actualValue, expectedValue);
 });
 
@@ -393,7 +224,7 @@ test("(Modern) Get Sum", async ({ eq }) => {
   const georaster = await parse(url);
   const results = await sum(georaster);
   const actualValue = Number(results[0].toFixed(2));
-  const expectedValue = 108343045.4;
+  const expectedValue = 108_343_045.4; // rasterstats says 108_343_045.40000004
   eq(actualValue, expectedValue);
 });
 
@@ -417,16 +248,22 @@ test("(Modern) Get Sum from Bounding Box Greater Then Raster", async ({ eq }) =>
 test("(Modern) Get Same Sum from GeoJSON and ESRI JSON", async ({ eq }) => {
   const urlToRaster = urlToData + "mapspam/spam2005v3r2_harvested-area_wheat_total.tiff";
   const georaster = await parse(urlToRaster);
-  const countryNames = ["Afghanistan", "Ukraine"];
+  const countryNames = [
+    ["Afghanistan", 2_226_323.1], // rasterstats says 2,227,296
+    ["Ukraine", 5_875_383.4] // rasterstats says 5,877,552
+  ];
   for (let i = 0; i < countryNames.length; i++) {
-    const name = countryNames[i];
+    const [name, expectedSum] = countryNames[i];
     const jsons = await fetchJsons([urlToGeojsons + name + ".geojson", urlToArcgisJsons + name + ".json"], true);
     const [geojson, arcgisJson] = jsons;
-    const valueViaGeojson = Number(sum(georaster, geojson)[0].toFixed(2));
-    const valueViaArcgisJson = Number(sum(georaster, arcgisJson)[0].toFixed(2));
-    const valueViaArcgisJsonPolygon = Number(sum(georaster, arcgisJson.geometry)[0].toFixed(2));
-    eq(valueViaGeojson, valueViaArcgisJson);
-    eq(valueViaGeojson, valueViaArcgisJsonPolygon);
+    const valueViaGeojson = Number((await sum(georaster, geojson))[0].toFixed(2));
+    eq(valueViaGeojson, expectedSum);
+
+    const valueViaArcgisJson = Number((await sum(georaster, arcgisJson))[0].toFixed(2));
+    eq(valueViaArcgisJson, expectedSum);
+
+    const valueViaArcgisJsonPolygon = Number((await sum(georaster, arcgisJson.geometry))[0].toFixed(2));
+    eq(valueViaArcgisJsonPolygon, expectedSum);
   }
 });
 
@@ -464,5 +301,5 @@ test("(Modern) Test sum for Country with Multiple Rings", async ({ eq }) => {
 test("(Modern) Get Sum from Polygon Above X Value", async ({ eq }) => {
   const georaster = await parse(url);
   const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
-  eq(value, 1453380.1);
+  eq(value, 1_454_066);
 });

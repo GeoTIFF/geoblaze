@@ -5,7 +5,7 @@ import fastMax from "fast-max";
 import get from "../get";
 import utils from "../utils";
 import wrap from "../wrap-parse";
-import convertGeometry from "../convert-geometry";
+import { convertBbox, convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
 const { resolve } = utils;
@@ -154,14 +154,14 @@ const getHistogramsForRaster = (georaster, geom, options) => {
       const values = get(georaster, null, flat);
       return resolve(values).then(calc);
     } else if (utils.isBbox(geom)) {
-      geom = convertGeometry("bbox", geom);
+      geom = convertBbox(geom);
 
       // grab array of values by band
       const flat = true;
       const values = get(georaster, geom, flat);
       return resolve(values).then(calc);
-    } else if (utils.isPolygon(geom)) {
-      geom = convertGeometry("polygon", geom);
+    } else if (utils.isPolygonal(geom)) {
+      geom = convertMultiPolygon(geom);
       const { noDataValue } = georaster;
 
       // grab array of values by band

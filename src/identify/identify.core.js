@@ -1,10 +1,10 @@
-import convertGeometry from "../convert-geometry";
+import { convertPoint } from "../convert-geometry";
 import wrap from "../wrap-parse";
 
 const identify = (georaster, geometry) => {
   // The convertGeometry function takes the input
   // geometry and converts it to a standard format.
-  const [xInCrs, yInCrs] = convertGeometry("point", geometry);
+  const [xInCrs, yInCrs] = convertPoint(geometry);
 
   // By normalizing the difference in latitude and longitude between the image
   // origin and the point geometry by the cell height and width respectively,
