@@ -67,10 +67,7 @@ const get = (georaster, geom, flat) => {
             left: cropLeft,
             top: cropTop,
             right: cropRight,
-            bottom: cropBottom,
-
-            // shouldn't resample, but specifying resampleMethod just in case
-            resampleMethod: "near"
+            bottom: cropBottom
           })
           .then(bands => {
             return bands.map(rows => {
