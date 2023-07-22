@@ -136,7 +136,6 @@ test("Hole Test", async ({ eq }) => {
 test("antimerdian #1", async ({ eq }) => {
   const georaster = await parse(urlToData + "gfwfiji_6933_COG.tiff");
   const geojson = await fetch(urlToData + "antimeridian/right-edge.geojson").then(res => res.json());
-  console.dir({ georaster, geojson });
   let numberOfIntersectingPixels = 0;
   let geom = convertMultiPolygon(geojson);
   // reproject geometry to projection of raster
