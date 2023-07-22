@@ -1,8 +1,10 @@
 import { readFileSync } from "fs";
+import fetch from "cross-fetch";
 import test from "flug";
 import { serve } from "srvd";
 import turfBbox from "@turf/bbox";
 import { polygon as turfPolygon } from "@turf/helpers";
+import reprojectGeoJSON from "reproject-geojson";
 
 import utils from "../utils";
 import load from "../load";

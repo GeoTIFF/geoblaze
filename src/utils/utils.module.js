@@ -16,6 +16,11 @@ function fetchJsons(urls) {
     throw error;
   }
 }
+
+function roundDown(n) {
+  return -1 * Math.round(-1 * n);
+}
+
 const utils = {
   convertToGeojsonIfNecessary(input, debug = false) {
     if (this.isEsriJson(input, debug)) {
@@ -45,10 +50,10 @@ const utils = {
     system is inverted along the y axis relative to the lat/long (geographic)
     coordinate system */
     return {
-      xmin: Math.floor((crsXMin - georaster.xmin) / georaster.pixelWidth),
-      ymin: Math.floor((georaster.ymax - crsYMax) / georaster.pixelHeight),
-      xmax: Math.ceil((crsXMax - georaster.xmin) / georaster.pixelWidth),
-      ymax: Math.ceil((georaster.ymax - crsYMin) / georaster.pixelHeight)
+      xmin: roundDown((crsXMin - georaster.xmin) / georaster.pixelWidth),
+      ymin: roundDown((georaster.ymax - crsYMax) / georaster.pixelHeight),
+      xmax: Math.round((crsXMax - georaster.xmin) / georaster.pixelWidth),
+      ymax: Math.round((georaster.ymax - crsYMin) / georaster.pixelHeight)
     };
   },
 
@@ -187,7 +192,9 @@ const utils = {
       results.push(i);
     }
     return results;
-  }
+  },
+
+  roundDown
 };
 
 export default utils;
