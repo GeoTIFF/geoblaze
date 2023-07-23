@@ -1,3 +1,5 @@
+set -e
+
 # start in data directory
 cd data
 
