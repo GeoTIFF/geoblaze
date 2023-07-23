@@ -16,6 +16,8 @@ jobs:
       - run: npm install
       - run: npm run lint
       - run: npm run setup
+      # list all files in the data folder for debugging purposes
+      - run: find ./data
       - run: npm run test
       # see https://github.com/webpack/webpack/issues/14532
       - run: NODE_OPTIONS=--openssl-legacy-provider npm run build
