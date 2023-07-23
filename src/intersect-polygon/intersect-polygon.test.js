@@ -1,6 +1,5 @@
 import test from "flug";
 import { serve } from "srvd";
-import fetch from "cross-fetch";
 import parseGeoraster from "georaster";
 import bboxPolygon from "@turf/bbox-polygon";
 import reprojectGeoJSON from "reproject-geojson";
@@ -11,7 +10,7 @@ import parse from "../parse";
 import { convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
-serve({ debug: true, max: 10, port: 3000 });
+serve({ debug: true, max: 11, port: 3000, wait: 60 });
 
 const urlToGeojson = "http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson";
 
