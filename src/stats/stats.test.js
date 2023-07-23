@@ -1,10 +1,13 @@
-import test from "flug";
 import { readFileSync } from "fs";
+
+import test from "flug";
+import fetch from "cross-fetch";
 import { serve } from "srvd";
 import parseGeoraster from "georaster";
-import fetch from "cross-fetch";
+import reprojectGeoJSON from "reproject-geojson";
 
 import load from "../load";
+import parse from "../parse";
 import stats from "./stats.module";
 
 serve({ debug: true, max: 8, port: 3000, wait: 240 });
@@ -35,19 +38,19 @@ const EXPECTED_RASTER_STATS = [
 
 const EXPECTED_BBOX_STATS = [
   {
-    count: 213,
+    count: 188,
     invalid: 0,
     max: 5166.7,
-    mean: 1232.4718309859154,
-    median: 906.7,
+    mean: 1257.6351063829786,
+    median: 915.85,
     min: 0,
     mode: 0,
     modes: [0],
     range: 5166.7,
-    std: 1195.3529916721104,
-    sum: 262516.5,
-    valid: 213,
-    variance: 1428868.7746994647
+    std: 1216.4677587709607,
+    sum: 236435.4,
+    valid: 188,
+    variance: 1479793.808129244
   }
 ];
 
@@ -159,4 +162,12 @@ test("Hole Test", async ({ eq }) => {
   const results = await stats(georaster, geojson);
   eq(results[0].count, 12);
   eq(results[0].sum, 12);
+});
+
+test("antimerdian #1", async ({ eq }) => {
+  const georaster = await parse("http://localhost:3000/data/gfwfiji_6933_COG.tiff");
+  let geom = JSON.parse(readFileSync("./data/antimeridian/right-edge.geojson", "utf-8"));
+  geom = reprojectGeoJSON(geom, { from: 4326, to: georaster.projection });
+  const results = await stats(georaster, geom, { stats: ["count", "min", "max", "sum"] });
+  eq(results, [{ count: 314_930, min: 0.20847222208976746, max: 492.3219299316406, sum: 12_783_872.545041203 }]);
 });

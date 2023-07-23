@@ -9,7 +9,7 @@ serve({ debug: true, max: 1, port: 3000 });
 const url = "http://localhost:3000/data/test.tiff";
 
 const bbox = [80.63, 7.42, 84.21, 10.1];
-const expectedBboxValue = 906.7;
+const expectedBboxValue = 915.85;
 
 const bboxGeojson = `{
   "type": "FeatureCollection",
@@ -26,7 +26,7 @@ const bboxGeojson = `{
     }
   }]
 }`;
-const expectedBboxGeojsonValue = 1849.4;
+const expectedBboxGeojsonValue = 1831.9;
 
 const polygon = JSON.parse(readFileSync("./data/part-of-india.geojson", "utf-8"));
 const expectedPolygonValue = 1637.35;

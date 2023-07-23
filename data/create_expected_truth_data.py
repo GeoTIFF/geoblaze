@@ -2,10 +2,10 @@ import csv
 import os
 
 import rasterio
-from rasterio.windows import from_bounds
 
 from rasterstats import zonal_stats
 from rasterstats.utils import VALID_STATS
+
 
 # known limitations
 # - just for first band
@@ -20,24 +20,33 @@ test_cases = [
   ["./gadm/geojsons/Akrotiri and Dhekelia.geojson", "./ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_30_40.tif"],
   ["./gadm/geojsons/Ukraine.geojson", "./mapspam/spam2005v3r2_harvested-area_wheat_total.tiff"],
   ["./veneto/veneto.geojson", "./veneto/geonode_atlanteil.tif"],
+
+  # https://github.com/perrygeo/python-rasterstats/issues/26
+  # ogr2ogr right-edge.shp right-edge.geojson -t_srs EPSG:6933
+  ["./antimeridian/right-edge.shp", "gfwfiji_6933_COG.tiff"]
 ]
 
 for i, (geom, raster) in enumerate(test_cases):
   print("\n\ncase: " + str(i + 1))
-  feature_stats = zonal_stats(geom, raster, stats=VALID_STATS, band=1)
-
-  # merge feature_stats (doesn't handle overlapping polygons)
-  results = {
-    "count": sum(f['count'] for f in feature_stats),
-    "min": min(f['min'] for f in feature_stats),
-    "max": min(f['max'] for f in feature_stats),
-    "sum": sum(f['sum'] for f in feature_stats),
-  }
   print("  vector: " + geom)
   print("  raster: " + raster)
-  print("  result:")
-  for key, value in results.items():
-    print(f"        {key}: {value:,}")
+
+  feature_stats = zonal_stats(geom, raster, stats=VALID_STATS, band=1)
+
+  try:
+    # merge feature_stats (doesn't handle overlapping polygons)
+    results = {
+      "count": sum(f['count'] for f in feature_stats),
+      "min": min(f['min'] for f in feature_stats),
+      "max": max(f['max'] for f in feature_stats),
+      "sum": sum(f['sum'] for f in feature_stats),
+    }
+    print("  result:")
+    for key, value in results.items():
+      print(f"        {key}: {value:,}")
+  except Exception as e:
+    print(feature_stats)
+    raise e
 
 
 sum_test_cases = [

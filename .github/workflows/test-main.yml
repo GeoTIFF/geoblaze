@@ -13,9 +13,14 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+      - run: sudo apt-add-repository ppa:ubuntugis/ubuntugis-unstable
+      - run: sudo apt-get update
+      - run: sudo apt-get install gdal-bin libgdal-dev
       - run: npm install
       - run: npm run lint
       - run: npm run setup
+      # list all files in the data folder for debugging purposes
+      - run: find ./data
       - run: npm run test
       # see https://github.com/webpack/webpack/issues/14532
       - run: NODE_OPTIONS=--openssl-legacy-provider npm run build
