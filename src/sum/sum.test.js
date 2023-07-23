@@ -31,7 +31,7 @@ const bbox = [80.63, 7.42, 84.21, 10.1];
 //   arr = src.read(1, window=from_bounds(80.63, 7.42, 84.21, 10.1, src.transform))
 //   arr[arr > 0].sum()
 // 236_435.40000000002
-const expectedBboxValue = 262_516.5;
+const expectedBboxValue = 236_435.4;
 
 const polygon = JSON.parse(readFileSync("./data/part-of-india.geojson", "utf-8"));
 
