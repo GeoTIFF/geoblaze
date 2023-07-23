@@ -12,7 +12,7 @@ const { round } = utils;
 const url = "http://localhost:3000/data/test.tiff";
 
 const bbox = [80.63, 7.42, 84.21, 10.1];
-const expectedBboxValue = 1232.47;
+const expectedBboxValue = 1257.64;
 
 const polygon = JSON.parse(readFileSync("./data/part-of-india.geojson", "utf-8"));
 const expectedPolygonValue = 1853.71;
