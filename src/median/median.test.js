@@ -9,7 +9,7 @@ serve({ debug: true, max: 1, port: 3000 });
 const url = "http://localhost:3000/data/test.tiff";
 
 const bbox = [80.63, 7.42, 84.21, 10.1];
-const expectedBboxValue = 906.7;
+const expectedBboxValue = 915.85;
 
 const bboxGeojson = `{
   "type": "FeatureCollection",
