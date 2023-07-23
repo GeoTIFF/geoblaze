@@ -1,3 +1,25 @@
+## v2.1.0 (2023-07-23)
+
+### :boom: Breaking Changes
+* Updated convertCrsBboxToImageBbox to properly exclude pixels that barely touch a polygon (i.e. whose pixel centroid doesn't intersect the aoi geometry).  This will mean that stats results for rectangular aois could change.  You might also see an error thrown saying no valid pixels, whereas before some intersecting pixels were mistakenly included in the calculation.  Changes are only expected for rectangular geometries whether they are defined as bounding boxes or rectangular polygons (geoblaze is smart enough to identify a bbox masquerading as a polygon).  Non-rectangular geometries should not be affected by any of these changes.
+
+### :rocket: New Feature / Improvement
+* Refactored convertCrsBboxToImageBbox in utils.module.js, so that only pixels whose centroid is within the provided rectangle are used for stats calculations.  This is making sure rectangles and bounding boxes are treated the same as other polygons.
+
+### :bug: Bug Fix
+* Fixed bug in our Github CI workflow whereby gdal_translate wasn't working, because I had forgotten to add instructions to install it
+
+### :house: Internal
+
+* added roundDown function to utils.module.js (copying it from dufour-peyton-intersection)
+* added more testing
+* committed some new test data files
+
+### :memo: Documentation
+
+* No changes
+
+
 ## v2.0.0 (2023-07-10)
 
 ### :boom: Breaking Changes
