@@ -38,19 +38,19 @@ const EXPECTED_RASTER_STATS = [
 
 const EXPECTED_BBOX_STATS = [
   {
-    count: 213,
+    count: 188,
     invalid: 0,
     max: 5166.7,
-    mean: 1232.4718309859154,
-    median: 906.7,
+    mean: 1257.6351063829786,
+    median: 915.85,
     min: 0,
     mode: 0,
     modes: [0],
     range: 5166.7,
-    std: 1195.3529916721104,
-    sum: 262516.5,
-    valid: 213,
-    variance: 1428868.7746994647
+    std: 1216.4677587709607,
+    sum: 236435.4,
+    valid: 188,
+    variance: 1479793.808129244
   }
 ];
 
