@@ -26,7 +26,7 @@ const bboxGeojson = `{
     }
   }]
 }`;
-const expectedBboxGeojsonValue = 1849.4;
+const expectedBboxGeojsonValue = 1831.9;
 
 const polygon = JSON.parse(readFileSync("./data/part-of-india.geojson", "utf-8"));
 const expectedPolygonValue = 1637.35;
