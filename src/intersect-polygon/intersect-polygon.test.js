@@ -10,6 +10,19 @@ import parse from "../parse";
 import { convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
+async function fetch_json(url) {
+  let res;
+  let text;
+  try {
+    res = await fetch(url);
+    text = await res.text();
+    return JSON.parse(text);
+  } catch (error) {
+    console.log("text:", text);
+    throw error;
+  }
+}
+
 serve({ debug: true, max: 11, port: 3000, wait: 60 });
 
 const urlToGeojson = "http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson";
@@ -134,7 +147,7 @@ test("Hole Test", async ({ eq }) => {
 
 test("antimerdian #1", async ({ eq }) => {
   const georaster = await parse(urlToData + "gfwfiji_6933_COG.tiff");
-  const geojson = await fetch(urlToData + "antimeridian/right-edge.geojson").then(res => res.json());
+  const geojson = await fetch_json(urlToData + "antimeridian/right-edge.geojson");
   let numberOfIntersectingPixels = 0;
   let geom = convertMultiPolygon(geojson);
   // reproject geometry to projection of raster
