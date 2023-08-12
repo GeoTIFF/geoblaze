@@ -10,7 +10,7 @@ import load from "../load";
 import parse from "../parse";
 import stats from "./stats.module";
 
-serve({ debug: true, max: 8, port: 3000, wait: 240 });
+serve({ debug: true, max: 25, port: 3000, wait: 240 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -28,6 +28,7 @@ const EXPECTED_RASTER_STATS = [
     min: 0,
     mode: 0,
     modes: [0],
+    product: 0,
     range: 8131.2,
     std: 562.8169687364914,
     sum: 108343045.39997534,
@@ -46,6 +47,7 @@ const EXPECTED_BBOX_STATS = [
     min: 0,
     mode: 0,
     modes: [0],
+    product: 0,
     range: 5166.7,
     std: 1216.4677587709607,
     sum: 236435.4,
@@ -64,6 +66,7 @@ const EXPECTED_POLYGON_STATS = [
     min: 0,
     mode: 0,
     modes: [0],
+    product: 0,
     range: 7807.4,
     std: 1507.3255322956486,
     sum: 3_099_403.799999996, // rasterstats says 3,099,403.8
@@ -170,4 +173,21 @@ test("antimerdian #1", async ({ eq }) => {
   geom = reprojectGeoJSON(geom, { from: 4326, to: georaster.projection });
   const results = await stats(georaster, geom, { stats: ["count", "min", "max", "sum"] });
   eq(results, [{ count: 314_930, min: 0.20847222208976746, max: 492.3219299316406, sum: 12_783_872.545041203 }]);
+});
+
+test("antimerdian #2 (split at antimeridian)", async ({ eq }) => {
+  // converted GeoTIFF to all 1's
+  const georaster = await parse("http://localhost:3000/data/gfwfiji_6933_COG_Binary.tif");
+  let geom = JSON.parse(readFileSync("./data/antimeridian/split.geojson", "utf-8"));
+  geom = reprojectGeoJSON(geom, { from: 4326, to: georaster.projection });
+  const results = await stats(georaster, geom, { stats: ["count", "min", "max", "sum"] });
+  eq(results, [{ count: 327_972, min: 1, max: 1, sum: 327_972 }]);
+});
+
+test("edge", async ({ eq }) => {
+  // converted GeoTIFF to all 1's
+  const georaster = await parse("http://localhost:3000/data/geotiff-test-data/gfw-azores.tif");
+  const geojson = JSON.parse(readFileSync("./data/santa-maria/santa-maria-mpa.geojson", "utf-8"));
+  const results = await stats(georaster, geojson, { stats: ["count", "min", "max", "sum"] });
+  eq(results, [{ count: 2, min: 9.936111450195312, max: 19.24805450439453, sum: 29.184165954589844 }]);
 });

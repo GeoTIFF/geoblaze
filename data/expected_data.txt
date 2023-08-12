@@ -81,6 +81,16 @@ case: 8
 
 
 case: 9
+  vector: ./santa-maria/santa-maria-mpa.geojson
+  raster: ./geotiff-test-data/gfw-azores.tif
+  result:
+        count: 2
+        min: 9.936111450195312
+        max: 19.24805450439453
+        sum: 29.184165954589844
+
+
+case: 10
   vector: ./antimeridian/right-edge.shp
   raster: gfwfiji_6933_COG.tiff
   result:
@@ -88,6 +98,16 @@ case: 9
         min: 0.20847222208976746
         max: 492.3219299316406
         sum: 12,783,873.0
+
+
+case: 11
+  vector: ./antimeridian/split.shp
+  raster: gfwfiji_6933_COG_Binary.tif
+  result:
+        count: 327,972
+        min: 1.0
+        max: 1.0
+        sum: 327,972.0
 
 
 sum
@@ -113,8 +133,3 @@ Uruguay:  3,303,090.0
 Macedonia:  2,239,499.25
 Ukraine:  12,697,956.0
 Nicaragua:  5,066,313.5
-Afghanistan:  27,024,636.0
-Akrotiri and Dhekelia:  23,469.134765625
-Cyprus:  790,242.0625
-Croatia:  4,685,367.0
-Jamaica:  2,332,581.75

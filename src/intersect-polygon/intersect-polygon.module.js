@@ -1,3 +1,4 @@
+import booleanIntersects from "bbox-fns/boolean-intersects.js";
 import calcBoundingBox from "bbox-fns/calc.js";
 import dufour_peyton_intersection from "dufour-peyton-intersection";
 import snap from "snap-bbox";
@@ -9,6 +10,8 @@ const { resolve } = utils;
 
 const intersectPolygon = (georaster, geometry, perPixelFunction) => {
   const { noDataValue } = georaster;
+
+  const georaster_bbox = [georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax];
 
   const precisePixelHeight = georaster.pixelHeight.toString();
   const precisePixelWidth = georaster.pixelWidth.toString();
@@ -29,7 +32,7 @@ const intersectPolygon = (georaster, geometry, perPixelFunction) => {
     // so using the whole georaster bbox, shouldn't significantly more operations
     intersections = dufour_peyton_intersection.calculate({
       debug: false,
-      raster_bbox: [georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax],
+      raster_bbox: georaster_bbox,
       raster_height: georaster.height,
       raster_width: georaster.width,
       pixel_height: georaster.pixelHeight,
@@ -37,14 +40,20 @@ const intersectPolygon = (georaster, geometry, perPixelFunction) => {
       geometry
     });
   } else if (georaster.getValues) {
-    const [xmin, ymin, xmax, ymax] = calcBoundingBox(geometry);
+    const geometry_bbox = calcBoundingBox(geometry);
+
+    if (!booleanIntersects(geometry_bbox, georaster_bbox)) return;
+
+    const [xmin, ymin, xmax, ymax] = geometry_bbox;
 
     // snap geometry bounding box to georaster grid system
     const snapResult = snap({
       bbox: [xmin.toString(), ymin.toString(), xmax.toString(), ymax.toString()],
-      container: [georaster.xmin.toString(), georaster.ymin.toString(), georaster.xmax.toString(), georaster.ymax.toString()],
+      debug: false,
       origin: [georaster.xmin.toString(), georaster.ymax.toString()],
+      overflow: false,
       scale: [precisePixelWidth, "-" + precisePixelHeight],
+      size: [georaster.width.toString(), georaster.height.toString()],
       precise: true
     });
 

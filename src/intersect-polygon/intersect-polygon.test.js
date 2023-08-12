@@ -1,4 +1,5 @@
 import test from "flug";
+import fetch from "cross-fetch";
 import { serve } from "srvd";
 import parseGeoraster from "georaster";
 import bboxPolygon from "@turf/bbox-polygon";
@@ -23,7 +24,7 @@ async function fetch_json(url) {
   }
 }
 
-serve({ debug: true, max: 11, port: 3000, wait: 60 });
+serve({ debug: true, max: 19, port: 3000, wait: 60 });
 
 const urlToGeojson = "http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson";
 
@@ -155,4 +156,24 @@ test("antimerdian #1", async ({ eq }) => {
   await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
   // same as rasterstats
   eq(numberOfIntersectingPixels, 314_930);
+});
+
+test("parse", async ({ eq }) => {
+  const georaster = await parse(urlToData + "geotiff-test-data/gfw-azores.tif");
+  const geojson = await fetch_json(urlToData + "santa-maria/santa-maria-mpa.geojson");
+  let numberOfIntersectingPixels = 0;
+  const geom = convertMultiPolygon(geojson);
+  await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
+  // same as rasterstats
+  eq(numberOfIntersectingPixels, 2);
+});
+
+test("parse no overlap", async ({ eq }) => {
+  const georaster = await parse(urlToData + "geotiff-test-data/gfw-azores.tif");
+  const geojson = await fetch_json(urlToData + "santa-maria/santa-maria-mpa-offset.geojson");
+  let numberOfIntersectingPixels = 0;
+  const geom = convertMultiPolygon(geojson);
+  await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
+  // same as rasterstats
+  eq(numberOfIntersectingPixels, 0);
 });

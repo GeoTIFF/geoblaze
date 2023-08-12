@@ -64,7 +64,7 @@ typings/
 *.swp
 
 # temporary backups
-*.bak
+*bak*
 
 # downloaded test data
 data/*.xml
