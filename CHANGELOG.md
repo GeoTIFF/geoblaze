@@ -1,3 +1,26 @@
+## v2.2.0 (2023-08-12)
+
+### :boom: Breaking Changes
+* none
+
+### :rocket: New Feature / Improvement
+* stats now includes product (all pixel values within an area multiplied together) because we upgraded calc-stats to the newest version
+
+### :bug: Bug Fix
+* intersect-polygon now accounts for cases where the geometry's extent is totally outside the extent of the geotiff, returning early
+* upgrading snap-bbox, fixing where pixels on the edge of a geotiff where missed
+
+### :house: Internal
+
+* added some tests
+* updated some test values to account for new product value returned by calc-stats
+* added some more test data
+
+### :memo: Documentation
+
+* No changes
+
+
 ## v2.1.0 (2023-07-23)
 
 ### :boom: Breaking Changes
