@@ -21,9 +21,12 @@ test_cases = [
   ["./gadm/geojsons/Ukraine.geojson", "./mapspam/spam2005v3r2_harvested-area_wheat_total.tiff"],
   ["./veneto/veneto.geojson", "./veneto/geonode_atlanteil.tif"],
 
+  ["./santa-maria/santa-maria-mpa.geojson", "./geotiff-test-data/gfw-azores.tif"],
+
   # https://github.com/perrygeo/python-rasterstats/issues/26
   # ogr2ogr right-edge.shp right-edge.geojson -t_srs EPSG:6933
-  ["./antimeridian/right-edge.shp", "gfwfiji_6933_COG.tiff"]
+  ["./antimeridian/right-edge.shp", "gfwfiji_6933_COG.tiff"],
+  ["./antimeridian/split.shp", "gfwfiji_6933_COG_Binary.tif"]
 ]
 
 for i, (geom, raster) in enumerate(test_cases):
