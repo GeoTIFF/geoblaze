@@ -24,7 +24,7 @@ async function fetch_json(url) {
   }
 }
 
-serve({ debug: true, max: 13, port: 3000, wait: 60 });
+serve({ debug: true, max: 19, port: 3000, wait: 60 });
 
 const urlToGeojson = "http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson";
 
