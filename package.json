@@ -60,7 +60,7 @@
     "@turf/boolean-clockwise": "^6.5.0",
     "@turf/combine": "^6.5.0",
     "bbox-fns": "^0.13.0",
-    "calc-stats": "^2.1.0",
+    "calc-stats": "^2.2.0",
     "cross-fetch": "^3.1.6",
     "dufour-peyton-intersection": "0.2.0",
     "fast-max": "^0.4.0",
