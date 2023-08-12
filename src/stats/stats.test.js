@@ -28,6 +28,7 @@ const EXPECTED_RASTER_STATS = [
     min: 0,
     mode: 0,
     modes: [0],
+    product: 0,
     range: 8131.2,
     std: 562.8169687364914,
     sum: 108343045.39997534,
@@ -46,6 +47,7 @@ const EXPECTED_BBOX_STATS = [
     min: 0,
     mode: 0,
     modes: [0],
+    product: 0,
     range: 5166.7,
     std: 1216.4677587709607,
     sum: 236435.4,
@@ -64,6 +66,7 @@ const EXPECTED_POLYGON_STATS = [
     min: 0,
     mode: 0,
     modes: [0],
+    product: 0,
     range: 7807.4,
     std: 1507.3255322956486,
     sum: 3_099_403.799999996, // rasterstats says 3,099,403.8
