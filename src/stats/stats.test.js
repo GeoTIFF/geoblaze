@@ -184,6 +184,17 @@ test("antimerdian #2 (split at antimeridian)", async ({ eq }) => {
   eq(results, [{ count: 327_972, min: 1, max: 1, sum: 327_972 }]);
 });
 
+test("antimerdian #3 (across antimeridian on left-side)", async ({ eq }) => {
+  // converted GeoTIFF to all 1's
+  const georaster = await parse("http://localhost:3000/data/gfwfiji_6933_COG_Binary.tif");
+  const geojson = JSON.parse(readFileSync("./data/antimeridian/across.geojson", "utf-8"));
+  // geom = reprojectGeoJSON(geom, { from: 4326, to: georaster.projection });
+  // console.dir(geom.geometry.coordinates, { depth: null });
+  const geom = { geometry: geojson, srs: 4326 };
+  const results = await stats(georaster, geom, { stats: ["count", "min", "max", "sum"] });
+  eq(results, [{ count: 327_972, min: 1, max: 1, sum: 327_972 }]);
+});
+
 test("edge", async ({ eq }) => {
   // converted GeoTIFF to all 1's
   const georaster = await parse("http://localhost:3000/data/geotiff-test-data/gfw-azores.tif");

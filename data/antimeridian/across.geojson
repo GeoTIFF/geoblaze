@@ -1,0 +1,35 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": 
+      [
+        [
+          [
+            -182,
+            -18
+          ],
+          [
+            -178,
+            -18
+          ],
+          [
+            -178,
+            -20
+          ],
+          [
+            -182,
+            -20
+          ],
+          [
+            -182,
+            -18
+          ]
+        ]
+      ]
+  },
+  "properties": {
+    "description": "rectangular polygon that cross the anti-meridian (on the left side), technically same area as split.geojson"
+  },
+  "srs": 4326
+}
