@@ -3,6 +3,7 @@
 case: 1
   vector: part-of-india.geojson
   raster: test.tiff
+  opts: []
   result:
         count: 1,672
         min: 0.0
@@ -13,6 +14,7 @@ case: 1
 case: 2
   vector: part-of-india-2.geojson
   raster: test.tiff
+  opts: []
   result:
         count: 109
         min: 0.0
@@ -23,6 +25,7 @@ case: 2
 case: 3
   vector: part-of-india-3.geojson
   raster: test.tiff
+  opts: []
   result:
         count: 67
         min: 0.0
@@ -33,6 +36,7 @@ case: 3
 case: 4
   vector: ./gadm/geojsons/Akrotiri and Dhekelia.geojson
   raster: test.tiff
+  opts: []
   result:
         count: 1
         min: 0.0
@@ -43,6 +47,7 @@ case: 4
 case: 5
   vector: ./gadm/geojsons/Afghanistan.geojson
   raster: ./mapspam/spam2005v3r2_harvested-area_wheat_total.tiff
+  opts: []
   result:
         count: 7,112
         min: 0.0
@@ -53,6 +58,7 @@ case: 5
 case: 6
   vector: ./gadm/geojsons/Akrotiri and Dhekelia.geojson
   raster: ./ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_30_40.tif
+  opts: []
   result:
         count: 229
         min: 0.0
@@ -63,6 +69,7 @@ case: 6
 case: 7
   vector: ./gadm/geojsons/Ukraine.geojson
   raster: ./mapspam/spam2005v3r2_harvested-area_wheat_total.tiff
+  opts: []
   result:
         count: 8,596
         min: 0.0
@@ -73,6 +80,7 @@ case: 7
 case: 8
   vector: ./veneto/veneto.geojson
   raster: ./veneto/geonode_atlanteil.tif
+  opts: []
   result:
         count: 59,409
         min: 0.0
@@ -83,6 +91,7 @@ case: 8
 case: 9
   vector: ./santa-maria/santa-maria-mpa.geojson
   raster: ./geotiff-test-data/gfw-azores.tif
+  opts: []
   result:
         count: 2
         min: 9.936111450195312
@@ -93,6 +102,7 @@ case: 9
 case: 10
   vector: ./antimeridian/right-edge.shp
   raster: gfwfiji_6933_COG.tiff
+  opts: []
   result:
         count: 314,930
         min: 0.20847222208976746
@@ -101,13 +111,36 @@ case: 10
 
 
 case: 11
+  vector: ./antimeridian/right-edge.shp
+  raster: gfwfiji_6933_COG.tiff
+  opts: [{'boundless': False, 'nodata': -9999}]
+  result:
+        count: 314,930
+        min: 0.20847222208976746
+        max: 492.3219299316406
+        sum: 12,783,873.0
+
+
+case: 12
   vector: ./antimeridian/split.shp
   raster: gfwfiji_6933_COG_Binary.tif
+  opts: []
   result:
         count: 327,972
         min: 1.0
         max: 1.0
         sum: 327,972.0
+
+
+case: 13
+  vector: ./antimeridian/across.shp
+  raster: gfwfiji_6933_COG_Binary.tif
+  opts: []
+  result:
+        count: 29,211,252
+        min: 1.0
+        max: 1.0
+        sum: 29,211,252.0
 
 
 sum
@@ -128,8 +161,13 @@ sum
 sum
 ./veneto/geonode_atlanteil.tif
 27953.119140625
+Afghanistan:  27,024,636.0
+Akrotiri and Dhekelia:  23,469.134765625
+Croatia:  4,685,367.0
+Cyprus:  790,242.0625
+Jamaica:  2,332,581.75
 Lebanon:  5,554,060.0
-Uruguay:  3,303,090.0
 Macedonia:  2,239,499.25
-Ukraine:  12,697,956.0
 Nicaragua:  5,066,313.5
+Ukraine:  12,697,956.0
+Uruguay:  3,303,090.0
