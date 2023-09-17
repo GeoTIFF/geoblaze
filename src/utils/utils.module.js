@@ -86,8 +86,10 @@ const utils = {
 
   isEsriJson(input, debug = false) {
     if (debug) console.log("starting isEsriJson with", input);
-    const inputType = typeof input;
-    const obj = inputType === "string" ? JSON.parse(input) : inputType === "object" ? input : null;
+
+    if (typeof input === "undefined") return false;
+
+    const obj = typeof input === "string" ? JSON.parse(input) : typeof input === "object" ? input : null;
     const geometry = obj.geometry ? obj.geometry : obj;
     if (geometry) {
       if (geometry.rings || (geometry.x && geometry.y)) {
@@ -107,6 +109,12 @@ const utils = {
     } else {
       return false;
     }
+  },
+
+  isGeoJSON(input) {
+    if (typeof input === "undefined") return false;
+    if (input === null) return false;
+    return !utils.isEsriJson(input) && ["FeatureCollection", "Feature", "Polygon", "MultiPolygon"].includes(input.type);
   },
 
   toGeoJSON(input, debug = false) {

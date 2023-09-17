@@ -26,15 +26,19 @@ test_cases = [
   # https://github.com/perrygeo/python-rasterstats/issues/26
   # ogr2ogr right-edge.shp right-edge.geojson -t_srs EPSG:6933
   ["./antimeridian/right-edge.shp", "gfwfiji_6933_COG.tiff"],
-  ["./antimeridian/split.shp", "gfwfiji_6933_COG_Binary.tif"]
+  ["./antimeridian/right-edge.shp", "gfwfiji_6933_COG.tiff", { "boundless": False, "nodata": -9999 }],
+  ["./antimeridian/split.shp", "gfwfiji_6933_COG_Binary.tif"],
+  ["./antimeridian/across.shp", "gfwfiji_6933_COG_Binary.tif"]
 ]
 
-for i, (geom, raster) in enumerate(test_cases):
+for i, (geom, raster, *opts) in enumerate(test_cases):
   print("\n\ncase: " + str(i + 1))
   print("  vector: " + geom)
   print("  raster: " + raster)
+  print("  opts: " + str(opts))
 
-  feature_stats = zonal_stats(geom, raster, stats=VALID_STATS, band=1)
+
+  feature_stats = zonal_stats(geom, raster, stats=VALID_STATS, band=1, **(opts[0] if opts else {}))
 
   try:
     # merge feature_stats (doesn't handle overlapping polygons)
@@ -67,7 +71,7 @@ for filepath in sum_test_cases:
 
 
 
-country_files = [[f.split(".")[0], f]for f in os.listdir("./gadm/geojsons") if f.endswith(".geojson")]
+country_files = sorted([[f.split(".")[0], f] for f in os.listdir("./gadm/geojsons") if f.endswith(".geojson")])
 ghsl_tiles = [f for f in os.listdir("./ghsl/tiles") if f.endswith(".tif")]
 
 # calculate populations

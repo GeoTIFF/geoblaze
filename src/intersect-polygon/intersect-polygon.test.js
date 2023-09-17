@@ -24,7 +24,7 @@ async function fetch_json(url) {
   }
 }
 
-serve({ debug: true, max: 19, port: 3000, wait: 60 });
+serve({ debug: true, max: 25, port: 3000, wait: 60 });
 
 const urlToGeojson = "http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson";
 
@@ -148,24 +148,25 @@ test("Hole Test", async ({ eq }) => {
 
 test("antimerdian #1", async ({ eq }) => {
   const georaster = await parse(urlToData + "gfwfiji_6933_COG.tiff");
-  const geojson = await fetch_json(urlToData + "antimeridian/right-edge.geojson");
+  let geojson = await fetch_json(urlToData + "antimeridian/right-edge.geojson");
   let numberOfIntersectingPixels = 0;
-  let geom = convertMultiPolygon(geojson);
   // reproject geometry to projection of raster
-  geom = reprojectGeoJSON(geom, { from: 4326, to: georaster.projection });
+  geojson = reprojectGeoJSON(geojson, { from: 4326, to: georaster.projection });
+  const geom = convertMultiPolygon(geojson);
   await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
-  // same as rasterstats
+  // rasterstats says 314,930
   eq(numberOfIntersectingPixels, 314_930);
 });
 
 test("parse", async ({ eq }) => {
   const georaster = await parse(urlToData + "geotiff-test-data/gfw-azores.tif");
   const geojson = await fetch_json(urlToData + "santa-maria/santa-maria-mpa.geojson");
-  let numberOfIntersectingPixels = 0;
   const geom = convertMultiPolygon(geojson);
-  await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
-  // same as rasterstats
-  eq(numberOfIntersectingPixels, 2);
+  const values = [];
+  await intersectPolygon(georaster, geom, (value, iband, irow, icol) => {
+    values.push(value);
+  });
+  eq(values, [19.24805450439453, 9.936111450195312]);
 });
 
 test("parse no overlap", async ({ eq }) => {
@@ -176,4 +177,14 @@ test("parse no overlap", async ({ eq }) => {
   await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
   // same as rasterstats
   eq(numberOfIntersectingPixels, 0);
+});
+
+test("more testing", async ({ eq }) => {
+  const georaster = await parse(urlToData + "test.tiff");
+  const geojson = await fetch_json(urlToData + "part-of-india.geojson");
+  let numberOfIntersectingPixels = 0;
+  const geom = convertMultiPolygon(geojson);
+  await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
+  // same as rasterstats
+  eq(numberOfIntersectingPixels, 1_672);
 });
