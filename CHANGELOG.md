@@ -1,3 +1,26 @@
+## v2.3.0 (2023-09-17)
+
+### :boom: Breaking Changes
+* refactored stats calculation such that no data values are now included in the total `"count"` property of the return object.  Previously, geoblaze completely ignored no data values.  However, this shouldn't impact any of the statistical results like sum and median.  If you want to get the total number of valid values in an area, look for the `"valid"` property value in the stats result object.
+* improved antimeridian support (described below) could potentially lead to changed results for geometries that cross the antimeridian.  The new results should be treated as more accurate.
+
+### :rocket: New Feature / Improvement
+* when a multi-polygon is used where the polygons are far apart, geoblaze will now make multiple smaller samples instead of sampling the whole area that contains all the polygons.  A practical example is when a multipolygon includes polygons that border each side of the antimeridian, previously GeoBlaze would sample a bounding box across the whole world (from nearly -180 to 180 longitude).  This could lead to memory issues and stalling.  Now, GeoBlaze samples from each side of the world separately.
+
+### :bug: Bug Fix
+* fixed seemingly never-ending stalling when sampling across the antimeridian
+
+### :house: Internal
+
+* refactored stats to use the defaults as defined by https://github.com/danieljdufour/calc-stats
+* added a geojson and shapefile that cross the antimeridian to the test data
+* replace [quick-resolve](https://github.com/danieljdufour/quick-resolve) with [quick-promise](https://github.com/danieljdufour/quick-promise)
+
+### :memo: Documentation
+
+* No changes
+
+
 ## v2.2.0 (2023-08-12)
 
 ### :boom: Breaking Changes
