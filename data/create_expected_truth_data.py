@@ -28,7 +28,9 @@ test_cases = [
   ["./antimeridian/right-edge.shp", "gfwfiji_6933_COG.tiff"],
   ["./antimeridian/right-edge.shp", "gfwfiji_6933_COG.tiff", { "boundless": False, "nodata": -9999 }],
   ["./antimeridian/split.shp", "gfwfiji_6933_COG_Binary.tif"],
-  ["./antimeridian/across.shp", "gfwfiji_6933_COG_Binary.tif"]
+  ["./antimeridian/across.shp", "gfwfiji_6933_COG_Binary.tif"],
+
+  ["./geojson-test-data/EEZ_Land_v3_202030_New_Zealand.geojson", "./geotiff-test-data/nz_habitat_anticross_4326_1deg.tif"]
 ]
 
 for i, (geom, raster, *opts) in enumerate(test_cases):

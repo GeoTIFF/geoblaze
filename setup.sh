@@ -10,6 +10,13 @@ bash setup.sh
 cd ..
 echo "---------- Finished Setting up GeoTIFF Data ----------"
 
+# setup test-data
+echo "---------- Setting up GeoJSON Test Data ----------"
+cd geojson-test-data
+bash setup.sh
+cd ..
+echo "---------- Finished Setting up GeoJSON Data ----------"
+
 # setup gadm
 echo "---------- Setting up GADM Data ----------"
 cd gadm

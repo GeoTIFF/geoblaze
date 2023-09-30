@@ -12,6 +12,7 @@ const countries_to_extract = new Set([
   "Nicaragua",
   "Lebanon",
   "Macedonia",
+  "New Zealand",
   "Uruguay",
   "Ukraine"
 ]);

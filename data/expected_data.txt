@@ -143,6 +143,17 @@ case: 13
         sum: 29,211,252.0
 
 
+case: 14
+  vector: ./geojson-test-data/EEZ_Land_v3_202030_New_Zealand.geojson
+  raster: ./geotiff-test-data/nz_habitat_anticross_4326_1deg.tif
+  opts: []
+  result:
+        count: 454
+        min: 1.0
+        max: 71.0
+        sum: 4,512.0
+
+
 sum
 test.tiff
 108343045.40000004
@@ -168,6 +179,7 @@ Cyprus:  790,242.0625
 Jamaica:  2,332,581.75
 Lebanon:  5,554,060.0
 Macedonia:  2,239,499.25
+New Zealand:  0.0
 Nicaragua:  5,066,313.5
 Ukraine:  12,697,956.0
 Uruguay:  3,303,090.0
