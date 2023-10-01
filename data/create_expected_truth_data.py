@@ -30,7 +30,7 @@ test_cases = [
   ["./antimeridian/split.shp", "gfwfiji_6933_COG_Binary.tif"],
   ["./antimeridian/across.shp", "gfwfiji_6933_COG_Binary.tif"],
 
-  ["./geojson-test-data/EEZ_Land_v3_202030_New_Zealand.geojson", "./geotiff-test-data/nz_habitat_anticross_4326_1deg.tif"]
+  ["./geojson-test-data/eez_land_union/EEZ_Land_v3_202030_New_Zealand.geojson", "./geotiff-test-data/nz_habitat_anticross_4326_1deg.tif"]
 ]
 
 for i, (geom, raster, *opts) in enumerate(test_cases):
@@ -85,3 +85,4 @@ with open("country_populations.csv", "w") as csv_file:
     for tile in ghsl_tiles:
       pop += zonal_stats(f"./gadm/geojsons/{file}", f"./ghsl/tiles/{tile}", stats="sum", band=1)[0]['sum']
     print(f"{country}:  {pop:,}")
+    writer.writerow({ "country": country, "population": pop })
