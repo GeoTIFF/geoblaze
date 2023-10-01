@@ -184,6 +184,16 @@ test("antimerdian #2 (split at antimeridian)", async ({ eq }) => {
   eq(results, [{ count: 327_972, min: 1, max: 1, sum: 327_972 }]);
 });
 
+test("antimeridian New Zealand EEZ and Habitat", async ({ eq }) => {
+  const georaster = await parse("http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif");
+  const geojson = JSON.parse(readFileSync("./data/geojson-test-data/eez_land_union/EEZ_Land_v3_202030_New_Zealand.geojson", "utf-8"));
+  const results = await stats(georaster, geojson, { stats: ["count", "min", "max", "sum"] });
+  eq(results, [{ count: 4_512, min: 1, max: 71, sum: 454 }]);
+
+  const results2 = await Promise.all(geojson.features[0].geometry.coordinates.map(geom => stats(georaster, geom, { stats: ["count", "min", "max", "sum"] })));
+  eq(results2, [[{ count: 322, min: 1, max: 71, sum: 3931 }], [{ count: 132, min: 1, max: 22, sum: 581 }]]);
+});
+
 test("antimerdian #3 (across antimeridian on left-side)", async ({ eq }) => {
   return; // XXX
   // converted GeoTIFF to all 1's

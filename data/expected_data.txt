@@ -144,7 +144,7 @@ case: 13
 
 
 case: 14
-  vector: ./geojson-test-data/EEZ_Land_v3_202030_New_Zealand.geojson
+  vector: ./geojson-test-data/eez_land_union/EEZ_Land_v3_202030_New_Zealand.geojson
   raster: ./geotiff-test-data/nz_habitat_anticross_4326_1deg.tif
   opts: []
   result:
