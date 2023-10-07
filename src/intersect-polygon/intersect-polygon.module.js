@@ -9,8 +9,6 @@ import wrapParse from "../wrap-parse";
 // import writePng from "@danieljdufour/write-png";
 
 const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level = 0 } = {}) => {
-  const { noDataValue } = georaster;
-
   const georaster_bbox = [georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax];
 
   const precisePixelHeight = georaster.pixelHeight.toString();
