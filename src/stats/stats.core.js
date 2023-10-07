@@ -49,13 +49,18 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0 } 
       // the third argument of this function is a function which
       // runs for every pixel in the polygon. Here we add them to
       // an array, so we can later on calculate stats for each band separately
-      const done = intersectPolygon(georaster, geometry, (value, bandIndex) => {
-        if (values[bandIndex]) {
-          values[bandIndex].push(value);
-        } else {
-          values[bandIndex] = [value];
-        }
-      });
+      const done = intersectPolygon(
+        georaster,
+        geometry,
+        (value, bandIndex) => {
+          if (values[bandIndex]) {
+            values[bandIndex].push(value);
+          } else {
+            values[bandIndex] = [value];
+          }
+        },
+        { debug_level }
+      );
 
       return QuickPromise.resolve(done).then(() => {
         const bands = values.filter(band => band.length !== 0);
