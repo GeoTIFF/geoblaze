@@ -10,7 +10,7 @@ import load from "../load";
 import parse from "../parse";
 import stats from "./stats.module";
 
-serve({ debug: true, max: 26, port: 3000, wait: 240 });
+serve({ debug: true, max: 30, port: 3000, wait: 240 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -58,8 +58,8 @@ const EXPECTED_BBOX_STATS = [
 
 const EXPECTED_POLYGON_STATS = [
   {
-    count: 1672, // rasterstats says 1672
-    invalid: 0, // expected because geoblaze ignores no data values (but maybe this isn't ideal?)
+    count: 1722,
+    invalid: 50,
     max: 7807.4,
     mean: 1853.7104066985623,
     median: 1637.35,
@@ -70,7 +70,7 @@ const EXPECTED_POLYGON_STATS = [
     range: 7807.4,
     std: 1507.3255322956486,
     sum: 3_099_403.799999996, // rasterstats says 3,099,403.8
-    valid: 1672,
+    valid: 1672, // same as rasterstats
     variance: 2_272_030.2603103607
   }
 ];
