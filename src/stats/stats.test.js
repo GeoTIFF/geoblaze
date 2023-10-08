@@ -187,11 +187,13 @@ test("antimerdian #2 (split at antimeridian)", async ({ eq }) => {
 test("antimeridian New Zealand EEZ and Habitat", async ({ eq }) => {
   const georaster = await parse("http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif");
   const geojson = JSON.parse(readFileSync("./data/geojson-test-data/eez_land_union/EEZ_Land_v3_202030_New_Zealand.geojson", "utf-8"));
-  const results = await stats(georaster, geojson, { stats: ["count", "min", "max", "sum"] });
-  eq(results, [{ count: 454, min: 1, max: 71, sum: 4512 }]);
+  const results = await stats(georaster, geojson, { stats: ["count", "invalid", "min", "max", "sum", "valid"] });
+  eq(results, [{ count: 487, invalid: 33, min: 1, max: 71, sum: 4512, valid: 454 }]);
 
-  const results2 = await Promise.all(geojson.features[0].geometry.coordinates.map(geom => stats(georaster, geom, { stats: ["count", "min", "max", "sum"] })));
-  eq(results2, [[{ count: 322, min: 1, max: 71, sum: 3931 }], [{ count: 132, min: 1, max: 22, sum: 581 }]]);
+  const results2 = await Promise.all(
+    geojson.features[0].geometry.coordinates.map(geom => stats(georaster, geom, { stats: ["count", "invalid", "min", "max", "sum", "valid"] }))
+  );
+  eq(results2, [[{ count: 354, valid: 322, invalid: 32, min: 1, max: 71, sum: 3931 }], [{ count: 133, valid: 132, invalid: 1, min: 1, max: 22, sum: 581 }]]);
 });
 
 test("antimerdian #3 (across antimeridian on left-side)", async ({ eq }) => {
