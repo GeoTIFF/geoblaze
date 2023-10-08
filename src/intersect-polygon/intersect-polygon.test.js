@@ -11,6 +11,16 @@ import parse from "../parse";
 import { convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
+async function countIntersectingPixels(georaster, geom, includeNoData) {
+  let numberOfIntersectingPixels = 0;
+  await intersectPolygon(georaster, geom, value => {
+    if (includeNoData || value !== georaster.noDataValue) {
+      numberOfIntersectingPixels++;
+    }
+  });
+  return numberOfIntersectingPixels;
+}
+
 async function fetch_json(url) {
   let res;
   let text;
@@ -42,7 +52,7 @@ test("(Legacy) Testing intersection of box", async ({ eq }) => {
   values.forEach(band => {
     band.forEach(row => {
       row.forEach(value => {
-        if (value != georaster.noDataValue) {
+        if (value !== georaster.noDataValue) {
           expectedNumberOfIntersectingPixels++;
         }
       });
@@ -60,8 +70,7 @@ test("(Legacy) Testing intersection of box", async ({ eq }) => {
     georaster.ymax - 0.5 * pixelHeight
   ]);
   const coords = geom.geometry.coordinates;
-  let numberOfIntersectingPixels = 0;
-  intersectPolygon(georaster, coords, () => numberOfIntersectingPixels++);
+  const numberOfIntersectingPixels = await countIntersectingPixels(georaster, coords, false);
   eq(numberOfIntersectingPixels, expectedNumberOfIntersectingPixels);
 });
 
@@ -69,9 +78,8 @@ test("(Legacy) Test intersection/sum calculations for Country with Multiple Ring
   const georaster = await load(urlToData + "ghsl/tiles/GHS_POP_GPW42015_GLOBE_R2015A_54009_1k_v1_0_4326_30_40.tif");
   const response = await fetch(urlToGeojson);
   const country = await response.json();
-  let numberOfIntersectingPixels = 0;
   const geom = convertMultiPolygon(country);
-  intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
+  const numberOfIntersectingPixels = await countIntersectingPixels(georaster, geom, true);
   eq(numberOfIntersectingPixels, EXPECTED_NUMBER_OF_INTERSECTING_PIXELS);
 });
 
@@ -85,9 +93,7 @@ test("(Modern) Testing intersection of box", async ({ eq }) => {
   values.forEach(band => {
     band.forEach(row => {
       row.forEach(value => {
-        if (value != georaster.noDataValue) {
-          expectedNumberOfIntersectingPixels++;
-        }
+        expectedNumberOfIntersectingPixels++;
       });
     });
   });
@@ -153,7 +159,11 @@ test("antimerdian #1", async ({ eq }) => {
   // reproject geometry to projection of raster
   geojson = reprojectGeoJSON(geojson, { from: 4326, to: georaster.projection });
   const geom = convertMultiPolygon(geojson);
-  await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
+  await intersectPolygon(georaster, geom, value => {
+    if (value !== georaster.noDataValue) {
+      numberOfIntersectingPixels++;
+    }
+  });
   // rasterstats says 314,930
   eq(numberOfIntersectingPixels, 314_930);
 });
@@ -182,9 +192,8 @@ test("parse no overlap", async ({ eq }) => {
 test("more testing", async ({ eq }) => {
   const georaster = await parse(urlToData + "test.tiff");
   const geojson = await fetch_json(urlToData + "part-of-india.geojson");
-  let numberOfIntersectingPixels = 0;
   const geom = convertMultiPolygon(geojson);
-  await intersectPolygon(georaster, geom, () => numberOfIntersectingPixels++);
+  const numberOfIntersectingPixels = await countIntersectingPixels(georaster, geom, false);
   // same as rasterstats
   eq(numberOfIntersectingPixels, 1_672);
 });
