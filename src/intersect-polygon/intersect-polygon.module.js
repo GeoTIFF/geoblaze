@@ -9,8 +9,6 @@ import wrapParse from "../wrap-parse";
 // import writePng from "@danieljdufour/write-png";
 
 const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level = 0 } = {}) => {
-  const { noDataValue } = georaster;
-
   const georaster_bbox = [georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax];
 
   const precisePixelHeight = georaster.pixelHeight.toString();
@@ -41,6 +39,7 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
     samples = [{ intersections, sample, offset: [0, 0] }];
   } else if (georaster.getValues) {
     const geometry_bboxes = calcAll(geometry);
+    if (debug_level >= 2) console.log("[geoblaze] geometry_bboxes:", geometry_bboxes);
 
     if (!geometry_bboxes.some(bbox => booleanIntersects(bbox, georaster_bbox))) return;
 
@@ -121,9 +120,7 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
                 const row = band[irow];
                 if (row) {
                   const value = row[icol];
-                  if (value != undefined && value !== noDataValue) {
-                    perPixelFunction(value, iband, yoff + irow, xoff + icol);
-                  }
+                  perPixelFunction(value, iband, yoff + irow, xoff + icol);
                 }
               });
             }

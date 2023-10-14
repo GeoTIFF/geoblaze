@@ -10,7 +10,7 @@ import load from "../load";
 import parse from "../parse";
 import stats from "./stats.module";
 
-serve({ debug: true, max: 26, port: 3000, wait: 240 });
+serve({ debug: true, max: 30, port: 3000, wait: 240 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -58,8 +58,8 @@ const EXPECTED_BBOX_STATS = [
 
 const EXPECTED_POLYGON_STATS = [
   {
-    count: 1672, // rasterstats says 1672
-    invalid: 0, // expected because geoblaze ignores no data values (but maybe this isn't ideal?)
+    count: 1722,
+    invalid: 50,
     max: 7807.4,
     mean: 1853.7104066985623,
     median: 1637.35,
@@ -70,7 +70,7 @@ const EXPECTED_POLYGON_STATS = [
     range: 7807.4,
     std: 1507.3255322956486,
     sum: 3_099_403.799999996, // rasterstats says 3,099,403.8
-    valid: 1672,
+    valid: 1672, // same as rasterstats
     variance: 2_272_030.2603103607
   }
 ];
@@ -187,11 +187,13 @@ test("antimerdian #2 (split at antimeridian)", async ({ eq }) => {
 test("antimeridian New Zealand EEZ and Habitat", async ({ eq }) => {
   const georaster = await parse("http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif");
   const geojson = JSON.parse(readFileSync("./data/geojson-test-data/eez_land_union/EEZ_Land_v3_202030_New_Zealand.geojson", "utf-8"));
-  const results = await stats(georaster, geojson, { stats: ["count", "min", "max", "sum"] });
-  eq(results, [{ count: 454, min: 1, max: 71, sum: 4512 }]);
+  const results = await stats(georaster, geojson, { stats: ["count", "invalid", "min", "max", "sum", "valid"] });
+  eq(results, [{ count: 487, invalid: 33, min: 1, max: 71, sum: 4512, valid: 454 }]);
 
-  const results2 = await Promise.all(geojson.features[0].geometry.coordinates.map(geom => stats(georaster, geom, { stats: ["count", "min", "max", "sum"] })));
-  eq(results2, [[{ count: 322, min: 1, max: 71, sum: 3931 }], [{ count: 132, min: 1, max: 22, sum: 581 }]]);
+  const results2 = await Promise.all(
+    geojson.features[0].geometry.coordinates.map(geom => stats(georaster, geom, { stats: ["count", "invalid", "min", "max", "sum", "valid"] }))
+  );
+  eq(results2, [[{ count: 354, valid: 322, invalid: 32, min: 1, max: 71, sum: 3931 }], [{ count: 133, valid: 132, invalid: 1, min: 1, max: 22, sum: 581 }]]);
 });
 
 test("antimerdian #3 (across antimeridian on left-side)", async ({ eq }) => {
@@ -215,4 +217,21 @@ test("edge", async ({ eq }) => {
   const geojson = JSON.parse(readFileSync("./data/santa-maria/santa-maria-mpa.geojson", "utf-8"));
   const results = await stats(georaster, geojson, { stats: ["count", "min", "max", "sum"] });
   eq(results, [{ count: 2, min: 9.936111450195312, max: 19.24805450439453, sum: 29.184165954589844 }]);
+});
+
+test("multipolygon vs 2 polygons", async ({ eq }) => {
+  const geojson = JSON.parse(readFileSync("./data/antimeridian/split.geojson", "utf-8"));
+  const georaster = await parse("http://localhost:3000/data/geotiff-test-data/spam2005v3r2_harvested-area_wheat_total.tiff");
+  const _stats = ["count", "invalid", "min", "max", "sum", "valid"];
+
+  const expected = [{ count: 1152, valid: 4, invalid: 1148, min: 0, max: 0, sum: 0 }];
+  eq(await stats(georaster, geojson, { stats: _stats }, undefined, { debug_level: 5 }), expected);
+  eq(await stats(georaster, geojson.features[0], { stats: _stats }), expected);
+
+  const [poly1, poly2] = geojson.features[0].geometry.coordinates;
+  const results1 = await stats(georaster, poly1, { debug_level: 5, stats: _stats });
+  eq(results1, [{ count: 576, valid: 0, invalid: 576, sum: 0, min: undefined, max: undefined }]);
+
+  const results2 = await stats(georaster, poly2, { debug_level: 5, stats: _stats });
+  eq(results2, [{ count: 576, valid: 4, invalid: 572, min: 0, max: 0, sum: 0 }]);
 });
