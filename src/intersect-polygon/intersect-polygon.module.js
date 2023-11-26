@@ -3,6 +3,9 @@ import booleanIntersects from "bbox-fns/boolean-intersects.js";
 import calcAll from "bbox-fns/calc-all.js";
 import dufour_peyton_intersection from "dufour-peyton-intersection";
 import merge from "bbox-fns/merge.js";
+import union from "bbox-fns/union.js";
+import reproject from "bbox-fns/precise/reproject.js";
+import { PreciseGeotransform } from "geoaffine";
 import QuickPromise from "quick-promise";
 import snap from "snap-bbox";
 import wrapParse from "../wrap-parse";
@@ -38,10 +41,19 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
 
     samples = [{ intersections, sample, offset: [0, 0] }];
   } else if (georaster.getValues) {
-    const geometry_bboxes = calcAll(geometry);
+    let geometry_bboxes = union(calcAll(geometry));
     if (debug_level >= 2) console.log("[geoblaze] geometry_bboxes:", geometry_bboxes);
 
-    if (!geometry_bboxes.some(bbox => booleanIntersects(bbox, georaster_bbox))) return;
+    // filter out geometry bboxes that don't intersect raster
+    // assuming anti-meridian geometries have been normalized beforehand
+    geometry_bboxes = geometry_bboxes.filter(bbox => booleanIntersects(bbox, georaster_bbox));
+    if (debug_level >= 2) console.log("[geoblaze] intersecting geometry bboxes:", geometry_bboxes);
+
+    // no intersecting pixels
+    if (geometry_bboxes.length === 0) return;
+
+    const geotransfrom = PreciseGeotransform([georaster.xmin.toString(), precisePixelWidth, "0", georaster.ymax.toString(), "0", "-" + precisePixelHeight]);
+    if (debug_level >= 2) console.log("[geoblaze] geotransfrom:", geotransfrom);
 
     const combined_geometry_bbox = merge(geometry_bboxes);
     if (debug_level >= 2) console.log("[geoblaze] combined_geometry_bbox:", combined_geometry_bbox);
@@ -53,49 +65,65 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
 
     const sample_bboxes = usedPercentage > 0.01 ? [combined_geometry_bbox] : geometry_bboxes;
 
-    // get samples for each geometry bbox
-    samples = sample_bboxes.map(sample_bbox => {
+    const sample_image_bboxes = sample_bboxes.map(sample_bbox => {
       const [xmin, ymin, xmax, ymax] = sample_bbox;
 
-      // snap whole geometry bounding box to georaster grid system
-      const snapResult = snap({
+      const snap_params = {
         bbox: [xmin.toString(), ymin.toString(), xmax.toString(), ymax.toString()],
         debug: false,
         origin: [georaster.xmin.toString(), georaster.ymax.toString()],
         overflow: false,
+        padding: ["1", "1"], // add a little padding in case the geometry is smaller than half a pixel
         scale: [precisePixelWidth, "-" + precisePixelHeight],
         size: [georaster.width.toString(), georaster.height.toString()],
         precise: true
-      });
-      if (debug_level >= 2) console.log("[geoblaze] snapResult:", snapResult);
-      const snapped_bbox = snapResult.bbox_in_coordinate_system.map(n => Number(n));
+      };
+      if (debug_level >= 2) console.log("[geoblaze] snapping:", snap_params);
+      const snap_result = snap(snap_params);
+      if (debug_level >= 2) console.log("[geoblaze] snap_result:", snap_result);
 
-      const image_bbox = snapResult.bbox_in_grid_cells.map(n => Number(n));
+      const image_bbox = snap_result.bbox_in_grid_cells.map(n => Number(n));
       if (debug_level >= 2) console.log("[geoblaze] image_bbox:", image_bbox);
-      const [left, bottom, right, top] = image_bbox;
 
-      const snapped_height = bottom - top;
-      const snapped_width = right - left;
+      return image_bbox;
+    });
+
+    // combine image bboxes that overlap, preventing double counting pixels
+    const sample_image_bboxes_union = union(sample_image_bboxes);
+
+    // get values for each sample area
+    samples = sample_image_bboxes_union.map(sample_image_bbox => {
+      const [left, bottom, right, top] = sample_image_bbox;
+
+      const sample_height = bottom - top;
+      const sample_width = right - left;
 
       const getValuesPromise = georaster.getValues({
         left,
         bottom,
         right,
         top,
-        width: snapped_width,
-        height: snapped_height,
+        width: sample_width,
+        height: sample_height,
         resampleMethod: "near"
       });
 
-      const intersections = dufour_peyton_intersection.calculate({
-        debug: false,
-        raster_bbox: snapped_bbox,
-        raster_height: snapped_height,
-        raster_width: snapped_width,
+      // compute bbox in srs from bbox in pixel coordinates
+      const precise_sample_bbox = reproject(sample_image_bbox, geotransfrom.forward, { async: false, density: 0 });
+
+      const sample_bbox = precise_sample_bbox.map(str => Number(str));
+
+      const intersect_params = {
+        debug: true,
+        raster_bbox: sample_bbox,
+        raster_height: sample_height,
+        raster_width: sample_width,
         pixel_height: georaster.pixelHeight,
         pixel_width: georaster.pixelWidth,
         geometry
-      });
+      };
+
+      const intersections = dufour_peyton_intersection.calculate(intersect_params);
       if (debug_level >= 3) console.log("[geoblaze] intersections:", JSON.stringify(intersections, undefined, 2));
 
       return QuickPromise.resolve(getValuesPromise).then(sample => {
