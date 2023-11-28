@@ -219,6 +219,15 @@ test("edge", async ({ eq }) => {
   eq(results, [{ count: 2, min: 9.936111450195312, max: 19.24805450439453, sum: 29.184165954589844 }]);
 });
 
+test("issue #224", async ({ eq }) => {
+  const geojson = JSON.parse(readFileSync("./data/antimeridian/clip-test-clipped.json", "utf-8"));
+  const georaster = await parse("http://localhost:3000/data/antimeridian/fiji_anticross_random_test.tif");
+  const _stats = ["count", "invalid", "min", "max", "sum", "valid"];
+
+  const expected = [{ count: 4, valid: 1, invalid: 3, min: 3, max: 3, sum: 3 }];
+  eq(await stats(georaster, geojson, { stats: _stats }, undefined, { debug_level: 0 }), expected);
+});
+
 test("multipolygon vs 2 polygons", async ({ eq }) => {
   const geojson = JSON.parse(readFileSync("./data/antimeridian/split.geojson", "utf-8"));
   const georaster = await parse("http://localhost:3000/data/geotiff-test-data/spam2005v3r2_harvested-area_wheat_total.tiff");

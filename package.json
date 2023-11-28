@@ -67,6 +67,7 @@
     "fast-max": "^0.4.0",
     "fast-min": "^0.3.0",
     "faster-median": "^1.0.0",
+    "geoaffine": "^0.2.0",
     "geojson-antimeridian-cut": "^0.1.0",
     "georaster": "^1.6.0",
     "get-depth": "^0.0.3",
