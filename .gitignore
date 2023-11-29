@@ -107,3 +107,4 @@ out
 data/geotiff-test-data/*.cog
 data/geotiff-test-data/*.tif*
 Pipfile*
+package-lock.json
