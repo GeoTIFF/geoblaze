@@ -11,7 +11,12 @@ export default function wrapGeom(func) {
         if (Array.isArray(geometry) && geometry.length === 4 && geometry.every(n => typeof n === "number")) {
           geom = reprojectBoundingBox({ bbox: geometry, density: 10, from: srs, to: georaster.projection });
         } else {
-          geom = reprojectGeoJSON(geometry, { from: srs, to: georaster.projection });
+          geom = reprojectGeoJSON(geometry, {
+            // adds 3 points to every edge, basically dividing each edge into quarters
+            densify: typeof geom.densify === "number" ? Math.round(geom.densify) : 3,
+            from: srs,
+            to: georaster.projection
+          });
         }
       } else {
         geom = geom.geometry;
