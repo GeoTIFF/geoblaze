@@ -1,3 +1,5 @@
+import modes from "../stat";
+
 /**
  * The modes function takes a georaster and an optional geometry.
  * If a geometry is included, the function returns the modes of all the pixels
@@ -17,4 +19,6 @@
  * [[ 42, 43] , [83, 82, 84], [92], [94]]
  */
 
-export { default } from "./modes.module";
+export default function modes(georaster, geometry, test) {
+  return stat(georaster, geometry, "modes", test);
+}

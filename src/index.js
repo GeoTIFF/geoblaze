@@ -10,8 +10,10 @@ import median from "./median";
 import min from "./min";
 import mode from "./mode";
 import parse from "./parse";
+import range from "./range";
 import rasterCalculator from "./raster-calculator";
 import sum from "./sum";
+import stat from "./stat";
 import stats from "./stats";
 
 const geoblaze = {
@@ -27,9 +29,11 @@ const geoblaze = {
   min,
   mode,
   parse,
+  range,
   rasterCalculator,
-  sum,
-  stats
+  stat,
+  stats,
+  sum
 };
 
 export default geoblaze;

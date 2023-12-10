@@ -185,15 +185,6 @@ const utils = {
     }
   },
 
-  resolve(it) {
-    if (typeof it === "object" && typeof it.then === "function") {
-      // it appears to be a promise
-      return it;
-    } else {
-      return { then: func => func(it) };
-    }
-  },
-
   range(start, stop, step = 1) {
     const results = [];
     for (let i = start; step < 0 ? i > stop : i < stop; i += step) {
