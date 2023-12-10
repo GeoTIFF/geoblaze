@@ -1,6 +1,6 @@
 import test from "flug";
 import { serve } from "srvd";
-import range from "./index";
+import range from ".";
 
 serve({ debug: true, max: 10, port: 3000 });
 

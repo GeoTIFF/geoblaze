@@ -1,7 +1,7 @@
 import test from "flug";
 import { serve } from "srvd";
 import load from "../load";
-import min from "./min.module";
+import min from ".";
 
 serve({ debug: true, max: 1, port: 3000 });
 

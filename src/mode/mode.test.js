@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import test from "flug";
 import { serve } from "srvd";
 import load from "../load";
-import mode from "./mode.module";
+import mode from ".";
 
 serve({ debug: true, max: 1, port: 3000 });
 
