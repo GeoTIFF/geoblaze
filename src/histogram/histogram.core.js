@@ -1,14 +1,13 @@
 import _ from "underscore";
 import fastMin from "fast-min";
 import fastMax from "fast-max";
+import QuickPromise from "quick-promise";
 
 import get from "../get";
 import utils from "../utils";
 import wrap from "../wrap-parse";
 import { convertBbox, convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
-
-const { resolve } = utils;
 
 const getEqualIntervalBins = (values, numClasses) => {
   // get min and max values
@@ -152,14 +151,14 @@ const getHistogramsForRaster = (georaster, geom, options) => {
     if (geom === null || geom === undefined) {
       const flat = true;
       const values = get(georaster, null, flat);
-      return resolve(values).then(calc);
+      return QuickPromise.resolve(values).then(calc);
     } else if (utils.isBbox(geom)) {
       geom = convertBbox(geom);
 
       // grab array of values by band
       const flat = true;
       const values = get(georaster, geom, flat);
-      return resolve(values).then(calc);
+      return QuickPromise.resolve(values).then(calc);
     } else if (utils.isPolygonal(geom)) {
       geom = convertMultiPolygon(geom);
       const { noDataValue } = georaster;
@@ -174,7 +173,7 @@ const getHistogramsForRaster = (georaster, geom, options) => {
         }
       });
 
-      return resolve(done).then(() => values.map(band => band.filter(value => value !== noDataValue)).map(band => getHistogram(band, options)));
+      return QuickPromise.resolve(done).then(() => values.map(band => band.filter(value => value !== noDataValue)).map(band => getHistogram(band, options)));
     } else {
       throw "Only Bounding Box and Polygon geometries are currently supported.";
     }
