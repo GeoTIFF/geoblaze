@@ -1,4 +1,4 @@
-import modes from "../stat";
+import stat from "../stat";
 
 /**
  * The modes function takes a georaster and an optional geometry.
