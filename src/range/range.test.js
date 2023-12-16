@@ -2,7 +2,7 @@ import test from "flug";
 import { serve } from "srvd";
 import range from ".";
 
-serve({ debug: true, max: 10, port: 3000 });
+serve({ debug: true, max: 20, port: 3000 });
 
 const url = "http://localhost:3000/data/test.tiff";
 const bbox = [80.63, 7.42, 84.21, 10.1];
