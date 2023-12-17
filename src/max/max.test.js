@@ -3,7 +3,7 @@ import test from "flug";
 import reprojectBoundingBox from "reproject-bbox";
 import { serve } from "srvd";
 import load from "../load";
-import max from "./max.core";
+import max from ".";
 
 serve({ debug: true, max: 1, port: 3000 });
 

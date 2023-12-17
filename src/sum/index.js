@@ -1,3 +1,5 @@
+import stat from "../stat";
+
 /**
  * The sum function takes a georaster and an optional geometry.
  * If a geometry is included, the function returns the sum of all the pixels
@@ -15,4 +17,6 @@
  * // results is [red, green, blue, nir]
  * [217461, 21375, 57312, 457125]
  */
-export { default } from "./sum.module";
+export default function sum(georaster, geometry, test) {
+  return stat(georaster, geometry, "sum", test);
+}

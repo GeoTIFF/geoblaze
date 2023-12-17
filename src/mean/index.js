@@ -1,3 +1,5 @@
+import stat from "../stat";
+
 /**
  * The mean function takes a georaster and an optional geometry.
  * If a geometry is included, the function returns the mean of all the pixels
@@ -15,4 +17,7 @@
  * // means is [red, green, blue, nir]
  * [42, 84, 92, 94]
  */
-export { default } from "./mean.module";
+
+export default function mean(georaster, geometry, test) {
+  return stat(georaster, geometry, "mean", test);
+}

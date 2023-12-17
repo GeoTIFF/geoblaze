@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import test from "flug";
 import { serve } from "srvd";
 import load from "../load";
-import mean from "./mean.module";
+import mean from ".";
 import utils from "../utils";
 
 serve({ debug: true, max: 2, port: 3000 });

@@ -9,7 +9,7 @@ import reprojectGeoJSON from "reproject-geojson";
 import utils from "../utils";
 import load from "../load";
 import parse from "../parse";
-import sum from "./sum.module";
+import sum from ".";
 
 const { fetchJson, fetchJsons } = utils;
 

@@ -1,3 +1,5 @@
+import stat from "../stat";
+
 /**
  * The mode function takes a georaster and an optional geometry.
  * If a geometry is included, the function returns the mode of all the pixels
@@ -16,4 +18,7 @@
  * // results is [red, green, blue, nir]
  * [42, 84, 92, 94]
  */
-export { default } from "./mode.module";
+
+export default function mode(georaster, geometry, test) {
+  return stat(georaster, geometry, "mode", test);
+}

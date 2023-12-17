@@ -1,3 +1,5 @@
+import stat from "../stat";
+
 /**
  * The min function takes a georaster as an input and an optional geometry.
  * If a geometry is included, the function returns the min of all the pixels
@@ -15,4 +17,7 @@
  * // mins is [red, green, blue, nir]
  * [1, 4, 9, 4]
  */
-export { default } from "./min.module";
+
+export default function min(georaster, geometry, test) {
+  return stat(georaster, geometry, "min", test);
+}

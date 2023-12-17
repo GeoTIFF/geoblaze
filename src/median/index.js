@@ -1,3 +1,5 @@
+import stat from "../stat";
+
 /**
  * The median function takes a raster and an optional geometry.
  * If a geometry is included, the function returns the median of all the pixels
@@ -15,4 +17,7 @@
  * // medians is [red, green, blue, nir]
  * [42, 84, 92, 94]
  */
-export { default } from "./median.module";
+
+export default function median(georaster, geometry, test) {
+  return stat(georaster, geometry, "median", test);
+}
