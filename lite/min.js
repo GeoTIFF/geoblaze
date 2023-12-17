@@ -1,1 +1,5 @@
-export { default } from "../src/min/min.core";
+import stat from "./stat";
+
+export default function min(georaster, geometry, test) {
+  return stat(georaster, geometry, "min", test);
+}

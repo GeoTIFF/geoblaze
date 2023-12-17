@@ -1,1 +1,5 @@
-export { default } from "../src/max/max.core";
+import stat from "./stat";
+
+export default function max(georaster, geometry, test) {
+  return stat(georaster, geometry, "max", test);
+}

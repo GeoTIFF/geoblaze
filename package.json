@@ -26,7 +26,7 @@
     "dev": "webpack --mode development --target node --watch",
     "document": "npx documentation build src/** --config documentation.yml -f html -o docs && echo 'docs.geoblaze.io' > docs/CNAME",
     "fix": "eslint lite --fix && eslint src --fix",
-    "format": "npx prettier --arrow-parens=avoid --print-width=160 --trailing-comma=none --write src/*.js src/*/*.js",
+    "format": "npx prettier --arrow-parens=avoid --print-width=160 --trailing-comma=none --write lite/*.js src/*.js src/*/*.js ",
     "lint": "eslint lite && eslint src",
     "serve": "npx srvd --debug --port=3000 --wait=120",
     "test": "set -e; for f in src/*/*test*.js; do echo \"\nrunning $f\" && sleep 5 && node -r esm $f; done",
