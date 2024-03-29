@@ -5,7 +5,7 @@ import { serve } from "srvd";
 import load from "../load";
 import max from ".";
 
-serve({ debug: true, max: 1, port: 3000 });
+serve({ debug: true, max: 5, port: 3000 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -61,3 +61,17 @@ test("Max with Web Mercator Bounding Box and GeoRaster URL", async ({ eq }) => {
   const value = Number(result[0].toFixed(2));
   eq(value, expectedBboxValue);
 });
+
+test("virtual resampling, contained", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
+  const result = await max(url, geojson)
+  eq(result, [38]);  
+})
+
+test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-intersect.geojson").then(res => res.json());
+  const result = await max(url, geojson)
+  eq(result, [38]);  
+})

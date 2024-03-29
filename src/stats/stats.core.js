@@ -6,7 +6,7 @@ import wrap from "../wrap-parse";
 import { convertBbox, convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
-const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0 } = {}) => {
+const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, vrm } = {}) => {
   try {
     // shallow clone
     calcStatsOptions = { ...calcStatsOptions };
@@ -17,6 +17,20 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0 } 
     if (noDataValue !== undefined && calcStatsOptions.noData === undefined) {
       calcStatsOptions.noData = noDataValue;
     }
+
+    let xvrm;
+    let yvrm;
+    if (typeof vrm === "number") {
+      if (vrm !== Math.round(vrm)) {
+        throw new Error("[geoblaze] divisor must be an integer");
+      }
+      xvrm = vrm;
+      yvrm = vrm;
+    } else if (Array.isArray(vrm) && vrm.length === 2 && typeof vrm[0] === "number") {
+      [xvrm, yvrm] = vrm;
+    }
+
+    console.log("vrm:", [xvrm, yvrm]);
 
     if (test) {
       if (calcStatsOptions && calcStatsOptions.filter) {
@@ -37,6 +51,7 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0 } 
     } else if (utils.isBbox(geometry)) {
       if (debug_level >= 2) console.log("[geoblaze] geometry is a rectangle");
       geometry = convertBbox(geometry);
+      // if using multiplier, might need to pad get results or at least not round
       const values = get(georaster, geometry, flat);
       return QuickPromise.resolve(values).then(getStatsByBand);
     } else if (utils.isPolygonal(geometry)) {
@@ -59,7 +74,7 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0 } 
             values[bandIndex] = [value];
           }
         },
-        { debug_level }
+        { debug_level, vrm }
       );
 
       return QuickPromise.resolve(done).then(() => {

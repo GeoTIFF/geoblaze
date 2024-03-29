@@ -11,11 +11,15 @@ import snap from "snap-bbox";
 import wrapParse from "../wrap-parse";
 // import writePng from "@danieljdufour/write-png";
 
-const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level = 0 } = {}) => {
+const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level = 0, vrm = [1, 1] } = {}) => {
   const georaster_bbox = [georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax];
 
   const precisePixelHeight = georaster.pixelHeight.toString();
   const precisePixelWidth = georaster.pixelWidth.toString();
+
+  if (typeof vrm === "number") vrm = [vrm, vrm]
+  const [xvrm, yvrm] = vrm;
+  console.log({xvrm, yvrm});
 
   // run intersect for each sample
   // each sample is a multi-dimensional array of numbers
@@ -23,6 +27,7 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
   let samples;
 
   if (georaster.values) {
+    console.log("georaster.values:", georaster.values);
     // if we have already loaded all the values into memory,
     // just pass those along and avoid using up more memory
     const sample = georaster.values;
@@ -113,15 +118,18 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
 
       const sample_bbox = precise_sample_bbox.map(str => Number(str));
 
+      console.log({vrm});
+      console.log(JSON.stringify(geometry));
       const intersect_params = {
         debug: true,
         raster_bbox: sample_bbox,
-        raster_height: sample_height,
-        raster_width: sample_width,
-        pixel_height: georaster.pixelHeight,
-        pixel_width: georaster.pixelWidth,
+        raster_height: sample_height * yvrm,
+        raster_width: sample_width * xvrm,
+        pixel_height: georaster.pixelHeight / yvrm,
+        pixel_width: georaster.pixelWidth / xvrm,
         geometry
       };
+      console.log("intersect_params:", intersect_params);
 
       const intersections = dufour_peyton_intersection.calculate(intersect_params);
       if (debug_level >= 3) console.log("[geoblaze] intersections:", JSON.stringify(intersections, undefined, 2));
@@ -145,9 +153,9 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
           row.forEach(([start, end], irange) => {
             for (let icol = start; icol <= end; icol++) {
               imageBands.forEach((band, iband) => {
-                const row = band[irow];
+                const row = band[Math.floor(irow / yvrm)];
                 if (row) {
-                  const value = row[icol];
+                  const value = row[Math.floor(icol / xvrm)];
                   perPixelFunction(value, iband, yoff + irow, xoff + icol);
                 }
               });

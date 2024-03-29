@@ -17,6 +17,6 @@ import stat from "../stat";
  * // results is [red, green, blue, nir]
  * [217461, 21375, 57312, 457125]
  */
-export default function sum(georaster, geometry, test) {
-  return stat(georaster, geometry, "sum", test);
+export default function sum(georaster, geometry, test, { vrm } = {}) {
+  return stat(georaster, geometry, "sum", test, { vrm });
 }

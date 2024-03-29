@@ -19,5 +19,5 @@ import stat from "../stat";
  */
 
 export default function median(georaster, geometry, test) {
-  return stat(georaster, geometry, "median", test);
+  return stat(georaster, geometry, "median", test, { vrm: 100 });
 }

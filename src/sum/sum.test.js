@@ -305,3 +305,13 @@ test("(Modern) Get Sum from Polygon Above X Value", async ({ eq }) => {
   const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
   eq(value, 1_454_066);
 });
+
+test("Virtual Resampling", async ({ eq }) => {
+  const values = [
+    await load(`http://localhost:${port}/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif`),
+    await fetchJson(`http://localhost:${port}/data/virtual-resampling/virtual-resampling-one.geojson`)
+  ];
+  const [georaster, geojson] = values;
+  const results = await sum(georaster, geojson, undefined, { vrm: 10 });  
+  eq(results, []);
+});

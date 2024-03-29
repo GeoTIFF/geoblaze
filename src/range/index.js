@@ -19,5 +19,5 @@ import stat from "../stat";
  */
 
 export default function range(georaster, geometry, test) {
-  return stat(georaster, geometry, "range", test);
+  return stat(georaster, geometry, "range", test, { vrm: 100 });
 }

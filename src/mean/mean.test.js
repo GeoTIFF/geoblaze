@@ -5,7 +5,7 @@ import load from "../load";
 import mean from ".";
 import utils from "../utils";
 
-serve({ debug: true, max: 2, port: 3000 });
+serve({ debug: true, max: 4, port: 3000 });
 
 const { round } = utils;
 
@@ -91,3 +91,17 @@ test("(Modern) Mean from GeoJSON", async ({ eq }) => {
   const value = round(results[0]);
   eq(value, expectedPolygonGeojsonValue);
 });
+
+test("virtual resampling, contained", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
+  const result = await mean(url, geojson)
+  eq(result, [38]);  
+})
+
+test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-intersect.geojson").then(res => res.json());
+  const result = await mean(url, geojson)
+  eq(result, [33.61065313887127]);  
+})

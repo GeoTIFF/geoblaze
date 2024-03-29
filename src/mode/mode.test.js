@@ -4,7 +4,7 @@ import { serve } from "srvd";
 import load from "../load";
 import mode from ".";
 
-serve({ debug: true, max: 1, port: 3000 });
+serve({ debug: true, max: 5, port: 3000 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -44,3 +44,17 @@ test("(Modern) Mode Polygon", async ({ eq }) => {
   const results = await mode(url, polygon);
   eq(results, [0]);
 });
+
+test("virtual resampling, contained", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
+  const result = await mode(url, geojson)
+  eq(result, [38]);  
+})
+
+test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-intersect.geojson").then(res => res.json());
+  const result = await mode(url, geojson)
+  eq(result, [38]);  
+})

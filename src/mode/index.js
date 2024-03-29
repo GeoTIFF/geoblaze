@@ -20,5 +20,5 @@ import stat from "../stat";
  */
 
 export default function mode(georaster, geometry, test) {
-  return stat(georaster, geometry, "mode", test);
+  return stat(georaster, geometry, "mode", test, { vrm: 100 });
 }
