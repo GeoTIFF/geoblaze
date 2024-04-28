@@ -1,7 +1,9 @@
 import bboxArea from "bbox-fns/bbox-area.js";
+import bboxSize from "bbox-fns/bbox-size.js";
 import booleanIntersects from "bbox-fns/boolean-intersects.js";
 import calcAll from "bbox-fns/calc-all.js";
 import dufour_peyton_intersection from "dufour-peyton-intersection";
+import fastMax from "fast-max";
 import merge from "bbox-fns/merge.js";
 import union from "bbox-fns/union.js";
 import reproject from "bbox-fns/precise/reproject.js";
@@ -11,15 +13,55 @@ import snap from "snap-bbox";
 import wrapParse from "../wrap-parse";
 // import writePng from "@danieljdufour/write-png";
 
-const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level = 0, vrm = [1, 1] } = {}) => {
+const VRM_NO_RESAMPLING = [1, 1];
+
+const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level = 0, vrm = VRM_NO_RESAMPLING } = {}) => {
   const georaster_bbox = [georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax];
 
   const precisePixelHeight = georaster.pixelHeight.toString();
   const precisePixelWidth = georaster.pixelWidth.toString();
 
-  if (typeof vrm === "number") vrm = [vrm, vrm]
+  if (typeof vrm === "number") {
+    if (vrm <= 0 || vrm !== Math.round(vrm)) {
+      throw new Error("[geoblaze] vrm can only be defined as a positive integer");
+    }
+    vrm = [vrm, vrm];
+  }
+
+  let geometry_bboxes = union(calcAll(geometry));
+  if (debug_level >= 2) console.log("[geoblaze] geometry_bboxes:", geometry_bboxes);
+
+  // filter out geometry bboxes that don't intersect raster
+  // assuming anti-meridian geometries have been normalized beforehand
+  geometry_bboxes = geometry_bboxes.filter(bbox => booleanIntersects(bbox, georaster_bbox));
+  if (debug_level >= 2) console.log("[geoblaze] intersecting geometry bboxes:", geometry_bboxes);
+
+  // no intersecting pixels
+  if (geometry_bboxes.length === 0) return;
+
+  // calculate size of bboxes in pixels
+  const geometry_bboxes_sizes = geometry_bboxes.map(bbox => bboxSize(bbox));
+  if (debug_level >= 2) console.log("[geoblaze] size of geometry bboxes:", geometry_bboxes_sizes);
+
+  const geometry_bbox_size_ratios = geometry_bboxes_sizes.map(([width, height]) => [width / georaster.pixelWidth, height / georaster.pixelHeight]);
+  if (debug_level >= 2) console.log("[geoblaze] geometry_bbox_size_ratios:", geometry_bbox_size_ratios);
+
+  // resample just enough to ensure at least one resampled pixel intersects
+  if (vrm === "minimal") {
+    // check if any geometry is smaller than half a pixel
+    if (geometry_bbox_size_ratios.some(([xratio, yratio]) => xratio <= 1 || yratio <= 1)) {
+      const geometry_bboxes_multipliers = geometry_bbox_size_ratios.map(([xratio, yratio]) => [2 / xratio, 2 / yratio]);
+      vrm = [
+        Math.ceil(fastMax(geometry_bboxes_multipliers.map(([xmul, ymul]) => xmul))),
+        Math.ceil(fastMax(geometry_bboxes_multipliers.map(([xmul, ymul]) => ymul)))
+      ];
+    } else {
+      vrm = VRM_NO_RESAMPLING;
+    }
+  }
+
+  if (debug_level >= 2) console.log("[geoblaze] vrm:", vrm);
   const [xvrm, yvrm] = vrm;
-  console.log({xvrm, yvrm});
 
   // run intersect for each sample
   // each sample is a multi-dimensional array of numbers
@@ -27,7 +69,7 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
   let samples;
 
   if (georaster.values) {
-    console.log("georaster.values:", georaster.values);
+    if (debug_level >= 2) console.log("[geoblaze] georaster already has all values loaded into memory");
     // if we have already loaded all the values into memory,
     // just pass those along and avoid using up more memory
     const sample = georaster.values;
@@ -46,17 +88,6 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
 
     samples = [{ intersections, sample, offset: [0, 0] }];
   } else if (georaster.getValues) {
-    let geometry_bboxes = union(calcAll(geometry));
-    if (debug_level >= 2) console.log("[geoblaze] geometry_bboxes:", geometry_bboxes);
-
-    // filter out geometry bboxes that don't intersect raster
-    // assuming anti-meridian geometries have been normalized beforehand
-    geometry_bboxes = geometry_bboxes.filter(bbox => booleanIntersects(bbox, georaster_bbox));
-    if (debug_level >= 2) console.log("[geoblaze] intersecting geometry bboxes:", geometry_bboxes);
-
-    // no intersecting pixels
-    if (geometry_bboxes.length === 0) return;
-
     const geotransfrom = PreciseGeotransform([georaster.xmin.toString(), precisePixelWidth, "0", georaster.ymax.toString(), "0", "-" + precisePixelHeight]);
     if (debug_level >= 2) console.log("[geoblaze] geotransfrom:", geotransfrom);
 
@@ -118,8 +149,6 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
 
       const sample_bbox = precise_sample_bbox.map(str => Number(str));
 
-      console.log({vrm});
-      console.log(JSON.stringify(geometry));
       const intersect_params = {
         debug: true,
         raster_bbox: sample_bbox,
@@ -129,7 +158,7 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
         pixel_width: georaster.pixelWidth / xvrm,
         geometry
       };
-      console.log("intersect_params:", intersect_params);
+      if (debug_level >= 3) console.log("[geoblaze] intersect_params:", intersect_params);
 
       const intersections = dufour_peyton_intersection.calculate(intersect_params);
       if (debug_level >= 3) console.log("[geoblaze] intersections:", JSON.stringify(intersections, undefined, 2));
@@ -164,6 +193,7 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
         });
       });
     });
+    return { vrm };
   });
 };
 
