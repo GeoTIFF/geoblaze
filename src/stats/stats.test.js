@@ -10,7 +10,7 @@ import load from "../load";
 import parse from "../parse";
 import stats from "./stats.module";
 
-serve({ debug: true, max: 30, port: 3000, wait: 240 });
+serve({ debug: true, max: 35, port: 3000, wait: 240 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -243,4 +243,67 @@ test("multipolygon vs 2 polygons", async ({ eq }) => {
 
   const results2 = await stats(georaster, poly2, { debug_level: 5, stats: _stats });
   eq(results2, [{ count: 576, valid: 4, invalid: 572, min: 0, max: 0, sum: 0 }]);
+});
+
+test("virtual resampling, contained", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
+  const result = await stats(url, geojson, undefined, undefined, { debug_level: 10, rescale: true, vrm: "minimal" });
+  eq(result, [
+    {
+      count: 0.007936507936507936,
+      invalid: 0,
+      median: 38,
+      min: 38,
+      max: 38,
+      product: 0.022738725119677502,
+      sum: 0.30158730158730157,
+      range: 0,
+      mean: 38,
+      variance: 0,
+      std: 0,
+      histogram: { 38: { n: 38, ct: 0.007936507936507936 } },
+      modes: [38],
+      mode: 38,
+      uniques: [38]
+    }
+  ]);
+});
+
+test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-intersect.geojson").then(res => res.json());
+  const result = await stats(url, geojson, null, null, { include_meta: false, rescale: true, vrm: [10, 10] });
+  eq(result, [
+    {
+      count: 0.18,
+      invalid: 0,
+      median: 38,
+      min: 1,
+      max: 38,
+      product: 1.5122637183654097e-10,
+      sum: 6.17,
+      range: 37,
+      mean: 34.27777777777778,
+      variance: 112.20061728395062,
+      std: 10.592479279373201,
+      histogram: {
+        1: {
+          n: 1,
+          ct: 0.01
+        },
+        8: {
+          n: 8,
+          ct: 0.01
+        },
+        38: {
+          n: 38,
+          ct: 0.16
+        }
+      },
+      modes: [38],
+      mode: 38,
+      uniques: [1, 8, 38]
+    }
+  ]);
 });

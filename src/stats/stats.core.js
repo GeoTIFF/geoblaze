@@ -1,12 +1,16 @@
 import calcStats from "calc-stats";
 import QuickPromise from "quick-promise";
+import polygon from "bbox-fns/polygon";
+import validate from "bbox-fns/validate";
 import get from "../get";
 import utils from "../utils";
 import wrap from "../wrap-parse";
 import { convertBbox, convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
-const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, vrm } = {}) => {
+const VRM_NO_RESAMPLING = [1, 1];
+
+const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, include_meta = false, rescale = false, vrm = VRM_NO_RESAMPLING } = {}) => {
   try {
     // shallow clone
     calcStatsOptions = { ...calcStatsOptions };
@@ -18,19 +22,12 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, v
       calcStatsOptions.noData = noDataValue;
     }
 
-    let xvrm;
-    let yvrm;
     if (typeof vrm === "number") {
-      if (vrm !== Math.round(vrm)) {
-        throw new Error("[geoblaze] divisor must be an integer");
+      if (vrm <= 0 || vrm !== Math.round(vrm)) {
+        throw new Error("[geoblaze] vrm can only be defined as a positive integer");
       }
-      xvrm = vrm;
-      yvrm = vrm;
-    } else if (Array.isArray(vrm) && vrm.length === 2 && typeof vrm[0] === "number") {
-      [xvrm, yvrm] = vrm;
+      vrm = [vrm, vrm];
     }
-
-    console.log("vrm:", [xvrm, yvrm]);
 
     if (test) {
       if (calcStatsOptions && calcStatsOptions.filter) {
@@ -44,14 +41,24 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, v
     const flat = true;
     const getStatsByBand = values => values.map(band => calcStats(band, calcStatsOptions));
 
-    if (geometry === null || geometry === undefined) {
+    const resample = vrm === "minimal" || (Array.isArray(vrm) && (vrm[0] !== 1 || vrm[1] !== 1));
+    const geometry_is_nullish = geometry === null || geometry === undefined;
+
+    if (resample === true) {
+      if (geometry_is_nullish) {
+        geometry = polygon([georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax]);
+      } else if (validate(geometry)) {
+        geometry = polygon(geometry);
+      }
+    }
+
+    if (geometry_is_nullish && resample === false) {
       if (debug_level >= 2) console.log("[geoblaze] geometry is nullish");
       const values = get(georaster, undefined, flat);
       return QuickPromise.resolve(values).then(getStatsByBand);
-    } else if (utils.isBbox(geometry)) {
+    } else if (utils.isBbox(geometry) && resample === false) {
       if (debug_level >= 2) console.log("[geoblaze] geometry is a rectangle");
       geometry = convertBbox(geometry);
-      // if using multiplier, might need to pad get results or at least not round
       const values = get(georaster, geometry, flat);
       return QuickPromise.resolve(values).then(getStatsByBand);
     } else if (utils.isPolygonal(geometry)) {
@@ -77,10 +84,85 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, v
         { debug_level, vrm }
       );
 
-      return QuickPromise.resolve(done).then(() => {
+      return QuickPromise.resolve(done).then(({ vrm }) => {
+        // check if the user wants the number of valid pixels returned
+        const want_valid = calcStatsOptions.stats ? calcStatsOptions.stats.includes("valid") : calcStatsOptions.calcValid === true;
+
+        const use_virtual_resampling = vrm[0] !== 1 && vrm[1] !== 1;
+
         const bands = values.filter(band => band.length !== 0);
-        if (bands.length > 0) return bands.map(band => calcStats(band, calcStatsOptions));
-        else throw "No Values were found in the given geometry";
+
+        if (bands.length > 0) {
+          // if we need to know the number of valid pixels for intermediate calculations,
+          // but the user didn't ask for it, calculate it anyway
+          // and then remove the valid count from the returned results
+          if (use_virtual_resampling) {
+            if (calcStatsOptions.stats) {
+              if (calcStatsOptions.stats.includes("product") && calcStatsOptions.stats.includes("valid") === false) {
+                calcStatsOptions.stats = [...calcStatsOptions.stats, "valid"];
+                if (debug_level >= 2) console.log('[geoblaze] added "valid" to stats');
+              }
+            } else {
+              if (calcStatsOptions.calcProduct === true && calcStatsOptions.calcValid === false) {
+                calcStatsOptions.calcValid = true;
+                if (debug_level >= 2) console.log('[geoblaze] set "calcValid" to true');
+              }
+            }
+          }
+
+          const stats = bands.map(band => calcStats(band, calcStatsOptions));
+          if (debug_level >= 2) console.log("[geoblaze] stats (before rescaling):", stats);
+
+          // only rescaling results if virtual resampling is on
+          if (use_virtual_resampling && rescale) {
+            if (debug_level >= 2) console.log("[geoblaze] rescaling results based on relative size of virtual pixels");
+
+            // if vrm is [2, 4] then area_multiplier will be 8,
+            // meaning there are 8 virtual pixels for every actual pixel
+            const area_multiplier = vrm[0] * vrm[1];
+            if (debug_level >= 2) console.log("[geoblaze] area_multiplier:", area_multiplier);
+
+            stats.forEach(band => {
+              const { valid } = band;
+              if (typeof band.count === "number") band.count /= area_multiplier;
+              if (typeof band.invalid === "number") band.invalid /= area_multiplier;
+              if (typeof band.sum === "number") band.sum /= area_multiplier;
+              if (typeof band.valid === "number") band.valid /= area_multiplier;
+
+              if (band.histogram) {
+                for (let key in band.histogram) {
+                  // this will lead to fractions of pixels
+                  // for example, a pixel could appear 3.75 times if vrm is [2, 2]
+                  band.histogram[key].ct /= area_multiplier;
+                }
+              }
+
+              if (typeof band.product === "number") {
+                band.product /= Math.pow(area_multiplier, valid);
+              }
+            });
+          }
+
+          // if the user asked not to have the valid stat,
+          // exclude if from the results
+          if (want_valid === false) {
+            stats.forEach(band => delete band.valid);
+          }
+
+          if (include_meta) {
+            stats.forEach(band => {
+              band._meta = {
+                vph: georaster.pixelHeight / vrm[1],
+                vpw: georaster.pixelWidth / vrm[0],
+                vrm: [vrm[0], vrm[1]]
+              };
+            });
+          }
+
+          return stats;
+        } else {
+          throw "No Values were found in the given geometry";
+        }
       });
     } else {
       throw "Geometry Type is Not Supported";

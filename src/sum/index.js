@@ -1,3 +1,4 @@
+import QuickPromise from "quick-promise";
 import stat from "../stat";
 
 /**
@@ -17,6 +18,6 @@ import stat from "../stat";
  * // results is [red, green, blue, nir]
  * [217461, 21375, 57312, 457125]
  */
-export default function sum(georaster, geometry, test, { vrm } = {}) {
-  return stat(georaster, geometry, "sum", test, { vrm });
+export default function sum(georaster, geometry, test) {
+  return QuickPromise.resolve(stat(georaster, geometry, "sum", test, { rescale: true, vrm: "minimal" }));
 }

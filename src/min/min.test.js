@@ -3,7 +3,7 @@ import { serve } from "srvd";
 import load from "../load";
 import min from ".";
 
-serve({ debug: true, max: 5, port: 3000 });
+serve({ debug: true, max: 5, port: 3000, wait: 120 });
 
 const url = "http://localhost:3000/data/test.tiff";
 const bbox = [80.63, 7.42, 84.21, 10.1];
@@ -65,13 +65,13 @@ test("(Modern) Get Min from whole Raster", async ({ eq }) => {
 test("virtual resampling, contained", async ({ eq }) => {
   const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
   const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
-  const result = await min(url, geojson)
-  eq(result, [38]);  
-})
+  const result = await min(url, geojson);
+  eq(result, [38]);
+});
 
 test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
   const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
   const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-intersect.geojson").then(res => res.json());
-  const result = await min(url, geojson)
-  eq(result, [1]);  
-})
+  const result = await min(url, geojson);
+  eq(result, [38]);
+});

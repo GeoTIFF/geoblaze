@@ -312,6 +312,6 @@ test("Virtual Resampling", async ({ eq }) => {
     await fetchJson(`http://localhost:${port}/data/virtual-resampling/virtual-resampling-one.geojson`)
   ];
   const [georaster, geojson] = values;
-  const results = await sum(georaster, geojson, undefined, { vrm: 10 });  
-  eq(results, []);
+  const results = await sum(georaster, geojson, undefined);
+  eq(results, [0.30158730158730157]);
 });

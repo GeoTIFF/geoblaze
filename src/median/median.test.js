@@ -82,13 +82,13 @@ test("Get Median from Whole Raster from url", async ({ eq }) => {
 test("virtual resampling, contained", async ({ eq }) => {
   const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
   const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
-  const result = await median(url, geojson)
-  eq(result, [38]);  
-})
+  const result = await median(url, geojson);
+  eq(result, [38]);
+});
 
 test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
   const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
   const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-intersect.geojson").then(res => res.json());
-  const result = await median(url, geojson)
-  eq(result, [38]);  
-})
+  const result = await median(url, geojson);
+  eq(result, [38]);
+});

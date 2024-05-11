@@ -52,8 +52,9 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
     if (geometry_bbox_size_ratios.some(([xratio, yratio]) => xratio <= 1 || yratio <= 1)) {
       const geometry_bboxes_multipliers = geometry_bbox_size_ratios.map(([xratio, yratio]) => [2 / xratio, 2 / yratio]);
       vrm = [
-        Math.ceil(fastMax(geometry_bboxes_multipliers.map(([xmul, ymul]) => xmul))),
-        Math.ceil(fastMax(geometry_bboxes_multipliers.map(([xmul, ymul]) => ymul)))
+        // don't drop more than 10,000 sample lines per pixel
+        Math.min(10000, Math.ceil(fastMax(geometry_bboxes_multipliers.map(([xmul, ymul]) => xmul)))),
+        Math.min(10000, Math.ceil(fastMax(geometry_bboxes_multipliers.map(([xmul, ymul]) => ymul))))
       ];
     } else {
       vrm = VRM_NO_RESAMPLING;
@@ -79,10 +80,10 @@ const intersectPolygon = (georaster, geometry, perPixelFunction, { debug_level =
     const intersections = dufour_peyton_intersection.calculate({
       debug: false,
       raster_bbox: georaster_bbox,
-      raster_height: georaster.height,
-      raster_width: georaster.width,
-      pixel_height: georaster.pixelHeight,
-      pixel_width: georaster.pixelWidth,
+      raster_height: georaster.height * yvrm,
+      raster_width: georaster.width * xvrm,
+      pixel_height: georaster.pixelHeight / yvrm,
+      pixel_width: georaster.pixelWidth / xvrm,
       geometry
     });
 

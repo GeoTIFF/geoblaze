@@ -38,6 +38,7 @@
     "test:mode": "node -r esm ./src/mode/mode.test.js",
     "test:modes": "node -r esm ./src/modes/modes.test.js",
     "test:range": "node -r esm ./src/range/range.test.js",
+    "test:stats": "node -r esm ./src/stats/stats.test.js",
     "test:sum": "node -r esm ./src/sum/sum.test.js",
     "test-loading-builds": "node test-loading-builds.js",
     "setup": "bash setup.sh"

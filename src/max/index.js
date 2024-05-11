@@ -19,5 +19,5 @@ import stat from "../stat";
  */
 
 export default function max(georaster, geometry, test) {
-  return stat(georaster, geometry, "max", test, { vrm: 100 });
+  return stat(georaster, geometry, "max", test, { vrm: "minimal" });
 }
