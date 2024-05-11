@@ -130,7 +130,7 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, i
               if (typeof band.valid === "number") band.valid /= area_multiplier;
 
               if (band.histogram) {
-                for (let key in band.histogram) {
+                for (const key in band.histogram) {
                   // this will lead to fractions of pixels
                   // for example, a pixel could appear 3.75 times if vrm is [2, 2]
                   band.histogram[key].ct /= area_multiplier;
