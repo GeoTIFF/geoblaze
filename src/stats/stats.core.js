@@ -85,8 +85,8 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, i
       );
 
       return QuickPromise.resolve(done).then(({ vrm }) => {
-        // check if the user wants the number of valid pixels returned
-        const want_valid = calcStatsOptions.stats ? calcStatsOptions.stats.includes("valid") : calcStatsOptions.calcValid === true;
+        // check if the user doesn't want the number of valid pixels returned
+        const want_valid = calcStatsOptions.stats ? calcStatsOptions.stats.includes("valid") : calcStatsOptions.calcValid !== false;
 
         const use_virtual_resampling = vrm[0] !== 1 && vrm[1] !== 1;
 
