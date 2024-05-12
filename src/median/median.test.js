@@ -4,7 +4,7 @@ import { serve } from "srvd";
 import load from "../load";
 import median from ".";
 
-serve({ debug: true, max: 1, port: 3000 });
+serve({ debug: true, max: 6, port: 3000 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -79,7 +79,7 @@ test("Get Median from Whole Raster from url", async ({ eq }) => {
   eq(value, 0);
 });
 
-test("virtual resampling, contained", async ({ eq }) => {
+test("Get Median with virtual resampling, contained", async ({ eq }) => {
   const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
   const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
   const result = await median(url, geojson);
