@@ -260,6 +260,7 @@ test("virtual resampling, contained", async ({ eq }) => {
       sum: 0.30158730158730157,
       range: 0,
       mean: 38,
+      valid: 0.007936507936507936,
       variance: 0,
       std: 0,
       histogram: { 38: { n: 38, ct: 0.007936507936507936 } },
@@ -285,6 +286,7 @@ test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
       sum: 6.17,
       range: 37,
       mean: 34.27777777777778,
+      valid: 0.18,
       variance: 112.20061728395062,
       std: 10.592479279373201,
       histogram: {
