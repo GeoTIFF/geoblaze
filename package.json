@@ -124,7 +124,7 @@
     "eslint-plugin-standard": "^3.1.0",
     "esm": "3.2.25",
     "find-and-read": "^1.2.0",
-    "flug": "^2.8.1",
+    "flug": "^2.8.2",
     "jsdoc": "^3.6.7",
     "memory-fs": "^0.4.1",
     "null-loader": "^4.0.1",
