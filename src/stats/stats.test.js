@@ -79,8 +79,9 @@ test("(Sync) Stats without Geometry", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, undefined);
   results.forEach(band => {
-    delete band.uniques;
+    delete band.frequency;
     delete band.histogram;
+    delete band.uniques;
   });
   eq(results, EXPECTED_RASTER_STATS);
 });
@@ -88,6 +89,7 @@ test("(Sync) Stats without Geometry", async ({ eq }) => {
 test("(Async) Stats without Geometry", async ({ eq }) => {
   const results = await stats(url, undefined);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -98,6 +100,7 @@ test("(Sync) Stats with Bounding Box", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, bbox);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -107,6 +110,7 @@ test("(Sync) Stats with Bounding Box", async ({ eq }) => {
 test("(Async) Stats with Bounding Box", async ({ eq }) => {
   const results = await stats(url, bbox);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -117,6 +121,7 @@ test("(Sync) Stats with Polygon", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, polygon);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -126,6 +131,7 @@ test("(Sync) Stats with Polygon", async ({ eq }) => {
 test("(Async) Stats with Polygon", async ({ eq }) => {
   const results = await stats(url, polygon);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
