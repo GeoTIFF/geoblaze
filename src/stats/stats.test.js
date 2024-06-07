@@ -258,6 +258,7 @@ test("virtual resampling, contained", async ({ eq }) => {
   eq(result, [
     {
       count: 0.007936507936507936,
+      frequency: { 38: { n: 38, freq: 1 } },
       invalid: 0,
       median: 38,
       min: 38,
