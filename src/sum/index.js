@@ -1,4 +1,3 @@
-import QuickPromise from "quick-promise";
 import stat from "../stat";
 
 /**
