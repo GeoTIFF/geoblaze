@@ -254,7 +254,7 @@ test("multipolygon vs 2 polygons", async ({ eq }) => {
 test("virtual resampling, contained", async ({ eq }) => {
   const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
   const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
-  const result = await stats(url, geojson, undefined, undefined, { debug_level: 10, rescale: true, vrm: "minimal" });
+  const result = await stats(url, geojson, undefined, undefined, { debug_level: 0, rescale: true, vrm: "minimal" });
   eq(result, [
     {
       count: 0.007936507936507936,
