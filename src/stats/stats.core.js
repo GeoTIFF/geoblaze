@@ -49,6 +49,9 @@ const stats = (georaster, geometry, calcStatsOptions, test, { debug_level = 0, i
         geometry = polygon([georaster.xmin, georaster.ymin, georaster.xmax, georaster.ymax]);
       } else if (validate(geometry)) {
         geometry = polygon(geometry);
+      } else if (utils.isBboxObj(geometry)) {
+        // convert { xmin: 20, xmax: 32, ymin: -3, ymax: 0 } to geojson polygon
+        geometry = polygon([geometry.xmin, geometry.ymin, geometry.xmax, geometry.ymax]);
       }
     }
 

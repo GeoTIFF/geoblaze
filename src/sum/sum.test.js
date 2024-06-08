@@ -13,7 +13,7 @@ import sum from ".";
 
 const { fetchJson, fetchJsons } = utils;
 
-const { port } = serve({ debug: true, max: 100, port: 8888, wait: 120 });
+const { port } = serve({ debug: true, max: 31, port: 8888, wait: 120 });
 
 const urlRwanda = `http://localhost:${port}/data/RWA_MNH_ANC.tif`;
 const bboxRwanda = require("../../data/RwandaBufferedBoundingBox.json");
@@ -59,6 +59,7 @@ test("(Legacy) Get Sum from Veneto Geonode", async ({ eq }) => {
   ];
   const [georaster, geojson] = values;
   const results = sum(georaster, geojson);
+  eq(Array.isArray(results), true);
   const actualValue = Number(results[0].toFixed(2));
   const expectedValue = 24_943.31; // rasterstats says 24,963.465454101562
   eq(actualValue, expectedValue);
