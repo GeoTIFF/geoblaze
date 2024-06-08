@@ -240,14 +240,14 @@ test("multipolygon vs 2 polygons", async ({ eq }) => {
   const _stats = ["count", "invalid", "min", "max", "sum", "valid"];
 
   const expected = [{ count: 1152, valid: 4, invalid: 1148, min: 0, max: 0, sum: 0 }];
-  eq(await stats(georaster, geojson, { stats: _stats }, undefined, { debug_level: 5 }), expected);
+  eq(await stats(georaster, geojson, { stats: _stats }, undefined, { debug_level: 0 }), expected);
   eq(await stats(georaster, geojson.features[0], { stats: _stats }), expected);
 
   const [poly1, poly2] = geojson.features[0].geometry.coordinates;
-  const results1 = await stats(georaster, poly1, { debug_level: 5, stats: _stats });
+  const results1 = await stats(georaster, poly1, { debug_level: 0, stats: _stats });
   eq(results1, [{ count: 576, valid: 0, invalid: 576, sum: 0, min: undefined, max: undefined }]);
 
-  const results2 = await stats(georaster, poly2, { debug_level: 5, stats: _stats });
+  const results2 = await stats(georaster, poly2, { debug_level: 0, stats: _stats });
   eq(results2, [{ count: 576, valid: 4, invalid: 572, min: 0, max: 0, sum: 0 }]);
 });
 
