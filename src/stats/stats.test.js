@@ -296,6 +296,20 @@ test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
       valid: 0.18,
       variance: 112.20061728395062,
       std: 10.592479279373201,
+      frequency: {
+        1: {
+          freq: 0.05555555555555555,
+          n: 1
+        },
+        8: {
+          freq: 0.05555555555555555,
+          n: 8
+        },
+        38: {
+          freq: 0.8888888888888888,
+          n: 38
+        }
+      },
       histogram: {
         1: {
           n: 1,
