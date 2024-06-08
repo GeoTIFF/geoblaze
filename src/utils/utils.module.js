@@ -122,6 +122,18 @@ const utils = {
     return Array.isArray(parsed) ? parsed[0] : parsed;
   },
 
+  // checks if bbox in form { xmin: 20, xmax: 32, ymin: -3, ymax: 0 }
+  isBboxObj(geometry) {
+    return (
+      typeof geometry === "object" &&
+      Array.isArray(geometry) === false &&
+      typeof geometry.xmin === "number" &&
+      typeof geometry.xmax === "number" &&
+      typeof geometry.ymin === "number" &&
+      typeof geometry.ymax === "number"
+    );
+  },
+
   isPolygonal(geometry) {
     const polys = mpoly.get(geometry);
 

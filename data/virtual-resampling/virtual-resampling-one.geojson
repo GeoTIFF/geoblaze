@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "virtual-resampling-one",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 166.128374676391331, -46.408874339638622 ], [ 166.231891765876185, -46.50319516961985 ], [ 166.051123117074297, -46.506566757293193 ], [ 166.068118460124026, -46.429072377024667 ], [ 166.128374676391331, -46.408874339638622 ] ] ] } }
+]
+}

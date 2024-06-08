@@ -11,14 +11,19 @@ import parse from "../parse";
 import { convertMultiPolygon } from "../convert-geometry";
 import intersectPolygon from "../intersect-polygon";
 
-async function countIntersectingPixels(georaster, geom, includeNoData) {
+async function countIntersectingPixels(georaster, geom, includeNoData, { debug_level, vrm } = {}) {
   let numberOfIntersectingPixels = 0;
-  await intersectPolygon(georaster, geom, value => {
-    if (includeNoData || value !== georaster.noDataValue) {
-      numberOfIntersectingPixels++;
-    }
-  });
-  return numberOfIntersectingPixels;
+  const result = await intersectPolygon(
+    georaster,
+    geom,
+    value => {
+      if (includeNoData || value !== georaster.noDataValue) {
+        numberOfIntersectingPixels++;
+      }
+    },
+    { debug_level, vrm }
+  );
+  return { numberOfIntersectingPixels, ...result };
 }
 
 async function fetch_json(url) {
@@ -34,7 +39,7 @@ async function fetch_json(url) {
   }
 }
 
-serve({ debug: true, max: 25, port: 3000, wait: 60 });
+serve({ debug: true, max: 30, port: 3000, wait: 60 });
 
 const urlToGeojson = "http://localhost:3000/data/gadm/geojsons/Akrotiri and Dhekelia.geojson";
 
@@ -70,7 +75,7 @@ test("(Legacy) Testing intersection of box", async ({ eq }) => {
     georaster.ymax - 0.5 * pixelHeight
   ]);
   const coords = geom.geometry.coordinates;
-  const numberOfIntersectingPixels = await countIntersectingPixels(georaster, coords, false);
+  const { numberOfIntersectingPixels } = await countIntersectingPixels(georaster, coords, false);
   eq(numberOfIntersectingPixels, expectedNumberOfIntersectingPixels);
 });
 
@@ -79,7 +84,7 @@ test("(Legacy) Test intersection/sum calculations for Country with Multiple Ring
   const response = await fetch(urlToGeojson);
   const country = await response.json();
   const geom = convertMultiPolygon(country);
-  const numberOfIntersectingPixels = await countIntersectingPixels(georaster, geom, true);
+  const { numberOfIntersectingPixels } = await countIntersectingPixels(georaster, geom, true);
   eq(numberOfIntersectingPixels, EXPECTED_NUMBER_OF_INTERSECTING_PIXELS);
 });
 
@@ -168,6 +173,26 @@ test("antimerdian #1", async ({ eq }) => {
   eq(numberOfIntersectingPixels, 314_930);
 });
 
+test("antimerdian #1, vrm=10", async ({ eq }) => {
+  const georaster = await parse(urlToData + "gfwfiji_6933_COG.tiff");
+  let geojson = await fetch_json(urlToData + "antimeridian/right-edge.geojson");
+  let numberOfIntersectingPixels = 0;
+  // reproject geometry to projection of raster
+  geojson = reprojectGeoJSON(geojson, { from: 4326, to: georaster.projection });
+  const geom = convertMultiPolygon(geojson);
+  await intersectPolygon(
+    georaster,
+    geom,
+    value => {
+      if (value !== georaster.noDataValue) {
+        numberOfIntersectingPixels++;
+      }
+    },
+    { vrm: 10 }
+  );
+  eq(numberOfIntersectingPixels, 31_501_375);
+});
+
 test("parse", async ({ eq }) => {
   const georaster = await parse(urlToData + "geotiff-test-data/gfw-azores.tif");
   const geojson = await fetch_json(urlToData + "santa-maria/santa-maria-mpa.geojson");
@@ -193,7 +218,43 @@ test("more testing", async ({ eq }) => {
   const georaster = await parse(urlToData + "test.tiff");
   const geojson = await fetch_json(urlToData + "part-of-india.geojson");
   const geom = convertMultiPolygon(geojson);
-  const numberOfIntersectingPixels = await countIntersectingPixels(georaster, geom, false);
+  const { numberOfIntersectingPixels } = await countIntersectingPixels(georaster, geom, false);
   // same as rasterstats
   eq(numberOfIntersectingPixels, 1_672);
+});
+
+test("virtual resampling with vrm = minimal", async ({ eq }) => {
+  const georaster = await parse(urlToData + "/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif");
+  const geojson = await fetch_json(urlToData + "/virtual-resampling/virtual-resampling-one.geojson");
+  const geom = convertMultiPolygon(geojson);
+  const { numberOfIntersectingPixels, vrm } = await countIntersectingPixels(georaster, geom, false, { debug_level: 0, vrm: "minimal" });
+  eq(vrm, [12, 21]);
+  eq(numberOfIntersectingPixels, 2);
+});
+
+test("virtual resampling with vrm = 100", async ({ eq }) => {
+  const georaster = await parse(urlToData + "/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif");
+  const geojson = await fetch_json(urlToData + "/virtual-resampling/virtual-resampling-one.geojson");
+  const geom = convertMultiPolygon(geojson);
+  const { numberOfIntersectingPixels, vrm } = await countIntersectingPixels(georaster, geom, false, { debug_level: 0, vrm: 100 });
+  eq(vrm, [100, 100]);
+  eq(numberOfIntersectingPixels, 104);
+});
+
+test("virtual resampling intersect with vrm = minimal", async ({ eq }) => {
+  const georaster = await parse(urlToData + "/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif");
+  const geojson = await fetch_json(urlToData + "/virtual-resampling/virtual-resampling-intersect.geojson");
+  const geom = convertMultiPolygon(geojson);
+  const { numberOfIntersectingPixels, vrm } = await countIntersectingPixels(georaster, geom, false, { debug_level: 0, vrm: "minimal" });
+  eq(vrm, [4, 4]);
+  eq(numberOfIntersectingPixels, 2);
+});
+
+test("virtual resampling intersect with vrm = 100", async ({ eq }) => {
+  const georaster = await parse(urlToData + "/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif");
+  const geojson = await fetch_json(urlToData + "/virtual-resampling/virtual-resampling-intersect.geojson");
+  const geom = convertMultiPolygon(geojson);
+  const { numberOfIntersectingPixels, vrm } = await countIntersectingPixels(georaster, geom, false, { debug_level: 0, vrm: 100 });
+  eq(vrm, [100, 100]);
+  eq(numberOfIntersectingPixels, 1577);
 });

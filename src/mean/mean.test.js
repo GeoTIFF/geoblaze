@@ -5,7 +5,7 @@ import load from "../load";
 import mean from ".";
 import utils from "../utils";
 
-serve({ debug: true, max: 2, port: 3000 });
+serve({ debug: true, max: 4, port: 3000 });
 
 const { round } = utils;
 
@@ -90,4 +90,33 @@ test("(Modern) Mean from GeoJSON", async ({ eq }) => {
   const results = await mean(url, polygonGeojson);
   const value = round(results[0]);
   eq(value, expectedPolygonGeojsonValue);
+});
+
+test("virtual resampling, contained", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
+  const result = await mean(url, geojson);
+  eq(result, [38]);
+});
+
+test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-intersect.geojson").then(res => res.json());
+  const result = await mean(url, geojson);
+  eq(result, [38]);
+});
+
+test("virtual resampling, intersecting 4 pixels (sync)", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-intersect.geojson").then(res => res.json());
+  const georaster = await load(url);
+  const result = await mean(georaster, geojson);
+  eq(result, [38]);
+});
+
+test("virtual resampling with bbox", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geom = [166.06811846012403, -46.42907237702467, 166.23189176587618, -46.40887433963862];
+  const result = await mean(url, geom);
+  eq(result, [38]);
 });

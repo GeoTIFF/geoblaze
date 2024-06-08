@@ -10,7 +10,7 @@ import load from "../load";
 import parse from "../parse";
 import stats from "./stats.module";
 
-serve({ debug: true, max: 30, port: 3000, wait: 240 });
+serve({ debug: true, max: 35, port: 3000, wait: 240 });
 
 const url = "http://localhost:3000/data/test.tiff";
 
@@ -79,8 +79,9 @@ test("(Sync) Stats without Geometry", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, undefined);
   results.forEach(band => {
-    delete band.uniques;
+    delete band.frequency;
     delete band.histogram;
+    delete band.uniques;
   });
   eq(results, EXPECTED_RASTER_STATS);
 });
@@ -88,6 +89,7 @@ test("(Sync) Stats without Geometry", async ({ eq }) => {
 test("(Async) Stats without Geometry", async ({ eq }) => {
   const results = await stats(url, undefined);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -98,6 +100,7 @@ test("(Sync) Stats with Bounding Box", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, bbox);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -107,6 +110,7 @@ test("(Sync) Stats with Bounding Box", async ({ eq }) => {
 test("(Async) Stats with Bounding Box", async ({ eq }) => {
   const results = await stats(url, bbox);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -117,6 +121,7 @@ test("(Sync) Stats with Polygon", async ({ eq }) => {
   const georaster = await load(url);
   const results = stats(georaster, polygon);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -126,6 +131,7 @@ test("(Sync) Stats with Polygon", async ({ eq }) => {
 test("(Async) Stats with Polygon", async ({ eq }) => {
   const results = await stats(url, polygon);
   results.forEach(band => {
+    delete band.frequency;
     delete band.histogram;
     delete band.uniques;
   });
@@ -234,13 +240,93 @@ test("multipolygon vs 2 polygons", async ({ eq }) => {
   const _stats = ["count", "invalid", "min", "max", "sum", "valid"];
 
   const expected = [{ count: 1152, valid: 4, invalid: 1148, min: 0, max: 0, sum: 0 }];
-  eq(await stats(georaster, geojson, { stats: _stats }, undefined, { debug_level: 5 }), expected);
+  eq(await stats(georaster, geojson, { stats: _stats }, undefined, { debug_level: 0 }), expected);
   eq(await stats(georaster, geojson.features[0], { stats: _stats }), expected);
 
   const [poly1, poly2] = geojson.features[0].geometry.coordinates;
-  const results1 = await stats(georaster, poly1, { debug_level: 5, stats: _stats });
+  const results1 = await stats(georaster, poly1, { debug_level: 0, stats: _stats });
   eq(results1, [{ count: 576, valid: 0, invalid: 576, sum: 0, min: undefined, max: undefined }]);
 
-  const results2 = await stats(georaster, poly2, { debug_level: 5, stats: _stats });
+  const results2 = await stats(georaster, poly2, { debug_level: 0, stats: _stats });
   eq(results2, [{ count: 576, valid: 4, invalid: 572, min: 0, max: 0, sum: 0 }]);
+});
+
+test("virtual resampling, contained", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = await fetch("http://localhost:3000/data/virtual-resampling/virtual-resampling-one.geojson").then(res => res.json());
+  const result = await stats(url, geojson, undefined, undefined, { debug_level: 0, rescale: true, vrm: "minimal" });
+  eq(result, [
+    {
+      count: 0.007936507936507936,
+      frequency: { 38: { n: 38, freq: 1 } },
+      invalid: 0,
+      median: 38,
+      min: 38,
+      max: 38,
+      product: 0.022738725119677502,
+      sum: 0.30158730158730157,
+      range: 0,
+      mean: 38,
+      valid: 0.007936507936507936,
+      variance: 0,
+      std: 0,
+      histogram: { 38: { n: 38, ct: 0.007936507936507936 } },
+      modes: [38],
+      mode: 38,
+      uniques: [38]
+    }
+  ]);
+});
+
+test("virtual resampling, intersecting 4 pixels", async ({ eq }) => {
+  const url = "http://localhost:3000/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif";
+  const geojson = JSON.parse(readFileSync("./data/virtual-resampling/virtual-resampling-intersect.geojson", "utf-8"));
+  const result = await stats(url, geojson, null, null, { include_meta: false, rescale: true, vrm: [10, 10] });
+  eq(result, [
+    {
+      count: 0.18,
+      invalid: 0,
+      median: 38,
+      min: 1,
+      max: 38,
+      product: 1.5122637183654097e-10,
+      sum: 6.17,
+      range: 37,
+      mean: 34.27777777777778,
+      valid: 0.18,
+      variance: 112.20061728395062,
+      std: 10.592479279373201,
+      frequency: {
+        1: {
+          freq: 0.05555555555555555,
+          n: 1
+        },
+        8: {
+          freq: 0.05555555555555555,
+          n: 8
+        },
+        38: {
+          freq: 0.8888888888888888,
+          n: 38
+        }
+      },
+      histogram: {
+        1: {
+          n: 1,
+          ct: 0.01
+        },
+        8: {
+          n: 8,
+          ct: 0.01
+        },
+        38: {
+          n: 38,
+          ct: 0.16
+        }
+      },
+      modes: [38],
+      mode: 38,
+      uniques: [1, 8, 38]
+    }
+  ]);
 });

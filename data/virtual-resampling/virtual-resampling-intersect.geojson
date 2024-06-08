@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "virtual-resampling-intersect",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 165.939001402474787, -46.486236933721152 ], [ 166.303394074387001, -46.121247183868078 ], [ 166.581806452926685, -46.392534642381364 ], [ 165.996321598056511, -46.660679777789575 ], [ 165.939001402474787, -46.486236933721152 ] ] ] } }
+]
+}

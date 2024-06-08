@@ -18,5 +18,5 @@ import stat from "../stat";
  * [217461, 21375, 57312, 457125]
  */
 export default function sum(georaster, geometry, test) {
-  return stat(georaster, geometry, "sum", test);
+  return stat(georaster, geometry, "sum", test, { rescale: true, vrm: "minimal" });
 }

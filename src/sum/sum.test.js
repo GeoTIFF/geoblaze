@@ -13,7 +13,7 @@ import sum from ".";
 
 const { fetchJson, fetchJsons } = utils;
 
-const { port } = serve({ debug: true, max: 100, port: 8888, wait: 120 });
+const { port } = serve({ debug: true, max: 31, port: 8888, wait: 120 });
 
 const urlRwanda = `http://localhost:${port}/data/RWA_MNH_ANC.tif`;
 const bboxRwanda = require("../../data/RwandaBufferedBoundingBox.json");
@@ -59,6 +59,7 @@ test("(Legacy) Get Sum from Veneto Geonode", async ({ eq }) => {
   ];
   const [georaster, geojson] = values;
   const results = sum(georaster, geojson);
+  eq(Array.isArray(results), true);
   const actualValue = Number(results[0].toFixed(2));
   const expectedValue = 24_943.31; // rasterstats says 24,963.465454101562
   eq(actualValue, expectedValue);
@@ -304,4 +305,14 @@ test("(Modern) Get Sum from Polygon Above X Value", async ({ eq }) => {
   const georaster = await parse(url);
   const value = Number(sum(georaster, polygon, v => v > 3000)[0].toFixed(2));
   eq(value, 1_454_066);
+});
+
+test("Virtual Resampling", async ({ eq }) => {
+  const values = [
+    await load(`http://localhost:${port}/data/geotiff-test-data/nz_habitat_anticross_4326_1deg.tif`),
+    await fetchJson(`http://localhost:${port}/data/virtual-resampling/virtual-resampling-one.geojson`)
+  ];
+  const [georaster, geojson] = values;
+  const results = await sum(georaster, geojson, undefined);
+  eq(results, [0.30158730158730157]);
 });
