@@ -1,6 +1,6 @@
 {
   "name": "geoblaze",
-  "version": "2.6.1",
+  "version": "2.7.0",
   "description": "Blazing Fast JavaScript Raster Processing Engine",
   "main": "dist/geoblaze.node.min.js",
   "browser": "./dist/geoblaze.web.min.js",
