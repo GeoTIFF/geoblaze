@@ -8,6 +8,7 @@ import stat from "../stat";
  * @name min
  * @param {GeoRaster|ArrayBuffer|Blob|Buffer|File|String} georaster - geospatial gridded raster data
  * @param {Object} geometry - geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+ * @param {Function} test - a filter function that takes in a pixel value and returns true or false whether it should be included in the min calculation
  * @returns {Number[]} array of mins for each band
  * @example
  * // naip.tif has 4-bands: red, green, blue and near-infrared (nir)

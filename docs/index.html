@@ -1,25 +1,28 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset='utf-8' />
-  <title>geoblaze 0.3.2 | Documentation</title>
+  <meta charset='utf-8'>
+  <title>geoblaze 2.6.1 | Documentation</title>
   <meta name='description' content='Blazing Fast JavaScript Raster Processing Engine'>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
-  <link href='assets/bass.css' rel='stylesheet' />
-  <link href='assets/style.css' rel='stylesheet' />
-  <link href='assets/github.css' rel='stylesheet' />
-  <link href='assets/split.css' rel='stylesheet' />
+  <link href='assets/bass.css' rel='stylesheet'>
+  <link href='assets/style.css' rel='stylesheet'>
+  <link href='assets/github.css' rel='stylesheet'>
+  <link href='assets/split.css' rel='stylesheet'>
 </head>
 <body class='documentation m0'>
     <div class='flex'>
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
           <h3 class='mb0 no-anchor'>geoblaze</h3>
-          <div class='mb1'><code>0.3.2</code></div>
+          <div class='mb1'><code>2.6.1</code></div>
           <input
             placeholder='Filter'
             id='filter-input'
             class='col12 block input'
+            spellcheck='false'
+            autocapitalize='off'
+            autocorrect='off'
             type='text' />
           <div id='toc'>
             <ul class='list-reset h5 py1-ul'>
@@ -79,6 +82,16 @@
                   href='#max'
                   class="">
                   max
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#min'
+                  class="">
+                  min
                   
                 </a>
                 
@@ -252,15 +265,17 @@ for single band rasters. The output is a computed single band raster.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red (a), green (b), blue (c) and near-infrared (d)</span>
-<span class="hljs-keyword">const</span> ndvi = <span class="hljs-keyword">await</span> geoblaze.bandArithmetic(<span class="hljs-string">"https://example.org/naip.tif"</span>, <span class="hljs-string">'(d - a)/(d + a)'</span>)
+<span class="hljs-keyword">const</span> ndvi = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">bandArithmetic</span>(<span class="hljs-string">&quot;https://example.org/naip.tif&quot;</span>, <span class="hljs-string">&#x27;(d - a)/(d + a)&#x27;</span>)
 
 <span class="hljs-comment">// or if you want to preload the georaster, so you can use it later, too</span>
-<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> geoblaze.load(<span class="hljs-string">"https://example.org/naip.tif"</span>);
-<span class="hljs-keyword">const</span> ndvi = <span class="hljs-keyword">await</span> geoblaze.bandArithmetic(georaster, <span class="hljs-string">'(c - b)/(c + b)'</span>);</pre>
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">load</span>(<span class="hljs-string">&quot;https://example.org/naip.tif&quot;</span>);
+<span class="hljs-keyword">const</span> ndvi = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">bandArithmetic</span>(georaster, <span class="hljs-string">&#x27;(c - b)/(c + b)&#x27;</span>);</pre>
     
   
 
@@ -321,15 +336,7 @@ matrix across bands, so that for each band all the rows will be combined into on
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>boundingBox</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    can be an 
-[xmin, ymin, xmax, ymax]
- array, a [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    can be an [xmin, ymin, xmax, ymax] array, a [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
           
@@ -362,10 +369,12 @@ matrix across bands, so that for each band all the rows will be combined into on
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> pixels = <span class="hljs-keyword">await</span> geoblaze.get(georaster, geometry);</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> pixels = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">get</span>(georaster, geometry);</pre>
     
   
 
@@ -502,17 +511,19 @@ all the pixels for each band in the georaster.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
 <span class="hljs-comment">// calculate the raw histogram pixel values</span>
-<span class="hljs-keyword">const</span> histograms = <span class="hljs-keyword">await</span> geoblaze.histogram(url, geometry, { <span class="hljs-attr">scaleType</span>: <span class="hljs-string">"nominal"</span> });
+<span class="hljs-keyword">const</span> histograms = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">histogram</span>(url, geometry, { <span class="hljs-attr">scaleType</span>: <span class="hljs-string">&quot;nominal&quot;</span> });
 
 <span class="hljs-comment">// break histograms into 10 bins for each band</span>
-<span class="hljs-keyword">const</span> histograms = <span class="hljs-keyword">await</span> geoblaze.histogram(url, geometry, { <span class="hljs-attr">scaleType</span>: <span class="hljs-string">"ratio"</span>, <span class="hljs-attr">numClasses</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">classType</span>: <span class="hljs-string">"equal-interval"</span> });</pre>
+<span class="hljs-keyword">const</span> histograms = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">histogram</span>(url, geometry, { <span class="hljs-attr">scaleType</span>: <span class="hljs-string">&quot;ratio&quot;</span>, <span class="hljs-attr">numClasses</span>: <span class="hljs-number">10</span>, <span class="hljs-attr">classType</span>: <span class="hljs-string">&quot;equal-interval&quot;</span> });</pre>
     
   
 
@@ -543,7 +554,7 @@ all the pixels for each band in the georaster.</p>
 
   <p>Given a raster and a point geometry, the identify function returns the pixel
 value of the raster at the given point.  The raster and point must share the same
-<a href="https://en.wikipedia.org/wiki/Spatial_reference_system">Spatial Reference System</a>.</p>
+Spatial Reference System.</p>
 
     <div class='pre p1 fill-light mt0'>identify</div>
   
@@ -572,9 +583,7 @@ value of the raster at the given point.  The raster and point must share the sam
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a> | <a href="https://tools.ietf.org/html/rfc7946#section-3.1.2">Point</a>))</code>
-	    geometry can be an 
-[x,y]
- array, a GeoJSON point object, or a string representation of a GeoJSON point object.
+	    geometry can be an [x,y] array, a GeoJSON point object, or a string representation of a GeoJSON point object.
 
           </div>
           
@@ -590,16 +599,18 @@ value of the raster at the given point.  The raster and point must share the sam
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// based on https://observablehq.com/@danieljdufour/identify-single-pixel-value-in-geotiff</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://s3.amazonaws.com/geoblaze/wildfires.tiff"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://s3.amazonaws.com/geoblaze/wildfires.tiff&quot;</span>;
 
 <span class="hljs-comment">// point as [longitude, latitude]</span>
-<span class="hljs-keyword">const</span> cityOfRedding = [<span class="hljs-number">-122.366667</span>, <span class="hljs-number">40.583333</span>];
+<span class="hljs-keyword">const</span> cityOfRedding = [-<span class="hljs-number">122.366667</span>, <span class="hljs-number">40.583333</span>];
 
-<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.identify(url, cityOfRedding);
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">identify</span>(url, cityOfRedding);
 
 <span class="hljs-comment">// results are [red, green, blue]</span>
 [<span class="hljs-number">76</span>, <span class="hljs-number">76</span>, <span class="hljs-number">68</span>]</pre>
@@ -632,10 +643,10 @@ value of the raster at the given point.  The raster and point must share the sam
   
 
   <p>This function loads a whole file into memory as a georaster.  If you pass in a url,
-it will fetch the whole file.  It is the heavy-weight alternative to <a href="#parse">geoblaze.parse</a>
+it will fetch the whole file.  It is the heavy-weight alternative to geoblaze.parse
 and should only be used if your file is relatively small or you have a really good reason
 for loading the whole file into memory, like running band arithmetic to create a new file.
-In general, use <a href="#parse">geoblaze.parse</a> instead of geoblaze.load.</p>
+In general, use geoblaze.parse instead of geoblaze.load.</p>
 
     <div class='pre p1 fill-light mt0'>load</div>
   
@@ -671,18 +682,20 @@ In general, use <a href="#parse">geoblaze.parse</a> instead of geoblaze.load.</p
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
-<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> geoblaze.load(url);
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">load</span>(url);
 
-<span class="hljs-keyword">const</span> mins = geoblaze.min(georaster);
-<span class="hljs-keyword">const</span> maxs = geoblaze.max(georaster);
+<span class="hljs-keyword">const</span> mins = geoblaze.<span class="hljs-title function_">min</span>(georaster);
+<span class="hljs-keyword">const</span> maxs = geoblaze.<span class="hljs-title function_">max</span>(georaster);
 
-<span class="hljs-keyword">const</span> ndvi = geoblaze.bandArithmetic(georaster, <span class="hljs-string">"(d - a) / (d + a)"</span>);</pre>
+<span class="hljs-keyword">const</span> ndvi = geoblaze.<span class="hljs-title function_">bandArithmetic</span>(georaster, <span class="hljs-string">&quot;(d - a) / (d + a)&quot;</span>);</pre>
     
   
 
@@ -743,15 +756,16 @@ all the pixels for each band in the raster.</p>
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[xmin, ymin, xmax, ymax]
- array for a bounding box, [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the max calculation
 
           </div>
           
@@ -775,13 +789,15 @@ all the pixels for each band in the raster.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
-<span class="hljs-keyword">const</span> maxs = <span class="hljs-keyword">await</span> geoblaze.max(url, geometry);
+<span class="hljs-keyword">const</span> maxs = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">max</span>(url, geometry);
 <span class="hljs-comment">// maxs is [red, green, blue, nir]</span>
 [<span class="hljs-number">231</span>, <span class="hljs-number">242</span>, <span class="hljs-number">254</span>, <span class="hljs-number">255</span>]</pre>
     
@@ -844,15 +860,16 @@ all the pixels for each band in the raster.</p>
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[xmin, ymin, xmax, ymax]
- array for a bounding box, [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the min calculation
 
           </div>
           
@@ -876,15 +893,121 @@ all the pixels for each band in the raster.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
-<span class="hljs-keyword">const</span> mins = <span class="hljs-keyword">await</span> geoblaze.min(url, geometry);
+<span class="hljs-keyword">const</span> mins = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">min</span>(url, geometry);
 <span class="hljs-comment">// mins is [red, green, blue, nir]</span>
 [<span class="hljs-number">1</span>, <span class="hljs-number">4</span>, <span class="hljs-number">9</span>, <span class="hljs-number">4</span>]</pre>
+    
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='min'>
+      min
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>The range function takes a georaster as an input and an optional geometry.
+If a geometry is included, the function returns the range of all the pixels
+in that area for each band. If no geometry is included, the function returns the range of
+all the pixels for each band in the raster.</p>
+
+    <div class='pre p1 fill-light mt0'>min</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>georaster</span> <code class='quiet'>((<a href="https://github.com/geotiff/georaster">GeoRaster</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer">ArrayBuffer</a> | <a href="https://developer.mozilla.org/docs/Web/API/Blob">Blob</a> | <a href="https://nodejs.org/api/buffer.html">Buffer</a> | <a href="https://developer.mozilla.org/en-US/docs/Web/API/File">File</a> | <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">String</a>))</code>
+	    geospatial gridded raster data
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the range calculation
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a>></code>:
+        array of ranges for each band
+
+      
+    
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
+
+<span class="hljs-keyword">const</span> ranges = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">range</span>(url, geometry);
+<span class="hljs-comment">// ranges is [red, green, blue, nir]</span>
+[<span class="hljs-number">231</span>, <span class="hljs-number">234</span>, <span class="hljs-number">229</span>, <span class="hljs-number">0</span>]</pre>
     
   
 
@@ -945,15 +1068,16 @@ all the pixels for each band in the raster.</p>
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[xmin, ymin, xmax, ymax]
- array for a bounding box, [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the mean calculation
 
           </div>
           
@@ -977,13 +1101,15 @@ all the pixels for each band in the raster.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
-<span class="hljs-keyword">const</span> means = <span class="hljs-keyword">await</span> geoblaze.mean(url, geometry);
+<span class="hljs-keyword">const</span> means = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">mean</span>(url, geometry);
 <span class="hljs-comment">// means is [red, green, blue, nir]</span>
 [<span class="hljs-number">42</span>, <span class="hljs-number">84</span>, <span class="hljs-number">92</span>, <span class="hljs-number">94</span>]</pre>
     
@@ -1046,15 +1172,16 @@ all the pixels for each band in the raster.</p>
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[xmin, ymin, xmax, ymax]
- array for a bounding box, [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the median calculation
 
           </div>
           
@@ -1078,13 +1205,15 @@ all the pixels for each band in the raster.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
-<span class="hljs-keyword">const</span> medians = <span class="hljs-keyword">await</span> geoblaze.median(url, geometry);
+<span class="hljs-keyword">const</span> medians = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">median</span>(url, geometry);
 <span class="hljs-comment">// medians is [red, green, blue, nir]</span>
 [<span class="hljs-number">42</span>, <span class="hljs-number">84</span>, <span class="hljs-number">92</span>, <span class="hljs-number">94</span>]</pre>
     
@@ -1148,15 +1277,16 @@ it computes the mean among those modes.</p>
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[xmin, ymin, xmax, ymax]
- array for a bounding box, [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the mode calculation
 
           </div>
           
@@ -1180,13 +1310,15 @@ it computes the mean among those modes.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
-<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.mode(url, geometry);
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">mode</span>(url, geometry);
 <span class="hljs-comment">// results is [red, green, blue, nir]</span>
 [<span class="hljs-number">42</span>, <span class="hljs-number">84</span>, <span class="hljs-number">92</span>, <span class="hljs-number">94</span>]</pre>
     
@@ -1250,15 +1382,16 @@ not compute the mean, but return all the most common values for each band.</p>
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[xmin, ymin, xmax, ymax]
- array for a bounding box, [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the modes calculation
 
           </div>
           
@@ -1282,13 +1415,15 @@ not compute the mean, but return all the most common values for each band.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
-<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.mode(url, geometry);
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">mode</span>(url, geometry);
 <span class="hljs-comment">// results is [ [red], [green], [blue], [nir] ]</span>
 [[ <span class="hljs-number">42</span>, <span class="hljs-number">43</span>] , [<span class="hljs-number">83</span>, <span class="hljs-number">82</span>, <span class="hljs-number">84</span>], [<span class="hljs-number">92</span>], [<span class="hljs-number">94</span>]]</pre>
     
@@ -1322,7 +1457,7 @@ not compute the mean, but return all the most common values for each band.</p>
   <p>The parse function takes a georaster (as an object, array buffer, blob, buffer, file or url)
 and returns a promise. The promise resolves to a georaster, which
 can be used as input in other geoblaze methods, such as identify, sum,
-or histogram. This function essentially call's <a href="https://github.com/geotiff/georaster" target="_blank">georaster</a>'s parseGeoRaster function.</p>
+or histogram. This function essentially call's georaster's parseGeoRaster function.</p>
 
     <div class='pre p1 fill-light mt0'>parse</div>
   
@@ -1358,23 +1493,25 @@ or histogram. This function essentially call's <a href="https://github.com/geoti
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { parse } <span class="hljs-keyword">from</span> <span class="hljs-string">"geoblaze"</span>;
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">import</span> { parse } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;geoblaze&quot;</span>;
 
 <span class="hljs-comment">// parse url</span>
-<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> parse(<span class="hljs-string">"https://example.org/naif.tif"</span>);
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> <span class="hljs-title function_">parse</span>(<span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>);
 
 <span class="hljs-comment">// parse array buffer</span>
-<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">"https://example.org/naif.tif"</span>);
-<span class="hljs-keyword">const</span> arrayBuffer = <span class="hljs-keyword">await</span> response.arrayBuffer();
-<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> parse(arrayBuffer);
+<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>);
+<span class="hljs-keyword">const</span> arrayBuffer = <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">arrayBuffer</span>();
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> <span class="hljs-title function_">parse</span>(arrayBuffer);
 
 <span class="hljs-comment">// parse buffer (in NodeJS)</span>
-<span class="hljs-keyword">import</span> { readFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">"fs"</span>;
-<span class="hljs-keyword">const</span> buffer = readFileSync(<span class="hljs-string">"naip.tif"</span>);
-<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> parse(buffer);</pre>
+<span class="hljs-keyword">import</span> { readFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;fs&quot;</span>;
+<span class="hljs-keyword">const</span> buffer = <span class="hljs-title function_">readFileSync</span>(<span class="hljs-string">&quot;naip.tif&quot;</span>);
+<span class="hljs-keyword">const</span> georaster = <span class="hljs-keyword">await</span> <span class="hljs-title function_">parse</span>(buffer);</pre>
     
   
 
@@ -1458,12 +1595,14 @@ to the function should reference bands in the order in the raster</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// 3-band GeoTIFF with bands (a) red, (b) green, and (c) blue</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/rgb.tif"</span>
-<span class="hljs-keyword">const</span> filteredRaster = geoblaze.rasterCalculator(url, (a, b, c) =&gt; a + b === c ? <span class="hljs-number">1</span> : <span class="hljs-number">0</span>);</pre>
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/rgb.tif&quot;</span>
+<span class="hljs-keyword">const</span> filteredRaster = geoblaze.<span class="hljs-title function_">rasterCalculator</span>(url, <span class="hljs-function">(<span class="hljs-params">a, b, c</span>) =&gt;</span> a + b === c ? <span class="hljs-number">1</span> : <span class="hljs-number">0</span>);</pre>
     
   
 
@@ -1493,7 +1632,7 @@ to the function should reference bands in the order in the raster</p>
   
 
   <p>The stats function takes a georaster and an optional geometry.
-It then uses the <a href="https://github.com/DanielJDufour/calc-stats" target="_blank">calc-stats</a> library
+It then uses the calc-stats library
 to calculate statistics for each band.</p>
 
     <div class='pre p1 fill-light mt0'>stats</div>
@@ -1523,17 +1662,70 @@ to calculate statistics for each band.</p>
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[xmin, ymin, xmax, ymax]
- array for a bounding box, [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
 
           </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>calcStatsOptions</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    options passed to 
+calc-stats
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the sum calculation
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>extraOptions</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>extraOptions.vrm</span> <code class='quiet'>([<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>] | <code>"minimal"</code>)</code>
+  </td>
+  <td class='break-word'><span>virtual resampling multiplier for the horizontal (x) and vertical (y) dimensions. In other words, how many times we divide each pixel horizontally and vertically to increase resolution. If you don't want to pass in the exact number of times to divide the pixels, pass "minimal" and geoblaze will calculate the minimal amount of divisions to make sure at least one pixel is intersected.
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>extraOptions.rescale</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></code>
+  </td>
+  <td class='break-word'><span>whether we should scale some results (specifically count, histogram, invalid, product, sum, valid) according to how many times the pixels are divided when virtually resampling
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
           
         </div>
       
@@ -1545,7 +1737,7 @@ to calculate statistics for each band.</p>
   
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></code>:
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>></code>:
         array of stats for each band
 
       
@@ -1555,11 +1747,17 @@ to calculate statistics for each band.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
-      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> stats = <span class="hljs-keyword">await</span> geoblaze.stats(<span class="hljs-string">"https://example.org/imagery.tif"</span>, geometry);
-[{ <span class="hljs-attr">median</span>: <span class="hljs-number">906.7</span>, <span class="hljs-attr">min</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">max</span>: <span class="hljs-number">5166.7</span>, <span class="hljs-attr">sum</span>: <span class="hljs-number">262516.5</span>, <span class="hljs-attr">mean</span>: <span class="hljs-number">1232.4718309859154</span>, <span class="hljs-attr">modes</span>: [<span class="hljs-number">0</span>], <span class="hljs-attr">mode</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">histogram</span>: { <span class="hljs-number">0</span>: <span class="hljs-number">12</span>, <span class="hljs-number">1</span>: <span class="hljs-number">74</span>, <span class="hljs-number">2</span>: <span class="hljs-number">573</span>, ... } }]</pre>
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">const</span> stats = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">stats</span>(<span class="hljs-string">&quot;https://example.org/imagery.tif&quot;</span>, geometry);
+[{ <span class="hljs-attr">median</span>: <span class="hljs-number">906.7</span>, <span class="hljs-attr">min</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">max</span>: <span class="hljs-number">5166.7</span>, <span class="hljs-attr">sum</span>: <span class="hljs-number">262516.5</span>, <span class="hljs-attr">mean</span>: <span class="hljs-number">1232.4718309859154</span>, <span class="hljs-attr">modes</span>: [<span class="hljs-number">0</span>], <span class="hljs-attr">mode</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">histogram</span>: { <span class="hljs-number">0</span>: <span class="hljs-number">12</span>, <span class="hljs-number">1</span>: <span class="hljs-number">74</span>, <span class="hljs-number">2</span>: <span class="hljs-number">573</span>, ... } }]
+
+<span class="hljs-comment">// with vrm = [2, 2] and rescale = true, divide pixels into quarters (half horizontally and half vertically) and count each pixel as quarter of a pixel</span>
+<span class="hljs-keyword">const</span> stats = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">stats</span>(<span class="hljs-string">&quot;https://example.org/imagery.tif&quot;</span>, geometry, { <span class="hljs-attr">stats</span>: [<span class="hljs-string">&quot;count&quot;</span>, <span class="hljs-string">&quot;min&quot;</span>, <span class="hljs-string">&quot;max&quot;</span>, <span class="hljs-string">&quot;sum&quot;</span>] }, <span class="hljs-literal">undefined</span>, { <span class="hljs-attr">vrm</span>: [<span class="hljs-number">2</span>, <span class="hljs-number">2</span>], <span class="hljs-attr">rescale</span>: <span class="hljs-literal">true</span> });
+[{ <span class="hljs-attr">count</span>: <span class="hljs-number">4.25</span>, <span class="hljs-attr">min</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">max</span>: <span class="hljs-number">5</span>, <span class="hljs-attr">sum</span>: <span class="hljs-number">6.75</span> }]</pre>
     
   
 
@@ -1620,15 +1818,16 @@ all the pixels for each band in the georaster.</p>
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>geometry</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
-	    geometry can be an 
-[xmin, ymin, xmax, ymax]
- array for a bounding box, [[
-[x00,y00]
-,...,
-[x0n,y0n]
-,
-[x00,y00]
-]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+	    geometry can be an [xmin, ymin, xmax, ymax] array for a bounding box, [[[x00,y00],...,[x0n,y0n],[x00,y00]]...] for a polygon, a GeoJSON polygon object, or a string representation of a GeoJSON polygon object.
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>test</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function">Function</a>)</code>
+	    a filter function that takes in a pixel value and returns true or false whether it should be included in the sum calculation
 
           </div>
           
@@ -1652,15 +1851,24 @@ all the pixels for each band in the georaster.</p>
   
 
   
+
+  
     <div class='py1 quiet mt1 prose-big'>Example</div>
     
       
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-comment">// naip.tif has 4-bands: red, green, blue and near-infrared (nir)</span>
-<span class="hljs-keyword">const</span> url = <span class="hljs-string">"https://example.org/naif.tif"</span>;
+<span class="hljs-keyword">const</span> url = <span class="hljs-string">&quot;https://example.org/naif.tif&quot;</span>;
 
-<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.sum(url, geometry);
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">sum</span>(url, geometry);
 <span class="hljs-comment">// results is [red, green, blue, nir]</span>
-[<span class="hljs-number">217461</span>, <span class="hljs-number">21375</span>, <span class="hljs-number">57312</span>, <span class="hljs-number">457125</span>]</pre>
+[<span class="hljs-number">217461</span>, <span class="hljs-number">21375</span>, <span class="hljs-number">57312</span>, <span class="hljs-number">457125</span>]
+
+<span class="hljs-comment">// elevation.tif has one band with pixel values representing altitude</span>
+<span class="hljs-keyword">const</span> elevation_url = <span class="hljs-string">&quot;https://example.org/elevation.tif&quot;</span>;
+
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">sum</span>(elevation_url, geometry, <span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> value &gt;= <span class="hljs-number">0</span>);
+<span class="hljs-comment">// results is sum of all interesecting pixels at or above sea level</span>
+[<span class="hljs-number">2131</span>]</pre>
     
   
 

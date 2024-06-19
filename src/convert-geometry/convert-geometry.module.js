@@ -24,7 +24,7 @@ export function convertPoint(geom) {
 }
 
 /**
- *
+ * @private
  * @param {convertBbox} geom
  * @returns {Object} bbox in form { xmin, ymin, xmax, ymax }
  */
