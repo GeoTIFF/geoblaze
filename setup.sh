@@ -56,6 +56,7 @@ cd ..
 echo "---------- Finished Setting up Veneto Raster ----------"
 
 # generate truth data using rasterstats
+pip install --upgrade pip
 pip install pipenv
 pipenv install fiona rasterio rasterstats
 pipenv run python3 create_expected_truth_data.py
