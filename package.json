@@ -22,6 +22,7 @@
     "build:prod:lite": "npm run build:prod:node:lite && npm run build:prod:web:lite",
     "build:prod:node:lite": "GEOBLAZE_WEBPACK_ENTRY='./lite/index.js' GEOBLAZE_WEBPACK_OUTPUT_FILENAME='geoblaze.lite.node.min.js' webpack --mode production --target node",
     "build:prod:web:lite": "GEOBLAZE_WEBPACK_ENTRY='./lite/index.js' GEOBLAZE_WEBPACK_OUTPUT_FILENAME='geoblaze.lite.web.min.js' webpack --mode production --target web",
+    "clean": "sh clean.sh",
     "create-expected-data": "cd data && pipenv run python3 create_expected_truth_data.py > expected_data.txt",
     "dev": "webpack --mode development --target node --watch",
     "document": "npx documentation build src/** --config documentation.yml -f html -o docs && echo 'docs.geoblaze.io' > docs/CNAME",
