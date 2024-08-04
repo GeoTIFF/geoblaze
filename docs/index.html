@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset='utf-8'>
-  <title>geoblaze 2.6.1 | Documentation</title>
+  <title>geoblaze 2.7.0 | Documentation</title>
   <meta name='description' content='Blazing Fast JavaScript Raster Processing Engine'>
   <meta name='viewport' content='width=device-width,initial-scale=1'>
   <link href='assets/bass.css' rel='stylesheet'>
@@ -15,7 +15,7 @@
       <div id='split-left' class='overflow-auto fs0 height-viewport-100'>
         <div class='py1 px2'>
           <h3 class='mb0 no-anchor'>geoblaze</h3>
-          <div class='mb1'><code>2.6.1</code></div>
+          <div class='mb1'><code>2.7.0</code></div>
           <input
             placeholder='Filter'
             id='filter-input'
@@ -1830,6 +1830,48 @@ all the pixels for each band in the georaster.</p>
 	    a filter function that takes in a pixel value and returns true or false whether it should be included in the sum calculation
 
           </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>extraOptions</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a>)</code>
+	    
+          </div>
+          
+          <table class='mt1 mb2 fixed-table h5 col-12'>
+            <colgroup>
+              <col width='30%' />
+              <col width='70%' />
+            </colgroup>
+            <thead>
+              <tr class='bold fill-light'>
+                <th>Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody class='mt1'>
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>extraOptions.vrm</span> <code class='quiet'>([<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>] | <code>"minimal"</code>)</code>
+  </td>
+  <td class='break-word'><span>virtual resampling multiplier for the horizontal (x) and vertical (y) dimensions. In other words, how many times we divide each pixel horizontally and vertically to increase resolution. If you don't want to pass in the exact number of times to divide the pixels, pass "minimal" and geoblaze will calculate the minimal amount of divisions to make sure at least one pixel is intersected.
+</span></td>
+</tr>
+
+
+              
+                <tr>
+  <td class='break-word'><span class='code bold'>extraOptions.rescale</span> <code class='quiet'><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></code>
+  </td>
+  <td class='break-word'><span>whether we should rescale results based on virtual pixel size. It is highly recommended you set rescale to true if you set vrm.
+</span></td>
+</tr>
+
+
+              
+            </tbody>
+          </table>
           
         </div>
       

@@ -25,7 +25,7 @@
     "clean": "sh clean.sh",
     "create-expected-data": "cd data && pipenv run python3 create_expected_truth_data.py > expected_data.txt",
     "dev": "webpack --mode development --target node --watch",
-    "document": "npx documentation build src/** --config documentation.yml -f html -o docs && echo 'docs.geoblaze.io' > docs/CNAME",
+    "document": "npx documentation@14.0.2 build src/** --config documentation.yml -f html -o docs && echo 'docs.geoblaze.io' > docs/CNAME",
     "fix": "eslint lite --fix && eslint src --fix",
     "format": "npx prettier --arrow-parens=avoid --print-width=160 --trailing-comma=none --write lite/*.js src/*.js src/*/*.js ",
     "lint": "eslint lite && eslint src",
