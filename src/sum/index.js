@@ -25,6 +25,6 @@ import stat from "../stat";
  * // results is sum of all interesecting pixels at or above sea level
  * [2131]
  */
-export default function sum(georaster, geometry, test) {
-  return stat(georaster, geometry, "sum", test, { rescale: true, vrm: "minimal" });
+export default function sum(georaster, geometry, test, { rescale, vrm } = {}) {
+  return stat(georaster, geometry, "sum", test, { rescale, vrm });
 }

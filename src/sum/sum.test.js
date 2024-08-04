@@ -313,6 +313,21 @@ test("Virtual Resampling", async ({ eq }) => {
     await fetchJson(`http://localhost:${port}/data/virtual-resampling/virtual-resampling-one.geojson`)
   ];
   const [georaster, geojson] = values;
-  const results = await sum(georaster, geojson, undefined);
-  eq(results, [0.30158730158730157]);
+
+  let msg;
+  try {
+    await sum(georaster, geojson, undefined);
+  } catch (error) {
+    msg = error.toString();
+  }
+  eq(msg, "No Values were found in the given geometry");
+
+  const results_minimal = await sum(georaster, geojson, undefined, { vrm: "minimal", rescale: true });
+  eq(results_minimal, [0.30158730158730157]);
+
+  const results_100 = await sum(georaster, geojson, undefined, { vrm: [100, 100], rescale: true });
+  eq(results_100, [0.3952]);
+
+  const results_1000 = await sum(georaster, geojson, undefined, { vrm: [10_000, 10_000], rescale: true });
+  eq(results_1000, [0.41278374]);
 });
