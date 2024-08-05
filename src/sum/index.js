@@ -27,6 +27,11 @@ import stat from "../stat";
  * const results = await geoblaze.sum(elevation_url, geometry, value => value >= 0);
  * // results is sum of all interesecting pixels at or above sea level
  * [2131]
+ *
+ * const population_url = "https://example.org/population.tif";
+ * const results = await geoblaze.sum(population_url, geometry, undefined, { vrm: [100, 100], rescale: true });
+ * // results is the estimated number of people living within a geometry after resampling pixels (dividing 100 times horizontally then vertically)
+ * [3154.25425]
  */
 export default function sum(georaster, geometry, test, { rescale, vrm } = {}) {
   return stat(georaster, geometry, "sum", test, { rescale, vrm });
