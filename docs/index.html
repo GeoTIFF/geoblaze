@@ -1910,7 +1910,12 @@ all the pixels for each band in the georaster.</p>
 
 <span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">sum</span>(elevation_url, geometry, <span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> value &gt;= <span class="hljs-number">0</span>);
 <span class="hljs-comment">// results is sum of all interesecting pixels at or above sea level</span>
-[<span class="hljs-number">2131</span>]</pre>
+[<span class="hljs-number">2131</span>]
+
+<span class="hljs-keyword">const</span> population_url = <span class="hljs-string">&quot;https://example.org/population.tif&quot;</span>;
+<span class="hljs-keyword">const</span> results = <span class="hljs-keyword">await</span> geoblaze.<span class="hljs-title function_">sum</span>(population_url, geometry, <span class="hljs-literal">undefined</span>, { <span class="hljs-attr">vrm</span>: [<span class="hljs-number">100</span>, <span class="hljs-number">100</span>], <span class="hljs-attr">rescale</span>: <span class="hljs-literal">true</span> });
+<span class="hljs-comment">// results is the estimated number of people living within a geometry after resampling pixels (dividing 100 times horizontally then vertically)</span>
+[<span class="hljs-number">3154.25425</span>]</pre>
     
   
 
